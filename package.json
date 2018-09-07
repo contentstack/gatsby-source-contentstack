@@ -1,0 +1,39 @@
+{
+  "name": "gatsby-source-contentstack",
+  "version": "1.0.0",
+  "description": "Gatsby source plugin for building websites using Contentstack as a data source",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "babel src --out-dir .",
+    "watch": "babel -w src --out-dir ."
+  },
+  "main": "gatsby-node.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/contentstack/gatsby-source-contentstack"
+  },
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "gatsby-source-plugin"
+  ],
+  "author": {
+    "name": "Contentstack",
+    "url": "https://www.contentstack.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "asyncro": "3.0.0",
+    "lodash": "4.17.4",
+    "query-string": "6.0.0",
+    "node-fetch": "2.1.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.0",
+    "prettier": "^1.5.3"
+  }
+}
