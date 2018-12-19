@@ -1,5 +1,5 @@
 {
-  "name": "gatsby-source-contentstack",
+  "name": "@berlitz/gatsby-source-contentstack",
   "version": "1.0.0",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
