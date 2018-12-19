@@ -118,7 +118,7 @@ const builtEntry = (schema, entry, locale, entries, createNodeId) => {
         let value = (typeof entry[field.uid] != 'undefined') ? entry[field.uid] : null;
         switch (field.data_type) {
             case "reference":
-                entryObj[`${field.uid}___NODE`] = normalizeReferenceField(value, field.reference_to, locale, entries[field.reference_to], createNodeId);
+                entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, field.reference_to, locale, entries[field.reference_to], createNodeId);
             break;
             case "group":
                 entryObj[field.uid] = normalizeGroup(field, value, locale, entries, createNodeId);
