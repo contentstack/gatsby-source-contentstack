@@ -82,7 +82,7 @@ const normalizeModularBlock = (blocks, value, locale, entries, createNodeId) => 
         Object.keys(block).forEach(key => {
             let blockSchema = blocks.filter(block => block.uid ===  key);
             let blockObj = {};
-            blockObj[key] =  builtEntry(blockSchema[0].schema, block[key], locale, entries, createNodeId);
+            blockObj[key] =  builtEntry(blockSchema[0] && blockSchema[0].schema, block[key], locale, entries, createNodeId);
             modularBlocksObj.push(blockObj);
         });
     });
@@ -113,24 +113,26 @@ const normalizeReferenceField = (value, referenceTo, locale, entries,  createNod
 
 
 const builtEntry = (schema, entry, locale, entries, createNodeId) => {
-	let entryObj = {};
-    schema.forEach(field => {
-        let value = (typeof entry[field.uid] != 'undefined') ? entry[field.uid] : null;
-        switch (field.data_type) {
-            case "reference":
-                entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, field.reference_to, locale, entries[field.reference_to], createNodeId);
-            break;
-            case "group":
-                entryObj[field.uid] = normalizeGroup(field, value, locale, entries, createNodeId);
-            break;
-            case "blocks":
-                entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entries, createNodeId);
-            break;
-            default: 
-            entryObj[field.uid] = value;
-        }
+    let entryObj = {};
+    if (schema) {
+        schema.forEach(field => {
+            let value = (typeof entry[field.uid] != 'undefined') ? entry[field.uid] : null;
+            switch (field.data_type) {
+                case "reference":
+                    entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, field.reference_to, locale, entries[field.reference_to], createNodeId);
+                break;
+                case "group":
+                    entryObj[field.uid] = normalizeGroup(field, value, locale, entries, createNodeId);
+                break;
+                case "blocks":
+                    entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entries, createNodeId);
+                break;
+                default: 
+                entryObj[field.uid] = value;
+            }
 
-    });
+        });
+    }
     return entryObj;
 }
 
