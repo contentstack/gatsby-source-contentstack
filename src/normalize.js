@@ -91,23 +91,25 @@ const normalizeModularBlock = (blocks, value, locale, entries, createNodeId) => 
 
 const normalizeReferenceField = (value, referenceTo, locale, entries,  createNodeId) => {
     let reference = [];
-    value.forEach(entryUid => {
-            let nonLocalizedEntries = _.filter(entries, function(entry) { return entry.uid === entryUid }) || [];
-                nonLocalizedEntries.forEach(entry => {
-                    let publishedLocale = null;
-                    if(entry && entry.publish_details){
-                        if (Array.isArray(entry.publish_details)) { 
-                            publishedLocale = entry.publish_details[0].locale;
-                        } else {
-                            publishedLocale = entry.publish_details.locale;
+    if (Array.isArray(value)) {
+        value.forEach(entryUid => {
+                let nonLocalizedEntries = _.filter(entries, function(entry) { return entry.uid === entryUid }) || [];
+                    nonLocalizedEntries.forEach(entry => {
+                        let publishedLocale = null;
+                        if(entry && entry.publish_details){
+                            if (Array.isArray(entry.publish_details)) { 
+                                publishedLocale = entry.publish_details[0].locale;
+                            } else {
+                                publishedLocale = entry.publish_details.locale;
+                            }
                         }
-                    }
-                    if(publishedLocale === locale){
-                        reference.push(createNodeId(`contentstack-entry-${entryUid}-${publishedLocale}`));
-                    }
-                });
-         
-    });
+                        if(publishedLocale === locale){
+                            reference.push(createNodeId(`contentstack-entry-${entryUid}-${publishedLocale}`));
+                        }
+                    });
+            
+        });
+    }
     return reference;
 }
 

@@ -104,24 +104,26 @@ var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale
 
 var normalizeReferenceField = function normalizeReferenceField(value, referenceTo, locale, entries, createNodeId) {
     var reference = [];
-    value.forEach(function (entryUid) {
-        var nonLocalizedEntries = _.filter(entries, function (entry) {
-            return entry.uid === entryUid;
-        }) || [];
-        nonLocalizedEntries.forEach(function (entry) {
-            var publishedLocale = null;
-            if (entry && entry.publish_details) {
-                if (Array.isArray(entry.publish_details)) {
-                    publishedLocale = entry.publish_details[0].locale;
-                } else {
-                    publishedLocale = entry.publish_details.locale;
+    if (Array.isArray(value)) {
+        value.forEach(function (entryUid) {
+            var nonLocalizedEntries = _.filter(entries, function (entry) {
+                return entry.uid === entryUid;
+            }) || [];
+            nonLocalizedEntries.forEach(function (entry) {
+                var publishedLocale = null;
+                if (entry && entry.publish_details) {
+                    if (Array.isArray(entry.publish_details)) {
+                        publishedLocale = entry.publish_details[0].locale;
+                    } else {
+                        publishedLocale = entry.publish_details.locale;
+                    }
                 }
-            }
-            if (publishedLocale === locale) {
-                reference.push(createNodeId("contentstack-entry-" + entryUid + "-" + publishedLocale));
-            }
+                if (publishedLocale === locale) {
+                    reference.push(createNodeId("contentstack-entry-" + entryUid + "-" + publishedLocale));
+                }
+            });
         });
-    });
+    }
     return reference;
 };
 
