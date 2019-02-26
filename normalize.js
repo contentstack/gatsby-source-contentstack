@@ -1,5 +1,9 @@
 "use strict";
 
+var _typeof2 = require("babel-runtime/helpers/typeof");
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
 var _keys = require("babel-runtime/core-js/object/keys");
 
 var _keys2 = _interopRequireDefault(_keys);
@@ -88,7 +92,9 @@ var normalizeGroup = function normalizeGroup(field, value, locale, entries, crea
 };
 
 var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale, entries, createNodeId) {
-    var modularBlocksObj = [];
+    var modularBlocksArray = [];
+    if (!Array.isArray(value)) return modularBlocksArray;
+
     value.map(function (block) {
         (0, _keys2.default)(block).forEach(function (key) {
             var blockSchema = blocks.filter(function (block) {
@@ -96,10 +102,11 @@ var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale
             });
             var blockObj = {};
             blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entries, createNodeId);
-            modularBlocksObj.push(blockObj);
+            modularBlocksArray.push(blockObj);
         });
     });
-    return modularBlocksObj;
+
+    return modularBlocksArray;
 };
 
 var normalizeReferenceField = function normalizeReferenceField(value, referenceTo, locale, entries, createNodeId) {
@@ -125,10 +132,16 @@ var normalizeReferenceField = function normalizeReferenceField(value, referenceT
     return reference;
 };
 
+var getSchemaValue = function getSchemaValue(obj, key) {
+    if (obj === null) return null;
+    if ((typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) !== "object") return null;
+    return obj.hasOwnProperty(key.uid) ? obj[key.uid] : null;
+};
+
 var builtEntry = function builtEntry(schema, entry, locale, entries, createNodeId) {
     var entryObj = {};
     schema.forEach(function (field) {
-        var value = typeof entry[field.uid] != 'undefined' ? entry[field.uid] : null;
+        var value = getSchemaValue(entry, field);
         switch (field.data_type) {
             case "reference":
                 entryObj[field.uid + "___NODE"] = value && normalizeReferenceField(value, field.reference_to, locale, entries[field.reference_to], createNodeId);
