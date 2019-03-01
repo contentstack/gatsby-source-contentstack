@@ -1,4 +1,3 @@
-const _ = require("lodash");
 const crypto = require("crypto");
 const { map, reduce, parallel } = require("asyncro");
 
@@ -77,22 +76,26 @@ const normalizeGroup = (field, value, locale, entries, createNodeId) => {
 };
 
 const normalizeModularBlock = (blocks, value, locale, entries, createNodeId) => {
-    let modularBlocksObj = [];
+    const modularBlocksArray = [];
+    if (!Array.isArray(value)) return modularBlocksArray;
+
     value.map(block => {
         Object.keys(block).forEach(key => {
-            let blockSchema = blocks.filter(block => block.uid ===  key);
-            let blockObj = {};
-            blockObj[key] =  builtEntry(blockSchema[0].schema, block[key], locale, entries, createNodeId);
-            modularBlocksObj.push(blockObj);
+            const blockSchema = blocks.filter(block => block.uid ===  key);
+            const blockObj = {};
+            blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entries, createNodeId);
+            modularBlocksArray.push(blockObj);
         });
     });
-    return modularBlocksObj;
+
+    return modularBlocksArray;
 };
 
 const normalizeReferenceField = (value, referenceTo, locale, entries,  createNodeId) => {
     let reference = [];
     value.forEach(entryUid => {
-            let nonLocalizedEntries = _.filter(entries, function(entry) { return entry.uid === entryUid }) || [];
+            let nonLocalizedEntries = entries.filter(entry => entry.uid === entryUid);
+                nonLocalizedEntries = nonLocalizedEntries || [];
                 nonLocalizedEntries.forEach(entry => {
                     let publishedLocale = null;
                     if(entry && entry.publish_details){
@@ -111,11 +114,16 @@ const normalizeReferenceField = (value, referenceTo, locale, entries,  createNod
     return reference;
 }
 
+const getSchemaValue = (obj, key) => {
+    if (obj === null) return null;
+    if (typeof obj !== "object") return null;
+    return obj.hasOwnProperty(key.uid) ? obj[key.uid] : null;
+};
 
 const builtEntry = (schema, entry, locale, entries, createNodeId) => {
 	let entryObj = {};
     schema.forEach(field => {
-        let value = (typeof entry[field.uid] != 'undefined') ? entry[field.uid] : null;
+        const value = getSchemaValue(entry, field);
         switch (field.data_type) {
             case "reference":
                 entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, field.reference_to, locale, entries[field.reference_to], createNodeId);
