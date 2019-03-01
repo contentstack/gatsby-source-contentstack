@@ -18,7 +18,6 @@ var _stringify2 = _interopRequireDefault(_stringify);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _ = require("lodash");
 var crypto = require("crypto");
 
 var _require = require("asyncro"),
@@ -112,9 +111,10 @@ var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale
 var normalizeReferenceField = function normalizeReferenceField(value, referenceTo, locale, entries, createNodeId) {
     var reference = [];
     value.forEach(function (entryUid) {
-        var nonLocalizedEntries = _.filter(entries, function (entry) {
+        var nonLocalizedEntries = entries.filter(function (entry) {
             return entry.uid === entryUid;
-        }) || [];
+        });
+        nonLocalizedEntries = nonLocalizedEntries || [];
         nonLocalizedEntries.forEach(function (entry) {
             var publishedLocale = null;
             if (entry && entry.publish_details) {

@@ -1,4 +1,3 @@
-const _ = require("lodash");
 const crypto = require("crypto");
 const { map, reduce, parallel } = require("asyncro");
 
@@ -95,7 +94,8 @@ const normalizeModularBlock = (blocks, value, locale, entries, createNodeId) => 
 const normalizeReferenceField = (value, referenceTo, locale, entries,  createNodeId) => {
     let reference = [];
     value.forEach(entryUid => {
-            let nonLocalizedEntries = _.filter(entries, function(entry) { return entry.uid === entryUid }) || [];
+            let nonLocalizedEntries = entries.filter(entry => entry.uid === entryUid);
+                nonLocalizedEntries = nonLocalizedEntries || [];
                 nonLocalizedEntries.forEach(entry => {
                     let publishedLocale = null;
                     if(entry && entry.publish_details){

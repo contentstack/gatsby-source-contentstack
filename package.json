@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-contentstack",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
@@ -24,7 +24,6 @@
   "license": "MIT",
   "dependencies": {
     "asyncro": "3.0.0",
-    "lodash": "4.17.4",
     "query-string": "6.0.0",
     "node-fetch": "2.1.2"
   },
