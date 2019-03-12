@@ -46,7 +46,7 @@ exports.normalizeEntry = (contentType, entry, entries, createNodeId) => {
   let resolveEntry = Object.assign(
     {},
     entry,
-    builtEntry(contentType.schema, entry, entry.locale, entries, createNodeId)
+    builtEntry(contentType.schema, entry, entry.publish_details.locale, entries, createNodeId)
   );
   return resolveEntry;
 };

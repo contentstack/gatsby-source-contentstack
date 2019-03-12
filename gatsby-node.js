@@ -20,7 +20,7 @@ var fetchData = require("./fetch");
 
 exports.sourceNodes = function () {
     var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
-        var boundActionCreators = _ref2.boundActionCreators,
+        var actions = _ref2.actions,
             createNodeId = _ref2.createNodeId;
 
         var createNode, _ref3, contentstackData;
@@ -29,7 +29,7 @@ exports.sourceNodes = function () {
             while (1) {
                 switch (_context.prev = _context.next) {
                     case 0:
-                        createNode = boundActionCreators.createNode;
+                        createNode = actions.createNode;
                         _context.next = 3;
                         return fetchData(configOptions);
 
