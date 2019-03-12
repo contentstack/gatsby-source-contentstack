@@ -2,16 +2,18 @@ const queryString = require("query-string");
 const fetch = require("node-fetch");
 const { map, reduce, parallel } = require("asyncro");
 
-
 module.exports = async (configOptions) => {
 	console.time(`Fetch Contentstack data`);
 	console.log(`Starting to fetch data from Contentstack`);
 
 	configOptions.cdn = configOptions.cdn ? configOptions.cdn : `https://cdn.contentstack.io/v3`;
 
-	const contentTypes = await fetchContentTypes(configOptions);
-	const locales = await fetchLocales(configOptions);
-	const entries = await fetchEntries(locales, contentTypes, configOptions);
+  const contentTypes = await fetchContentTypes(configOptions);
+  console.log(`Content Types loaded`);
+  const locales = await fetchLocales(configOptions);
+  console.log(`Locales loaded`);
+  const entries = await fetchEntries(locales, contentTypes, configOptions);
+  console.log(`Content Entries loaded`);
 
 	const contentstackData = {
 		locales : locales,

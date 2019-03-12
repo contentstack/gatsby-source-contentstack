@@ -39,16 +39,23 @@ module.exports = function () {
 
 					case 5:
 						contentTypes = _context.sent;
-						_context.next = 8;
+
+						console.log("Content Types loaded");
+						_context.next = 9;
 						return fetchLocales(configOptions);
 
-					case 8:
+					case 9:
 						locales = _context.sent;
-						_context.next = 11;
+
+						console.log("Locales loaded");
+						_context.next = 13;
 						return fetchEntries(locales, contentTypes, configOptions);
 
-					case 11:
+					case 13:
 						entries = _context.sent;
+
+						console.log("Content Entries loaded");
+
 						contentstackData = {
 							locales: locales,
 							contentTypes: contentTypes,
@@ -58,7 +65,7 @@ module.exports = function () {
 							contentstackData: contentstackData
 						});
 
-					case 15:
+					case 18:
 					case "end":
 						return _context.stop();
 				}

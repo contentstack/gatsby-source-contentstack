@@ -7,8 +7,8 @@ const {
 
 const fetchData = require("./fetch");
 
-exports.sourceNodes = async ({ boundActionCreators, createNodeId },configOptions) => {
-    const { createNode } = boundActionCreators;
+exports.sourceNodes = async ({ actions, createNodeId },configOptions) => {
+    const { createNode } = actions;
 
     const { contentstackData } = await fetchData(configOptions);
 
