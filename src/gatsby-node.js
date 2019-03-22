@@ -1,15 +1,14 @@
 const {
   normalizeEntry,
   processContentType,
-  processEntry,
-} = require('./normalize')
+  processEntry
+} = require("./normalize");
 
-const fetchData = require('./fetch')
+const fetchData = require("./fetch");
 
 exports.sourceNodes = async ({ actions, createNodeId }, configOptions) => {
-  const { createNode } = actions
-
-  const { contentstackData } = await fetchData(configOptions)
+  const { createNode } = actions;
+  const { contentstackData } = await fetchData(configOptions);
 
   // loop over all content types
   for (const contentType of contentstackData.contentTypes) {
@@ -20,18 +19,22 @@ exports.sourceNodes = async ({ actions, createNodeId }, configOptions) => {
         entry,
         contentstackData.entries,
         createNodeId
-      )
+      );
       // Process the contentTypes data to match the structure of a Gatsby node
-      const entryNode = processEntry(contentType, normalizedEntry, createNodeId)
+      const entryNode = processEntry(
+        contentType,
+        normalizedEntry,
+        createNodeId
+      );
       // Use Gatsby's createNode helper to create a node from the node data
-      createNode(entryNode)
+      createNode(entryNode);
     }
 
     // Process the contentTypes data to match the structure of a Gatsby node
-    const contentTypeNode = processContentType(contentType, createNodeId)
+    const contentTypeNode = processContentType(contentType, createNodeId);
     // Use Gatsby's createNode helper to create a node from the node data
-    createNode(contentTypeNode)
+    createNode(contentTypeNode);
   }
 
-  return
-}
+  return;
+};
