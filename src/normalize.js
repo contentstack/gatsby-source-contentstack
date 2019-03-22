@@ -71,9 +71,11 @@ exports.normalizeEntry = async (contentType, entry, entries, createNodeId) => {
       parentUrl = response.get("url");
     }
 
-    entry.url = parentUrl
-      ? `${locale}${parentUrl}${pageSlug}`
-      : `${locale}${pageSlug}`;
+    if (pageSlug) {
+      entry.url = parentUrl
+        ? `/${locale}${parentUrl}${pageSlug}`
+        : `/${locale}${pageSlug}`;
+    }
 
     resolve(
       Object.assign(
