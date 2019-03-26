@@ -79,8 +79,6 @@ exports.normalizeEntry = async (contentType, entry, entries, createNodeId) => {
         const localeFormatted = locale.replace(/-[a-z]{2}/g, `-${region}`);
         entry.url = `/${localeFormatted}${entry.url}`;
       }
-
-      console.log(entry.url);
     }
 
     resolve(
