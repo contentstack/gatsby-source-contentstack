@@ -1,15 +1,16 @@
 {
   "name": "@berlitz/gatsby-source-contentstack",
-  "version": "1.2.2-alpha",
+  "version": "1.2.2-alpha1",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
+    "prepublish": "npm run build",
     "build": "babel src --out-dir ./",
     "watch": "babel -w src --out-dir ./"
   },
   "main": "gatsby-node.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/contentstack/gatsby-source-contentstack"
+    "url": "https://github.com/berlitz-global/gatsby-source-contentstack"
   },
   "keywords": [
     "gatsby",
