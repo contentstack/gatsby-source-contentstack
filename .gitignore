@@ -2,6 +2,3 @@
 .cache
 package-lock.json
 node_modules
-fetch.js
-gatsby-node.js
-normalize.js
