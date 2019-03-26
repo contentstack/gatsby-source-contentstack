@@ -4,11 +4,12 @@ const Contentstack = require("contentstack");
 const { ACTIVE_ENV, NODE_ENV } = process.env;
 const activeEnv = ACTIVE_ENV || NODE_ENV || "development";
 require("dotenv").config({ path: `.env.${activeEnv}` });
-
 const apiKey = process.env.CONTENTSTACK_API_KEY;
 const apiToken = process.env.CONTENTSTACK_ACCESS_TOKEN;
 const environment = process.env.CONTENTSTACK_ENVIRONMENT;
+const defaultLocale = process.env.CONTENTSTACK_DEFAULT_LOCALE || "en-us";
 const Stack = Contentstack.Stack(apiKey, apiToken, environment);
+const { region = "en" } = require(`${process.cwd()}/package.json`);
 
 exports.processContentType = (content_type, createNodeId) => {
   const nodeId = createNodeId(`contentstack-contentType-${content_type.uid}`);
@@ -58,8 +59,8 @@ const getParentId = entry => {
 exports.normalizeEntry = async (contentType, entry, entries, createNodeId) => {
   return new Promise(async resolve => {
     let parentUrl;
-    const locale = _.get(entry, "publish_details.locale", false);
-    const parentId = getParentId(entry, false);
+    const locale = _.get(entry, "publish_details.locale", defaultLocale);
+    const parentId = getParentId(entry, null);
     const pageSlug = _.get(entry, "url", null);
 
     if (parentId && locale) {
@@ -72,9 +73,14 @@ exports.normalizeEntry = async (contentType, entry, entries, createNodeId) => {
     }
 
     if (pageSlug) {
-      entry.url = parentUrl
-        ? `/${locale}${parentUrl}${pageSlug}`
-        : `/${locale}${pageSlug}`;
+      entry.url = `${pageSlug}`;
+      if (parentUrl) entry.url = `${parentUrl}/${pageSlug}`;
+      if (locale) {
+        const localeFormatted = locale.replace(/-[a-z]{2}/g, `-${region}`);
+        entry.url = `/${localeFormatted}${entry.url}`;
+      }
+
+      console.log(entry.url);
     }
 
     resolve(
@@ -150,13 +156,7 @@ const normalizeModularBlock = (
   return modularBlocksObj;
 };
 
-const normalizeReferenceField = (
-  value,
-  referenceTo,
-  locale,
-  entries,
-  createNodeId
-) => {
+const normalizeReferenceField = (value, locale, entries, createNodeId) => {
   let reference = [];
   if (Array.isArray(value)) {
     value.forEach(entryUid => {
