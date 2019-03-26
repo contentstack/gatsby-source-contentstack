@@ -9,7 +9,7 @@ const apiToken = process.env.CONTENTSTACK_ACCESS_TOKEN;
 const environment = process.env.CONTENTSTACK_ENVIRONMENT;
 const defaultLocale = process.env.CONTENTSTACK_DEFAULT_LOCALE || "en-us";
 const Stack = Contentstack.Stack(apiKey, apiToken, environment);
-const { region = "en" } = require(`${process.cwd()}/package.json`);
+const { region = "us" } = require(`${process.cwd()}/package.json`);
 
 exports.processContentType = (content_type, createNodeId) => {
   const nodeId = createNodeId(`contentstack-contentType-${content_type.uid}`);
