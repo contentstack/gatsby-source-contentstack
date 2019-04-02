@@ -39,15 +39,11 @@ var _process$env = process.env,
 
 var activeEnv = ACTIVE_ENV || NODE_ENV || "development";
 require("dotenv").config({ path: ".env." + activeEnv });
+
 var apiKey = process.env.CONTENTSTACK_API_KEY;
 var apiToken = process.env.CONTENTSTACK_ACCESS_TOKEN;
 var environment = process.env.CONTENTSTACK_ENVIRONMENT;
-var defaultLocale = process.env.CONTENTSTACK_DEFAULT_LOCALE || "en-us";
 var Stack = Contentstack.Stack(apiKey, apiToken, environment);
-
-var _require = require(process.cwd() + "/package.json"),
-    _require$region = _require.region,
-    region = _require$region === undefined ? "us" : _require$region;
 
 exports.processContentType = function (content_type, createNodeId) {
   var nodeId = createNodeId("contentstack-contentType-" + content_type.uid);
@@ -96,14 +92,14 @@ exports.normalizeEntry = function () {
           case 0:
             return _context2.abrupt("return", new _promise2.default(function () {
               var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(resolve) {
-                var parentUrl, locale, parentId, pageSlug, response, localeFormatted;
+                var parentUrl, locale, parentId, pageSlug, response;
                 return _regenerator2.default.wrap(function _callee$(_context) {
                   while (1) {
                     switch (_context.prev = _context.next) {
                       case 0:
                         parentUrl = void 0;
-                        locale = _.get(entry, "publish_details.locale", defaultLocale);
-                        parentId = getParentId(entry, null);
+                        locale = _.get(entry, "publish_details.locale", false);
+                        parentId = getParentId(entry, false);
                         pageSlug = _.get(entry, "url", null);
 
                         if (!(parentId && locale)) {
@@ -123,13 +119,7 @@ exports.normalizeEntry = function () {
                       case 9:
 
                         if (pageSlug) {
-                          entry.url = "" + pageSlug;
-                          if (parentUrl) entry.url = parentUrl + "/" + pageSlug;
-                          if (locale) {
-                            localeFormatted = locale.replace(/-[a-z]{2}/g, "-" + region);
-
-                            entry.url = "/" + localeFormatted + entry.url;
-                          }
+                          entry.url = parentUrl ? "/" + locale + parentUrl + pageSlug : "/" + locale + pageSlug;
                         }
 
                         resolve((0, _assign2.default)({}, entry, builtEntry(contentType.schema, entry, entry.publish_details.locale, entries, createNodeId)));
@@ -205,7 +195,7 @@ var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale
   return modularBlocksObj;
 };
 
-var normalizeReferenceField = function normalizeReferenceField(value, locale, entries, createNodeId) {
+var normalizeReferenceField = function normalizeReferenceField(value, referenceTo, locale, entries, createNodeId) {
   var reference = [];
   if (Array.isArray(value)) {
     value.forEach(function (entryUid) {
