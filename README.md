@@ -1,3 +1,7 @@
+# IMPORTANT NOTICE 
+
+ This is a fork of the [original repository](https://github.com/contentstack/gatsby-source-contentstack), customized for Berlitz. 
+
 # gatsby-source-contentstack
 
 Contentstack provides a source plugin for pulling content into [Gatsby][gatsby] from [Contentstack][contentstack] stacks. It helps you query content types and entries in Gatsby using GraphQL.
