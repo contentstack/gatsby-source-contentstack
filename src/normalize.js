@@ -8,7 +8,7 @@ require("dotenv").config({ path: `.env.${activeEnv}` });
 const apiKey = process.env.CONTENTSTACK_API_KEY;
 const apiToken = process.env.CONTENTSTACK_ACCESS_TOKEN;
 const environment = process.env.CONTENTSTACK_ENVIRONMENT;
-const localePrefixUrls = process.env.GATSBY_BLITZ_PREFIX_LOCALE;
+const disablePrefix = process.env.GATSBY_BLITZ_DISABLE_PREFIX === 'true';
 const Stack = Contentstack.Stack(apiKey, apiToken, environment);
 
 exports.processContentType = (content_type, createNodeId) => {
@@ -73,12 +73,12 @@ exports.normalizeEntry = async (contentType, entry, entries, createNodeId) => {
     }
 
     if (pageSlug) {
-      if (localePrefixUrls) {
+      if (disablePrefix) {
+        entry.url = parentUrl ? `${parentUrl}${pageSlug}` : `${pageSlug}`;
+      } else {
         entry.url = parentUrl
           ? `/${locale}${parentUrl}${pageSlug}`
           : `/${locale}${pageSlug}`;
-      } else {
-        entry.url = parentUrl ? `${parentUrl}${pageSlug}` : `${pageSlug}`;
       }
     }
 
