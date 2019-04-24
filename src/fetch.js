@@ -18,14 +18,12 @@ module.exports = async (configOptions) => {
 		contentTypes: contentTypes,
 		entries: entries
 	};
+	
+	console.timeEnd(`Fetch Contentstack data`);
 
 	return {
 		contentstackData
 	};
-
-
-	console.timeEnd(`Fetch Contentstack data`);
-
 }
 
 
