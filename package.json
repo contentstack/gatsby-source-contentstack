@@ -23,8 +23,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@berlitz/eslint-config-max-base": "^2.1.3",
     "asyncro": "3.0.0",
     "contentstack": "^3.5.2",
+    "eslint-plugin-prettier": "^3.0.1",
     "lodash": "4.17.4",
     "node-fetch": "2.1.2",
     "query-string": "6.0.0"
