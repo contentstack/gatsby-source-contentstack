@@ -1,6 +1,6 @@
 {
   "name": "@berlitz/gatsby-source-contentstack",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
@@ -27,7 +27,7 @@
     "contentstack": "^3.5.2",
     "lodash": "4.17.4",
     "node-fetch": "2.1.2",
-    "query-string": "6.0.0"
+    "query-string": "^5.1.1"
   },
   "devDependencies": {
     "@berlitz/eslint-config-max-base": "^2.1.3",
