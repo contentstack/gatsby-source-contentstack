@@ -81,7 +81,10 @@ const fetchCsData = async (url, config, query) => {
     query.include_count = true;
     query.api_key = config.api_key;
     query.access_token = config.access_token;
-    query.environment = config.environment;
+		query.environment = config.environment;
+		if (url.includes('locales')) {
+			query.v = Math.floor(Math.random() * 100)
+		}
     let queryParams = queryString.stringify(query);
 	let apiUrl = `${config.cdn}/${url}?${queryParams}`;
 	return new Promise((resolve, reject) => {
