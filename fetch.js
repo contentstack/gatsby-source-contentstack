@@ -262,6 +262,9 @@ var fetchCsData = function () {
 						query.api_key = config.api_key;
 						query.access_token = config.access_token;
 						query.environment = config.environment;
+						if (url.includes('locales')) {
+							query.v = Math.floor(Math.random() * 100);
+						}
 						queryParams = queryString.stringify(query);
 						apiUrl = config.cdn + "/" + url + "?" + queryParams;
 						return _context8.abrupt("return", new _promise2.default(function (resolve, reject) {
@@ -274,7 +277,7 @@ var fetchCsData = function () {
 							});
 						}));
 
-					case 8:
+					case 9:
 					case "end":
 						return _context8.stop();
 				}
