@@ -93,6 +93,9 @@ const normalizeModularBlock = (blocks, value, locale, entries, createNodeId) => 
 
 const normalizeReferenceField = (value, referenceTo, locale, entries,  createNodeId) => {
     let reference = [];
+	
+    if (!Array.isArray(value)) return
+	
     value.forEach(entryUid => {
             let nonLocalizedEntries = entries.filter(entry => entry.uid === entryUid);
                 nonLocalizedEntries = nonLocalizedEntries || [];
