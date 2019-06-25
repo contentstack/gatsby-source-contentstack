@@ -1,15 +1,8 @@
 const _ = require("lodash");
 const crypto = require("crypto");
-const Contentstack = require("contentstack");
 const { ACTIVE_ENV, NODE_ENV } = process.env;
 const activeEnv = ACTIVE_ENV || NODE_ENV || "development";
 require("dotenv").config({ path: `.env.${activeEnv}` });
-
-const apiKey = process.env.CONTENTSTACK_API_KEY;
-const apiToken = process.env.CONTENTSTACK_ACCESS_TOKEN;
-const environment = process.env.CONTENTSTACK_ENVIRONMENT;
-const disablePrefix = process.env.GATSBY_BLITZ_DISABLE_PREFIX === 'true';
-const Stack = Contentstack.Stack(apiKey, apiToken, environment);
 
 exports.processContentType = (content_type, createNodeId) => {
   const nodeId = createNodeId(`contentstack-contentType-${content_type.uid}`);
@@ -58,30 +51,6 @@ const getParentId = entry => {
 
 exports.normalizeEntry = async (contentType, entry, entries, createNodeId) => {
   return new Promise(async resolve => {
-    let parentUrl;
-    const locale = _.get(entry, "publish_details.locale", false);
-    const parentId = getParentId(entry, false);
-    const pageSlug = _.get(entry, "url", null);
-
-    if (parentId && locale) {
-      const response = await Stack.ContentType("page")
-        .Entry(parentId)
-        .language(locale)
-        .fetch();
-
-      parentUrl = response.get("url");
-    }
-
-    if (pageSlug) {
-      if (disablePrefix) {
-        entry.url = parentUrl ? `${parentUrl}${pageSlug}` : `${pageSlug}`;
-      } else {
-        entry.url = parentUrl
-          ? `/${locale}${parentUrl}${pageSlug}`
-          : `/${locale}${pageSlug}`;
-      }
-    }
-
     resolve(
       Object.assign(
         {},

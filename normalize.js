@@ -32,19 +32,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _ = require("lodash");
 var crypto = require("crypto");
-var Contentstack = require("contentstack");
 var _process$env = process.env,
     ACTIVE_ENV = _process$env.ACTIVE_ENV,
     NODE_ENV = _process$env.NODE_ENV;
 
 var activeEnv = ACTIVE_ENV || NODE_ENV || "development";
 require("dotenv").config({ path: ".env." + activeEnv });
-
-var apiKey = process.env.CONTENTSTACK_API_KEY;
-var apiToken = process.env.CONTENTSTACK_ACCESS_TOKEN;
-var environment = process.env.CONTENTSTACK_ENVIRONMENT;
-var disablePrefix = process.env.GATSBY_BLITZ_DISABLE_PREFIX === 'true';
-var Stack = Contentstack.Stack(apiKey, apiToken, environment);
 
 exports.processContentType = function (content_type, createNodeId) {
   var nodeId = createNodeId("contentstack-contentType-" + content_type.uid);
@@ -93,45 +86,15 @@ exports.normalizeEntry = function () {
           case 0:
             return _context2.abrupt("return", new _promise2.default(function () {
               var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(resolve) {
-                var parentUrl, locale, parentId, pageSlug, response;
                 return _regenerator2.default.wrap(function _callee$(_context) {
                   while (1) {
                     switch (_context.prev = _context.next) {
                       case 0:
-                        parentUrl = void 0;
-                        locale = _.get(entry, "publish_details.locale", false);
-                        parentId = getParentId(entry, false);
-                        pageSlug = _.get(entry, "url", null);
-
-                        if (!(parentId && locale)) {
-                          _context.next = 9;
-                          break;
-                        }
-
-                        _context.next = 7;
-                        return Stack.ContentType("page").Entry(parentId).language(locale).fetch();
-
-                      case 7:
-                        response = _context.sent;
-
-
-                        parentUrl = response.get("url");
-
-                      case 9:
-
-                        if (pageSlug) {
-                          if (disablePrefix) {
-                            entry.url = parentUrl ? "" + parentUrl + pageSlug : "" + pageSlug;
-                          } else {
-                            entry.url = parentUrl ? "/" + locale + parentUrl + pageSlug : "/" + locale + pageSlug;
-                          }
-                        }
-
                         resolve((0, _assign2.default)({}, entry, builtEntry(contentType.schema, entry, entry.publish_details.locale, entries, createNodeId)));
 
                         return _context.abrupt("return", null);
 
-                      case 12:
+                      case 2:
                       case "end":
                         return _context.stop();
                     }
