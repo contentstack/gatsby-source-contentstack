@@ -18,9 +18,7 @@ var queryString = require("query-string");
 var fetch = require("node-fetch");
 
 var _require = require("asyncro"),
-    map = _require.map,
-    reduce = _require.reduce,
-    parallel = _require.parallel;
+    reduce = _require.reduce;
 
 module.exports = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(configOptions) {
@@ -298,8 +296,7 @@ var fetchCsData = function () {
 
 var getPagedData = function () {
   var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(_ref10) {
-    var _ref10$aggregatedResp = _ref10.aggregatedResponse,
-        aggregatedResponse = _ref10$aggregatedResp === undefined ? null : _ref10$aggregatedResp,
+    var url = _ref10.url,
         config = _ref10.config,
         _ref10$limit = _ref10.limit,
         limit = _ref10$limit === undefined ? 100 : _ref10$limit,
@@ -308,8 +305,7 @@ var getPagedData = function () {
         query = _ref10$query === undefined ? {} : _ref10$query,
         responseKey = _ref10.responseKey,
         _ref10$skip = _ref10.skip,
-        skip = _ref10$skip === undefined ? 0 : _ref10$skip,
-        url = _ref10.url;
+        skip = _ref10$skip === undefined ? 0 : _ref10$skip;
     var response;
     return _regenerator2.default.wrap(function _callee9$(_context9) {
       while (1) {
@@ -318,10 +314,11 @@ var getPagedData = function () {
             query.skip = skip;
             query.limit = limit;
             query.locale = locale;
-            _context9.next = 5;
+            if (url.includes("locales")) query.v = Math.floor(Math.random() * 100);
+            _context9.next = 6;
             return fetchCsData(url, config, query);
 
-          case 5:
+          case 6:
             response = _context9.sent;
 
 
@@ -332,7 +329,7 @@ var getPagedData = function () {
             }
 
             if (!(skip + limit <= response.count)) {
-              _context9.next = 9;
+              _context9.next = 10;
               break;
             }
 
@@ -347,10 +344,10 @@ var getPagedData = function () {
               locale: locale
             }));
 
-          case 9:
+          case 10:
             return _context9.abrupt("return", aggregatedResponse);
 
-          case 10:
+          case 11:
           case "end":
             return _context9.stop();
         }

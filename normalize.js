@@ -73,11 +73,6 @@ exports.processEntry = function (content_type, entry, createNodeId) {
   return nodeData;
 };
 
-var getParentId = function getParentId(entry) {
-  if (!Array.isArray(entry.page_parent)) return false;
-  return entry.page_parent[0];
-};
-
 exports.normalizeEntry = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(contentType, entry, entries, createNodeId) {
     return _regenerator2.default.wrap(function _callee2$(_context2) {

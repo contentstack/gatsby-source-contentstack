@@ -1,6 +1,6 @@
 const queryString = require("query-string");
 const fetch = require("node-fetch");
-const { map, reduce, parallel } = require("asyncro");
+const { reduce } = require("asyncro");
 
 module.exports = async configOptions => {
   console.time(`Fetch Contentstack data`);
@@ -109,18 +109,18 @@ const fetchCsData = async (url, config, query) => {
 };
 
 const getPagedData = async ({
-  aggregatedResponse = null,
+  url,
   config,
   limit = 100,
   locale,
   query = {},
   responseKey,
-  skip = 0,
-  url
+  skip = 0
 }) => {
   query.skip = skip;
   query.limit = limit;
   query.locale = locale;
+  if (url.includes("locales")) query.v = Math.floor(Math.random() * 100);
   let response = await fetchCsData(url, config, query);
 
   if (!aggregatedResponse) {

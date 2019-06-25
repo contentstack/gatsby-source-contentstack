@@ -44,11 +44,6 @@ exports.processEntry = (content_type, entry, createNodeId) => {
   return nodeData;
 };
 
-const getParentId = entry => {
-  if (!Array.isArray(entry.page_parent)) return false;
-  return entry.page_parent[0];
-};
-
 exports.normalizeEntry = async (contentType, entry, entries, createNodeId) => {
   return new Promise(async resolve => {
     resolve(
