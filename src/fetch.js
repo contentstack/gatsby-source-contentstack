@@ -64,7 +64,7 @@ const fetchEntries = async (locales, contentTypes, configOptions) => {
     let responseKey = `entries`;
     let entries = await reduce(
       locales,
-      async (accumulator, locale) => {
+      async (accumulator = [], locale) => {
         let localeEntries = await getPagedData({
           config: configOptions,
           locale: locale.code,

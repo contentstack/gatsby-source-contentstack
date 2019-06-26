@@ -149,7 +149,9 @@ var fetchEntries = function () {
                 responseKey = "entries";
                 _context6.next = 4;
                 return reduce(locales, function () {
-                  var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(accumulator, locale) {
+                  var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5() {
+                    var accumulator = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+                    var locale = arguments[1];
                     var localeEntries;
                     return _regenerator2.default.wrap(function _callee5$(_context5) {
                       while (1) {
@@ -178,7 +180,7 @@ var fetchEntries = function () {
                     }, _callee5, _this);
                   }));
 
-                  return function (_x10, _x11) {
+                  return function () {
                     return _ref7.apply(this, arguments);
                   };
                 }(), []);
@@ -289,7 +291,7 @@ var fetchCsData = function () {
     }, _callee8, undefined);
   }));
 
-  return function fetchCsData(_x12, _x13, _x14) {
+  return function fetchCsData(_x11, _x12, _x13) {
     return _ref8.apply(this, arguments);
   };
 }();
@@ -355,7 +357,7 @@ var getPagedData = function () {
     }, _callee9, undefined);
   }));
 
-  return function getPagedData(_x15) {
+  return function getPagedData(_x14) {
     return _ref9.apply(this, arguments);
   };
 }();
