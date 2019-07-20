@@ -18,12 +18,8 @@ var _stringify2 = _interopRequireDefault(_stringify);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var _ = require("lodash");
 var crypto = require("crypto");
-
-var _require = require("asyncro"),
-    map = _require.map,
-    reduce = _require.reduce,
-    parallel = _require.parallel;
 
 exports.processContentType = function (content_type, createNodeId) {
     var nodeId = createNodeId("contentstack-contentType-" + content_type.uid);
@@ -35,6 +31,23 @@ exports.processContentType = function (content_type, createNodeId) {
         children: [],
         internal: {
             type: "ContentstackContentTypes",
+            content: nodeContent,
+            contentDigest: nodeContentDigest
+        }
+    });
+    return nodeData;
+};
+
+exports.processAsset = function (asset, createNodeId) {
+    var nodeId = makeAssetNodeUid(asset, createNodeId);
+    var nodeContent = (0, _stringify2.default)(asset);
+    var nodeContentDigest = crypto.createHash('md5').update(nodeContent).digest('hex');
+    var nodeData = (0, _assign2.default)({}, asset, {
+        id: nodeId,
+        parent: null,
+        children: [],
+        internal: {
+            type: "Contentstack_assets",
             content: nodeContent,
             contentDigest: nodeContentDigest
         }
@@ -59,12 +72,24 @@ exports.processEntry = function (content_type, entry, createNodeId) {
     return nodeData;
 };
 
-exports.normalizeEntry = function (contentType, entry, entries, createNodeId) {
-    var resolveEntry = (0, _assign2.default)({}, entry, builtEntry(contentType.schema, entry, entry.locale, entries, createNodeId));
+exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId) {
+    var resolveEntry = (0, _assign2.default)({}, entry, builtEntry(contentType.schema, entry, entry.locale, entriesNodeIds, assetsNodeIds, createNodeId));
     return resolveEntry;
 };
 
-var makeEntryNodeUid = function makeEntryNodeUid(entry, createNodeId) {
+var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId) {
+    var publishedLocale = null;
+    if (asset && asset.publish_details) {
+        if (Array.isArray(asset.publish_details)) {
+            publishedLocale = asset.publish_details[0].locale;
+        } else {
+            publishedLocale = asset.publish_details.locale;
+        }
+    }
+    return createNodeId("contentstack-assets-" + asset.uid + "-" + publishedLocale);
+};
+
+var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId) {
     var publishedLocale = null;
     if (entry && entry.publish_details) {
         if (Array.isArray(entry.publish_details)) {
@@ -76,59 +101,59 @@ var makeEntryNodeUid = function makeEntryNodeUid(entry, createNodeId) {
     return createNodeId("contentstack-entry-" + entry.uid + "-" + publishedLocale);
 };
 
-var normalizeGroup = function normalizeGroup(field, value, locale, entries, createNodeId) {
+var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId) {
     var groupObj = null;
     if (field.multiple && value instanceof Array) {
         groupObj = [];
         value.forEach(function (groupValue) {
-            groupObj.push(builtEntry(field.schema, groupValue, locale, entries, createNodeId));
+            groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId));
         });
     } else {
         groupObj = {};
-        groupObj = builtEntry(field.schema, value, locale, entries, createNodeId);
+        groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
     }
     return groupObj;
 };
 
-var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale, entries, createNodeId) {
-    var modularBlocksArray = [];
-    if (!Array.isArray(value)) return modularBlocksArray;
-
+var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId) {
+    var modularBlocksObj = [];
     value.map(function (block) {
         (0, _keys2.default)(block).forEach(function (key) {
             var blockSchema = blocks.filter(function (block) {
                 return block.uid === key;
             });
             var blockObj = {};
-            blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entries, createNodeId);
-            modularBlocksArray.push(blockObj);
+            blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId);
+            modularBlocksObj.push(blockObj);
         });
     });
-
-    return modularBlocksArray;
+    return modularBlocksObj;
 };
 
-var normalizeReferenceField = function normalizeReferenceField(value, referenceTo, locale, entries, createNodeId) {
+var normalizeReferenceField = function normalizeReferenceField(value, locale, entriesNodeIds, createNodeId) {
     var reference = [];
     value.forEach(function (entryUid) {
-        var nonLocalizedEntries = entries.filter(function (entry) {
-            return entry.uid === entryUid;
-        });
-        nonLocalizedEntries = nonLocalizedEntries || [];
-        nonLocalizedEntries.forEach(function (entry) {
-            var publishedLocale = null;
-            if (entry && entry.publish_details) {
-                if (Array.isArray(entry.publish_details)) {
-                    publishedLocale = entry.publish_details[0].locale;
-                } else {
-                    publishedLocale = entry.publish_details.locale;
-                }
-            }
-            if (publishedLocale === locale) {
-                reference.push(createNodeId("contentstack-entry-" + entryUid + "-" + publishedLocale));
-            }
-        });
+        if (entriesNodeIds.has(createNodeId("contentstack-entry-" + entryUid + "-" + locale))) {
+            reference.push(createNodeId("contentstack-entry-" + entryUid + "-" + locale));
+        }
     });
+    return reference;
+};
+
+var normalizeFileField = function normalizeFileField(value, locale, assetsNodeIds, createNodeId) {
+    var reference = {};
+    if (Array.isArray(value)) {
+        reference = [];
+        value.forEach(function (assetUid) {
+            if (assetsNodeIds.has(createNodeId("contentstack-assets-" + assetUid + "-" + locale))) {
+                reference.push(createNodeId("contentstack-assets-" + assetUid + "-" + locale));
+            }
+        });
+    } else {
+        if (assetsNodeIds.has(createNodeId("contentstack-assets-" + value + "-" + locale))) {
+            reference = createNodeId("contentstack-assets-" + value + "-" + locale);
+        }
+    }
     return reference;
 };
 
@@ -138,19 +163,22 @@ var getSchemaValue = function getSchemaValue(obj, key) {
     return obj.hasOwnProperty(key.uid) ? obj[key.uid] : null;
 };
 
-var builtEntry = function builtEntry(schema, entry, locale, entries, createNodeId) {
+var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId) {
     var entryObj = {};
     schema.forEach(function (field) {
         var value = getSchemaValue(entry, field);
         switch (field.data_type) {
             case "reference":
-                entryObj[field.uid + "___NODE"] = value && normalizeReferenceField(value, field.reference_to, locale, entries[field.reference_to], createNodeId);
+                entryObj[field.uid + "___NODE"] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId);
+                break;
+            case "file":
+                entryObj[field.uid + "___NODE"] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId);
                 break;
             case "group":
-                entryObj[field.uid] = normalizeGroup(field, value, locale, entries, createNodeId);
+                entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
                 break;
             case "blocks":
-                entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entries, createNodeId);
+                entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
                 break;
             default:
                 entryObj[field.uid] = value;

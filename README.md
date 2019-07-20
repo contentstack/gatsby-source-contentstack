@@ -21,9 +21,9 @@ plugins: [
       // API Key is a unique key assigned to each stack. This is required.
       api_key: `api_key`,
 
-      // Access Token is a read-only credential . This is required.
-      access_token: `access_token`,
-
+      // Delivery Token is a read-only credential . This is required.
+      deliver_token: `deliver_token`,
+      
       // Environment where you published your data.
       environment: `environment`
     },
