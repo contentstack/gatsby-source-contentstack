@@ -144,7 +144,6 @@ exports.sourceNodes = function () {
                         });
 
                         unPublishedAssetsType.forEach(function (item) {
-                            console.log("item.data", item.data);
                             deleteContentstackNodes(item.data, 'asset');
                         });
 

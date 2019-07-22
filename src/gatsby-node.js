@@ -100,7 +100,6 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
     });
 
     unPublishedAssetsType.forEach(item => {
-        console.log("item.data",item.data);
         deleteContentstackNodes(item.data, 'asset');
     });
 
