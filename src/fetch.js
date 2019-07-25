@@ -60,7 +60,7 @@ const fetchCsData = async (url, config, query) => {
     query = query ? query : {};
     query.include_count = true;
     query.api_key = config.api_key;
-    query.access_token = config.deliver_token;
+    query.access_token = config.delivery_token;
     query.environment = config.environment;
     let queryParams = queryString.stringify(query);
 	let apiUrl = `${config.cdn}/${url}?${queryParams}`;
