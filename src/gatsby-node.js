@@ -10,67 +10,59 @@ const {
 const fetchData = require("./fetch");
 
 
-exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, reporter },configOptions) => {
+exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, reporter, createContentDigest },configOptions) => {
     const { createNode, deleteNode, touchNode, setPluginStatus } = actions;
-    let syncToken 
-
-    if (
-        store.getState().status.plugins &&
-        store.getState().status.plugins[`gatsby-source-contentstack`] &&
-        store.getState().status.plugins[`gatsby-source-contentstack`][
-            `contentstack-sync-token-${configOptions.api_key}`
-        ]
-    ) {
-        syncToken = store.getState().status.plugins[`gatsby-source-contentstack`][
-            `contentstack-sync-token-${configOptions.api_key}`
-        ];
+    let syncToken; 
+    const status = store.getState().status;
+    
+    if (status && status.plugins && status.plugins[`gatsby-source-contentstack`]) {
+        syncToken = status.plugins[`gatsby-source-contentstack`][`contentstack-sync-token-${configOptions.api_key}`]
     }
-
+ 
     configOptions.syncToken = syncToken || null;
     
-    const { contentstackData } = await fetchData(configOptions);
-    
-    let publishedEntriesType   = contentstackData.syncData.filter(item => item.type === 'entry_published') || []; 
-    let publishedAssetsType    = contentstackData.syncData.filter(item => item.type === 'asset_published') || []; 
-    
-    // for removing nodes from cache if present
-    let unPublishedEntriesType = contentstackData.syncData.filter(item => item.type === 'entry_unpublished') || []; 
-    let unPublishedAssetsType  = contentstackData.syncData.filter(item => item.type === 'asset_unpublished') || []; 
-    let entriesDeleteType      = contentstackData.syncData.filter(item => item.type === 'entry_deleted') || []; 
-    let assetsDeleteType       = contentstackData.syncData.filter(item => item.type === 'asset_deleted') || []; 
-    let contentTypeDeleteType  = contentstackData.syncData.filter(item => item.type === 'content_type_deleted') || []; 
+    const { contentstackData } = await fetchData(configOptions, reporter);
 
+    const syncData = contentstackData.syncData.reduce((merged, item) => {
+        if (!merged[item.type]) {
+            merged[item.type] = [];
+        }
+        merged[item.type].push(item);
+        return merged;
+    }, {});
 
     // for checking if the reference node is present or not
     let entriesNodeIds = new Set();
     let assetsNodeIds = new Set();
 
-    publishedEntriesType.forEach(item => {
+    syncData['entry_published'] && syncData['entry_published'].forEach(item => {
         let entryNodeId = makeEntryNodeUid(item.data, createNodeId);
         entriesNodeIds.add(entryNodeId);
     });
 
-    publishedAssetsType.forEach(item => {
+    syncData['asset_published'] && syncData['asset_published'].forEach(item => {
         let entryNodeId = makeAssetNodeUid(item.data, createNodeId);
         assetsNodeIds.add(entryNodeId);
     });
+    
+    // adding nodes
 
-    publishedEntriesType.forEach(item => {
+    syncData['entry_published'] && syncData['entry_published'].forEach(item => {
         const contentType = contentstackData.contentTypes.find(function(contentType) {
             return item.content_type_uid === contentType.uid;
         });
         const normalizedEntry = normalizeEntry(contentType, item.data,entriesNodeIds, assetsNodeIds, createNodeId);
-        const entryNode = processEntry(contentType, normalizedEntry, createNodeId);
+        const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest);
         createNode(entryNode);
     });
 
-    publishedAssetsType.forEach(item => {
-        const assetNode = processAsset(item.data, createNodeId);
+    syncData['asset_published'] && syncData['asset_published'].forEach(item => {
+        const assetNode = processAsset(item.data, createNodeId, createContentDigest);
         createNode(assetNode);
     });
 
     contentstackData.contentTypes.forEach(contentType => {
-        const contentTypeNode = processContentType(contentType, createNodeId);
+        const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest);
         createNode(contentTypeNode);
     });
 
@@ -95,23 +87,25 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
         }
     }
 
-    unPublishedEntriesType.forEach(item => {
+    // deleting nodes
+
+    syncData['entry_unpublished'] && syncData['entry_unpublished'].forEach(item => {
         deleteContentstackNodes(item.data, 'entry');
     });
 
-    unPublishedAssetsType.forEach(item => {
+    syncData['asset_unpublished'] && syncData['asset_unpublished'].forEach(item => {
         deleteContentstackNodes(item.data, 'asset');
     });
 
-    entriesDeleteType.forEach(item => {
+    syncData['entry_deleted'] && syncData['entry_deleted'].forEach(item => {
         deleteContentstackNodes(item.data, 'entry');
     });
 
-    assetsDeleteType.forEach(item => {
+    syncData['asset_deleted'] && syncData['asset_deleted'].forEach(item => {
         deleteContentstackNodes(item.data, 'asset');
     });
 
-    contentTypeDeleteType.forEach(item => {
+    syncData['content_type_deleted'] && syncData['content_type_deleted'].forEach(item => {
         const sameContentTypeNodes = getNodes().filter(
             n => n.internal.type === `Contentstack_${item.content_type_uid}`
         );

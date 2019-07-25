@@ -31,9 +31,10 @@ exports.sourceNodes = function () {
             getNodes = _ref2.getNodes,
             createNodeId = _ref2.createNodeId,
             store = _ref2.store,
-            reporter = _ref2.reporter;
+            reporter = _ref2.reporter,
+            createContentDigest = _ref2.createContentDigest;
 
-        var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _ref3, contentstackData, publishedEntriesType, publishedAssetsType, unPublishedEntriesType, unPublishedAssetsType, entriesDeleteType, assetsDeleteType, contentTypeDeleteType, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
+        var createNode, deleteNode, touchNode, setPluginStatus, syncToken, status, _ref3, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
 
         return _regenerator2.default.wrap(function _callee$(_context) {
             while (1) {
@@ -56,44 +57,28 @@ exports.sourceNodes = function () {
 
                         createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus;
                         syncToken = void 0;
+                        status = store.getState().status;
 
 
-                        if (store.getState().status.plugins && store.getState().status.plugins["gatsby-source-contentstack"] && store.getState().status.plugins["gatsby-source-contentstack"]["contentstack-sync-token-" + configOptions.api_key]) {
-                            syncToken = store.getState().status.plugins["gatsby-source-contentstack"]["contentstack-sync-token-" + configOptions.api_key];
+                        if (status && status.plugins && status.plugins["gatsby-source-contentstack"]) {
+                            syncToken = status.plugins["gatsby-source-contentstack"]["contentstack-sync-token-" + configOptions.api_key];
                         }
 
                         configOptions.syncToken = syncToken || null;
 
-                        _context.next = 7;
-                        return fetchData(configOptions);
+                        _context.next = 8;
+                        return fetchData(configOptions, reporter);
 
-                    case 7:
+                    case 8:
                         _ref3 = _context.sent;
                         contentstackData = _ref3.contentstackData;
-                        publishedEntriesType = contentstackData.syncData.filter(function (item) {
-                            return item.type === 'entry_published';
-                        }) || [];
-                        publishedAssetsType = contentstackData.syncData.filter(function (item) {
-                            return item.type === 'asset_published';
-                        }) || [];
-
-                        // for removing nodes from cache if present
-
-                        unPublishedEntriesType = contentstackData.syncData.filter(function (item) {
-                            return item.type === 'entry_unpublished';
-                        }) || [];
-                        unPublishedAssetsType = contentstackData.syncData.filter(function (item) {
-                            return item.type === 'asset_unpublished';
-                        }) || [];
-                        entriesDeleteType = contentstackData.syncData.filter(function (item) {
-                            return item.type === 'entry_deleted';
-                        }) || [];
-                        assetsDeleteType = contentstackData.syncData.filter(function (item) {
-                            return item.type === 'asset_deleted';
-                        }) || [];
-                        contentTypeDeleteType = contentstackData.syncData.filter(function (item) {
-                            return item.type === 'content_type_deleted';
-                        }) || [];
+                        syncData = contentstackData.syncData.reduce(function (merged, item) {
+                            if (!merged[item.type]) {
+                                merged[item.type] = [];
+                            }
+                            merged[item.type].push(item);
+                            return merged;
+                        }, {});
 
                         // for checking if the reference node is present or not
 
@@ -101,32 +86,34 @@ exports.sourceNodes = function () {
                         assetsNodeIds = new _set2.default();
 
 
-                        publishedEntriesType.forEach(function (item) {
+                        syncData['entry_published'] && syncData['entry_published'].forEach(function (item) {
                             var entryNodeId = makeEntryNodeUid(item.data, createNodeId);
                             entriesNodeIds.add(entryNodeId);
                         });
 
-                        publishedAssetsType.forEach(function (item) {
+                        syncData['asset_published'] && syncData['asset_published'].forEach(function (item) {
                             var entryNodeId = makeAssetNodeUid(item.data, createNodeId);
                             assetsNodeIds.add(entryNodeId);
                         });
 
-                        publishedEntriesType.forEach(function (item) {
+                        // adding nodes
+
+                        syncData['entry_published'] && syncData['entry_published'].forEach(function (item) {
                             var contentType = contentstackData.contentTypes.find(function (contentType) {
                                 return item.content_type_uid === contentType.uid;
                             });
                             var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId);
-                            var entryNode = processEntry(contentType, normalizedEntry, createNodeId);
+                            var entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest);
                             createNode(entryNode);
                         });
 
-                        publishedAssetsType.forEach(function (item) {
-                            var assetNode = processAsset(item.data, createNodeId);
+                        syncData['asset_published'] && syncData['asset_published'].forEach(function (item) {
+                            var assetNode = processAsset(item.data, createNodeId, createContentDigest);
                             createNode(assetNode);
                         });
 
                         contentstackData.contentTypes.forEach(function (contentType) {
-                            var contentTypeNode = processContentType(contentType, createNodeId);
+                            var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest);
                             createNode(contentTypeNode);
                         });
 
@@ -139,23 +126,25 @@ exports.sourceNodes = function () {
                             return touchNode({ nodeId: n.id });
                         });
 
-                        unPublishedEntriesType.forEach(function (item) {
+                        // deleting nodes
+
+                        syncData['entry_unpublished'] && syncData['entry_unpublished'].forEach(function (item) {
                             deleteContentstackNodes(item.data, 'entry');
                         });
 
-                        unPublishedAssetsType.forEach(function (item) {
+                        syncData['asset_unpublished'] && syncData['asset_unpublished'].forEach(function (item) {
                             deleteContentstackNodes(item.data, 'asset');
                         });
 
-                        entriesDeleteType.forEach(function (item) {
+                        syncData['entry_deleted'] && syncData['entry_deleted'].forEach(function (item) {
                             deleteContentstackNodes(item.data, 'entry');
                         });
 
-                        assetsDeleteType.forEach(function (item) {
+                        syncData['asset_deleted'] && syncData['asset_deleted'].forEach(function (item) {
                             deleteContentstackNodes(item.data, 'asset');
                         });
 
-                        contentTypeDeleteType.forEach(function (item) {
+                        syncData['content_type_deleted'] && syncData['content_type_deleted'].forEach(function (item) {
                             var sameContentTypeNodes = getNodes().filter(function (n) {
                                 return n.internal.type === "Contentstack_" + item.content_type_uid;
                             });
@@ -176,7 +165,7 @@ exports.sourceNodes = function () {
 
                         return _context.abrupt("return");
 
-                    case 35:
+                    case 30:
                     case "end":
                         return _context.stop();
                 }

@@ -1,14 +1,7 @@
-const _ = require("lodash");
-const crypto = require("crypto");
 
-
-exports.processContentType = (content_type, createNodeId) => {
+exports.processContentType = (content_type, createNodeId, createContentDigest) => {
     const nodeId = createNodeId(`contentstack-contentType-${content_type.uid}`);
     const nodeContent = JSON.stringify(content_type);
-    const nodeContentDigest = crypto
-    .createHash('md5')
-    .update(nodeContent)
-    .digest('hex');
     const nodeData = Object.assign({}, content_type, {
         id: nodeId,
         parent: null,
@@ -16,19 +9,15 @@ exports.processContentType = (content_type, createNodeId) => {
         internal: {
             type: `ContentstackContentTypes`,
             content: nodeContent,
-            contentDigest: nodeContentDigest,
+            contentDigest: createContentDigest(nodeContent),
         },
     });
     return nodeData;
 }
 
-exports.processAsset = (asset, createNodeId) => {
+exports.processAsset = (asset, createNodeId, createContentDigest) => {
     const nodeId = makeAssetNodeUid(asset, createNodeId);
     const nodeContent = JSON.stringify(asset);
-    const nodeContentDigest = crypto
-        .createHash('md5')
-        .update(nodeContent)
-        .digest('hex');
     const nodeData = Object.assign({}, asset, {
         id: nodeId,
         parent: null,
@@ -36,19 +25,15 @@ exports.processAsset = (asset, createNodeId) => {
         internal: {
             type: `Contentstack_assets`,
             content: nodeContent,
-            contentDigest: nodeContentDigest,
+            contentDigest: createContentDigest(nodeContent),
         },
     });
     return nodeData;
 }
 
-exports.processEntry = (content_type, entry, createNodeId) => {
+exports.processEntry = (content_type, entry, createNodeId, createContentDigest) => {
     const nodeId = makeEntryNodeUid(entry, createNodeId);
     const nodeContent = JSON.stringify(entry);
-    const nodeContentDigest = crypto
-        .createHash('md5')
-        .update(nodeContent)
-        .digest('hex');
     const nodeData = Object.assign({}, entry, {
         id: nodeId,
         parent: null,
@@ -56,7 +41,7 @@ exports.processEntry = (content_type, entry, createNodeId) => {
         internal: {
             type: `Contentstack_${content_type.uid}`,
             content: nodeContent,
-            contentDigest: nodeContentDigest,
+            contentDigest: createContentDigest(nodeContent),
         },
     });
     return nodeData;

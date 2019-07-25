@@ -18,13 +18,9 @@ var _stringify2 = _interopRequireDefault(_stringify);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _ = require("lodash");
-var crypto = require("crypto");
-
-exports.processContentType = function (content_type, createNodeId) {
+exports.processContentType = function (content_type, createNodeId, createContentDigest) {
     var nodeId = createNodeId("contentstack-contentType-" + content_type.uid);
     var nodeContent = (0, _stringify2.default)(content_type);
-    var nodeContentDigest = crypto.createHash('md5').update(nodeContent).digest('hex');
     var nodeData = (0, _assign2.default)({}, content_type, {
         id: nodeId,
         parent: null,
@@ -32,16 +28,15 @@ exports.processContentType = function (content_type, createNodeId) {
         internal: {
             type: "ContentstackContentTypes",
             content: nodeContent,
-            contentDigest: nodeContentDigest
+            contentDigest: createContentDigest(nodeContent)
         }
     });
     return nodeData;
 };
 
-exports.processAsset = function (asset, createNodeId) {
+exports.processAsset = function (asset, createNodeId, createContentDigest) {
     var nodeId = makeAssetNodeUid(asset, createNodeId);
     var nodeContent = (0, _stringify2.default)(asset);
-    var nodeContentDigest = crypto.createHash('md5').update(nodeContent).digest('hex');
     var nodeData = (0, _assign2.default)({}, asset, {
         id: nodeId,
         parent: null,
@@ -49,16 +44,15 @@ exports.processAsset = function (asset, createNodeId) {
         internal: {
             type: "Contentstack_assets",
             content: nodeContent,
-            contentDigest: nodeContentDigest
+            contentDigest: createContentDigest(nodeContent)
         }
     });
     return nodeData;
 };
 
-exports.processEntry = function (content_type, entry, createNodeId) {
+exports.processEntry = function (content_type, entry, createNodeId, createContentDigest) {
     var nodeId = makeEntryNodeUid(entry, createNodeId);
     var nodeContent = (0, _stringify2.default)(entry);
-    var nodeContentDigest = crypto.createHash('md5').update(nodeContent).digest('hex');
     var nodeData = (0, _assign2.default)({}, entry, {
         id: nodeId,
         parent: null,
@@ -66,7 +60,7 @@ exports.processEntry = function (content_type, entry, createNodeId) {
         internal: {
             type: "Contentstack_" + content_type.uid,
             content: nodeContent,
-            contentDigest: nodeContentDigest
+            contentDigest: createContentDigest(nodeContent)
         }
     });
     return nodeData;

@@ -22,7 +22,7 @@ plugins: [
       api_key: `api_key`,
 
       // Delivery Token is a read-only credential . This is required.
-      deliver_token: `deliver_token`,
+      delivery_token: `deliver_token`,
       
       // Environment where you published your data.
       environment: `environment`
