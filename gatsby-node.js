@@ -84,7 +84,20 @@ exports.sourceNodes = function () {
 
                         entriesNodeIds = new _set2.default();
                         assetsNodeIds = new _set2.default();
+                        existingNodes = getNodes().filter(function (n) {
+                            return n.internal.owner === "gatsby-source-contentstack";
+                        });
 
+
+                        existingNodes.forEach(function (n) {
+                            if (n.internal.type !== "ContentstackContentTypes" && n.internal.type !== "Contentstack_assets") {
+                                entriesNodeIds.add(n.id);
+                            }
+                            if (n.internal.type === "Contentstack_assets") {
+                                assetsNodeIds.add(n.id);
+                            }
+                            touchNode({ nodeId: n.id });
+                        });
 
                         syncData['entry_published'] && syncData['entry_published'].forEach(function (item) {
                             var entryNodeId = makeEntryNodeUid(item.data, createNodeId);
@@ -115,15 +128,6 @@ exports.sourceNodes = function () {
                         contentstackData.contentTypes.forEach(function (contentType) {
                             var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest);
                             createNode(contentTypeNode);
-                        });
-
-                        existingNodes = getNodes().filter(function (n) {
-                            return n.internal.owner === "gatsby-source-contentstack";
-                        });
-
-
-                        existingNodes.forEach(function (n) {
-                            return touchNode({ nodeId: n.id });
                         });
 
                         // deleting nodes

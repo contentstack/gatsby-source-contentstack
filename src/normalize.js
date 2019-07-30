@@ -107,10 +107,16 @@ const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNode
 
 const normalizeReferenceField = (value, locale, entriesNodeIds, createNodeId) => {
     let reference = [];
-    value.forEach(entryUid => {
-        if(entriesNodeIds.has(createNodeId(`contentstack-entry-${entryUid}-${locale}`))){
-            reference.push(createNodeId(`contentstack-entry-${entryUid}-${locale}`));    
-        } 
+    value.forEach(entry => {
+        if(typeof entry === "object" && entry.uid){
+            if(entriesNodeIds.has(createNodeId(`contentstack-entry-${entry.uid}-${locale}`))){
+                reference.push(createNodeId(`contentstack-entry-${entry.uid}-${locale}`));    
+            }
+        } else {
+            if(entriesNodeIds.has(createNodeId(`contentstack-entry-${entry}-${locale}`))){
+                reference.push(createNodeId(`contentstack-entry-${entry}-${locale}`));    
+            } 
+        }
     });
     return reference;
 }

@@ -35,6 +35,21 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
     let entriesNodeIds = new Set();
     let assetsNodeIds = new Set();
 
+
+    const existingNodes = getNodes().filter(
+        n => n.internal.owner === `gatsby-source-contentstack`
+    );
+
+    existingNodes.forEach(n => {
+        if(n.internal.type !== "ContentstackContentTypes" && n.internal.type !== "Contentstack_assets"){
+            entriesNodeIds.add(n.id);
+        }
+        if(n.internal.type === "Contentstack_assets"){
+            assetsNodeIds.add(n.id);
+        }
+        touchNode({ nodeId: n.id });
+    });
+
     syncData['entry_published'] && syncData['entry_published'].forEach(item => {
         let entryNodeId = makeEntryNodeUid(item.data, createNodeId);
         entriesNodeIds.add(entryNodeId);
@@ -66,11 +81,6 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
         createNode(contentTypeNode);
     });
 
-    const existingNodes = getNodes().filter(
-        n => n.internal.owner === `gatsby-source-contentstack`
-    );
-
-    existingNodes.forEach(n => touchNode({ nodeId: n.id }));
     
     function deleteContentstackNodes(item, type) {
         let nodeId = '';

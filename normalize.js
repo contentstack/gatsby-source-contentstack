@@ -126,9 +126,15 @@ var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale
 
 var normalizeReferenceField = function normalizeReferenceField(value, locale, entriesNodeIds, createNodeId) {
     var reference = [];
-    value.forEach(function (entryUid) {
-        if (entriesNodeIds.has(createNodeId("contentstack-entry-" + entryUid + "-" + locale))) {
-            reference.push(createNodeId("contentstack-entry-" + entryUid + "-" + locale));
+    value.forEach(function (entry) {
+        if ((typeof entry === "undefined" ? "undefined" : (0, _typeof3.default)(entry)) === "object" && entry.uid) {
+            if (entriesNodeIds.has(createNodeId("contentstack-entry-" + entry.uid + "-" + locale))) {
+                reference.push(createNodeId("contentstack-entry-" + entry.uid + "-" + locale));
+            }
+        } else {
+            if (entriesNodeIds.has(createNodeId("contentstack-entry-" + entry + "-" + locale))) {
+                reference.push(createNodeId("contentstack-entry-" + entry + "-" + locale));
+            }
         }
     });
     return reference;
