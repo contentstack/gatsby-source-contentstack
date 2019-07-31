@@ -29,6 +29,7 @@ plugins: [
     },
   },
 ]
+// Note: access_token has been replaced by delivery_token
 ```
 
 ## How to query

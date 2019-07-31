@@ -73,10 +73,16 @@ const fetchCsData = async (url, config, query) => {
                 fetch(apiUrl,option)
                     .then(response => response.json())
                     .then(data => {
-                        resolve(data);
+						if(data.error_code){
+							console.error(data);
+							reject(data);
+						} else{
+							resolve(data);
+						}
                     })
                     .catch(err => {
-                    	console.error(err);
+						console.error(err);
+						reject(err);
                     })
     		});
 }

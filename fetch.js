@@ -173,9 +173,15 @@ var fetchCsData = function () {
 							fetch(apiUrl, option).then(function (response) {
 								return response.json();
 							}).then(function (data) {
-								resolve(data);
+								if (data.error_code) {
+									console.error(data);
+									reject(data);
+								} else {
+									resolve(data);
+								}
 							}).catch(function (err) {
 								console.error(err);
+								reject(err);
 							});
 						}));
 
