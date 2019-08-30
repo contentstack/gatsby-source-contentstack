@@ -25,7 +25,10 @@ plugins: [
       delivery_token: `deliver_token`,
       
       // Environment where you published your data.
-      environment: `environment`
+      environment: `environment`,
+
+      //CDN to set to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3
+      cdn: `cdn_url`
     },
   },
 ]
