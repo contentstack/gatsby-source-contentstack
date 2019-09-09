@@ -27,7 +27,7 @@ plugins: [
       // Environment where you published your data.
       environment: `environment`,
 
-      //CDN to set to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3
+      //CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 . This is not required.
       cdn: `cdn_url`
     },
   },
