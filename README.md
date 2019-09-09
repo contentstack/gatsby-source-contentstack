@@ -21,14 +21,18 @@ plugins: [
       // API Key is a unique key assigned to each stack. This is required.
       api_key: `api_key`,
 
-      // Access Token is a read-only credential . This is required.
-      access_token: `access_token`,
-
+      // Delivery Token is a read-only credential . This is required.
+      delivery_token: `deliver_token`,
+      
       // Environment where you published your data.
-      environment: `environment`
+      environment: `environment`,
+
+      //CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 . This is not required.
+      cdn: `cdn_url`
     },
   },
 ]
+// Note: access_token has been replaced by delivery_token
 ```
 
 ## How to query

@@ -4,6 +4,10 @@ var _regenerator = require("babel-runtime/regenerator");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
+var _set = require("babel-runtime/core-js/set");
+
+var _set2 = _interopRequireDefault(_set);
+
 var _asyncToGenerator2 = require("babel-runtime/helpers/asyncToGenerator");
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
@@ -11,53 +15,161 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _require = require("./normalize"),
-    normalizeFields = _require.normalizeFields,
     normalizeEntry = _require.normalizeEntry,
     processContentType = _require.processContentType,
-    processEntry = _require.processEntry;
+    processEntry = _require.processEntry,
+    processAsset = _require.processAsset,
+    makeEntryNodeUid = _require.makeEntryNodeUid,
+    makeAssetNodeUid = _require.makeAssetNodeUid;
 
 var fetchData = require("./fetch");
 
 exports.sourceNodes = function () {
     var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
-        var boundActionCreators = _ref2.boundActionCreators,
-            createNodeId = _ref2.createNodeId;
+        var actions = _ref2.actions,
+            getNode = _ref2.getNode,
+            getNodes = _ref2.getNodes,
+            createNodeId = _ref2.createNodeId,
+            store = _ref2.store,
+            reporter = _ref2.reporter,
+            createContentDigest = _ref2.createContentDigest;
 
-        var createNode, _ref3, contentstackData;
+        var createNode, deleteNode, touchNode, setPluginStatus, syncToken, status, _ref3, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
 
         return _regenerator2.default.wrap(function _callee$(_context) {
             while (1) {
                 switch (_context.prev = _context.next) {
                     case 0:
-                        createNode = boundActionCreators.createNode;
-                        _context.next = 3;
-                        return fetchData(configOptions);
+                        deleteContentstackNodes = function deleteContentstackNodes(item, type) {
+                            var nodeId = '';
+                            var node = null;
+                            if (type === 'entry') {
+                                nodeId = createNodeId("contentstack-entry-" + item.uid + "-" + item.locale);
+                            }
+                            if (type === 'asset') {
+                                nodeId = createNodeId("contentstack-assets-" + item.uid + "-" + item.locale);
+                            }
+                            node = getNode(nodeId);
+                            if (node) {
+                                deleteNode({ node: node });
+                            }
+                        };
 
-                    case 3:
+                        createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus;
+                        syncToken = void 0;
+                        status = store.getState().status;
+
+
+                        if (status && status.plugins && status.plugins["gatsby-source-contentstack"]) {
+                            syncToken = status.plugins["gatsby-source-contentstack"]["contentstack-sync-token-" + configOptions.api_key];
+                        }
+
+                        configOptions.syncToken = syncToken || null;
+
+                        _context.next = 8;
+                        return fetchData(configOptions, reporter);
+
+                    case 8:
                         _ref3 = _context.sent;
                         contentstackData = _ref3.contentstackData;
+                        syncData = contentstackData.syncData.reduce(function (merged, item) {
+                            if (!merged[item.type]) {
+                                merged[item.type] = [];
+                            }
+                            merged[item.type].push(item);
+                            return merged;
+                        }, {});
 
+                        // for checking if the reference node is present or not
+
+                        entriesNodeIds = new _set2.default();
+                        assetsNodeIds = new _set2.default();
+                        existingNodes = getNodes().filter(function (n) {
+                            return n.internal.owner === "gatsby-source-contentstack";
+                        });
+
+
+                        existingNodes.forEach(function (n) {
+                            if (n.internal.type !== "ContentstackContentTypes" && n.internal.type !== "Contentstack_assets") {
+                                entriesNodeIds.add(n.id);
+                            }
+                            if (n.internal.type === "Contentstack_assets") {
+                                assetsNodeIds.add(n.id);
+                            }
+                            touchNode({ nodeId: n.id });
+                        });
+
+                        syncData['entry_published'] && syncData['entry_published'].forEach(function (item) {
+                            var entryNodeId = makeEntryNodeUid(item.data, createNodeId);
+                            entriesNodeIds.add(entryNodeId);
+                        });
+
+                        syncData['asset_published'] && syncData['asset_published'].forEach(function (item) {
+                            var entryNodeId = makeAssetNodeUid(item.data, createNodeId);
+                            assetsNodeIds.add(entryNodeId);
+                        });
+
+                        // adding nodes
+
+                        syncData['entry_published'] && syncData['entry_published'].forEach(function (item) {
+                            var contentType = contentstackData.contentTypes.find(function (contentType) {
+                                return item.content_type_uid === contentType.uid;
+                            });
+                            var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId);
+                            var entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest);
+                            createNode(entryNode);
+                        });
+
+                        syncData['asset_published'] && syncData['asset_published'].forEach(function (item) {
+                            var assetNode = processAsset(item.data, createNodeId, createContentDigest);
+                            createNode(assetNode);
+                        });
 
                         contentstackData.contentTypes.forEach(function (contentType) {
-                            var entries = contentstackData.entries[contentType.uid];
-
-                            entries.forEach(function (entry) {
-                                var normalizedEntry = normalizeEntry(contentType, entry, contentstackData.entries, createNodeId);
-                                // Process the contentTypes data to match the structure of a Gatsby node
-                                var entryNode = processEntry(contentType, normalizedEntry, createNodeId);
-                                // Use Gatsby's createNode helper to create a node from the node data
-                                createNode(entryNode);
-                            });
-
-                            // Process the contentTypes data to match the structure of a Gatsby node
-                            var contentTypeNode = processContentType(contentType, createNodeId);
-                            // Use Gatsby's createNode helper to create a node from the node data
+                            var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest);
                             createNode(contentTypeNode);
                         });
 
+                        // deleting nodes
+
+                        syncData['entry_unpublished'] && syncData['entry_unpublished'].forEach(function (item) {
+                            deleteContentstackNodes(item.data, 'entry');
+                        });
+
+                        syncData['asset_unpublished'] && syncData['asset_unpublished'].forEach(function (item) {
+                            deleteContentstackNodes(item.data, 'asset');
+                        });
+
+                        syncData['entry_deleted'] && syncData['entry_deleted'].forEach(function (item) {
+                            deleteContentstackNodes(item.data, 'entry');
+                        });
+
+                        syncData['asset_deleted'] && syncData['asset_deleted'].forEach(function (item) {
+                            deleteContentstackNodes(item.data, 'asset');
+                        });
+
+                        syncData['content_type_deleted'] && syncData['content_type_deleted'].forEach(function (item) {
+                            var sameContentTypeNodes = getNodes().filter(function (n) {
+                                return n.internal.type === "Contentstack_" + item.content_type_uid;
+                            });
+                            sameContentTypeNodes.forEach(function (node) {
+                                return deleteNode({ node: node });
+                            });
+                        });
+
+                        // Updating the syncToken
+                        nextSyncToken = contentstackData.sync_token;
+
+                        // Storing the sync state for the next sync
+
+                        newState = {};
+
+                        newState["contentstack-sync-token-" + configOptions.api_key] = nextSyncToken;
+                        setPluginStatus(newState);
+
                         return _context.abrupt("return");
 
-                    case 7:
+                    case 30:
                     case "end":
                         return _context.stop();
                 }
