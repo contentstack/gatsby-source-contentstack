@@ -97,6 +97,10 @@ const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNode
     value.map(block => {
         Object.keys(block).forEach(key => {
             let blockSchema = blocks.filter(block => block.uid ===  key);
+            if (!blockSchema.length) {
+                // block value no longer exists block schema so ignore it
+                return
+            }
             let blockObj = {};
             blockObj[key] =  builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId);
             modularBlocksObj.push(blockObj);
