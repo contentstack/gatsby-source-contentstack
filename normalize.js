@@ -116,6 +116,10 @@ var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale
             var blockSchema = blocks.filter(function (block) {
                 return block.uid === key;
             });
+            if (!blockSchema.length) {
+                // block value no longer exists block schema so ignore it
+                return;
+            }
             var blockObj = {};
             blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId);
             modularBlocksObj.push(blockObj);
