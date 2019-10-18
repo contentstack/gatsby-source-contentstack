@@ -67,31 +67,17 @@ exports.processEntry = function (content_type, entry, createNodeId, createConten
 };
 
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId) {
-    var resolveEntry = (0, _assign2.default)({}, entry, builtEntry(contentType.schema, entry, entry.locale, entriesNodeIds, assetsNodeIds, createNodeId));
+    var resolveEntry = (0, _assign2.default)({}, entry, builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId));
     return resolveEntry;
 };
 
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId) {
-    var publishedLocale = null;
-    if (asset && asset.publish_details) {
-        if (Array.isArray(asset.publish_details)) {
-            publishedLocale = asset.publish_details[0].locale;
-        } else {
-            publishedLocale = asset.publish_details.locale;
-        }
-    }
+    var publishedLocale = asset.publish_details.locale;
     return createNodeId("contentstack-assets-" + asset.uid + "-" + publishedLocale);
 };
 
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId) {
-    var publishedLocale = null;
-    if (entry && entry.publish_details) {
-        if (Array.isArray(entry.publish_details)) {
-            publishedLocale = entry.publish_details[0].locale;
-        } else {
-            publishedLocale = entry.publish_details.locale;
-        }
-    }
+    var publishedLocale = entry.publish_details.locale;
     return createNodeId("contentstack-entry-" + entry.uid + "-" + publishedLocale);
 };
 
@@ -111,20 +97,22 @@ var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeId
 
 var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId) {
     var modularBlocksObj = [];
-    value.map(function (block) {
-        (0, _keys2.default)(block).forEach(function (key) {
-            var blockSchema = blocks.filter(function (block) {
-                return block.uid === key;
+    if (value) {
+        value.map(function (block) {
+            (0, _keys2.default)(block).forEach(function (key) {
+                var blockSchema = blocks.filter(function (block) {
+                    return block.uid === key;
+                });
+                if (!blockSchema.length) {
+                    // block value no longer exists block schema so ignore it
+                    return;
+                }
+                var blockObj = {};
+                blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId);
+                modularBlocksObj.push(blockObj);
             });
-            if (!blockSchema.length) {
-                // block value no longer exists block schema so ignore it
-                return;
-            }
-            var blockObj = {};
-            blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId);
-            modularBlocksObj.push(blockObj);
         });
-    });
+    }
     return modularBlocksObj;
 };
 
