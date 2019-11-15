@@ -167,6 +167,7 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
                 entryObj[field.uid + "___NODE"] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId);
                 break;
             case "group":
+            case "global_field":
                 entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
                 break;
             case "blocks":

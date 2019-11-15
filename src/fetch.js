@@ -44,20 +44,19 @@ module.exports = async (configOptions, reporter) => {
 const fetchContentTypes = async (config) => {
 	let url = `content_types`;
 	let responseKey = `content_types`;
-    let allContentTypes = await getPagedData(url, config, responseKey);
-
+	let query = {"include_global_field_schema":true};
+    let allContentTypes = await getPagedData(url, config, responseKey, query);
 	return allContentTypes;
 }
 
 const fetchSyncData = async (query, config) => {
 	let url = `stacks/sync`;
 	let response = await getSyncData(url, config, query, 'items'); 
-
-	return response;
+	return response;	
 }
 
 const fetchCsData = async (url, config, query) => {
-    query = query ? query : {};
+	query = query ? query : {};
     query.include_count = true;
     query.api_key = config.api_key;
     query.access_token = config.delivery_token;
