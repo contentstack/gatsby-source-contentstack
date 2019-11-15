@@ -63,7 +63,6 @@ const makeEntryNodeUid = exports.makeEntryNodeUid = (entry, createNodeId) => {
     return createNodeId(`contentstack-entry-${entry.uid}-${publishedLocale}`);
 };
 
-
 const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId) => {
     let groupObj = null;
     if(field.multiple && value instanceof Array){
@@ -144,11 +143,12 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
         switch (field.data_type) {
             case "reference":
                 entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId);
-            break;
+                break;
             case "file":
                 entryObj[`${field.uid}___NODE`] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId);
             break;    
             case "group":
+            case "global_field":    
                 entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
             break;
             case "blocks":

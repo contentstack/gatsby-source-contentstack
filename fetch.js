@@ -95,21 +95,22 @@ module.exports = function () {
 
 var fetchContentTypes = function () {
 	var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(config) {
-		var url, responseKey, allContentTypes;
+		var url, responseKey, query, allContentTypes;
 		return _regenerator2.default.wrap(function _callee2$(_context2) {
 			while (1) {
 				switch (_context2.prev = _context2.next) {
 					case 0:
 						url = "content_types";
 						responseKey = "content_types";
-						_context2.next = 4;
-						return getPagedData(url, config, responseKey);
+						query = { "include_global_field_schema": true };
+						_context2.next = 5;
+						return getPagedData(url, config, responseKey, query);
 
-					case 4:
+					case 5:
 						allContentTypes = _context2.sent;
 						return _context2.abrupt("return", allContentTypes);
 
-					case 6:
+					case 7:
 					case "end":
 						return _context2.stop();
 				}
