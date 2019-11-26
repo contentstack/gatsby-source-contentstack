@@ -1,32 +1,32 @@
-"use strict";
+'use strict';
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
+var _typeof2 = require('babel-runtime/helpers/typeof');
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
-var _keys = require("babel-runtime/core-js/object/keys");
+var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
 
-var _assign = require("babel-runtime/core-js/object/assign");
+var _assign = require('babel-runtime/core-js/object/assign');
 
 var _assign2 = _interopRequireDefault(_assign);
 
-var _stringify = require("babel-runtime/core-js/json/stringify");
+var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.processContentType = function (content_type, createNodeId, createContentDigest) {
-    var nodeId = createNodeId("contentstack-contentType-" + content_type.uid);
+    var nodeId = createNodeId('contentstack-contentType-' + content_type.uid);
     var nodeContent = (0, _stringify2.default)(content_type);
     var nodeData = (0, _assign2.default)({}, content_type, {
         id: nodeId,
         parent: null,
         children: [],
         internal: {
-            type: "ContentstackContentTypes",
+            type: 'ContentstackContentTypes',
             content: nodeContent,
             contentDigest: createContentDigest(nodeContent)
         }
@@ -42,7 +42,7 @@ exports.processAsset = function (asset, createNodeId, createContentDigest) {
         parent: null,
         children: [],
         internal: {
-            type: "Contentstack_assets",
+            type: 'Contentstack_assets',
             content: nodeContent,
             contentDigest: createContentDigest(nodeContent)
         }
@@ -58,7 +58,7 @@ exports.processEntry = function (content_type, entry, createNodeId, createConten
         parent: null,
         children: [],
         internal: {
-            type: "Contentstack_" + content_type.uid,
+            type: 'Contentstack_' + content_type.uid,
             content: nodeContent,
             contentDigest: createContentDigest(nodeContent)
         }
@@ -73,12 +73,12 @@ exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNod
 
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId) {
     var publishedLocale = asset.publish_details.locale;
-    return createNodeId("contentstack-assets-" + asset.uid + "-" + publishedLocale);
+    return createNodeId('contentstack-assets-' + asset.uid + '-' + publishedLocale);
 };
 
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId) {
     var publishedLocale = entry.publish_details.locale;
-    return createNodeId("contentstack-entry-" + entry.uid + "-" + publishedLocale);
+    return createNodeId('contentstack-entry-' + entry.uid + '-' + publishedLocale);
 };
 
 var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId) {
@@ -119,13 +119,13 @@ var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale
 var normalizeReferenceField = function normalizeReferenceField(value, locale, entriesNodeIds, createNodeId) {
     var reference = [];
     value.forEach(function (entry) {
-        if ((typeof entry === "undefined" ? "undefined" : (0, _typeof3.default)(entry)) === "object" && entry.uid) {
-            if (entriesNodeIds.has(createNodeId("contentstack-entry-" + entry.uid + "-" + locale))) {
-                reference.push(createNodeId("contentstack-entry-" + entry.uid + "-" + locale));
+        if ((typeof entry === 'undefined' ? 'undefined' : (0, _typeof3.default)(entry)) === "object" && entry.uid) {
+            if (entriesNodeIds.has(createNodeId('contentstack-entry-' + entry.uid + '-' + locale))) {
+                reference.push(createNodeId('contentstack-entry-' + entry.uid + '-' + locale));
             }
         } else {
-            if (entriesNodeIds.has(createNodeId("contentstack-entry-" + entry + "-" + locale))) {
-                reference.push(createNodeId("contentstack-entry-" + entry + "-" + locale));
+            if (entriesNodeIds.has(createNodeId('contentstack-entry-' + entry + '-' + locale))) {
+                reference.push(createNodeId('contentstack-entry-' + entry + '-' + locale));
             }
         }
     });
@@ -137,21 +137,36 @@ var normalizeFileField = function normalizeFileField(value, locale, assetsNodeId
     if (Array.isArray(value)) {
         reference = [];
         value.forEach(function (assetUid) {
-            if (assetsNodeIds.has(createNodeId("contentstack-assets-" + assetUid + "-" + locale))) {
-                reference.push(createNodeId("contentstack-assets-" + assetUid + "-" + locale));
+            if (assetsNodeIds.has(createNodeId('contentstack-assets-' + assetUid + '-' + locale))) {
+                reference.push(createNodeId('contentstack-assets-' + assetUid + '-' + locale));
             }
         });
     } else {
-        if (assetsNodeIds.has(createNodeId("contentstack-assets-" + value + "-" + locale))) {
-            reference = createNodeId("contentstack-assets-" + value + "-" + locale);
+        if (assetsNodeIds.has(createNodeId('contentstack-assets-' + value + '-' + locale))) {
+            reference = createNodeId('contentstack-assets-' + value + '-' + locale);
         }
     }
     return reference;
 };
 
+var normalizeMarkdown2Html = function normalizeMarkdown2Html(value) {
+    var remark = require('remark');
+    var guide = require('remark-preset-lint-markdown-style-guide');
+    var html = require('remark-html');
+
+    var md2html = {};
+    remark().use(guide).use(html).process(value, function (err, data) {
+        md2html = {
+            markdown: value,
+            html: String(data)
+        };
+    });
+    return md2html;
+};
+
 var getSchemaValue = function getSchemaValue(obj, key) {
     if (obj === null) return null;
-    if ((typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) !== "object") return null;
+    if ((typeof obj === 'undefined' ? 'undefined' : (0, _typeof3.default)(obj)) !== "object") return null;
     return obj.hasOwnProperty(key.uid) ? obj[key.uid] : null;
 };
 
@@ -161,10 +176,10 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
         var value = getSchemaValue(entry, field);
         switch (field.data_type) {
             case "reference":
-                entryObj[field.uid + "___NODE"] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId);
+                entryObj[field.uid + '___NODE'] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId);
                 break;
             case "file":
-                entryObj[field.uid + "___NODE"] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId);
+                entryObj[field.uid + '___NODE'] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId);
                 break;
             case "group":
             case "global_field":
@@ -172,6 +187,13 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
                 break;
             case "blocks":
                 entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
+                break;
+            case "text":
+                if (field.field_metadata && field.field_metadata.markdown && value) {
+                    entryObj[field.uid] = normalizeMarkdown2Html(value);
+                } else {
+                    entryObj[field.uid] = value;
+                }
                 break;
             default:
                 entryObj[field.uid] = value;

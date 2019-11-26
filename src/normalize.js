@@ -129,6 +129,21 @@ const normalizeFileField = (value, locale, assetsNodeIds, createNodeId) => {
     return reference;
 }
 
+const normalizeMarkdown2Html = (value) => {
+    const remark = require('remark');
+    const guide = require('remark-preset-lint-markdown-style-guide');
+    const html = require('remark-html');
+  
+    let md2html = {};
+    remark().use(guide).use(html).process(value, (err, data) => {
+        md2html = {
+            markdown: value,
+            html: String(data),
+        };
+    });
+    return md2html;
+};
+
 const getSchemaValue = (obj, key) => {
     if (obj === null) return null;
     if (typeof obj !== "object") return null;
@@ -153,6 +168,13 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
             break;
             case "blocks":
                 entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
+            break;
+            case "text":
+                if (field.field_metadata && field.field_metadata.markdown && value) {
+                    entryObj[field.uid] = normalizeMarkdown2Html(value);
+                } else {
+                    entryObj[field.uid] = value;
+                }
             break;
             default: 
             entryObj[field.uid] = value;
