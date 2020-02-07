@@ -14,9 +14,12 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
     const { createNode, deleteNode, touchNode, setPluginStatus } = actions;
     let syncToken; 
     const status = store.getState().status;
+
+    // use a custom type prefix if specified
+    const typePrefix = configOptions.type_prefix || 'Contentstack'
     
     if (status && status.plugins && status.plugins[`gatsby-source-contentstack`]) {
-        syncToken = status.plugins[`gatsby-source-contentstack`][`contentstack-sync-token-${configOptions.api_key}`]
+        syncToken = status.plugins[`gatsby-source-contentstack`][`${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`]
     }
  
     configOptions.syncToken = syncToken || null;
@@ -41,22 +44,22 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
     );
 
     existingNodes.forEach(n => {
-        if(n.internal.type !== "ContentstackContentTypes" && n.internal.type !== "Contentstack_assets"){
+        if(n.internal.type !== `${typePrefix}ContentTypes` && n.internal.type !== `${typePrefix}_assets`){
             entriesNodeIds.add(n.id);
         }
-        if(n.internal.type === "Contentstack_assets"){
+        if(n.internal.type === `${typePrefix}_assets`){
             assetsNodeIds.add(n.id);
         }
         touchNode({ nodeId: n.id });
     });
 
     syncData['entry_published'] && syncData['entry_published'].forEach(item => {
-        let entryNodeId = makeEntryNodeUid(item.data, createNodeId);
+        let entryNodeId = makeEntryNodeUid(item.data, createNodeId, typePrefix);
         entriesNodeIds.add(entryNodeId);
     });
 
     syncData['asset_published'] && syncData['asset_published'].forEach(item => {
-        let entryNodeId = makeAssetNodeUid(item.data, createNodeId);
+        let entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
         assetsNodeIds.add(entryNodeId);
     });
     
@@ -66,18 +69,18 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
         const contentType = contentstackData.contentTypes.find(function(contentType) {
             return item.content_type_uid === contentType.uid;
         });
-        const normalizedEntry = normalizeEntry(contentType, item.data,entriesNodeIds, assetsNodeIds, createNodeId);
-        const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest);
+        const normalizedEntry = normalizeEntry(contentType, item.data,entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
         createNode(entryNode);
     });
 
     syncData['asset_published'] && syncData['asset_published'].forEach(item => {
-        const assetNode = processAsset(item.data, createNodeId, createContentDigest);
+        const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
         createNode(assetNode);
     });
 
     contentstackData.contentTypes.forEach(contentType => {
-        const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest);
+        const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
         createNode(contentTypeNode);
     });
 
@@ -86,10 +89,10 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
         let nodeId = '';
         let node = null;
         if(type === 'entry'){
-            nodeId = createNodeId(`contentstack-entry-${item.uid}-${item.locale}`)
+            nodeId = createNodeId(`${typePrefix.toLowerCase()}-entry-${item.uid}-${item.locale}`)
         }
         if(type === 'asset'){
-            nodeId = createNodeId(`contentstack-assets-${item.uid}-${item.locale}`)
+            nodeId = createNodeId(`${typePrefix.toLowerCase()}-assets-${item.uid}-${item.locale}`)
         }
         node = getNode(nodeId);
         if(node){
@@ -117,7 +120,7 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
 
     syncData['content_type_deleted'] && syncData['content_type_deleted'].forEach(item => {
         const sameContentTypeNodes = getNodes().filter(
-            n => n.internal.type === `Contentstack_${item.content_type_uid}`
+            n => n.internal.type === `${typePrefix}_${item.content_type_uid}`
         );
         sameContentTypeNodes.forEach(node =>  deleteNode({ node: node }));
     });
@@ -127,7 +130,7 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
 
     // Storing the sync state for the next sync
     const newState = {};
-    newState[`contentstack-sync-token-${configOptions.api_key}`] = nextSyncToken;
+    newState[`${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`] = nextSyncToken;
     setPluginStatus(newState);
 
     return 
