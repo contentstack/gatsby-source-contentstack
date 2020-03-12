@@ -40,7 +40,7 @@ module.exports = function () {
 						contentTypes = void 0;
 						syncData = {};
 
-						if (!(process.env.NODE_ENV === 'production')) {
+						if (!configOptions.expediteBuild) {
 							_context.next = 29;
 							break;
 						}

@@ -14,7 +14,7 @@ module.exports = async (configOptions, reporter) => {
 	let contentTypes
 	let syncData = {}
 
-	if (process.env.NODE_ENV === 'production') {
+	if (configOptions.expediteBuild) {
 		const syncEntryParams = configOptions.syncToken ? {
 			sync_token: configOptions.syncToken
 		} : {
