@@ -1,12 +1,16 @@
 "use strict";
 
+var _regenerator = require("babel-runtime/regenerator");
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
 var _promise = require("babel-runtime/core-js/promise");
 
 var _promise2 = _interopRequireDefault(_promise);
 
-var _regenerator = require("babel-runtime/regenerator");
+var _slicedToArray2 = require("babel-runtime/helpers/slicedToArray");
 
-var _regenerator2 = _interopRequireDefault(_regenerator);
+var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
 
 var _asyncToGenerator2 = require("babel-runtime/helpers/asyncToGenerator");
 
@@ -22,7 +26,8 @@ var _require = require('./package.json'),
 
 module.exports = function () {
 	var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(configOptions, reporter) {
-		var syncParams, contentTypes, syncData, contentstackData;
+		var contentTypes, syncData, syncEntryParams, syncAssetParams, _ref2, _ref3, contentTypesdata, syncEntryData, syncAssetData, data, syncParams, _ref4, _ref5, contentstackData;
+
 		return _regenerator2.default.wrap(function _callee$(_context) {
 			while (1) {
 				switch (_context.prev = _context.next) {
@@ -32,41 +37,83 @@ module.exports = function () {
 
 						configOptions.cdn = configOptions.cdn ? configOptions.cdn : "https://cdn.contentstack.io/v3";
 
-						syncParams = configOptions.syncToken ? { sync_token: configOptions.syncToken } : { init: true };
 						contentTypes = void 0;
-						syncData = void 0;
-						_context.prev = 6;
-						_context.next = 9;
-						return fetchContentTypes(configOptions);
+						syncData = {};
 
-					case 9:
-						contentTypes = _context.sent;
-						_context.next = 15;
+						if (!configOptions.expediteBuild) {
+							_context.next = 29;
+							break;
+						}
+
+						syncEntryParams = configOptions.syncToken ? {
+							sync_token: configOptions.syncToken
+						} : {
+							init: true
+						};
+						syncAssetParams = configOptions.syncToken ? {
+							sync_token: configOptions.syncToken
+						} : {
+							init: true
+						};
+
+
+						syncEntryParams['type'] = 'entry_published';
+						syncAssetParams['type'] = 'asset_published';
+
+						_context.prev = 10;
+						_context.next = 13;
+						return _promise2.default.all([fetchContentTypes(configOptions), fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
+
+					case 13:
+						_ref2 = _context.sent;
+						_ref3 = (0, _slicedToArray3.default)(_ref2, 3);
+						contentTypesdata = _ref3[0];
+						syncEntryData = _ref3[1];
+						syncAssetData = _ref3[2];
+
+						contentTypes = contentTypesdata;
+						data = syncEntryData.data.concat(syncAssetData.data);
+
+						syncData.data = data;
+						syncData.token = null;
+						_context.next = 27;
 						break;
 
-					case 12:
-						_context.prev = 12;
-						_context.t0 = _context["catch"](6);
+					case 24:
+						_context.prev = 24;
+						_context.t0 = _context["catch"](10);
 
 						reporter.panic("Fetching contentstack data failed", _context.t0);
 
-					case 15:
-						_context.prev = 15;
-						_context.next = 18;
-						return fetchSyncData(syncParams, configOptions);
-
-					case 18:
-						syncData = _context.sent;
-						_context.next = 24;
+					case 27:
+						_context.next = 42;
 						break;
 
-					case 21:
-						_context.prev = 21;
-						_context.t1 = _context["catch"](15);
+					case 29:
+						syncParams = configOptions.syncToken ? {
+							sync_token: configOptions.syncToken
+						} : {
+							init: true
+						};
+						_context.prev = 30;
+						_context.next = 33;
+						return _promise2.default.all([fetchContentTypes(configOptions), fetchSyncData(syncParams, configOptions)]);
+
+					case 33:
+						_ref4 = _context.sent;
+						_ref5 = (0, _slicedToArray3.default)(_ref4, 2);
+						contentTypes = _ref5[0];
+						syncData = _ref5[1];
+						_context.next = 42;
+						break;
+
+					case 39:
+						_context.prev = 39;
+						_context.t1 = _context["catch"](30);
 
 						reporter.panic("Fetching contentstack data failed", _context.t1);
 
-					case 24:
+					case 42:
 						contentstackData = {
 							contentTypes: contentTypes,
 							syncData: syncData.data,
@@ -80,12 +127,12 @@ module.exports = function () {
 							contentstackData: contentstackData
 						});
 
-					case 27:
+					case 45:
 					case "end":
 						return _context.stop();
 				}
 			}
-		}, _callee, undefined, [[6, 12], [15, 21]]);
+		}, _callee, undefined, [[10, 24], [30, 39]]);
 	}));
 
 	return function (_x, _x2) {
@@ -94,7 +141,7 @@ module.exports = function () {
 }();
 
 var fetchContentTypes = function () {
-	var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(config) {
+	var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(config) {
 		var url, responseKey, query, allContentTypes;
 		return _regenerator2.default.wrap(function _callee2$(_context2) {
 			while (1) {
@@ -102,7 +149,9 @@ var fetchContentTypes = function () {
 					case 0:
 						url = "content_types";
 						responseKey = "content_types";
-						query = { "include_global_field_schema": true };
+						query = {
+							"include_global_field_schema": true
+						};
 						_context2.next = 5;
 						return getPagedData(url, config, responseKey, query);
 
@@ -119,12 +168,12 @@ var fetchContentTypes = function () {
 	}));
 
 	return function fetchContentTypes(_x3) {
-		return _ref2.apply(this, arguments);
+		return _ref6.apply(this, arguments);
 	};
 }();
 
 var fetchSyncData = function () {
-	var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(query, config) {
+	var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(query, config) {
 		var url, response;
 		return _regenerator2.default.wrap(function _callee3$(_context3) {
 			while (1) {
@@ -147,12 +196,12 @@ var fetchSyncData = function () {
 	}));
 
 	return function fetchSyncData(_x4, _x5) {
-		return _ref3.apply(this, arguments);
+		return _ref7.apply(this, arguments);
 	};
 }();
 
 var fetchCsData = function () {
-	var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(url, config, query) {
+	var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(url, config, query) {
 		var queryParams, apiUrl, option;
 		return _regenerator2.default.wrap(function _callee4$(_context4) {
 			while (1) {
@@ -195,12 +244,12 @@ var fetchCsData = function () {
 	}));
 
 	return function fetchCsData(_x6, _x7, _x8) {
-		return _ref4.apply(this, arguments);
+		return _ref8.apply(this, arguments);
 	};
 }();
 
 var getPagedData = function () {
-	var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(url, config, responseKey) {
+	var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(url, config, responseKey) {
 		var query = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 		var skip = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
 		var limit = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 100;
@@ -243,12 +292,12 @@ var getPagedData = function () {
 	}));
 
 	return function getPagedData(_x9, _x10, _x11) {
-		return _ref5.apply(this, arguments);
+		return _ref9.apply(this, arguments);
 	};
 }();
 
 var getSyncData = function () {
-	var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(url, config, query, responseKey) {
+	var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(url, config, query, responseKey) {
 		var aggregatedResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
 		var response;
 		return _regenerator2.default.wrap(function _callee6$(_context6) {
@@ -277,7 +326,9 @@ var getSyncData = function () {
 							break;
 						}
 
-						return _context6.abrupt("return", getSyncData(url, config, query = { pagination_token: response.pagination_token }, responseKey, aggregatedResponse));
+						return _context6.abrupt("return", getSyncData(url, config, query = {
+							pagination_token: response.pagination_token
+						}, responseKey, aggregatedResponse));
 
 					case 6:
 						return _context6.abrupt("return", aggregatedResponse);
@@ -291,6 +342,6 @@ var getSyncData = function () {
 	}));
 
 	return function getSyncData(_x16, _x17, _x18, _x19) {
-		return _ref6.apply(this, arguments);
+		return _ref10.apply(this, arguments);
 	};
 }();

@@ -22,21 +22,25 @@ plugins: [
       api_key: `api_key`,
 
       // Delivery Token is a read-only credential . This is required.
-      delivery_token: `deliver_token`,
+      delivery_token: `delivery_token`,
       
       // Environment where you published your data.
       environment: `environment`,
 
-      //CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 . This is not required.
+      // Optional: CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 
       cdn: `cdn_url`,
 
+      // Optional: expediteBuild set this to either true or false
+      expediteBuild: `boolean_value`,
+
       // Optional: Specify a different prefix for types. This can be useful when using multiple instance of the plugin to connect to different stacks.
-      // type_prefix: `Contentstack`, // (default)
+      type_prefix: `Contentstack`, // (default)
     },
   },
 ]
 // Note: access_token has been replaced by delivery_token
 ```
+There is a provision to speed up the gatsby build process. To do this, you can set the value of the **expediteBuild** to **true**. So when you set the value of this parameter to true, the build process is significantly enhanced as only published assets and entries are synced parallelly. However, when you want to perform gatsby develop, ensure to set the value of **expediteBuild** to **false**.
 
 ## How to query
 
