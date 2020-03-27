@@ -27,11 +27,14 @@ plugins: [
       // Environment where you published your data.
       environment: `environment`,
 
-      //CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 . This is not required.
+      // Optional: CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 
       cdn: `cdn_url`,
 
-      //expediteBuild set this to either true or false
+      // Optional: expediteBuild set this to either true or false
       expediteBuild: `boolean_value`,
+
+      // Optional: Specify a different prefix for types. This can be useful when using multiple instance of the plugin to connect to different stacks.
+      type_prefix: `Contentstack`, // (default)
     },
   },
 ]

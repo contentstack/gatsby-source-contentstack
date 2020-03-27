@@ -1,13 +1,13 @@
 
-exports.processContentType = (content_type, createNodeId, createContentDigest) => {
-    const nodeId = createNodeId(`contentstack-contentType-${content_type.uid}`);
+exports.processContentType = (content_type, createNodeId, createContentDigest, typePrefix) => {
+    const nodeId = createNodeId(`${typePrefix.toLowerCase()}-contentType-${content_type.uid}`);
     const nodeContent = JSON.stringify(content_type);
     const nodeData = Object.assign({}, content_type, {
         id: nodeId,
         parent: null,
         children: [],
         internal: {
-            type: `ContentstackContentTypes`,
+            type: `${typePrefix}ContentTypes`,
             content: nodeContent,
             contentDigest: createContentDigest(nodeContent),
         },
@@ -15,15 +15,15 @@ exports.processContentType = (content_type, createNodeId, createContentDigest) =
     return nodeData;
 }
 
-exports.processAsset = (asset, createNodeId, createContentDigest) => {
-    const nodeId = makeAssetNodeUid(asset, createNodeId);
+exports.processAsset = (asset, createNodeId, createContentDigest, typePrefix) => {
+    const nodeId = makeAssetNodeUid(asset, createNodeId, typePrefix);
     const nodeContent = JSON.stringify(asset);
     const nodeData = Object.assign({}, asset, {
         id: nodeId,
         parent: null,
         children: [],
         internal: {
-            type: `Contentstack_assets`,
+            type: `${typePrefix}_assets`,
             content: nodeContent,
             contentDigest: createContentDigest(nodeContent),
         },
@@ -31,15 +31,15 @@ exports.processAsset = (asset, createNodeId, createContentDigest) => {
     return nodeData;
 }
 
-exports.processEntry = (content_type, entry, createNodeId, createContentDigest) => {
-    const nodeId = makeEntryNodeUid(entry, createNodeId);
+exports.processEntry = (content_type, entry, createNodeId, createContentDigest, typePrefix) => {
+    const nodeId = makeEntryNodeUid(entry, createNodeId, typePrefix);
     const nodeContent = JSON.stringify(entry);
     const nodeData = Object.assign({}, entry, {
         id: nodeId,
         parent: null,
         children: [],
         internal: {
-            type: `Contentstack_${content_type.uid}`,
+            type: `${typePrefix}_${content_type.uid}`,
             content: nodeContent,
             contentDigest: createContentDigest(nodeContent),
         },
@@ -47,37 +47,37 @@ exports.processEntry = (content_type, entry, createNodeId, createContentDigest) 
     return nodeData;
 }
 
-exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId) => {
-    let resolveEntry = Object.assign({}, entry, builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId));
+exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
+    let resolveEntry = Object.assign({}, entry, builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
     return resolveEntry;
 }
 
 
-const makeAssetNodeUid = exports.makeAssetNodeUid = (asset, createNodeId) => {
+const makeAssetNodeUid = exports.makeAssetNodeUid = (asset, createNodeId, typePrefix) => {
     let publishedLocale = asset.publish_details.locale;
-    return createNodeId(`contentstack-assets-${asset.uid}-${publishedLocale}`);
+    return createNodeId(`${typePrefix.toLowerCase()}-assets-${asset.uid}-${publishedLocale}`);
 };
 
-const makeEntryNodeUid = exports.makeEntryNodeUid = (entry, createNodeId) => {
+const makeEntryNodeUid = exports.makeEntryNodeUid = (entry, createNodeId, typePrefix) => {
     let publishedLocale = entry.publish_details.locale;
-    return createNodeId(`contentstack-entry-${entry.uid}-${publishedLocale}`);
+    return createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${publishedLocale}`);
 };
 
-const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId) => {
+const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
     let groupObj = null;
     if(field.multiple && value instanceof Array){
         groupObj = [];
         value.forEach(groupValue => {
-            groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId));
+            groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
         })
     } else {
         groupObj = {};
-        groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
+        groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
     }
     return groupObj;
 };
 
-const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId) => {
+const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
     let modularBlocksObj = [];
     if(value){
         value.map(block => {
@@ -88,7 +88,7 @@ const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNode
                     return
                 }
                 let blockObj = {};
-                blockObj[key] =  builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId);
+                blockObj[key] =  builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
                 modularBlocksObj.push(blockObj);
             });
         });
@@ -96,34 +96,34 @@ const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNode
     return modularBlocksObj;
 };
 
-const normalizeReferenceField = (value, locale, entriesNodeIds, createNodeId) => {
+const normalizeReferenceField = (value, locale, entriesNodeIds, createNodeId, typePrefix) => {
     let reference = [];
     value.forEach(entry => {
         if(typeof entry === "object" && entry.uid){
-            if(entriesNodeIds.has(createNodeId(`contentstack-entry-${entry.uid}-${locale}`))){
-                reference.push(createNodeId(`contentstack-entry-${entry.uid}-${locale}`));    
+            if(entriesNodeIds.has(createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${locale}`))){
+                reference.push(createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${locale}`));    
             }
         } else {
-            if(entriesNodeIds.has(createNodeId(`contentstack-entry-${entry}-${locale}`))){
-                reference.push(createNodeId(`contentstack-entry-${entry}-${locale}`));    
+            if(entriesNodeIds.has(createNodeId(`${typePrefix.toLowerCase()}-entry-${entry}-${locale}`))){
+                reference.push(createNodeId(`${typePrefix.toLowerCase()}-entry-${entry}-${locale}`));    
             } 
         }
     });
     return reference;
 }
 
-const normalizeFileField = (value, locale, assetsNodeIds, createNodeId) => {
+const normalizeFileField = (value, locale, assetsNodeIds, createNodeId, typePrefix) => {
     let reference = {};
     if(Array.isArray(value)){
         reference = [];
         value.forEach(assetUid => {
-            if(assetsNodeIds.has(createNodeId(`contentstack-assets-${assetUid}-${locale}`))){
-                reference.push(createNodeId(`contentstack-assets-${assetUid}-${locale}`));    
+            if(assetsNodeIds.has(createNodeId(`${typePrefix.toLowerCase()}-assets-${assetUid}-${locale}`))){
+                reference.push(createNodeId(`${typePrefix.toLowerCase()}-assets-${assetUid}-${locale}`));    
             }
         });
     } else{
-        if(assetsNodeIds.has(createNodeId(`contentstack-assets-${value}-${locale}`))){
-            reference = createNodeId(`contentstack-assets-${value}-${locale}`);
+        if(assetsNodeIds.has(createNodeId(`${typePrefix.toLowerCase()}-assets-${value}-${locale}`))){
+            reference = createNodeId(`${typePrefix.toLowerCase()}-assets-${value}-${locale}`);
         }
     }
     return reference;
@@ -136,23 +136,23 @@ const getSchemaValue = (obj, key) => {
 };
 
 
-const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId) => {
+const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
     let entryObj = {};
     schema.forEach(field => {
         const value = getSchemaValue(entry, field);
         switch (field.data_type) {
             case "reference":
-                entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId);
+                entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
                 break;
             case "file":
-                entryObj[`${field.uid}___NODE`] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId);
+                entryObj[`${field.uid}___NODE`] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
             break;    
             case "group":
             case "global_field":    
-                entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
+                entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
             break;
             case "blocks":
-                entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId);
+                entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
             break;
             default: 
             entryObj[field.uid] = value;
