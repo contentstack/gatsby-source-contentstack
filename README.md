@@ -28,7 +28,10 @@ plugins: [
       environment: `environment`,
 
       //CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 . This is not required.
-      cdn: `cdn_url`
+      cdn: `cdn_url`,
+
+      // Optional: Specify a different prefix for types. This can be useful when using multiple instance of the plugin to connect to different stacks.
+      // type_prefix: `Contentstack`, // (default)
     },
   },
 ]
