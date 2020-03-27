@@ -34,7 +34,7 @@ exports.sourceNodes = function () {
             reporter = _ref2.reporter,
             createContentDigest = _ref2.createContentDigest;
 
-        var createNode, deleteNode, touchNode, setPluginStatus, syncToken, status, _ref3, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
+        var createNode, deleteNode, touchNode, setPluginStatus, syncToken, status, typePrefix, _ref3, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
 
         return _regenerator2.default.wrap(function _callee$(_context) {
             while (1) {
@@ -44,10 +44,10 @@ exports.sourceNodes = function () {
                             var nodeId = '';
                             var node = null;
                             if (type === 'entry') {
-                                nodeId = createNodeId("contentstack-entry-" + item.uid + "-" + item.locale);
+                                nodeId = createNodeId(typePrefix.toLowerCase() + "-entry-" + item.uid + "-" + item.locale);
                             }
                             if (type === 'asset') {
-                                nodeId = createNodeId("contentstack-assets-" + item.uid + "-" + item.locale);
+                                nodeId = createNodeId(typePrefix.toLowerCase() + "-assets-" + item.uid + "-" + item.locale);
                             }
                             node = getNode(nodeId);
                             if (node) {
@@ -59,17 +59,21 @@ exports.sourceNodes = function () {
                         syncToken = void 0;
                         status = store.getState().status;
 
+                        // use a custom type prefix if specified
+
+                        typePrefix = configOptions.type_prefix || 'Contentstack';
+
 
                         if (status && status.plugins && status.plugins["gatsby-source-contentstack"]) {
-                            syncToken = status.plugins["gatsby-source-contentstack"]["contentstack-sync-token-" + configOptions.api_key];
+                            syncToken = status.plugins["gatsby-source-contentstack"][typePrefix.toLowerCase() + "-sync-token-" + configOptions.api_key];
                         }
 
                         configOptions.syncToken = syncToken || null;
 
-                        _context.next = 8;
+                        _context.next = 9;
                         return fetchData(configOptions, reporter);
 
-                    case 8:
+                    case 9:
                         _ref3 = _context.sent;
                         contentstackData = _ref3.contentstackData;
                         syncData = contentstackData.syncData.reduce(function (merged, item) {
@@ -90,22 +94,22 @@ exports.sourceNodes = function () {
 
 
                         existingNodes.forEach(function (n) {
-                            if (n.internal.type !== "ContentstackContentTypes" && n.internal.type !== "Contentstack_assets") {
+                            if (n.internal.type !== typePrefix + "ContentTypes" && n.internal.type !== typePrefix + "_assets") {
                                 entriesNodeIds.add(n.id);
                             }
-                            if (n.internal.type === "Contentstack_assets") {
+                            if (n.internal.type === typePrefix + "_assets") {
                                 assetsNodeIds.add(n.id);
                             }
                             touchNode({ nodeId: n.id });
                         });
 
                         syncData['entry_published'] && syncData['entry_published'].forEach(function (item) {
-                            var entryNodeId = makeEntryNodeUid(item.data, createNodeId);
+                            var entryNodeId = makeEntryNodeUid(item.data, createNodeId, typePrefix);
                             entriesNodeIds.add(entryNodeId);
                         });
 
                         syncData['asset_published'] && syncData['asset_published'].forEach(function (item) {
-                            var entryNodeId = makeAssetNodeUid(item.data, createNodeId);
+                            var entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
                             assetsNodeIds.add(entryNodeId);
                         });
 
@@ -115,18 +119,18 @@ exports.sourceNodes = function () {
                             var contentType = contentstackData.contentTypes.find(function (contentType) {
                                 return item.content_type_uid === contentType.uid;
                             });
-                            var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId);
-                            var entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest);
+                            var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+                            var entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
                             createNode(entryNode);
                         });
 
                         syncData['asset_published'] && syncData['asset_published'].forEach(function (item) {
-                            var assetNode = processAsset(item.data, createNodeId, createContentDigest);
+                            var assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
                             createNode(assetNode);
                         });
 
                         contentstackData.contentTypes.forEach(function (contentType) {
-                            var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest);
+                            var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
                             createNode(contentTypeNode);
                         });
 
@@ -150,7 +154,7 @@ exports.sourceNodes = function () {
 
                         syncData['content_type_deleted'] && syncData['content_type_deleted'].forEach(function (item) {
                             var sameContentTypeNodes = getNodes().filter(function (n) {
-                                return n.internal.type === "Contentstack_" + item.content_type_uid;
+                                return n.internal.type === typePrefix + "_" + item.content_type_uid;
                             });
                             sameContentTypeNodes.forEach(function (node) {
                                 return deleteNode({ node: node });
@@ -164,12 +168,12 @@ exports.sourceNodes = function () {
 
                         newState = {};
 
-                        newState["contentstack-sync-token-" + configOptions.api_key] = nextSyncToken;
+                        newState[typePrefix.toLowerCase() + "-sync-token-" + configOptions.api_key] = nextSyncToken;
                         setPluginStatus(newState);
 
                         return _context.abrupt("return");
 
-                    case 30:
+                    case 31:
                     case "end":
                         return _context.stop();
                 }

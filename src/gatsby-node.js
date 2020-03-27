@@ -101,7 +101,7 @@ exports.sourceNodes = async ({ actions, getNode, getNodes, createNodeId, store, 
     }
 
     // deleting nodes
-
+    
     syncData['entry_unpublished'] && syncData['entry_unpublished'].forEach(item => {
         deleteContentstackNodes(item.data, 'entry');
     });

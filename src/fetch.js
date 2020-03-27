@@ -11,8 +11,8 @@ module.exports = async (configOptions, reporter) => {
 
 	configOptions.cdn = configOptions.cdn ? configOptions.cdn : `https://cdn.contentstack.io/v3`;
 
-	let contentTypes
-	let syncData = {}
+	let contentTypes;
+	let syncData = {};
 
 	if (configOptions.expediteBuild) {
 		const syncEntryParams = configOptions.syncToken ? {
