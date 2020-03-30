@@ -64,7 +64,6 @@ module.exports = async (configOptions, reporter) => {
 	return {
 		contentstackData
 	};
-
 }
 
 
