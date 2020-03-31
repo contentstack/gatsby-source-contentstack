@@ -40,7 +40,9 @@ plugins: [
 ]
 // Note: access_token has been replaced by delivery_token
 ```
-There is a provision to speed up the gatsby build process. To do this, you can set the value of the **expediteBuild** to **true**. So when you set the value of this parameter to true, the build process is significantly enhanced as only published assets and entries are synced parallelly. However, when you want to perform gatsby develop, ensure to set the value of **expediteBuild** to **false**.
+There is a provision to speed up the ```gatsby build``` process. To do this, you can set the value of the **expediteBuild** to **true**. So when you set the value of this parameter to true, the build process is significantly enhanced as only published assets and entries are synced parallelly. 
+
+However, when you want to perform ```gatsby develop```, ensure to set the value of **expediteBuild** to **false**.
 
 ## How to query
 
