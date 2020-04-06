@@ -24,9 +24,9 @@ var fetch = require("node-fetch");
 var _require = require('./package.json'),
     version = _require.version;
 
-module.exports = function () {
+exports.fetchData = function () {
 	var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(configOptions, reporter) {
-		var contentTypes, syncData, syncEntryParams, syncAssetParams, _ref2, _ref3, contentTypesdata, syncEntryData, syncAssetData, data, syncParams, _ref4, _ref5, contentstackData;
+		var syncData, syncEntryParams, syncAssetParams, _ref2, _ref3, syncEntryData, syncAssetData, data, syncParams, contentstackData;
 
 		return _regenerator2.default.wrap(function _callee$(_context) {
 			while (1) {
@@ -35,13 +35,11 @@ module.exports = function () {
 						console.time("Fetch Contentstack data");
 						console.log("Starting to fetch data from Contentstack");
 
-						configOptions.cdn = configOptions.cdn ? configOptions.cdn : "https://cdn.contentstack.io/v3";
-
-						contentTypes = void 0;
+						// let contentTypes;
 						syncData = {};
 
 						if (!configOptions.expediteBuild) {
-							_context.next = 29;
+							_context.next = 25;
 							break;
 						}
 
@@ -60,62 +58,58 @@ module.exports = function () {
 						syncEntryParams['type'] = 'entry_published';
 						syncAssetParams['type'] = 'asset_published';
 
-						_context.prev = 10;
-						_context.next = 13;
-						return _promise2.default.all([fetchContentTypes(configOptions), fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
+						_context.prev = 8;
+						_context.next = 11;
+						return _promise2.default.all([fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
 
-					case 13:
+					case 11:
 						_ref2 = _context.sent;
-						_ref3 = (0, _slicedToArray3.default)(_ref2, 3);
-						contentTypesdata = _ref3[0];
-						syncEntryData = _ref3[1];
-						syncAssetData = _ref3[2];
+						_ref3 = (0, _slicedToArray3.default)(_ref2, 2);
+						syncEntryData = _ref3[0];
+						syncAssetData = _ref3[1];
 
-						contentTypes = contentTypesdata;
+						// contentTypes = contentTypesdata
 						data = syncEntryData.data.concat(syncAssetData.data);
 
 						syncData.data = data;
 						syncData.token = null;
-						_context.next = 27;
+						_context.next = 23;
 						break;
 
-					case 24:
-						_context.prev = 24;
-						_context.t0 = _context["catch"](10);
+					case 20:
+						_context.prev = 20;
+						_context.t0 = _context["catch"](8);
 
 						reporter.panic("Fetching contentstack data failed", _context.t0);
 
-					case 27:
-						_context.next = 42;
+					case 23:
+						_context.next = 35;
 						break;
 
-					case 29:
+					case 25:
 						syncParams = configOptions.syncToken ? {
 							sync_token: configOptions.syncToken
 						} : {
 							init: true
 						};
-						_context.prev = 30;
-						_context.next = 33;
-						return _promise2.default.all([fetchContentTypes(configOptions), fetchSyncData(syncParams, configOptions)]);
+						_context.prev = 26;
+						_context.next = 29;
+						return fetchSyncData(syncParams, configOptions);
 
-					case 33:
-						_ref4 = _context.sent;
-						_ref5 = (0, _slicedToArray3.default)(_ref4, 2);
-						contentTypes = _ref5[0];
-						syncData = _ref5[1];
-						_context.next = 42;
+					case 29:
+						syncData = _context.sent;
+						_context.next = 35;
 						break;
 
-					case 39:
-						_context.prev = 39;
-						_context.t1 = _context["catch"](30);
+					case 32:
+						_context.prev = 32;
+						_context.t1 = _context["catch"](26);
 
 						reporter.panic("Fetching contentstack data failed", _context.t1);
 
-					case 42:
+					case 35:
 						contentstackData = {
-							contentTypes: contentTypes,
+							// contentTypes: contentTypes,
 							syncData: syncData.data,
 							sync_token: syncData.sync_token
 						};
@@ -127,12 +121,12 @@ module.exports = function () {
 							contentstackData: contentstackData
 						});
 
-					case 45:
+					case 38:
 					case "end":
 						return _context.stop();
 				}
 			}
-		}, _callee, undefined, [[10, 24], [30, 39]]);
+		}, _callee, undefined, [[8, 20], [26, 32]]);
 	}));
 
 	return function (_x, _x2) {
@@ -140,26 +134,28 @@ module.exports = function () {
 	};
 }();
 
-var fetchContentTypes = function () {
-	var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(config) {
+exports.fetchContentTypes = function () {
+	var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(config) {
 		var url, responseKey, query, allContentTypes;
 		return _regenerator2.default.wrap(function _callee2$(_context2) {
 			while (1) {
 				switch (_context2.prev = _context2.next) {
 					case 0:
+						config.cdn = config.cdn ? config.cdn : "https://cdn.contentstack.io/v3";
+
 						url = "content_types";
 						responseKey = "content_types";
 						query = {
 							"include_global_field_schema": true
 						};
-						_context2.next = 5;
+						_context2.next = 6;
 						return getPagedData(url, config, responseKey, query);
 
-					case 5:
+					case 6:
 						allContentTypes = _context2.sent;
 						return _context2.abrupt("return", allContentTypes);
 
-					case 7:
+					case 8:
 					case "end":
 						return _context2.stop();
 				}
@@ -167,13 +163,13 @@ var fetchContentTypes = function () {
 		}, _callee2, undefined);
 	}));
 
-	return function fetchContentTypes(_x3) {
-		return _ref6.apply(this, arguments);
+	return function (_x3) {
+		return _ref4.apply(this, arguments);
 	};
 }();
 
 var fetchSyncData = function () {
-	var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(query, config) {
+	var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(query, config) {
 		var url, response;
 		return _regenerator2.default.wrap(function _callee3$(_context3) {
 			while (1) {
@@ -196,12 +192,12 @@ var fetchSyncData = function () {
 	}));
 
 	return function fetchSyncData(_x4, _x5) {
-		return _ref7.apply(this, arguments);
+		return _ref5.apply(this, arguments);
 	};
 }();
 
 var fetchCsData = function () {
-	var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(url, config, query) {
+	var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(url, config, query) {
 		var queryParams, apiUrl, option;
 		return _regenerator2.default.wrap(function _callee4$(_context4) {
 			while (1) {
@@ -244,12 +240,12 @@ var fetchCsData = function () {
 	}));
 
 	return function fetchCsData(_x6, _x7, _x8) {
-		return _ref8.apply(this, arguments);
+		return _ref6.apply(this, arguments);
 	};
 }();
 
 var getPagedData = function () {
-	var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(url, config, responseKey) {
+	var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(url, config, responseKey) {
 		var query = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 		var skip = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
 		var limit = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 100;
@@ -292,12 +288,12 @@ var getPagedData = function () {
 	}));
 
 	return function getPagedData(_x9, _x10, _x11) {
-		return _ref9.apply(this, arguments);
+		return _ref7.apply(this, arguments);
 	};
 }();
 
 var getSyncData = function () {
-	var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(url, config, query, responseKey) {
+	var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(url, config, query, responseKey) {
 		var aggregatedResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
 		var response;
 		return _regenerator2.default.wrap(function _callee6$(_context6) {
@@ -342,6 +338,6 @@ var getSyncData = function () {
 	}));
 
 	return function getSyncData(_x16, _x17, _x18, _x19) {
-		return _ref10.apply(this, arguments);
+		return _ref8.apply(this, arguments);
 	};
 }();

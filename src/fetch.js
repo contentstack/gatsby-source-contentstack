@@ -5,13 +5,12 @@ const {
 } = require('./package.json');
 
 
-module.exports = async (configOptions, reporter) => {
+exports.fetchData = async (configOptions, reporter) => {
 	console.time(`Fetch Contentstack data`);
 	console.log(`Starting to fetch data from Contentstack`);
 
-	configOptions.cdn = configOptions.cdn ? configOptions.cdn : `https://cdn.contentstack.io/v3`;
 
-	let contentTypes;
+	// let contentTypes;
 	let syncData = {};
 
 	if (configOptions.expediteBuild) {
@@ -31,8 +30,8 @@ module.exports = async (configOptions, reporter) => {
 		syncAssetParams['type'] = 'asset_published';
 
 		try {
-			let [contentTypesdata, syncEntryData, syncAssetData] = await Promise.all([fetchContentTypes(configOptions), fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
-			contentTypes = contentTypesdata
+			let [syncEntryData, syncAssetData] = await Promise.all([fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
+			// contentTypes = contentTypesdata
 			let data = syncEntryData.data.concat(syncAssetData.data)
 			syncData.data = data
 			syncData.token = null
@@ -47,14 +46,14 @@ module.exports = async (configOptions, reporter) => {
 		};
 
 		try {
-			[contentTypes, syncData] = await Promise.all([fetchContentTypes(configOptions), fetchSyncData(syncParams, configOptions)]);
+			syncData = await fetchSyncData(syncParams, configOptions);
 		} catch (error) {
 			reporter.panic(`Fetching contentstack data failed`, error);
 		}
 	}
 
 	const contentstackData = {
-		contentTypes: contentTypes,
+		// contentTypes: contentTypes,
 		syncData: syncData.data,
 		sync_token: syncData.sync_token
 	};
@@ -67,7 +66,9 @@ module.exports = async (configOptions, reporter) => {
 }
 
 
-const fetchContentTypes = async (config) => {
+exports.fetchContentTypes = async (config) => {
+	config.cdn = config.cdn ? config.cdn : `https://cdn.contentstack.io/v3`;
+
 	let url = `content_types`;
 	let responseKey = `content_types`;
 	let query = {

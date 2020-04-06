@@ -7,9 +7,37 @@ const {
   makeAssetNodeUid
 } = require("./normalize");
 
-const fetchData = require("./fetch");
+const { fetchData , fetchContentTypes} = require("./fetch");
 
+let contentTypes = [];
 
+exports.createSchemaCustomization = async ({ actions, schema }, configOptions) => {
+  try {
+    contentTypes = await fetchContentTypes(configOptions);
+  } catch(error) {
+    console.error('Contentsatck fetch content type failed!');
+  }
+  console.log('called', contentTypes.length, '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+  const typePrefix = configOptions.type_prefix || 'Contentstack'
+  const { createTypes } = actions
+  contentTypes.forEach((contentType) => {
+    let type = `${typePrefix}_${contentType.uid}`
+    console.log(type, 'type>>')
+    buildCustomSchema(contentType);
+  });
+  const typeDefs = [
+    schema.buildObjectType({
+      name: "Contentstack_test1234",
+      fields: {
+        title: "String!",
+        url: "String!",
+        number: "Int",
+      },
+      interfaces: ["Node"],
+    }),
+  ]
+  createTypes(typeDefs)
+}
 exports.sourceNodes = async ({
   actions,
   getNode,
@@ -27,7 +55,7 @@ exports.sourceNodes = async ({
   } = actions;
   let syncToken;
   const status = store.getState().status;
-
+  console.log('sourcenodes called>>>>>>>>>>>>>>>>>>>>>>>>')
   // use a custom type prefix if specified
   const typePrefix = configOptions.type_prefix || 'Contentstack'
 
@@ -40,7 +68,8 @@ exports.sourceNodes = async ({
   const {
     contentstackData
   } = await fetchData(configOptions, reporter);
-
+  contentstackData.contentTypes = contentTypes
+  console.log(contentstackData.contentTypes.length, 'length');
   const syncData = contentstackData.syncData.reduce((merged, item) => {
     if (!merged[item.type]) {
       merged[item.type] = [];
@@ -157,3 +186,88 @@ exports.sourceNodes = async ({
   return
 
 };
+
+
+function buildCustomSchema(array){
+  let fields = {}
+  array.schema.forEach(field => {
+    console.log(field.mandatory, 'mandatory>>>>>>>>')
+    switch(field.data_type){
+      case 'text':
+        if(field.mandatory)
+          fields[field.uid] = 'String!';
+        else
+          fields[field.uid] = 'String';
+        break;
+      case 'isodate':
+        if(field.mandatory)
+          fields[field.uid] = 'Date!';
+        else
+          fields[field.uid] = 'Date';
+        break;
+      case 'boolean':
+        if(field.mandatory)
+          fields[field.uid] = 'Boolean!';
+        else
+          fields[field.uid] = 'Boolean';
+        break;
+      case 'number':
+        if(field.mandatory)
+          fields[field.uid] = 'Int!';
+        else
+          fields[field.uid] = 'Int';
+        break;
+      case 'link':
+        if(field.mandatory) {
+          if(field.multiple) {
+            console.log(field.uid, 'uid in if man')
+
+            fields[field.uid] = [{
+              'title': 'String!',
+              'href': 'String!'
+            }]
+          } else {
+            console.log(field.uid, 'uid in else man')
+            
+            fields[field.uid] = {
+              'title': 'String!',
+              'href': 'String!'
+            }
+          }
+        } else {
+          if(field.multiple) {
+            console.log(field.uid, 'uid in if')
+            fields[field.uid] = [{
+              'title': 'String',
+              'href': 'String'
+            }]
+          } else {
+            console.log(field.uid, 'uid in else')
+            fields[field.uid] = {
+              'title': 'String',
+              'href': 'String'
+            }
+          }
+        }
+        break;
+      case 'group':
+      case 'global_field':
+        if(field.mandatory){
+          fields[field.uid] = `${buildCustomSchema(field)}!`
+        } else {
+          console.log(field.uid, 'group field>>>>>>>>>>>>>>>>>>>>>>>>')
+          fields[field.uid] = buildCustomSchema(field)
+        }
+        break;
+      case 'blocks':
+        if(field.mandatory){
+          fields[field.uid] = `[${buildCustomSchema(field.blocks)}]!`
+        } else {
+          fields[field.uid] = buildCustomSchema(field.blocks)
+        }
+        break;
+    }
+  })
+  console.log(fields, 'returned>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.')
+  return fields
+}
