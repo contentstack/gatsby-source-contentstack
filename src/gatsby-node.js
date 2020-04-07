@@ -21,22 +21,26 @@ exports.createSchemaCustomization = async ({ actions, schema }, configOptions) =
   const typePrefix = configOptions.type_prefix || 'Contentstack'
   const { createTypes } = actions
   contentTypes.forEach((contentType) => {
-    let type = `${typePrefix}_${contentType.uid}`
-    console.log(type, 'type>>')
-    buildCustomSchema(contentType);
+    let name = `${typePrefix}_${contentType.uid}`
+    console.log(name, 'type>>')
+    let res = buildCustomSchema(contentType, []);
+    // console.log(res.types, 'custo>>>>>>>>>>>>>>>>>>>>>')
+    const typeDefs = [`type linktype{
+      title: String
+      href: String
+    }`,
+    
+      schema.buildObjectType({
+        name,
+        fields: res.fields,
+        interfaces: ["Node"],
+      }),
+    ]
+    res.types = res.types.concat(typeDefs)
+    // console.log(JSON.stringify(res.types, null, 2), 'ytpes')
+    createTypes(res.types)
   });
-  const typeDefs = [
-    schema.buildObjectType({
-      name: "Contentstack_test1234",
-      fields: {
-        title: "String!",
-        url: "String!",
-        number: "Int",
-      },
-      interfaces: ["Node"],
-    }),
-  ]
-  createTypes(typeDefs)
+  
 }
 exports.sourceNodes = async ({
   actions,
@@ -188,7 +192,7 @@ exports.sourceNodes = async ({
 };
 
 
-function buildCustomSchema(array){
+function buildCustomSchema(array, types){
   let fields = {}
   array.schema.forEach(field => {
     console.log(field.mandatory, 'mandatory>>>>>>>>')
@@ -222,41 +226,38 @@ function buildCustomSchema(array){
           if(field.multiple) {
             console.log(field.uid, 'uid in if man')
 
-            fields[field.uid] = [{
-              'title': 'String!',
-              'href': 'String!'
-            }]
+            fields[field.uid] = `[linktype]`
           } else {
             console.log(field.uid, 'uid in else man')
             
-            fields[field.uid] = {
-              'title': 'String!',
-              'href': 'String!'
-            }
+            fields[field.uid] = `linktype`
           }
         } else {
           if(field.multiple) {
             console.log(field.uid, 'uid in if')
-            fields[field.uid] = [{
-              'title': 'String',
-              'href': 'String'
-            }]
+            fields[field.uid] = `[linktype]`
           } else {
             console.log(field.uid, 'uid in else')
-            fields[field.uid] = {
-              'title': 'String',
-              'href': 'String'
-            }
+            fields[field.uid] = `linktype`
           }
         }
         break;
       case 'group':
       case 'global_field':
         if(field.mandatory){
-          fields[field.uid] = `${buildCustomSchema(field)}!`
+          let groupFields = buildCustomSchema(field, types).fields
+          if(Object.keys(groupFields).length > 0 ) {
+          let type = `type type_${field.uid} ${JSON.stringify(groupFields).replace(/"/g, '')}`
+          types.push(type);
+          fields[field.uid] = `type_${field.uid}!`
+          }
         } else {
-          console.log(field.uid, 'group field>>>>>>>>>>>>>>>>>>>>>>>>')
-          fields[field.uid] = buildCustomSchema(field)
+          let groupFields = buildCustomSchema(field, types).fields
+          if(Object.keys(groupFields).length > 0 ) {
+          let type = `type type_${field.uid} ${JSON.stringify(groupFields).replace(/"/g, '')}`
+          types.push(type);
+          fields[field.uid] = `type_${field.uid}`
+          }
         }
         break;
       case 'blocks':
@@ -268,6 +269,6 @@ function buildCustomSchema(array){
         break;
     }
   })
-  console.log(fields, 'returned>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.')
-  return fields
+  console.log(types, 'returned>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.')
+  return {fields, types}
 }

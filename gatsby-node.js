@@ -1,5 +1,13 @@
 "use strict";
 
+var _stringify = require("babel-runtime/core-js/json/stringify");
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _keys = require("babel-runtime/core-js/object/keys");
+
+var _keys2 = _interopRequireDefault(_keys);
+
 var _set = require("babel-runtime/core-js/set");
 
 var _set2 = _interopRequireDefault(_set);
@@ -32,7 +40,7 @@ exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
     var actions = _ref2.actions,
         schema = _ref2.schema;
-    var typePrefix, createTypes, typeDefs;
+    var typePrefix, createTypes;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -58,23 +66,21 @@ exports.createSchemaCustomization = function () {
             createTypes = actions.createTypes;
 
             contentTypes.forEach(function (contentType) {
-              var type = typePrefix + "_" + contentType.uid;
-              console.log(type, 'type>>');
-              buildCustomSchema(contentType);
+              var name = typePrefix + "_" + contentType.uid;
+              console.log(name, 'type>>');
+              var res = buildCustomSchema(contentType, []);
+              // console.log(res.types, 'custo>>>>>>>>>>>>>>>>>>>>>')
+              var typeDefs = ["type linktype{\n      title: String\n      href: String\n    }", schema.buildObjectType({
+                name: name,
+                fields: res.fields,
+                interfaces: ["Node"]
+              })];
+              res.types = res.types.concat(typeDefs);
+              // console.log(JSON.stringify(res.types, null, 2), 'ytpes')
+              createTypes(res.types);
             });
-            typeDefs = [schema.buildObjectType({
-              name: "Contentstack_test1234",
-              fields: {
-                title: "String!",
-                url: "String!",
-                number: "Int"
-              },
-              interfaces: ["Node"]
-            })];
 
-            createTypes(typeDefs);
-
-          case 15:
+          case 13:
           case "end":
             return _context.stop();
         }
@@ -257,7 +263,7 @@ exports.sourceNodes = function () {
   };
 }();
 
-function buildCustomSchema(array) {
+function buildCustomSchema(array, types) {
   var fields = {};
   array.schema.forEach(function (field) {
     console.log(field.mandatory, 'mandatory>>>>>>>>');
@@ -279,41 +285,38 @@ function buildCustomSchema(array) {
           if (field.multiple) {
             console.log(field.uid, 'uid in if man');
 
-            fields[field.uid] = [{
-              'title': 'String!',
-              'href': 'String!'
-            }];
+            fields[field.uid] = "[linktype]";
           } else {
             console.log(field.uid, 'uid in else man');
 
-            fields[field.uid] = {
-              'title': 'String!',
-              'href': 'String!'
-            };
+            fields[field.uid] = "linktype";
           }
         } else {
           if (field.multiple) {
             console.log(field.uid, 'uid in if');
-            fields[field.uid] = [{
-              'title': 'String',
-              'href': 'String'
-            }];
+            fields[field.uid] = "[linktype]";
           } else {
             console.log(field.uid, 'uid in else');
-            fields[field.uid] = {
-              'title': 'String',
-              'href': 'String'
-            };
+            fields[field.uid] = "linktype";
           }
         }
         break;
       case 'group':
       case 'global_field':
         if (field.mandatory) {
-          fields[field.uid] = buildCustomSchema(field) + "!";
+          var groupFields = buildCustomSchema(field, types).fields;
+          if ((0, _keys2.default)(groupFields).length > 0) {
+            var type = "type type_" + field.uid + " " + (0, _stringify2.default)(groupFields).replace(/"/g, '');
+            types.push(type);
+            fields[field.uid] = "type_" + field.uid + "!";
+          }
         } else {
-          console.log(field.uid, 'group field>>>>>>>>>>>>>>>>>>>>>>>>');
-          fields[field.uid] = buildCustomSchema(field);
+          var _groupFields = buildCustomSchema(field, types).fields;
+          if ((0, _keys2.default)(_groupFields).length > 0) {
+            var _type = "type type_" + field.uid + " " + (0, _stringify2.default)(_groupFields).replace(/"/g, '');
+            types.push(_type);
+            fields[field.uid] = "type_" + field.uid;
+          }
         }
         break;
       case 'blocks':
@@ -325,6 +328,6 @@ function buildCustomSchema(array) {
         break;
     }
   });
-  console.log(fields, 'returned>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.');
-  return fields;
+  console.log(types, 'returned>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.');
+  return { fields: fields, types: types };
 }
