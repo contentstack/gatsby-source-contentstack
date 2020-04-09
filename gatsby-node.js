@@ -68,15 +68,19 @@ exports.createSchemaCustomization = function () {
             contentTypes.forEach(function (contentType) {
               var name = typePrefix + "_" + contentType.uid;
               console.log(name, 'type>>');
-              var res = buildCustomSchema(contentType, []);
-              // console.log(res.types, 'custo>>>>>>>>>>>>>>>>>>>>>')
-              var typeDefs = ["type linktype{\n      title: String\n      href: String\n    }", schema.buildObjectType({
+              var res = buildCustomSchema(contentType, name);
+              console.log(res.types, '@@@@@@@@@@@@@@@@@@@');
+              var typeDefs = ["type linktype{\n      title: String\n      href: String\n      }", schema.buildObjectType({
                 name: name,
                 fields: res.fields,
                 interfaces: ["Node"]
               })];
+              if (res.references) {
+                res.references.forEach(function (reference) {
+                  typeDefs.concat(reference);
+                });
+              }
               res.types = res.types.concat(typeDefs);
-              // console.log(JSON.stringify(res.types, null, 2), 'ytpes')
               createTypes(res.types);
             });
 
@@ -263,10 +267,12 @@ exports.sourceNodes = function () {
   };
 }();
 
-function buildCustomSchema(array, types) {
+var types = [];
+function buildCustomSchema(array, parent) {
   var fields = {};
+  var references = [];
+  // console.log(array.schema, 'aaray >>>>>>>>>>>>')
   array.schema.forEach(function (field) {
-    console.log(field.mandatory, 'mandatory>>>>>>>>');
     switch (field.data_type) {
       case 'text':
         if (field.mandatory) fields[field.uid] = 'String!';else fields[field.uid] = 'String';
@@ -283,20 +289,14 @@ function buildCustomSchema(array, types) {
       case 'link':
         if (field.mandatory) {
           if (field.multiple) {
-            console.log(field.uid, 'uid in if man');
-
             fields[field.uid] = "[linktype]";
           } else {
-            console.log(field.uid, 'uid in else man');
-
             fields[field.uid] = "linktype";
           }
         } else {
           if (field.multiple) {
-            console.log(field.uid, 'uid in if');
             fields[field.uid] = "[linktype]";
           } else {
-            console.log(field.uid, 'uid in else');
             fields[field.uid] = "linktype";
           }
         }
@@ -304,30 +304,102 @@ function buildCustomSchema(array, types) {
       case 'group':
       case 'global_field':
         if (field.mandatory) {
-          var groupFields = buildCustomSchema(field, types).fields;
+          parent = parent.concat('_', field.uid);
+          var groupFields = buildCustomSchema(field, parent).fields;
           if ((0, _keys2.default)(groupFields).length > 0) {
-            var type = "type type_" + field.uid + " " + (0, _stringify2.default)(groupFields).replace(/"/g, '');
+            var type = "type " + parent + " " + (0, _stringify2.default)(groupFields).replace(/"/g, '');
             types.push(type);
-            fields[field.uid] = "type_" + field.uid + "!";
+            fields[field.uid] = parent + "!";
           }
         } else {
-          var _groupFields = buildCustomSchema(field, types).fields;
+          parent = parent.concat('_', field.uid);
+          var _groupFields = buildCustomSchema(field, parent).fields;
           if ((0, _keys2.default)(_groupFields).length > 0) {
-            var _type = "type type_" + field.uid + " " + (0, _stringify2.default)(_groupFields).replace(/"/g, '');
+            var _type = "type " + parent + " " + (0, _stringify2.default)(_groupFields).replace(/"/g, '');
             types.push(_type);
-            fields[field.uid] = "type_" + field.uid;
+            fields[field.uid] = "" + parent;
           }
         }
         break;
       case 'blocks':
-        if (field.mandatory) {
-          fields[field.uid] = "[" + buildCustomSchema(field.blocks) + "]!";
-        } else {
-          fields[field.uid] = buildCustomSchema(field.blocks);
-        }
+        parent = parent.concat('_', field.uid);
+        // if(field.mandatory){
+
+        var _buildBlockCustomSche = buildBlockCustomSchema(field.blocks, parent),
+            blockType = _buildBlockCustomSche.blockType,
+            blockFields = _buildBlockCustomSche.blockFields;
+
+        console.log('blockFields>>>>>>>>>>>>>>>>>>', field.uid, (0, _stringify2.default)(blockFields, null, 2));
+        types.push(blockType);
+        fields[field.uid] = "" + parent;
+
+        // } else {
+        // fields[field.uid] = buildBlockCustomSchema(field.blocks, types, parent)
+        // }
         break;
+      // case 'reference':
+
+      // references.push(`schema.buildUnionType({
+      //   name: "abtesting_contact_usUnion",
+      //   types: ['Contentstack_abtesting', 'Contentstack_contact_us' ],
+      // })`)
+      // fields[field] = 'Contentstack_abtestingContentstack_contact_usUnion'
+      // let unionType = `union `
+      // if(typeof field.reference_to === 'string'){
+      //   let type = `type cs_${field.uid} { title: String!}`
+      //   // types.push(type)
+      // } else {
+      // field.reference_to.forEach(reference => {
+      //   // unionType = unionType.concat(reference)
+      //   let type = `type Contentstack_${reference} { title: String!}`
+      //   types.push(type)
+      // })
+      // let unionType = `union Contentstack_abtesting_Contentstack_contact_usUnion = Contentstack_abtesting | Contentstack_contact_us`
+      // types.push(unionType)
+      // }
+      // fields[field] = { 
+      // type: "[Contentstack_abtestingContentstack_contact_usUnion]", 
+      // resolve(parent, args, context, info) {
+      //   let field = parent[field]
+      //   return context.nodeModel.getNodesByIds({
+      //     ids: `${parent[field]}___NODE`,
+      //   });
+      // }
+      // }
+      // console.log(field.reference_to ,'reference_to>>>>>>>>>>>>>>>')
+      // if(field.mandatory) {
+      //   fields[field] = `[${unionType}]!`
+      // } else {
+      //   fields[field] = `[${unionType}]`
+      // }
+      // break;
     }
   });
-  console.log(types, 'returned>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.');
-  return { fields: fields, types: types };
+  // console.log(types, array.uid, 'returned>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.')
+  return { fields: fields, types: types, references: references };
+}
+
+function buildBlockCustomSchema(blocks, parent) {
+  var blockFields = {};
+  var blockType = "type " + parent + " {";
+  blocks.forEach(function (block) {
+    var newparent = parent.concat(block.uid);
+    blockType = blockType.concat(block.uid + " : " + newparent + " ");
+
+    var _buildCustomSchema = buildCustomSchema(block, newparent),
+        fields = _buildCustomSchema.fields;
+
+    // console.log(parent, 'inside')
+
+
+    if ((0, _keys2.default)(fields).length > 0) {
+      var type = "type " + newparent + " " + (0, _stringify2.default)(fields).replace(/"/g, '');
+      types.push(type);
+      // console.log(type, 'fields>>>>>>>@@@@@@@@@@@@@@@@@@@@@')
+      blockFields[block.uid] = "" + newparent;
+    }
+  });
+  blockType = blockType.concat('}');
+  // console.log(blockType, 'blocktype')
+  return { blockType: blockType, blockFields: blockFields };
 }
