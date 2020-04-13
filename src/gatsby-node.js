@@ -4,49 +4,69 @@ const {
   processEntry,
   processAsset,
   makeEntryNodeUid,
-  makeAssetNodeUid
+  makeAssetNodeUid,
+  buildCustomSchema,
 } = require("./normalize");
 
-const { fetchData , fetchContentTypes} = require("./fetch");
+const {
+  fetchData,
+  fetchContentTypes
+} = require("./fetch");
 
 let contentTypes = [];
 
-exports.createSchemaCustomization = async ({ actions, schema }, configOptions) => {
+exports.createSchemaCustomization = async ({
+  actions,
+  schema
+}, configOptions) => {
   try {
     contentTypes = await fetchContentTypes(configOptions);
-  } catch(error) {
+  } catch (error) {
     console.error('Contentsatck fetch content type failed!');
   }
-  console.log('called', contentTypes.length, '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
   const typePrefix = configOptions.type_prefix || 'Contentstack'
-  const { createTypes } = actions
+  const {
+    createTypes
+  } = actions
   contentTypes.forEach((contentType) => {
     let name = `${typePrefix}_${contentType.uid}`
-    console.log(name, 'type>>')
-    let res = buildCustomSchema(contentType, name);
-    console.log(res.types, '@@@@@@@@@@@@@@@@@@@')
-    let typeDefs= [
-      `type linktype{
-      title: String
-      href: String
-      }`,
-    
-      schema.buildObjectType({
-        name,
-        fields: res.fields,
-        interfaces: ["Node"],
-      }),
-    ]
-    if(res.references){
-      res.references.forEach(reference=>{
-        typeDefs.concat(reference)
-      })
+    let result = buildCustomSchema(contentType.schema, [], name, typePrefix);
+    if (Object.keys(result.references).length === 0) {
+      let typeDefs = [
+        `type linktype{
+        title: String
+        href: String
+        }`,
+        schema.buildObjectType({
+          name,
+          fields: result.fields,
+          interfaces: ["Node"],
+        }),
+      ]
+      result.types = result.types.concat(typeDefs)
+      createTypes(result.types)
+    } else {
+      let typeDefs = [
+        `type linktype{
+        title: String
+        href: String
+        }`,
+        schema.buildUnionType({
+          name: result.references.name,
+          types: result.references.unions
+        }),
+        schema.buildObjectType({
+          name,
+          fields: result.fields,
+          interfaces: ["Node"],
+        }),
+      ]
+      result.types = result.types.concat(typeDefs)
+      createTypes(result.types)
     }
-    res.types = res.types.concat(typeDefs)
-    createTypes(res.types)
   });
-  
 }
+
 exports.sourceNodes = async ({
   actions,
   getNode,
@@ -64,7 +84,6 @@ exports.sourceNodes = async ({
   } = actions;
   let syncToken;
   const status = store.getState().status;
-  console.log('sourcenodes called>>>>>>>>>>>>>>>>>>>>>>>>')
   // use a custom type prefix if specified
   const typePrefix = configOptions.type_prefix || 'Contentstack'
 
@@ -78,7 +97,6 @@ exports.sourceNodes = async ({
     contentstackData
   } = await fetchData(configOptions, reporter);
   contentstackData.contentTypes = contentTypes
-  console.log(contentstackData.contentTypes.length, 'length');
   const syncData = contentstackData.syncData.reduce((merged, item) => {
     if (!merged[item.type]) {
       merged[item.type] = [];
@@ -87,7 +105,7 @@ exports.sourceNodes = async ({
     return merged;
   }, {});
 
-  // for checking if the reference node is present or not
+  // for checking if the reference node is presultent or not
   let entriesNodeIds = new Set();
   let assetsNodeIds = new Set();
 
@@ -195,144 +213,3 @@ exports.sourceNodes = async ({
   return
 
 };
-
-let types = []
-function buildCustomSchema(array, parent){
-  let fields = {}
-  let references = []
-  // console.log(array.schema, 'aaray >>>>>>>>>>>>')
-  array.schema.forEach(field => {
-    switch(field.data_type){
-      case 'text':
-        if(field.mandatory)
-          fields[field.uid] = 'String!';
-        else
-          fields[field.uid] = 'String';
-        break;
-      case 'isodate':
-        if(field.mandatory)
-          fields[field.uid] = 'Date!';
-        else
-          fields[field.uid] = 'Date';
-        break;
-      case 'boolean':
-        if(field.mandatory)
-          fields[field.uid] = 'Boolean!';
-        else
-          fields[field.uid] = 'Boolean';
-        break;
-      case 'number':
-        if(field.mandatory)
-          fields[field.uid] = 'Int!';
-        else
-          fields[field.uid] = 'Int';
-        break;
-      case 'link':
-        if(field.mandatory) {
-          if(field.multiple) {
-            fields[field.uid] = `[linktype]`
-          } else {
-            fields[field.uid] = `linktype`
-          }
-        } else {
-          if(field.multiple) {
-            fields[field.uid] = `[linktype]`
-          } else {
-            fields[field.uid] = `linktype`
-          }
-        }
-        break;
-      case 'group':
-      case 'global_field':
-        if(field.mandatory){
-          parent = parent.concat('_',field.uid)
-          let groupFields = buildCustomSchema(field, parent).fields
-          if(Object.keys(groupFields).length > 0 ) {
-          let type = `type ${parent} ${JSON.stringify(groupFields).replace(/"/g, '')}`
-          types.push(type);
-          fields[field.uid] = `${parent}!`
-          }
-        } else {
-          parent = parent.concat('_',field.uid)
-          let groupFields = buildCustomSchema(field, parent).fields
-          if(Object.keys(groupFields).length > 0 ) {
-          let type = `type ${parent} ${JSON.stringify(groupFields).replace(/"/g, '')}`
-          types.push(type);
-          fields[field.uid] = `${parent}`
-          }
-        }
-        break;
-      case 'blocks':
-        parent = parent.concat('_', field.uid)
-        // if(field.mandatory){
-          let {blockType, blockFields} = buildBlockCustomSchema(field.blocks, parent)
-          console.log('blockFields>>>>>>>>>>>>>>>>>>', field.uid, JSON.stringify(blockFields, null, 2))
-          types.push(blockType)
-          fields[field.uid] = `${parent}`
-
-       // } else {
-         // fields[field.uid] = buildBlockCustomSchema(field.blocks, types, parent)
-        // }
-        break;
-      // case 'reference':
-
-        // references.push(`schema.buildUnionType({
-        //   name: "abtesting_contact_usUnion",
-        //   types: ['Contentstack_abtesting', 'Contentstack_contact_us' ],
-        // })`)
-        // fields[field] = 'Contentstack_abtestingContentstack_contact_usUnion'
-        // let unionType = `union `
-        // if(typeof field.reference_to === 'string'){
-        //   let type = `type cs_${field.uid} { title: String!}`
-        //   // types.push(type)
-        // } else {
-          // field.reference_to.forEach(reference => {
-          //   // unionType = unionType.concat(reference)
-          //   let type = `type Contentstack_${reference} { title: String!}`
-          //   types.push(type)
-          // })
-          // let unionType = `union Contentstack_abtesting_Contentstack_contact_usUnion = Contentstack_abtesting | Contentstack_contact_us`
-          // types.push(unionType)
-        // }
-       // fields[field] = { 
-         // type: "[Contentstack_abtestingContentstack_contact_usUnion]", 
-          // resolve(parent, args, context, info) {
-          //   let field = parent[field]
-          //   return context.nodeModel.getNodesByIds({
-          //     ids: `${parent[field]}___NODE`,
-          //   });
-          // }
-        // }
-        // console.log(field.reference_to ,'reference_to>>>>>>>>>>>>>>>')
-        // if(field.mandatory) {
-        //   fields[field] = `[${unionType}]!`
-        // } else {
-        //   fields[field] = `[${unionType}]`
-        // }
-      // break;
-    }
-  })
-  // console.log(types, array.uid, 'returned>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.')
-  return {fields, types, references}
-}
-
-function buildBlockCustomSchema(blocks, parent){
-  let blockFields = {}
-  let blockType = `type ${parent} {`
-  blocks.forEach(block => { 
-    let newparent = parent.concat(block.uid)
-    blockType = blockType.concat(`${block.uid} : ${newparent} `)
-    let { fields } = buildCustomSchema(block, newparent)
-
-    // console.log(parent, 'inside')
-      if(Object.keys(fields).length > 0) {
-      let type = `type ${newparent} ${JSON.stringify(fields).replace(/"/g, '')}`
-      types.push(type)
-      // console.log(type, 'fields>>>>>>>@@@@@@@@@@@@@@@@@@@@@')
-      blockFields[block.uid] = `${newparent}`
-    }
-  })
-  blockType = blockType.concat('}')
-  // console.log(blockType, 'blocktype')
-  return {blockType, blockFields}
-}

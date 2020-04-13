@@ -162,3 +162,140 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
   });
   return entryObj;
 }
+
+// let types = []
+const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, prefix) => {
+  let fields = {}
+  let references = {}
+  types = types ? types : []
+  schema.forEach(field => {
+    switch (field.data_type) {
+      case 'text':
+        if (field.mandatory)
+          fields[field.uid] = 'String!';
+        else
+          fields[field.uid] = 'String';
+        break;
+      case 'isodate':
+        if (field.mandatory)
+          fields[field.uid] = 'Date!';
+        else
+          fields[field.uid] = 'Date';
+        break;
+      case 'boolean':
+        if (field.mandatory)
+          fields[field.uid] = 'Boolean!';
+        else
+          fields[field.uid] = 'Boolean';
+        break;
+      case 'number':
+        if (field.mandatory)
+          fields[field.uid] = 'Int!';
+        else
+          fields[field.uid] = 'Int';
+        break;
+      case 'link':
+        if (field.mandatory) {
+          if (field.multiple) {
+            fields[field.uid] = `[linktype]`
+          } else {
+            fields[field.uid] = `linktype`
+          }
+        } else {
+          if (field.multiple) {
+            fields[field.uid] = `[linktype]`
+          } else {
+            fields[field.uid] = `linktype`
+          }
+        }
+        break;
+      case 'group':
+      case 'global_field':
+        if (field.mandatory) {
+          let newparent = parent.concat('_', field.uid)
+          let {
+            fields
+          } = buildCustomSchema(field.schema, types, newparent)
+          if (Object.keys(fields).length > 0) {
+            let type = `type ${newparent} ${JSON.stringify(fields).replace(/"/g, '')}`
+            types.push(type);
+            fields[field.uid] = `${newparent}!`
+          }
+        } else {
+          let newparent = parent.concat('_', field.uid)
+          let {
+            fields
+          } = buildCustomSchema(field.schema, types, newparent)
+          if (Object.keys(fields).length > 0) {
+            let type = `type ${newparent} ${JSON.stringify(fields).replace(/"/g, '')}`
+            types.push(type);
+            fields[field.uid] = `${newparent}`
+          }
+        }
+        break;
+      case 'blocks':
+        parent = parent.concat('_', field.uid)
+        if (field.mandatory) {
+          let blockType = buildBlockCustomSchema(field.blocks, types, parent)
+          types.push(blockType)
+          fields[field.uid] = `[${parent}]!`
+        } else {
+          let blockType = buildBlockCustomSchema(field.blocks, types, parent)
+          types.push(blockType)
+          fields[field.uid] = `[${parent}]`
+        }
+        break;
+      case 'reference':
+        let unionType = `union `
+        if (typeof field.reference_to === 'string') {
+          let type = `type ${prefix}_${field.uid} { title: String!}`
+          types.push(type)
+          fields[field.uid] = `${type}`
+        } else {
+          let unions = []
+          field.reference_to.forEach(reference => {
+            let referenceType = `${prefix}_${reference}`
+            unionType = unionType.concat(referenceType)
+            unions.push(referenceType)
+            let type = `type ${referenceType} { title: String!}`
+            types.push(type)
+          })
+          let name = ''
+          name = name.concat(unions.join(''), `_Union`)
+          unionType = unionType.concat(`_Union = `, unions.join(' | '))
+          types.push(unionType)
+
+          references = {
+            name,
+            unions,
+          }
+          fields[field.uid] = `[${name}]`
+        }
+        break;
+    }
+  })
+  return {
+    fields,
+    types,
+    references
+  }
+}
+
+const buildBlockCustomSchema = (blocks, types, parent) => {
+  let blockFields = {}
+  let blockType = `type ${parent} {`
+  blocks.forEach(block => {
+    let newparent = parent.concat(block.uid)
+    blockType = blockType.concat(`${block.uid} : ${newparent} `)
+    let {
+      fields
+    } = buildCustomSchema(block.schema, types, newparent)
+    if (Object.keys(fields).length > 0) {
+      let type = `type ${newparent} ${JSON.stringify(fields).replace(/"/g, '')}`
+      types.push(type)
+      blockFields[block.uid] = `${newparent}`
+    }
+  })
+  blockType = blockType.concat('}')
+  return blockType
+}
