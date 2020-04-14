@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-contentstack",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
@@ -32,6 +32,13 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",
-    "prettier": "^1.5.3"
+    "prettier": "^1.5.3",
+    "babel-eslint": "10.0.3",
+    "eslint": "6.1.0",
+    "eslint-config-airbnb": "18.0.1",
+    "eslint-plugin-import": "2.20.1",
+    "eslint-plugin-jsx-a11y": "6.2.3",
+    "eslint-plugin-react": "7.18.3",
+    "eslint-plugin-react-hooks": "1.7.0"
   }
 }

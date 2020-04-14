@@ -1,24 +1,24 @@
-"use strict";
+'use strict';
 
-var _set = require("babel-runtime/core-js/set");
+var _set = require('babel-runtime/core-js/set');
 
 var _set2 = _interopRequireDefault(_set);
 
-var _regenerator = require("babel-runtime/regenerator");
+var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _keys = require("babel-runtime/core-js/object/keys");
+var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
 
-var _asyncToGenerator2 = require("babel-runtime/helpers/asyncToGenerator");
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _require = require("./normalize"),
+var _require = require('./normalize'),
     normalizeEntry = _require.normalizeEntry,
     processContentType = _require.processContentType,
     processEntry = _require.processEntry,
@@ -27,7 +27,7 @@ var _require = require("./normalize"),
     makeAssetNodeUid = _require.makeAssetNodeUid,
     buildCustomSchema = _require.buildCustomSchema;
 
-var _require2 = require("./fetch"),
+var _require2 = require('./fetch'),
     fetchData = _require2.fetchData,
     fetchContentTypes = _require2.fetchContentTypes;
 
@@ -53,41 +53,43 @@ exports.createSchemaCustomization = function () {
 
           case 6:
             _context.prev = 6;
-            _context.t0 = _context["catch"](0);
+            _context.t0 = _context['catch'](0);
 
             console.error('Contentsatck fetch content type failed!');
 
           case 9:
-            typePrefix = configOptions.type_prefix || 'Contentstack';
-            createTypes = actions.createTypes;
+            if (configOptions.isCustomSchemaEnable) {
+              typePrefix = configOptions.type_prefix || 'Contentstack';
+              createTypes = actions.createTypes;
 
-            contentTypes.forEach(function (contentType) {
-              var name = typePrefix + "_" + contentType.uid;
-              var result = buildCustomSchema(contentType.schema, [], name, typePrefix);
-              if ((0, _keys2.default)(result.references).length === 0) {
-                var typeDefs = ["type linktype{\n        title: String\n        href: String\n        }", schema.buildObjectType({
-                  name: name,
-                  fields: result.fields,
-                  interfaces: ["Node"]
-                })];
-                result.types = result.types.concat(typeDefs);
-                createTypes(result.types);
-              } else {
-                var _typeDefs = ["type linktype{\n        title: String\n        href: String\n        }", schema.buildUnionType({
-                  name: result.references.name,
-                  types: result.references.unions
-                }), schema.buildObjectType({
-                  name: name,
-                  fields: result.fields,
-                  interfaces: ["Node"]
-                })];
-                result.types = result.types.concat(_typeDefs);
-                createTypes(result.types);
-              }
-            });
+              contentTypes.forEach(function (contentType) {
+                var name = typePrefix + '_' + contentType.uid;
+                var result = buildCustomSchema(contentType.schema, [], name, typePrefix);
+                if ((0, _keys2.default)(result.references).length === 0) {
+                  var typeDefs = ['type linktype{\n        title: String\n        href: String\n        }', schema.buildObjectType({
+                    name: name,
+                    fields: result.fields,
+                    interfaces: ['Node']
+                  })];
+                  result.types = result.types.concat(typeDefs);
+                  createTypes(result.types);
+                } else {
+                  var _typeDefs = ['type linktype{\n        title: String\n        href: String\n        }', schema.buildUnionType({
+                    name: result.references.name,
+                    types: result.references.unions
+                  }), schema.buildObjectType({
+                    name: name,
+                    fields: result.fields,
+                    interfaces: ['Node']
+                  })];
+                  result.types = result.types.concat(_typeDefs);
+                  createTypes(result.types);
+                }
+              });
+            }
 
-          case 12:
-          case "end":
+          case 10:
+          case 'end':
             return _context.stop();
         }
       }
@@ -109,7 +111,7 @@ exports.sourceNodes = function () {
         reporter = _ref4.reporter,
         createContentDigest = _ref4.createContentDigest;
 
-    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, status, typePrefix, _ref5, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
+    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref5, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
 
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
@@ -119,10 +121,10 @@ exports.sourceNodes = function () {
               var nodeId = '';
               var node = null;
               if (type === 'entry') {
-                nodeId = createNodeId(typePrefix.toLowerCase() + "-entry-" + item.uid + "-" + item.locale);
+                nodeId = createNodeId(typePrefix.toLowerCase() + '-entry-' + item.uid + '-' + item.locale);
               }
               if (type === 'asset') {
-                nodeId = createNodeId(typePrefix.toLowerCase() + "-assets-" + item.uid + "-" + item.locale);
+                nodeId = createNodeId(typePrefix.toLowerCase() + '-assets-' + item.uid + '-' + item.locale);
               }
               node = getNode(nodeId);
               if (node) {
@@ -134,14 +136,14 @@ exports.sourceNodes = function () {
 
             createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus;
             syncToken = void 0;
-            status = store.getState().status;
+            _store$getState = store.getState(), status = _store$getState.status;
             // use a custom type prefix if specified
 
             typePrefix = configOptions.type_prefix || 'Contentstack';
 
 
-            if (status && status.plugins && status.plugins["gatsby-source-contentstack"]) {
-              syncToken = status.plugins["gatsby-source-contentstack"][typePrefix.toLowerCase() + "-sync-token-" + configOptions.api_key];
+            if (status && status.plugins && status.plugins['gatsby-source-contentstack']) {
+              syncToken = status.plugins['gatsby-source-contentstack'][typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key];
             }
 
             configOptions.syncToken = syncToken || null;
@@ -167,15 +169,15 @@ exports.sourceNodes = function () {
             entriesNodeIds = new _set2.default();
             assetsNodeIds = new _set2.default();
             existingNodes = getNodes().filter(function (n) {
-              return n.internal.owner === "gatsby-source-contentstack";
+              return n.internal.owner === 'gatsby-source-contentstack';
             });
 
 
             existingNodes.forEach(function (n) {
-              if (n.internal.type !== typePrefix + "ContentTypes" && n.internal.type !== typePrefix + "_assets") {
+              if (n.internal.type !== typePrefix + 'ContentTypes' && n.internal.type !== typePrefix + '_assets') {
                 entriesNodeIds.add(n.id);
               }
-              if (n.internal.type === typePrefix + "_assets") {
+              if (n.internal.type === typePrefix + '_assets') {
                 assetsNodeIds.add(n.id);
               }
               touchNode({
@@ -183,19 +185,19 @@ exports.sourceNodes = function () {
               });
             });
 
-            syncData['entry_published'] && syncData['entry_published'].forEach(function (item) {
+            syncData.entry_published && syncData.entry_published.forEach(function (item) {
               var entryNodeId = makeEntryNodeUid(item.data, createNodeId, typePrefix);
               entriesNodeIds.add(entryNodeId);
             });
 
-            syncData['asset_published'] && syncData['asset_published'].forEach(function (item) {
+            syncData.asset_published && syncData.asset_published.forEach(function (item) {
               var entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
               assetsNodeIds.add(entryNodeId);
             });
 
             // adding nodes
 
-            syncData['entry_published'] && syncData['entry_published'].forEach(function (item) {
+            syncData.entry_published && syncData.entry_published.forEach(function (item) {
               var contentType = contentstackData.contentTypes.find(function (contentType) {
                 return item.content_type_uid === contentType.uid;
               });
@@ -204,7 +206,7 @@ exports.sourceNodes = function () {
               createNode(entryNode);
             });
 
-            syncData['asset_published'] && syncData['asset_published'].forEach(function (item) {
+            syncData.asset_published && syncData.asset_published.forEach(function (item) {
               var assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
               createNode(assetNode);
             });
@@ -216,25 +218,25 @@ exports.sourceNodes = function () {
 
             // deleting nodes
 
-            syncData['entry_unpublished'] && syncData['entry_unpublished'].forEach(function (item) {
+            syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               deleteContentstackNodes(item.data, 'entry');
             });
 
-            syncData['asset_unpublished'] && syncData['asset_unpublished'].forEach(function (item) {
+            syncData.asset_unpublished && syncData.asset_unpublished.forEach(function (item) {
               deleteContentstackNodes(item.data, 'asset');
             });
 
-            syncData['entry_deleted'] && syncData['entry_deleted'].forEach(function (item) {
+            syncData.entry_deleted && syncData.entry_deleted.forEach(function (item) {
               deleteContentstackNodes(item.data, 'entry');
             });
 
-            syncData['asset_deleted'] && syncData['asset_deleted'].forEach(function (item) {
+            syncData.asset_deleted && syncData.asset_deleted.forEach(function (item) {
               deleteContentstackNodes(item.data, 'asset');
             });
 
-            syncData['content_type_deleted'] && syncData['content_type_deleted'].forEach(function (item) {
+            syncData.content_type_deleted && syncData.content_type_deleted.forEach(function (item) {
               var sameContentTypeNodes = getNodes().filter(function (n) {
-                return n.internal.type === typePrefix + "_" + item.content_type_uid;
+                return n.internal.type === typePrefix + '_' + item.content_type_uid;
               });
               sameContentTypeNodes.forEach(function (node) {
                 return deleteNode({
@@ -250,13 +252,11 @@ exports.sourceNodes = function () {
 
             newState = {};
 
-            newState[typePrefix.toLowerCase() + "-sync-token-" + configOptions.api_key] = nextSyncToken;
+            newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-            return _context2.abrupt("return");
-
-          case 32:
-          case "end":
+          case 31:
+          case 'end':
             return _context2.stop();
         }
       }
