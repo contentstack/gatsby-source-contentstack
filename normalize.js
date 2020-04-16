@@ -204,16 +204,56 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
   schema.forEach(function (field) {
     switch (field.data_type) {
       case 'text':
-        if (field.mandatory) fields[field.uid] = 'String!';else fields[field.uid] = 'String';
+        if (field.mandatory) {
+          if (field.multiple) {
+            fields[field.uid] = '[String]!';
+          } else {
+            fields[field.uid] = 'String!';
+          }
+        } else if (field.multiple) {
+          fields[field.uid] = '[String]';
+        } else {
+          fields[field.uid] = 'String';
+        }
         break;
       case 'isodate':
-        if (field.mandatory) fields[field.uid] = 'Date!';else fields[field.uid] = 'Date';
+        if (field.mandatory) {
+          if (field.multiple) {
+            fields[field.uid] = '[Date]!';
+          } else {
+            fields[field.uid] = 'Date!';
+          }
+        } else if (field.multiple) {
+          fields[field.uid] = '[Date]';
+        } else {
+          fields[field.uid] = 'Date';
+        }
         break;
       case 'boolean':
-        if (field.mandatory) fields[field.uid] = 'Boolean!';else fields[field.uid] = 'Boolean';
+        if (field.mandatory) {
+          if (field.multiple) {
+            fields[field.uid] = '[Boolean]!';
+          } else {
+            fields[field.uid] = 'Boolean!';
+          }
+        } else if (field.multiple) {
+          fields[field.uid] = '[Boolean]';
+        } else {
+          fields[field.uid] = 'Boolean';
+        }
         break;
       case 'number':
-        if (field.mandatory) fields[field.uid] = 'Int!';else fields[field.uid] = 'Int';
+        if (field.mandatory) {
+          if (field.multiple) {
+            fields[field.uid] = '[Int]!';
+          } else {
+            fields[field.uid] = 'Int!';
+          }
+        } else if (field.multiple) {
+          fields[field.uid] = '[Int]';
+        } else {
+          fields[field.uid] = 'Int';
+        }
         break;
       case 'link':
         if (field.mandatory) {
