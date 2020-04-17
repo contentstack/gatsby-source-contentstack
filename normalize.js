@@ -288,7 +288,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
         if (field.mandatory) {
           var newparent = parent.concat('_', field.uid);
 
-          var _buildCustomSchema2 = buildCustomSchema(field.schema, types, newparent),
+          var _buildCustomSchema2 = buildCustomSchema(field.schema, types, newparent, prefix),
               _fields = _buildCustomSchema2.fields;
 
           if ((0, _keys2.default)(_fields).length > 0) {
@@ -303,7 +303,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
         } else {
           var _newparent = parent.concat('_', field.uid);
 
-          var _buildCustomSchema3 = buildCustomSchema(field.schema, types, _newparent),
+          var _buildCustomSchema3 = buildCustomSchema(field.schema, types, _newparent, prefix),
               _fields2 = _buildCustomSchema3.fields;
 
           if ((0, _keys2.default)(_fields2).length > 0) {
@@ -320,7 +320,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
       case 'blocks':
         parent = parent.concat('_', field.uid);
         if (field.mandatory) {
-          var blockType = buildBlockCustomSchema(field.blocks, types, parent);
+          var blockType = buildBlockCustomSchema(field.blocks, types, parent, prefix);
           types.push(blockType);
           if (field.multiple) {
             fields[field.uid] = '[' + parent + ']!';
@@ -328,7 +328,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
             fields[field.uid] = parent + '!';
           }
         } else {
-          var _blockType = buildBlockCustomSchema(field.blocks, types, parent);
+          var _blockType = buildBlockCustomSchema(field.blocks, types, parent, prefix);
           types.push(_blockType);
           if (field.multiple) {
             fields[field.uid] = '[' + parent + ']';
@@ -340,18 +340,12 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
       case 'reference':
         var unionType = 'union ';
         if (typeof field.reference_to === 'string') {
-          var _type3 = 'type ' + prefix + '_' + field.uid + ' { title: String!}';
+          var _type3 = 'type ' + prefix + '_' + field.reference_to + ' { title: String! }';
           types.push(_type3);
           if (field.mandatory) {
-            if (field.multiple) {
-              fields[field.uid] = '[' + _type3 + ']!';
-            } else {
-              fields[field.uid] = _type3 + '!';
-            }
-          } else if (field.multiple) {
-            fields[field.uid] = '[' + _type3 + ']';
+            fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']!';
           } else {
-            fields[field.uid] = '' + _type3;
+            fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']';
           }
         } else {
           var unions = [];
@@ -359,7 +353,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
             var referenceType = prefix + '_' + reference;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            var type = 'type ' + referenceType + ' { title: String!}';
+            var type = 'type ' + referenceType + ' { title: String! }';
             types.push(type);
           });
           var name = '';
@@ -374,7 +368,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
           if (field.mandatory) {
             fields[field.uid] = '[' + name + ']!';
           } else {
-            fields[field.uid] = '' + name;
+            fields[field.uid] = '[' + name + ']';
           }
         }
         break;

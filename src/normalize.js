@@ -269,7 +269,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
           const newparent = parent.concat('_', field.uid);
           const {
             fields,
-          } = buildCustomSchema(field.schema, types, newparent);
+          } = buildCustomSchema(field.schema, types, newparent, prefix);
           if (Object.keys(fields).length > 0) {
             const type = `type ${newparent} ${JSON.stringify(fields).replace(/"/g, '')}`;
             types.push(type);
@@ -283,7 +283,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
           const newparent = parent.concat('_', field.uid);
           const {
             fields,
-          } = buildCustomSchema(field.schema, types, newparent);
+          } = buildCustomSchema(field.schema, types, newparent, prefix);
           if (Object.keys(fields).length > 0) {
             const type = `type ${newparent} ${JSON.stringify(fields).replace(/"/g, '')}`;
             types.push(type);
@@ -298,7 +298,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
       case 'blocks':
         parent = parent.concat('_', field.uid);
         if (field.mandatory) {
-          const blockType = buildBlockCustomSchema(field.blocks, types, parent);
+          const blockType = buildBlockCustomSchema(field.blocks, types, parent, prefix);
           types.push(blockType);
           if (field.multiple) {
             fields[field.uid] = `[${parent}]!`;
@@ -306,7 +306,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
             fields[field.uid] = `${parent}!`;
           }
         } else {
-          const blockType = buildBlockCustomSchema(field.blocks, types, parent);
+          const blockType = buildBlockCustomSchema(field.blocks, types, parent, prefix);
           types.push(blockType);
           if (field.multiple) {
             fields[field.uid] = `[${parent}]`;
@@ -318,18 +318,12 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
       case 'reference':
         let unionType = 'union ';
         if (typeof field.reference_to === 'string') {
-          const type = `type ${prefix}_${field.uid} { title: String!}`;
+          const type = `type ${prefix}_${field.reference_to} { title: String! }`;
           types.push(type);
           if (field.mandatory) {
-            if (field.multiple) {
-              fields[field.uid] = `[${type}]!`;
-            } else {
-              fields[field.uid] = `${type}!`;
-            }
-          } else if (field.multiple) {
-            fields[field.uid] = `[${type}]`;
+            fields[field.uid] = `[${prefix}_${field.reference_to}]!`;
           } else {
-            fields[field.uid] = `${type}`;
+            fields[field.uid] = `[${prefix}_${field.reference_to}]`;
           }
         } else {
           const unions = [];
@@ -337,7 +331,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
             const referenceType = `${prefix}_${reference}`;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            const type = `type ${referenceType} { title: String!}`;
+            const type = `type ${referenceType} { title: String! }`;
             types.push(type);
           });
           let name = '';
@@ -352,7 +346,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
           if (field.mandatory) {
             fields[field.uid] = `[${name}]!`;
           } else {
-            fields[field.uid] = `${name}`;
+            fields[field.uid] = `[${name}]`;
           }
         }
         break;
