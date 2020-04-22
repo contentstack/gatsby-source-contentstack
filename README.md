@@ -18,13 +18,13 @@ plugins: [
   {
     resolve: `gatsby-source-contentstack`,
     options: {
-      // API Key is a unique key assigned to each stack. This is required.
+      // Required: API Key is a unique key assigned to each stack.
       api_key: `api_key`,
 
-      // Delivery Token is a read-only credential . This is required.
+      // Required: Delivery Token is a read-only credential. 
       delivery_token: `delivery_token`,
       
-      // Environment where you published your data.
+      // Required: Environment where you published your data.
       environment: `environment`,
 
       // Optional: CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 
@@ -32,6 +32,9 @@ plugins: [
 
       // Optional: expediteBuild set this to either true or false
       expediteBuild: `boolean_value`,
+
+      // Optional: Specify true if you want to enable custom schema
+      isCustomSchemaEnable : `boolean_value`,
 
       // Optional: Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.
       type_prefix: `Contentstack`, // (default)

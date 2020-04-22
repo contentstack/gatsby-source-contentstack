@@ -11,7 +11,6 @@ exports.fetchData = async (configOptions, reporter) => {
   console.time('Fetch Contentstack data');
   console.log('Starting to fetch data from Contentstack');
 
-  // let contentTypes;
   let syncData = {};
 
   if (configOptions.expediteBuild) {
@@ -32,7 +31,6 @@ exports.fetchData = async (configOptions, reporter) => {
 
     try {
       const [syncEntryData, syncAssetData] = await Promise.all([fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
-      // contentTypes = contentTypesdata
       const data = syncEntryData.data.concat(syncAssetData.data);
       syncData.data = data;
       syncData.token = null;
@@ -54,7 +52,6 @@ exports.fetchData = async (configOptions, reporter) => {
   }
 
   const contentstackData = {
-    // contentTypes: contentTypes,
     syncData: syncData.data,
     sync_token: syncData.sync_token,
   };

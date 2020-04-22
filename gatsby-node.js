@@ -164,7 +164,7 @@ exports.sourceNodes = function () {
               return merged;
             }, {});
 
-            // for checking if the reference node is presultent or not
+            // for checking if the reference node is present or not
 
             entriesNodeIds = new _set2.default();
             assetsNodeIds = new _set2.default();

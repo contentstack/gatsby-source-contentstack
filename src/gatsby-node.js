@@ -109,7 +109,7 @@ exports.sourceNodes = async ({
     return merged;
   }, {});
 
-  // for checking if the reference node is presultent or not
+  // for checking if the reference node is present or not
   const entriesNodeIds = new Set();
   const assetsNodeIds = new Set();
 

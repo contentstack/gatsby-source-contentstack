@@ -35,7 +35,6 @@ exports.fetchData = function () {
             console.time('Fetch Contentstack data');
             console.log('Starting to fetch data from Contentstack');
 
-            // let contentTypes;
             syncData = {};
 
             if (!configOptions.expediteBuild) {
@@ -67,8 +66,6 @@ exports.fetchData = function () {
             _ref3 = (0, _slicedToArray3.default)(_ref2, 2);
             syncEntryData = _ref3[0];
             syncAssetData = _ref3[1];
-
-            // contentTypes = contentTypesdata
             data = syncEntryData.data.concat(syncAssetData.data);
 
             syncData.data = data;
@@ -109,7 +106,6 @@ exports.fetchData = function () {
 
           case 35:
             contentstackData = {
-              // contentTypes: contentTypes,
               syncData: syncData.data,
               sync_token: syncData.sync_token
             };
