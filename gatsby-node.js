@@ -58,7 +58,7 @@ exports.createSchemaCustomization = function () {
             console.error('Contentsatck fetch content type failed!');
 
           case 9:
-            if (configOptions.isCustomSchemaEnable) {
+            if (configOptions.enableSchemaGeneration) {
               typePrefix = configOptions.type_prefix || 'Contentstack';
               createTypes = actions.createTypes;
 
