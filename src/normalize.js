@@ -174,7 +174,6 @@ const buildBlockCustomSchema = (blocks, types, parent, prefix) => {
     }
     if (Object.keys(fields).length > 0) {
       const type = `type ${newparent} ${JSON.stringify(fields).replace(/"/g, '')}`;
-      console.log(type, 'type>>>>>>>>>>>>>>>>>>>>>>>>>>');
       types.push(type);
       blockFields[block.uid] = `${newparent}`;
     }

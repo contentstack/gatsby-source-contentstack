@@ -194,7 +194,6 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, pare
     }
     if ((0, _keys2.default)(fields).length > 0) {
       var type = 'type ' + newparent + ' ' + (0, _stringify2.default)(fields).replace(/"/g, '');
-      console.log(type, 'type>>>>>>>>>>>>>>>>>>>>>>>>>>');
       types.push(type);
       blockFields[block.uid] = '' + newparent;
     }
