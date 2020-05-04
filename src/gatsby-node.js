@@ -35,9 +35,9 @@ exports.createSchemaCustomization = async ({
       if (Object.keys(result.references).length === 0) {
         const typeDefs = [
           `type linktype{
-        title: String
-        href: String
-        }`,
+              title: String
+              href: String
+            }`,
           schema.buildObjectType({
             name,
             fields: result.fields,
@@ -49,9 +49,9 @@ exports.createSchemaCustomization = async ({
       } else {
         const typeDefs = [
           `type linktype{
-        title: String
-        href: String
-        }`,
+              title: String
+              href: String
+            }`,
           schema.buildUnionType({
             name: result.references.name,
             types: result.references.unions,

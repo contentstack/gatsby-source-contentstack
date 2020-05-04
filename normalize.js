@@ -177,18 +177,24 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   return entryObj;
 };
 
-var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, parent) {
+var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, parent, prefix) {
   var blockFields = {};
   var blockType = 'type ' + parent + ' {';
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
     blockType = blockType.concat(block.uid + ' : ' + newparent + ' ');
 
-    var _buildCustomSchema = buildCustomSchema(block.schema, types, newparent),
+    var _buildCustomSchema = buildCustomSchema(block.schema, types, newparent, prefix),
         fields = _buildCustomSchema.fields;
 
+    for (var key in fields) {
+      if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
+        fields[key] = fields[key].type;
+      }
+    }
     if ((0, _keys2.default)(fields).length > 0) {
       var type = 'type ' + newparent + ' ' + (0, _stringify2.default)(fields).replace(/"/g, '');
+      console.log(type, 'type>>>>>>>>>>>>>>>>>>>>>>>>>>');
       types.push(type);
       blockFields[block.uid] = '' + newparent;
     }
@@ -204,16 +210,21 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
   schema.forEach(function (field) {
     switch (field.data_type) {
       case 'text':
+        fields[field.uid] = {
+          resolve: function resolve(source) {
+            return source[field.uid] || null;
+          }
+        };
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = '[String]!';
+            fields[field.uid].type = '[String]!';
           } else {
-            fields[field.uid] = 'String!';
+            fields[field.uid].type = 'String!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = '[String]';
+          fields[field.uid].type = '[String]';
         } else {
-          fields[field.uid] = 'String';
+          fields[field.uid].type = 'String';
         }
         break;
       case 'isodate':
@@ -243,16 +254,21 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
         }
         break;
       case 'number':
+        fields[field.uid] = {
+          resolve: function resolve(source) {
+            return source[field.uid] || null;
+          }
+        };
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = '[Int]!';
+            fields[field.uid].type = '[Int]!';
           } else {
-            fields[field.uid] = 'Int!';
+            fields[field.uid].type = 'Int!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = '[Int]';
+          fields[field.uid].type = '[Int]';
         } else {
-          fields[field.uid] = 'Int';
+          fields[field.uid].type = 'Int';
         }
         break;
       case 'link':
@@ -271,77 +287,74 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
       case 'file':
         var type = 'type ' + prefix + '_assets implements Node { url: String }';
         types.push(type);
+        fields[field.uid] = {
+          resolve: function resolve(source) {
+            return source[field.uid] || null;
+          }
+        };
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = '[' + prefix + '_assets]!';
+            fields[field.uid].type = '[' + prefix + '_assets]!';
           } else {
-            fields[field.uid] = prefix + '_assets!';
+            fields[field.uid].type = prefix + '_assets!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = '[' + prefix + '_assets]';
+          fields[field.uid].type = '[' + prefix + '_assets]';
         } else {
-          fields[field.uid] = prefix + '_assets';
+          fields[field.uid].type = prefix + '_assets';
         }
         break;
       case 'group':
       case 'global_field':
+        var newparent = parent.concat('_', field.uid);
+        var result = buildCustomSchema(field.schema, types, newparent, prefix);
+        for (var key in result.fields) {
+          if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
+            result.fields[key] = result.fields[key].type;
+          }
+        }
+        if ((0, _keys2.default)(result.fields).length > 0) {
+          var _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
+          types.push(_type);
+        }
+        fields[field.uid] = {
+          resolve: function resolve(source) {
+            return source[field.uid] || null;
+          }
+        };
         if (field.mandatory) {
-          var newparent = parent.concat('_', field.uid);
-
-          var _buildCustomSchema2 = buildCustomSchema(field.schema, types, newparent, prefix),
-              _fields = _buildCustomSchema2.fields;
-
-          if ((0, _keys2.default)(_fields).length > 0) {
-            var _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(_fields).replace(/"/g, '');
-            types.push(_type);
-            if (field.multiple) {
-              _fields[field.uid] = '[' + newparent + ']!';
-            } else {
-              _fields[field.uid] = newparent + '!';
-            }
+          if (field.multiple) {
+            fields[field.uid].type = '[' + newparent + ']!';
+          } else {
+            fields[field.uid].type = newparent + '!';
           }
+        } else if (field.multiple) {
+          fields[field.uid].type = '[' + newparent + ']';
         } else {
-          var _newparent = parent.concat('_', field.uid);
-
-          var _buildCustomSchema3 = buildCustomSchema(field.schema, types, _newparent, prefix),
-              _fields2 = _buildCustomSchema3.fields;
-
-          if ((0, _keys2.default)(_fields2).length > 0) {
-            var _type2 = 'type ' + _newparent + ' ' + (0, _stringify2.default)(_fields2).replace(/"/g, '');
-            types.push(_type2);
-            if (field.multiple) {
-              _fields2[field.uid] = '[' + _newparent + ']';
-            } else {
-              _fields2[field.uid] = '' + _newparent;
-            }
-          }
+          fields[field.uid].type = '' + newparent;
         }
         break;
       case 'blocks':
-        parent = parent.concat('_', field.uid);
+        var blockparent = parent.concat('_', field.uid);
+        var blockType = buildBlockCustomSchema(field.blocks, types, blockparent, prefix);
+        types.push(blockType);
         if (field.mandatory) {
-          var blockType = buildBlockCustomSchema(field.blocks, types, parent, prefix);
-          types.push(blockType);
           if (field.multiple) {
-            fields[field.uid] = '[' + parent + ']!';
+            fields[field.uid] = '[' + newparent + ']!';
           } else {
-            fields[field.uid] = parent + '!';
+            fields[field.uid] = newparent + '!';
           }
+        } else if (field.multiple) {
+          fields[field.uid] = '[' + blockparent + ']';
         } else {
-          var _blockType = buildBlockCustomSchema(field.blocks, types, parent, prefix);
-          types.push(_blockType);
-          if (field.multiple) {
-            fields[field.uid] = '[' + parent + ']';
-          } else {
-            fields[field.uid] = '' + parent;
-          }
+          fields[field.uid] = '' + blockparent;
         }
         break;
       case 'reference':
         var unionType = 'union ';
         if (typeof field.reference_to === 'string') {
-          var _type3 = 'type ' + prefix + '_' + field.reference_to + ' { title: String! }';
-          types.push(_type3);
+          var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node { title: String! }';
+          types.push(_type2);
           if (field.mandatory) {
             fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']!';
           } else {
@@ -353,7 +366,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
             var referenceType = prefix + '_' + reference;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            var type = 'type ' + referenceType + ' { title: String! }';
+            var type = 'type ' + referenceType + ' implements Node { title: String! }';
             types.push(type);
           });
           var name = '';
