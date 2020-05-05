@@ -309,7 +309,6 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
             fields[field.uid].type = `${newparent}`;
           }
         }
-        console.log(JSON.stringify(fields, null, 2), 'grp');
         break;
       case 'blocks':
         const blockparent = parent.concat('_', field.uid);
