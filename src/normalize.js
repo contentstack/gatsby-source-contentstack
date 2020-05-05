@@ -289,21 +289,27 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
         if (Object.keys(result.fields).length > 0) {
           const type = `type ${newparent} ${JSON.stringify(result.fields).replace(/"/g, '')}`;
           types.push(type);
-        }
-        fields[field.uid] = {
-          resolve: (source) => source[field.uid] || null,
-        };
-        if (field.mandatory) {
-          if (field.multiple) {
-            fields[field.uid].type = `[${newparent}]!`;
+          fields[field.uid] = {
+            resolve: (source) => {
+              if (field.multiple && !Array.isArray(source[field.uid])) {
+                return [];
+              }
+              return source[field.uid] || null;
+            },
+          };
+          if (field.mandatory) {
+            if (field.multiple) {
+              fields[field.uid].type = `[${newparent}]!`;
+            } else {
+              fields[field.uid].type = `${newparent}!`;
+            }
+          } else if (field.multiple) {
+            fields[field.uid].type = `[${newparent}]`;
           } else {
-            fields[field.uid].type = `${newparent}!`;
+            fields[field.uid].type = `${newparent}`;
           }
-        } else if (field.multiple) {
-          fields[field.uid].type = `[${newparent}]`;
-        } else {
-          fields[field.uid].type = `${newparent}`;
         }
+        console.log(JSON.stringify(fields, null, 2), 'grp');
         break;
       case 'blocks':
         const blockparent = parent.concat('_', field.uid);

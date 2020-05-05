@@ -315,23 +315,27 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
         if ((0, _keys2.default)(result.fields).length > 0) {
           var _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
           types.push(_type);
-        }
-        fields[field.uid] = {
-          resolve: function resolve(source) {
-            return source[field.uid] || null;
-          }
-        };
-        if (field.mandatory) {
-          if (field.multiple) {
-            fields[field.uid].type = '[' + newparent + ']!';
+          fields[field.uid] = {
+            resolve: function resolve(source) {
+              if (field.multiple && !Array.isArray(source[field.uid])) {
+                return [];
+              }
+              return source[field.uid] || null;
+            }
+          };
+          if (field.mandatory) {
+            if (field.multiple) {
+              fields[field.uid].type = '[' + newparent + ']!';
+            } else {
+              fields[field.uid].type = newparent + '!';
+            }
+          } else if (field.multiple) {
+            fields[field.uid].type = '[' + newparent + ']';
           } else {
-            fields[field.uid].type = newparent + '!';
+            fields[field.uid].type = '' + newparent;
           }
-        } else if (field.multiple) {
-          fields[field.uid].type = '[' + newparent + ']';
-        } else {
-          fields[field.uid].type = '' + newparent;
         }
+        console.log((0, _stringify2.default)(fields, null, 2), 'grp');
         break;
       case 'blocks':
         var blockparent = parent.concat('_', field.uid);
