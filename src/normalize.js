@@ -316,9 +316,9 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
         types.push(blockType);
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = `[${newparent}]!`;
+            fields[field.uid] = `[${blockparent}]!`;
           } else {
-            fields[field.uid] = `${newparent}!`;
+            fields[field.uid] = `${blockparent}!`;
           }
         } else if (field.multiple) {
           fields[field.uid] = `[${blockparent}]`;
