@@ -342,9 +342,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
         types.push(blockType);
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = '[' + newparent + ']!';
+            fields[field.uid] = '[' + blockparent + ']!';
           } else {
-            fields[field.uid] = newparent + '!';
+            fields[field.uid] = blockparent + '!';
           }
         } else if (field.multiple) {
           fields[field.uid] = '[' + blockparent + ']';
