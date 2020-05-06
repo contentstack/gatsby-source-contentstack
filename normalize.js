@@ -354,7 +354,8 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
         break;
       case 'reference':
         var unionType = 'union ';
-        if (typeof field.reference_to === 'string') {
+        if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
+          field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
           var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node { title: String! }';
           types.push(_type2);
           if (field.mandatory) {
@@ -380,10 +381,26 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
             name: name,
             unions: unions
           };
+          fields[field.uid] = {
+            resolve: function resolve(source, args, context) {
+              if (source[field.uid + '___NODE']) {
+                var nodesData = [];
+                context.nodeModel.getAllNodes({ type: name }).find(function (node) {
+                  source[field.uid + '___NODE'].forEach(function (id) {
+                    if (node.id === id) {
+                      nodesData.push(node);
+                    }
+                  });
+                });
+                return nodesData;
+              }
+              return [];
+            }
+          };
           if (field.mandatory) {
-            fields[field.uid] = '[' + name + ']!';
+            fields[field.uid].type = '[' + name + ']!';
           } else {
-            fields[field.uid] = '[' + name + ']';
+            fields[field.uid].type = '[' + name + ']';
           }
         }
         break;
