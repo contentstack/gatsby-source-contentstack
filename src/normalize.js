@@ -263,7 +263,25 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
         const type = `type ${prefix}_assets implements Node { url: String }`;
         types.push(type);
         fields[field.uid] = {
-          resolve: (source) => source[field.uid] || null,
+          resolve: (source, args, context) => {
+            if (field.multiple && source[`${field.uid}___NODE`]) {
+              const nodesData = [];
+              context.nodeModel.getAllNodes({ type: `${prefix}_assets` }).find((node) => {
+                source[`${field.uid}___NODE`].forEach((id) => {
+                  if (node.id === id) {
+                    nodesData.push(node);
+                  }
+                });
+              });
+              return nodesData;
+            }
+
+            if (source[`${field.uid}___NODE`]) {
+              return context.nodeModel.getAllNodes({ type: `${prefix}_assets` })
+                .find((node) => node.id === source[`${field.uid}___NODE`]);
+            }
+            return null;
+          },
         };
         if (field.mandatory) {
           if (field.multiple) {
