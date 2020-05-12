@@ -287,8 +287,25 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
         var type = 'type ' + prefix + '_assets implements Node { url: String }';
         types.push(type);
         fields[field.uid] = {
-          resolve: function resolve(source) {
-            return source[field.uid] || null;
+          resolve: function resolve(source, args, context) {
+            if (field.multiple && source[field.uid + '___NODE']) {
+              var nodesData = [];
+              context.nodeModel.getAllNodes({ type: prefix + '_assets' }).find(function (node) {
+                source[field.uid + '___NODE'].forEach(function (id) {
+                  if (node.id === id) {
+                    nodesData.push(node);
+                  }
+                });
+              });
+              return nodesData;
+            }
+
+            if (source[field.uid + '___NODE']) {
+              return context.nodeModel.getAllNodes({ type: prefix + '_assets' }).find(function (node) {
+                return node.id === source[field.uid + '___NODE'];
+              });
+            }
+            return null;
           }
         };
         if (field.mandatory) {
