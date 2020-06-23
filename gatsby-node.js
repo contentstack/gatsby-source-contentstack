@@ -63,7 +63,8 @@ exports.createSchemaCustomization = function () {
               createTypes = actions.createTypes;
 
               contentTypes.forEach(function (contentType) {
-                var name = typePrefix + '_' + contentType.uid;
+                var contentTypeUid = contentType.uid.replace(/-/g, '_');
+                var name = typePrefix + '_' + contentTypeUid;
                 var result = buildCustomSchema(contentType.schema, [], name, typePrefix);
                 if ((0, _keys2.default)(result.references).length === 0) {
                   var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({

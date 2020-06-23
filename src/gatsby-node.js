@@ -30,7 +30,8 @@ exports.createSchemaCustomization = async ({
       createTypes,
     } = actions;
     contentTypes.forEach((contentType) => {
-      const name = `${typePrefix}_${contentType.uid}`;
+      const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
+      const name = `${typePrefix}_${contentTypeUid}`;
       const result = buildCustomSchema(contentType.schema, [], name, typePrefix);
       if (Object.keys(result.references).length === 0) {
         const typeDefs = [
