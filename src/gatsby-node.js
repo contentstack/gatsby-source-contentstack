@@ -13,6 +13,8 @@ const {
   fetchContentTypes,
 } = require('./fetch');
 
+const { downloadAssets } = require('./download-assets');
+
 let contentTypes = [];
 
 exports.createSchemaCustomization = async ({
@@ -74,6 +76,7 @@ exports.sourceNodes = async ({
   actions,
   getNode,
   getNodes,
+  cache,
   createNodeId,
   store,
   reporter,
@@ -84,11 +87,13 @@ exports.sourceNodes = async ({
     deleteNode,
     touchNode,
     setPluginStatus,
+    getCache,
   } = actions;
   let syncToken;
   const {
     status,
   } = store.getState();
+
   // use a custom type prefix if specified
   const typePrefix = configOptions.type_prefix || 'Contentstack';
 
@@ -129,6 +134,10 @@ exports.sourceNodes = async ({
     touchNode({
       nodeId: n.id,
     });
+    if (n.localAsset___NODE) {
+      // Prevent GraphQL type inference from crashing on this property
+      touchNode({ nodeId: n.localAsset___NODE });
+    }
   });
 
   syncData.entry_published && syncData.entry_published.forEach((item) => {
@@ -154,6 +163,18 @@ exports.sourceNodes = async ({
     const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
     createNode(assetNode);
   });
+
+  if (configOptions.downloadAssets) {
+    downloadAssets({
+      actions,
+      createNodeId,
+      store,
+      cache,
+      getCache,
+      getNodes,
+      reporter,
+    }, typePrefix);
+  }
 
   contentstackData.contentTypes.forEach((contentType) => {
     const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);

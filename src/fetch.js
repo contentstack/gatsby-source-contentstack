@@ -92,7 +92,7 @@ const fetchCsData = async (url, config, query) => {
   const apiUrl = `${config.cdn}/${url}?${queryParams}`;
   const option = {
     headers: {
-      'X-User-Agent': `contentstack-gatsby-source-pilugin-${version}`,
+      'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
     },
   };
   return new Promise((resolve, reject) => {

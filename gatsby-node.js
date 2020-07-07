@@ -31,6 +31,9 @@ var _require2 = require('./fetch'),
     fetchData = _require2.fetchData,
     fetchContentTypes = _require2.fetchContentTypes;
 
+var _require3 = require('./download-assets'),
+    downloadAssets = _require3.downloadAssets;
+
 var contentTypes = [];
 
 exports.createSchemaCustomization = function () {
@@ -107,12 +110,13 @@ exports.sourceNodes = function () {
     var actions = _ref4.actions,
         getNode = _ref4.getNode,
         getNodes = _ref4.getNodes,
+        cache = _ref4.cache,
         createNodeId = _ref4.createNodeId,
         store = _ref4.store,
         reporter = _ref4.reporter,
         createContentDigest = _ref4.createContentDigest;
 
-    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref5, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
+    var createNode, deleteNode, touchNode, setPluginStatus, getCache, syncToken, _store$getState, status, typePrefix, _ref5, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
 
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
@@ -135,9 +139,10 @@ exports.sourceNodes = function () {
               }
             };
 
-            createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus;
+            createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus, getCache = actions.getCache;
             syncToken = void 0;
             _store$getState = store.getState(), status = _store$getState.status;
+
             // use a custom type prefix if specified
 
             typePrefix = configOptions.type_prefix || 'Contentstack';
@@ -184,6 +189,10 @@ exports.sourceNodes = function () {
               touchNode({
                 nodeId: n.id
               });
+              if (n.localAsset___NODE) {
+                // Prevent GraphQL type inference from crashing on this property
+                touchNode({ nodeId: n.localAsset___NODE });
+              }
             });
 
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
@@ -211,6 +220,18 @@ exports.sourceNodes = function () {
               var assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
               createNode(assetNode);
             });
+
+            if (configOptions.downloadAssets) {
+              downloadAssets({
+                actions: actions,
+                createNodeId: createNodeId,
+                store: store,
+                cache: cache,
+                getCache: getCache,
+                getNodes: getNodes,
+                reporter: reporter
+              }, typePrefix);
+            }
 
             contentstackData.contentTypes.forEach(function (contentType) {
               var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
@@ -256,7 +277,7 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 31:
+          case 32:
           case 'end':
             return _context2.stop();
         }
