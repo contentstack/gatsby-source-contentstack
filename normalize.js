@@ -322,7 +322,8 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
         break;
       case 'group':
       case 'global_field':
-        var newparent = parent.concat('_', field.uid);
+        var newparent = field.data_type === 'global_field' && field.reference_to ? prefix + '_' + field.reference_to : parent.concat('_', field.uid);
+
         var result = buildCustomSchema(field.schema, types, newparent, prefix);
         for (var key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
