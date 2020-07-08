@@ -18,21 +18,21 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _require = require('./normalize'),
-    normalizeEntry = _require.normalizeEntry,
-    processContentType = _require.processContentType,
-    processEntry = _require.processEntry,
-    processAsset = _require.processAsset,
-    makeEntryNodeUid = _require.makeEntryNodeUid,
-    makeAssetNodeUid = _require.makeAssetNodeUid,
-    buildCustomSchema = _require.buildCustomSchema;
+var _require = require('gatsby-source-filesystem'),
+    createRemoteFileNode = _require.createRemoteFileNode;
 
-var _require2 = require('./fetch'),
-    fetchData = _require2.fetchData,
-    fetchContentTypes = _require2.fetchContentTypes;
+var _require2 = require('./normalize'),
+    normalizeEntry = _require2.normalizeEntry,
+    processContentType = _require2.processContentType,
+    processEntry = _require2.processEntry,
+    processAsset = _require2.processAsset,
+    makeEntryNodeUid = _require2.makeEntryNodeUid,
+    makeAssetNodeUid = _require2.makeAssetNodeUid,
+    buildCustomSchema = _require2.buildCustomSchema;
 
-var _require3 = require('./download-assets'),
-    downloadAssets = _require3.downloadAssets;
+var _require3 = require('./fetch'),
+    fetchData = _require3.fetchData,
+    fetchContentTypes = _require3.fetchContentTypes;
 
 var contentTypes = [];
 
@@ -105,22 +105,74 @@ exports.createSchemaCustomization = function () {
   };
 }();
 
-exports.sourceNodes = function () {
+exports.onCreateNode = function () {
   var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref4, configOptions) {
-    var actions = _ref4.actions,
-        getNode = _ref4.getNode,
-        getNodes = _ref4.getNodes,
-        cache = _ref4.cache,
+    var createNode = _ref4.actions.createNode,
+        getCache = _ref4.getCache,
         createNodeId = _ref4.createNodeId,
-        store = _ref4.store,
-        reporter = _ref4.reporter,
-        createContentDigest = _ref4.createContentDigest;
-
-    var createNode, deleteNode, touchNode, setPluginStatus, getCache, syncToken, _store$getState, status, typePrefix, _ref5, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
-
+        node = _ref4.node;
+    var typePrefix, fileNode;
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
+          case 0:
+            // use a custom type prefix if specified
+            typePrefix = configOptions.type_prefix || 'Contentstack';
+            // because onCreateNode is called for all nodes, verify that you are only running this code on nodes created by your plugin
+
+            if (!(node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
+              _context2.next = 7;
+              break;
+            }
+
+            // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
+            console.log(encodeURI(node.url), 'url>>>>>>>>>>>>>>>');
+            _context2.next = 5;
+            return createRemoteFileNode({
+              // the url of the remote image to generate a node for
+              url: encodeURI(node.url),
+              getCache: getCache,
+              createNode: createNode,
+              createNodeId: createNodeId,
+              parentNodeId: node.id
+            });
+
+          case 5:
+            fileNode = _context2.sent;
+
+
+            if (fileNode) {
+              node.localAsset___NODE = fileNode.id;
+            }
+
+          case 7:
+          case 'end':
+            return _context2.stop();
+        }
+      }
+    }, _callee2, undefined);
+  }));
+
+  return function (_x3, _x4) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+exports.sourceNodes = function () {
+  var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(_ref6, configOptions) {
+    var actions = _ref6.actions,
+        getNode = _ref6.getNode,
+        getNodes = _ref6.getNodes,
+        createNodeId = _ref6.createNodeId,
+        store = _ref6.store,
+        reporter = _ref6.reporter,
+        createContentDigest = _ref6.createContentDigest;
+
+    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref7, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
+
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
           case 0:
             deleteContentstackNodes = function deleteContentstackNodes(item, type) {
               var nodeId = '';
@@ -139,7 +191,7 @@ exports.sourceNodes = function () {
               }
             };
 
-            createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus, getCache = actions.getCache;
+            createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus;
             syncToken = void 0;
             _store$getState = store.getState(), status = _store$getState.status;
 
@@ -154,12 +206,12 @@ exports.sourceNodes = function () {
 
             configOptions.syncToken = syncToken || null;
 
-            _context2.next = 9;
+            _context3.next = 9;
             return fetchData(configOptions, reporter);
 
           case 9:
-            _ref5 = _context2.sent;
-            contentstackData = _ref5.contentstackData;
+            _ref7 = _context3.sent;
+            contentstackData = _ref7.contentstackData;
 
             contentstackData.contentTypes = contentTypes;
             syncData = contentstackData.syncData.reduce(function (merged, item) {
@@ -221,17 +273,17 @@ exports.sourceNodes = function () {
               createNode(assetNode);
             });
 
-            if (configOptions.downloadAssets) {
-              downloadAssets({
-                actions: actions,
-                createNodeId: createNodeId,
-                store: store,
-                cache: cache,
-                getCache: getCache,
-                getNodes: getNodes,
-                reporter: reporter
-              }, typePrefix);
-            }
+            // if (configOptions.downloadAssets) {
+            //   downloadAssets({
+            //     actions,
+            //     createNodeId,
+            //     store,
+            //     cache,
+            //     getCache,
+            //     getNodes,
+            //     reporter,
+            //   }, typePrefix);
+            // }
 
             contentstackData.contentTypes.forEach(function (contentType) {
               var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
@@ -277,15 +329,15 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 32:
+          case 31:
           case 'end':
-            return _context2.stop();
+            return _context3.stop();
         }
       }
-    }, _callee2, undefined);
+    }, _callee3, undefined);
   }));
 
-  return function (_x3, _x4) {
-    return _ref3.apply(this, arguments);
+  return function (_x5, _x6) {
+    return _ref5.apply(this, arguments);
   };
 }();

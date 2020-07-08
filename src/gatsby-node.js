@@ -1,3 +1,5 @@
+const { createRemoteFileNode } = require('gatsby-source-filesystem');
+
 const {
   normalizeEntry,
   processContentType,
@@ -13,7 +15,6 @@ const {
   fetchContentTypes,
 } = require('./fetch');
 
-const { downloadAssets } = require('./download-assets');
 
 let contentTypes = [];
 
@@ -72,11 +73,37 @@ exports.createSchemaCustomization = async ({
   }
 };
 
+
+exports.onCreateNode = async ({
+  actions: { createNode },
+  getCache,
+  createNodeId,
+  node,
+}, configOptions) => {
+  // use a custom type prefix if specified
+  const typePrefix = configOptions.type_prefix || 'Contentstack';
+  // because onCreateNode is called for all nodes, verify that you are only running this code on nodes created by your plugin
+  if (node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
+    // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
+    const fileNode = await createRemoteFileNode({
+      // the url of the remote image to generate a node for
+      url: encodeURI(node.url),
+      getCache,
+      createNode,
+      createNodeId,
+      parentNodeId: node.id,
+    });
+
+    if (fileNode) {
+      node.localAsset___NODE = fileNode.id;
+    }
+  }
+};
+
 exports.sourceNodes = async ({
   actions,
   getNode,
   getNodes,
-  cache,
   createNodeId,
   store,
   reporter,
@@ -87,7 +114,6 @@ exports.sourceNodes = async ({
     deleteNode,
     touchNode,
     setPluginStatus,
-    getCache,
   } = actions;
   let syncToken;
   const {
@@ -163,18 +189,6 @@ exports.sourceNodes = async ({
     const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
     createNode(assetNode);
   });
-
-  if (configOptions.downloadAssets) {
-    downloadAssets({
-      actions,
-      createNodeId,
-      store,
-      cache,
-      getCache,
-      getNodes,
-      reporter,
-    }, typePrefix);
-  }
 
   contentstackData.contentTypes.forEach((contentType) => {
     const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
