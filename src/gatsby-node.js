@@ -73,33 +73,6 @@ exports.createSchemaCustomization = async ({
   }
 };
 
-
-exports.onCreateNode = async ({
-  actions: { createNode },
-  getCache,
-  createNodeId,
-  node,
-}, configOptions) => {
-  // use a custom type prefix if specified
-  const typePrefix = configOptions.type_prefix || 'Contentstack';
-  // because onCreateNode is called for all nodes, verify that you are only running this code on nodes created by your plugin
-  if (node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
-    // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-    const fileNode = await createRemoteFileNode({
-      // the url of the remote image to generate a node for
-      url: encodeURI(node.url),
-      getCache,
-      createNode,
-      createNodeId,
-      parentNodeId: node.id,
-    });
-
-    if (fileNode) {
-      node.localAsset___NODE = fileNode.id;
-    }
-  }
-};
-
 exports.sourceNodes = async ({
   actions,
   getNode,
@@ -247,4 +220,30 @@ exports.sourceNodes = async ({
   const newState = {};
   newState[`${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`] = nextSyncToken;
   setPluginStatus(newState);
+};
+
+exports.onCreateNode = async ({
+  actions: { createNode },
+  getCache,
+  createNodeId,
+  node,
+}, configOptions) => {
+  // use a custom type prefix if specified
+  const typePrefix = configOptions.type_prefix || 'Contentstack';
+
+  if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
+    // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
+    const fileNode = await createRemoteFileNode({
+      // the url of the remote image to generate a node for
+      url: encodeURI(node.url),
+      getCache,
+      createNode,
+      createNodeId,
+      parentNodeId: node.id,
+    });
+
+    if (fileNode) {
+      node.localAsset___NODE = fileNode.id;
+    }
+  }
 };

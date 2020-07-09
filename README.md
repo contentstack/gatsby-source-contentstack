@@ -38,6 +38,9 @@ plugins: [
 
       // Optional: Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.
       type_prefix: `Contentstack`, // (default)
+
+      // Optional: Specify true if you want to download all your contentstack assets locally
+      downloadAssets: `boolean_value`
     },
   },
 ]
@@ -74,7 +77,17 @@ If, for example, you have `Blogs` as one of your content types, you will be able
         description
         banner {
           filename
-          url
+          localAsset {
+            base
+            absolutePath
+            publicURL
+            url
+            childImageSharp {
+              fixed(width: 125, height: 125) {
+                base64
+              }
+            }
+          }
         }
         created_at
       }
@@ -106,12 +119,6 @@ referred entry is often needed, the referred entry data is provided at the `refe
   }
 }
 ```
-
-## Coming soon
-
-- Asset type and Image processing support using `gatsby-transformer-sharp`, `gatsby-plugin-sharp`.
-
-
 
 [gatsby]: https://www.gatsbyjs.org/
 [contentstack]: https://www.contentstack.com/
