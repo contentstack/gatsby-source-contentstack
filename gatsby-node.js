@@ -105,74 +105,21 @@ exports.createSchemaCustomization = function () {
   };
 }();
 
-exports.onCreateNode = function () {
+exports.sourceNodes = function () {
   var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref4, configOptions) {
-    var createNode = _ref4.actions.createNode,
-        getCache = _ref4.getCache,
+    var actions = _ref4.actions,
+        getNode = _ref4.getNode,
+        getNodes = _ref4.getNodes,
         createNodeId = _ref4.createNodeId,
-        node = _ref4.node;
-    var typePrefix, fileNode;
+        store = _ref4.store,
+        reporter = _ref4.reporter,
+        createContentDigest = _ref4.createContentDigest;
+
+    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref5, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
+
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
-          case 0:
-            // use a custom type prefix if specified
-            typePrefix = configOptions.type_prefix || 'Contentstack';
-            // because onCreateNode is called for all nodes, verify that you are only running this code on nodes created by your plugin
-
-            if (!(node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
-              _context2.next = 7;
-              break;
-            }
-
-            // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-            console.log(encodeURI(node.url), 'url>>>>>>>>>>>>>>>');
-            _context2.next = 5;
-            return createRemoteFileNode({
-              // the url of the remote image to generate a node for
-              url: encodeURI(node.url),
-              getCache: getCache,
-              createNode: createNode,
-              createNodeId: createNodeId,
-              parentNodeId: node.id
-            });
-
-          case 5:
-            fileNode = _context2.sent;
-
-
-            if (fileNode) {
-              node.localAsset___NODE = fileNode.id;
-            }
-
-          case 7:
-          case 'end':
-            return _context2.stop();
-        }
-      }
-    }, _callee2, undefined);
-  }));
-
-  return function (_x3, _x4) {
-    return _ref3.apply(this, arguments);
-  };
-}();
-
-exports.sourceNodes = function () {
-  var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(_ref6, configOptions) {
-    var actions = _ref6.actions,
-        getNode = _ref6.getNode,
-        getNodes = _ref6.getNodes,
-        createNodeId = _ref6.createNodeId,
-        store = _ref6.store,
-        reporter = _ref6.reporter,
-        createContentDigest = _ref6.createContentDigest;
-
-    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref7, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
-
-    return _regenerator2.default.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
           case 0:
             deleteContentstackNodes = function deleteContentstackNodes(item, type) {
               var nodeId = '';
@@ -206,12 +153,12 @@ exports.sourceNodes = function () {
 
             configOptions.syncToken = syncToken || null;
 
-            _context3.next = 9;
+            _context2.next = 9;
             return fetchData(configOptions, reporter);
 
           case 9:
-            _ref7 = _context3.sent;
-            contentstackData = _ref7.contentstackData;
+            _ref5 = _context2.sent;
+            contentstackData = _ref5.contentstackData;
 
             contentstackData.contentTypes = contentTypes;
             syncData = contentstackData.syncData.reduce(function (merged, item) {
@@ -273,18 +220,6 @@ exports.sourceNodes = function () {
               createNode(assetNode);
             });
 
-            // if (configOptions.downloadAssets) {
-            //   downloadAssets({
-            //     actions,
-            //     createNodeId,
-            //     store,
-            //     cache,
-            //     getCache,
-            //     getNodes,
-            //     reporter,
-            //   }, typePrefix);
-            // }
-
             contentstackData.contentTypes.forEach(function (contentType) {
               var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
               createNode(contentTypeNode);
@@ -331,6 +266,56 @@ exports.sourceNodes = function () {
 
           case 31:
           case 'end':
+            return _context2.stop();
+        }
+      }
+    }, _callee2, undefined);
+  }));
+
+  return function (_x3, _x4) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+exports.onCreateNode = function () {
+  var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(_ref7, configOptions) {
+    var createNode = _ref7.actions.createNode,
+        getCache = _ref7.getCache,
+        createNodeId = _ref7.createNodeId,
+        node = _ref7.node;
+    var typePrefix, fileNode;
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            // use a custom type prefix if specified
+            typePrefix = configOptions.type_prefix || 'Contentstack';
+
+            if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
+              _context3.next = 6;
+              break;
+            }
+
+            _context3.next = 4;
+            return createRemoteFileNode({
+              // the url of the remote image to generate a node for
+              url: encodeURI(node.url),
+              getCache: getCache,
+              createNode: createNode,
+              createNodeId: createNodeId,
+              parentNodeId: node.id
+            });
+
+          case 4:
+            fileNode = _context3.sent;
+
+
+            if (fileNode) {
+              node.localAsset___NODE = fileNode.id;
+            }
+
+          case 6:
+          case 'end':
             return _context3.stop();
         }
       }
@@ -338,6 +323,6 @@ exports.sourceNodes = function () {
   }));
 
   return function (_x5, _x6) {
-    return _ref5.apply(this, arguments);
+    return _ref6.apply(this, arguments);
   };
 }();
