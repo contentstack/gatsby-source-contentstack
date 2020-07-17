@@ -143,7 +143,14 @@ exports.sourceNodes = async ({
 
   // adding nodes
 
+  contentstackData.contentTypes.forEach((contentType) => {
+    contentType.uid = ((contentType.uid).replace(/-/g, '_'));
+    const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
+    createNode(contentTypeNode);
+  });
+
   syncData.entry_published && syncData.entry_published.forEach((item) => {
+    item.content_type_uid = ((item.content_type_uid).replace(/-/g, '_'));
     const contentType = contentstackData.contentTypes.find((contentType) => item.content_type_uid === contentType.uid);
     const normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
     const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
@@ -154,12 +161,6 @@ exports.sourceNodes = async ({
     const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
     createNode(assetNode);
   });
-
-  contentstackData.contentTypes.forEach((contentType) => {
-    const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
-    createNode(contentTypeNode);
-  });
-
 
   function deleteContentstackNodes(item, type) {
     let nodeId = '';
@@ -197,6 +198,7 @@ exports.sourceNodes = async ({
   });
 
   syncData.content_type_deleted && syncData.content_type_deleted.forEach((item) => {
+    item.content_type_uid = ((item.content_type_uid).replace(/-/g, '_'));
     const sameContentTypeNodes = getNodes().filter(
       (n) => n.internal.type === `${typePrefix}_${item.content_type_uid}`,
     );
