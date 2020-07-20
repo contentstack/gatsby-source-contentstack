@@ -198,7 +198,14 @@ exports.sourceNodes = function () {
 
             // adding nodes
 
+            contentstackData.contentTypes.forEach(function (contentType) {
+              contentType.uid = contentType.uid.replace(/-/g, '_');
+              var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
+              createNode(contentTypeNode);
+            });
+
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
+              item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var contentType = contentstackData.contentTypes.find(function (contentType) {
                 return item.content_type_uid === contentType.uid;
               });
@@ -210,11 +217,6 @@ exports.sourceNodes = function () {
             syncData.asset_published && syncData.asset_published.forEach(function (item) {
               var assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
               createNode(assetNode);
-            });
-
-            contentstackData.contentTypes.forEach(function (contentType) {
-              var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
-              createNode(contentTypeNode);
             });
 
             // deleting nodes
@@ -236,6 +238,7 @@ exports.sourceNodes = function () {
             });
 
             syncData.content_type_deleted && syncData.content_type_deleted.forEach(function (item) {
+              item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var sameContentTypeNodes = getNodes().filter(function (n) {
                 return n.internal.type === typePrefix + '_' + item.content_type_uid;
               });
