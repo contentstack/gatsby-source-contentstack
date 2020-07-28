@@ -258,13 +258,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
             return source[field.uid] || null;
           }
         };
-        if (field.mandatory) {
-          if (field.multiple) {
-            fields[field.uid].type = '[Int]!';
-          } else {
-            fields[field.uid].type = 'Int!';
-          }
-        } else if (field.multiple) {
+        if (field.multiple) {
           fields[field.uid].type = '[Int]';
         } else {
           fields[field.uid].type = 'Int';
