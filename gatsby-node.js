@@ -71,6 +71,18 @@ exports.createSchemaCustomization = function () {
                   multiple: false,
                   mandatory: false,
                 });
+                contentType.schema.push({
+                  data_type: "group",
+                  uid: "publish_details",
+                  schema: [{
+                    data_type: "text",
+                    uid: "locale",
+                    multiple: false,
+                    mandatory: false,
+                  }],
+                  multiple: false,
+                  mandatory: false,
+                });
                 var result = buildCustomSchema(contentType.schema, [], name, typePrefix);
                 if ((0, _keys2.default)(result.references).length === 0) {
                   var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
