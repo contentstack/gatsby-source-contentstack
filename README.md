@@ -39,8 +39,8 @@ plugins: [
       // Optional: Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.
       type_prefix: `Contentstack`, // (default)
 
-      // Optional: Specify true if you want to download all your contentstack assets locally
-      downloadAssets: `boolean_value`
+      // Optional: Specify true if you want to download all your contentstack images locally
+      downloadImages: `boolean_value`
     },
   },
 ]

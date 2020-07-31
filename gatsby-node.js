@@ -190,7 +190,7 @@ exports.sourceNodes = function () {
               });
               if (n.localAsset___NODE) {
                 // Prevent GraphQL type inference from crashing on this property
-                touchNode({ nodeId: n.localAsset___NODE });
+                touchNode({ nodeId: n.localImage___NODE });
               }
             });
 
@@ -283,7 +283,7 @@ exports.onCreateNode = function () {
         getCache = _ref7.getCache,
         createNodeId = _ref7.createNodeId,
         node = _ref7.node;
-    var typePrefix, fileNode;
+    var typePrefix, regexp, matches, fileNode;
     return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -291,12 +291,17 @@ exports.onCreateNode = function () {
             // use a custom type prefix if specified
             typePrefix = configOptions.type_prefix || 'Contentstack';
 
-            if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
-              _context3.next = 6;
+            // filter the images from all the aasets
+
+            regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
+            matches = regexp.exec(node.url);
+
+            if (!(configOptions.downloadImages && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets' && matches !== null)) {
+              _context3.next = 8;
               break;
             }
 
-            _context3.next = 4;
+            _context3.next = 6;
             return createRemoteFileNode({
               // the url of the remote image to generate a node for
               url: encodeURI(node.url),
@@ -306,15 +311,15 @@ exports.onCreateNode = function () {
               parentNodeId: node.id
             });
 
-          case 4:
+          case 6:
             fileNode = _context3.sent;
 
 
             if (fileNode) {
-              node.localAsset___NODE = fileNode.id;
+              node.localImage___NODE = fileNode.id;
             }
 
-          case 6:
+          case 8:
           case 'end':
             return _context3.stop();
         }
