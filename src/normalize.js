@@ -182,6 +182,34 @@ const buildBlockCustomSchema = (blocks, types, parent, prefix) => {
   return blockType;
 };
 
+exports.extendSchemaWithDefaultEntryFields = (schema) => {
+  schema.push({
+    data_type: "text",
+    uid: "uid",
+    multiple: false,
+    mandatory: false,
+  });
+  schema.push({
+      data_type: "text",
+      uid: "locale",
+      multiple: false,
+      mandatory: false,
+  });
+  schema.push({
+      data_type: "group",
+      uid: "publish_details",
+      schema: [{
+          data_type: "text",
+          uid: "locale",
+          multiple: false,
+          mandatory: false,
+      }],
+      multiple: false,
+      mandatory: false,
+  });
+  return schema;
+}
+
 const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, prefix) => {
   const fields = {};
   let references = {};

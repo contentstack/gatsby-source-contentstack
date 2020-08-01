@@ -13,6 +13,7 @@ var _keys = require('babel-runtime/core-js/object/keys');
 var _keys2 = _interopRequireDefault(_keys);
 
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+const { extendSchemaWithDefaultEntryFields } = require('./src/normalize');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
@@ -55,7 +56,7 @@ exports.createSchemaCustomization = function () {
             _context.prev = 6;
             _context.t0 = _context['catch'](0);
 
-            console.error('Contentsatck fetch content type failed!');
+            console.error('Contentstack fetch content type failed!');
 
           case 9:
             if (configOptions.enableSchemaGeneration) {
@@ -65,25 +66,8 @@ exports.createSchemaCustomization = function () {
               contentTypes.forEach(function (contentType) {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
                 var name = typePrefix + '_' + contentTypeUid;
-                contentType.schema.push({
-                  data_type: "text",
-                  uid: "locale",
-                  multiple: false,
-                  mandatory: false,
-                });
-                contentType.schema.push({
-                  data_type: "group",
-                  uid: "publish_details",
-                  schema: [{
-                    data_type: "text",
-                    uid: "locale",
-                    multiple: false,
-                    mandatory: false,
-                  }],
-                  multiple: false,
-                  mandatory: false,
-                });
-                var result = buildCustomSchema(contentType.schema, [], name, typePrefix);
+                var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
+                var result = buildCustomSchema(extendedSchema, [], name, typePrefix);
                 if ((0, _keys2.default)(result.references).length === 0) {
                   var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
                     name: name,
