@@ -33,39 +33,19 @@ exports.createSchemaCustomization = async ({
       const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
       const name = `${typePrefix}_${contentTypeUid}`;
       const result = buildCustomSchema(contentType.schema, [], name, typePrefix);
-      if (Object.keys(result.references).length === 0) {
-        const typeDefs = [
-          `type linktype{
+      const typeDefs = [
+        `type linktype{
               title: String
               href: String
             }`,
-          schema.buildObjectType({
-            name,
-            fields: result.fields,
-            interfaces: ['Node'],
-          }),
-        ];
-        result.types = result.types.concat(typeDefs);
-        createTypes(result.types);
-      } else {
-        const typeDefs = [
-          `type linktype{
-              title: String
-              href: String
-            }`,
-          schema.buildUnionType({
-            name: result.references.name,
-            types: result.references.unions,
-          }),
-          schema.buildObjectType({
-            name,
-            fields: result.fields,
-            interfaces: ['Node'],
-          }),
-        ];
-        result.types = result.types.concat(typeDefs);
-        createTypes(result.types);
-      }
+        schema.buildObjectType({
+          name,
+          fields: result.fields,
+          interfaces: ['Node'],
+        }),
+      ];
+      result.types = result.types.concat(typeDefs);
+      createTypes(result.types);
     });
   }
 };

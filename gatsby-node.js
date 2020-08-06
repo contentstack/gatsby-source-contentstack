@@ -8,10 +8,6 @@ var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _keys = require('babel-runtime/core-js/object/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
-
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
@@ -66,26 +62,13 @@ exports.createSchemaCustomization = function () {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
                 var name = typePrefix + '_' + contentTypeUid;
                 var result = buildCustomSchema(contentType.schema, [], name, typePrefix);
-                if ((0, _keys2.default)(result.references).length === 0) {
-                  var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
-                    name: name,
-                    fields: result.fields,
-                    interfaces: ['Node']
-                  })];
-                  result.types = result.types.concat(typeDefs);
-                  createTypes(result.types);
-                } else {
-                  var _typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildUnionType({
-                    name: result.references.name,
-                    types: result.references.unions
-                  }), schema.buildObjectType({
-                    name: name,
-                    fields: result.fields,
-                    interfaces: ['Node']
-                  })];
-                  result.types = result.types.concat(_typeDefs);
-                  createTypes(result.types);
-                }
+                var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
+                  name: name,
+                  fields: result.fields,
+                  interfaces: ['Node']
+                })];
+                result.types = result.types.concat(typeDefs);
+                createTypes(result.types);
               });
             }
 
