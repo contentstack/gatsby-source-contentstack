@@ -1,6 +1,5 @@
 const queryString = require('query-string');
 const fetch = require('node-fetch');
-
 const {
   version,
 // eslint-disable-next-line import/no-unresolved
@@ -124,6 +123,7 @@ const getPagedData = async (
 ) => {
   query.skip = skip;
   query.limit = limit;
+  query.include_global_field_schema = true
   const response = await fetchCsData(url, config, query);
   if (!aggregatedResponse) {
     aggregatedResponse = response[responseKey];
