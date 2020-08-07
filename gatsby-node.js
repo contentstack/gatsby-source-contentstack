@@ -64,15 +64,12 @@ exports.createSchemaCustomization = function () {
                 var name = typePrefix + '_' + contentTypeUid;
                 var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
                 var result = buildCustomSchema(extendedSchema, [], name, typePrefix);
-                var _typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildUnionType({
-                  name: result.references.name,
-                  types: result.references.unions
-                }), schema.buildObjectType({
+                var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
                   name: name,
                   fields: result.fields,
                   interfaces: ['Node']
                 })];
-                result.types = result.types.concat(_typeDefs);
+                result.types = result.types.concat(typeDefs);
                 createTypes(result.types);
               });
             }
