@@ -14,7 +14,7 @@ const {
 } = require('./fetch');
 
 let contentTypes = [];
-
+let references = []
 exports.createSchemaCustomization = async ({
   actions,
   schema,
@@ -32,7 +32,8 @@ exports.createSchemaCustomization = async ({
     contentTypes.forEach((contentType) => {
       const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
       const name = `${typePrefix}_${contentTypeUid}`;
-      const result = buildCustomSchema(contentType.schema, [], name, typePrefix);
+      const result = buildCustomSchema(contentType.schema, [], [], name, typePrefix);
+      references = references.concat(result.references)
       const typeDefs = [
         `type linktype{
               title: String
@@ -195,3 +196,31 @@ exports.sourceNodes = async ({
   newState[`${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`] = nextSyncToken;
   setPluginStatus(newState);
 };
+
+
+exports.createResolvers = ({
+  createResolvers
+}) => {
+  let resolvers = {}
+  references.forEach((result) => {
+    resolvers[result.parent] = {
+      [result.uid]: {
+        resolve(source, args, context, info) {
+          if (source[`${result.uid}___NODE`]) {
+            const nodesData = [];
+            context.nodeModel.getAllNodes().find((node) => {
+              source[`${result.uid}___NODE`].forEach((id) => {
+                if (node.id === id) {
+                  nodesData.push(node);
+                }
+              });
+            });
+            return nodesData;
+          }
+          return [];
+        },
+      }
+    }
+  })
+  createResolvers(resolvers)
+}
