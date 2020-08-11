@@ -64,20 +64,18 @@ exports.createSchemaCustomization = function () {
               createTypes = actions.createTypes;
 
               contentTypes.forEach(function (contentType) {
-                if (contentType.uid === 'pdp') {
-                  var contentTypeUid = contentType.uid.replace(/-/g, '_');
-                  var name = typePrefix + '_' + contentTypeUid;
-                  var result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
-                  references = references.concat(result.references);
-                  groups = groups.concat(result.groups);
-                  var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
-                    name: name,
-                    fields: result.fields,
-                    interfaces: ['Node']
-                  })];
-                  result.types = result.types.concat(typeDefs);
-                  createTypes(result.types);
-                }
+                var contentTypeUid = contentType.uid.replace(/-/g, '_');
+                var name = typePrefix + '_' + contentTypeUid;
+                var result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
+                references = references.concat(result.references);
+                groups = groups.concat(result.groups);
+                var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
+                  name: name,
+                  fields: result.fields,
+                  interfaces: ['Node']
+                })];
+                result.types = result.types.concat(typeDefs);
+                createTypes(result.types);
               });
             }
 

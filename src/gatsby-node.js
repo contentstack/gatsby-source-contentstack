@@ -31,26 +31,24 @@ exports.createSchemaCustomization = async ({
       createTypes,
     } = actions;
     contentTypes.forEach((contentType) => {
-      if (contentType.uid === 'pdp') {
-        const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
-        const name = `${typePrefix}_${contentTypeUid}`;
-        const result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
-        references = references.concat(result.references)
-        groups = groups.concat(result.groups)
-        const typeDefs = [
-          `type linktype{
+      const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
+      const name = `${typePrefix}_${contentTypeUid}`;
+      const result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
+      references = references.concat(result.references)
+      groups = groups.concat(result.groups)
+      const typeDefs = [
+        `type linktype{
               title: String
               href: String
             }`,
-          schema.buildObjectType({
-            name,
-            fields: result.fields,
-            interfaces: ['Node'],
-          }),
-        ];
-        result.types = result.types.concat(typeDefs);
-        createTypes(result.types);
-      }
+        schema.buildObjectType({
+          name,
+          fields: result.fields,
+          interfaces: ['Node'],
+        }),
+      ];
+      result.types = result.types.concat(typeDefs);
+      createTypes(result.types);
     });
   }
 };
