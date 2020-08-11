@@ -177,14 +177,14 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   return entryObj;
 };
 
-var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, parent, prefix) {
+var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, parent, prefix) {
   var blockFields = {};
   var blockType = 'type ' + parent + ' {';
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
     blockType = blockType.concat(block.uid + ' : ' + newparent + ' ');
 
-    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, newparent, prefix),
+    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, newparent, prefix),
         fields = _buildCustomSchema.fields;
 
     for (var key in fields) {
@@ -202,8 +202,9 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
   return blockType;
 };
 
-var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, parent, prefix) {
+var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, parent, prefix) {
   var fields = {};
+  groups = groups || [];
   references = references || [];
   types = types || [];
   schema.forEach(function (field) {
@@ -327,7 +328,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
       case 'group':
       case 'global_field':
         var newparent = parent.concat('_', field.uid);
-        var result = buildCustomSchema(field.schema, types, references, newparent, prefix);
+        var result = buildCustomSchema(field.schema, types, references, groups, newparent, prefix);
 
         for (var key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
@@ -337,24 +338,22 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         if ((0, _keys2.default)(result.fields).length > 0) {
           var _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
           types.push(_type);
-          fields[field.uid] = {
-            resolve: function resolve(source) {
-              if (field.multiple && !Array.isArray(source[field.uid])) {
-                return [];
-              }
-              return source[field.uid] || null;
-            }
-          };
+
+          groups.push({
+            parent: parent,
+            field: field
+          });
+
           if (field.mandatory) {
             if (field.multiple) {
-              fields[field.uid].type = '[' + newparent + ']!';
+              fields[field.uid] = '[' + newparent + ']!';
             } else {
-              fields[field.uid].type = newparent + '!';
+              fields[field.uid] = newparent + '!';
             }
           } else if (field.multiple) {
-            fields[field.uid].type = '[' + newparent + ']';
+            fields[field.uid] = '[' + newparent + ']';
           } else {
-            fields[field.uid].type = '' + newparent;
+            fields[field.uid] = '' + newparent;
           }
         }
 
@@ -417,6 +416,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
   return {
     fields: fields,
     types: types,
-    references: references
+    references: references,
+    groups: groups
   };
 };

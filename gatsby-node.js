@@ -33,6 +33,7 @@ var _require2 = require('./fetch'),
 
 var contentTypes = [];
 var references = [];
+var groups = [];
 exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
     var actions = _ref2.actions,
@@ -63,17 +64,20 @@ exports.createSchemaCustomization = function () {
               createTypes = actions.createTypes;
 
               contentTypes.forEach(function (contentType) {
-                var contentTypeUid = contentType.uid.replace(/-/g, '_');
-                var name = typePrefix + '_' + contentTypeUid;
-                var result = buildCustomSchema(contentType.schema, [], [], name, typePrefix);
-                references = references.concat(result.references);
-                var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
-                  name: name,
-                  fields: result.fields,
-                  interfaces: ['Node']
-                })];
-                result.types = result.types.concat(typeDefs);
-                createTypes(result.types);
+                if (contentType.uid === 'pdp') {
+                  var contentTypeUid = contentType.uid.replace(/-/g, '_');
+                  var name = typePrefix + '_' + contentTypeUid;
+                  var result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
+                  references = references.concat(result.references);
+                  groups = groups.concat(result.groups);
+                  var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
+                    name: name,
+                    fields: result.fields,
+                    interfaces: ['Node']
+                  })];
+                  result.types = result.types.concat(typeDefs);
+                  createTypes(result.types);
+                }
               });
             }
 
@@ -264,13 +268,13 @@ exports.createResolvers = function (_ref6) {
   var createResolvers = _ref6.createResolvers;
 
   var resolvers = {};
-  references.forEach(function (result) {
-    resolvers[result.parent] = (0, _defineProperty3.default)({}, result.uid, {
+  references.forEach(function (reference) {
+    resolvers[reference.parent] = (0, _defineProperty3.default)({}, reference.uid, {
       resolve: function resolve(source, args, context, info) {
-        if (source[result.uid + '___NODE']) {
+        if (source[reference.uid + '___NODE']) {
           var nodesData = [];
           context.nodeModel.getAllNodes().find(function (node) {
-            source[result.uid + '___NODE'].forEach(function (id) {
+            source[reference.uid + '___NODE'].forEach(function (id) {
               if (node.id === id) {
                 nodesData.push(node);
               }
@@ -279,6 +283,16 @@ exports.createResolvers = function (_ref6) {
           return nodesData;
         }
         return [];
+      }
+    });
+  });
+  groups.forEach(function (group) {
+    resolvers[group.parent] = (0, _defineProperty3.default)({}, group.field.uid, {
+      resolve: function resolve(source) {
+        if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
+          return [];
+        }
+        return source[group.field.uid] || null;
       }
     });
   });

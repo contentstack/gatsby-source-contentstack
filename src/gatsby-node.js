@@ -14,7 +14,8 @@ const {
 } = require('./fetch');
 
 let contentTypes = [];
-let references = []
+let references = [];
+let groups = [];
 exports.createSchemaCustomization = async ({
   actions,
   schema,
@@ -30,23 +31,26 @@ exports.createSchemaCustomization = async ({
       createTypes,
     } = actions;
     contentTypes.forEach((contentType) => {
-      const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
-      const name = `${typePrefix}_${contentTypeUid}`;
-      const result = buildCustomSchema(contentType.schema, [], [], name, typePrefix);
-      references = references.concat(result.references)
-      const typeDefs = [
-        `type linktype{
+      if (contentType.uid === 'pdp') {
+        const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
+        const name = `${typePrefix}_${contentTypeUid}`;
+        const result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
+        references = references.concat(result.references)
+        groups = groups.concat(result.groups)
+        const typeDefs = [
+          `type linktype{
               title: String
               href: String
             }`,
-        schema.buildObjectType({
-          name,
-          fields: result.fields,
-          interfaces: ['Node'],
-        }),
-      ];
-      result.types = result.types.concat(typeDefs);
-      createTypes(result.types);
+          schema.buildObjectType({
+            name,
+            fields: result.fields,
+            interfaces: ['Node'],
+          }),
+        ];
+        result.types = result.types.concat(typeDefs);
+        createTypes(result.types);
+      }
     });
   }
 };
@@ -202,14 +206,14 @@ exports.createResolvers = ({
   createResolvers
 }) => {
   let resolvers = {}
-  references.forEach((result) => {
-    resolvers[result.parent] = {
-      [result.uid]: {
+  references.forEach((reference) => {
+    resolvers[reference.parent] = {
+      [reference.uid]: {
         resolve(source, args, context, info) {
-          if (source[`${result.uid}___NODE`]) {
+          if (source[`${reference.uid}___NODE`]) {
             const nodesData = [];
             context.nodeModel.getAllNodes().find((node) => {
-              source[`${result.uid}___NODE`].forEach((id) => {
+              source[`${reference.uid}___NODE`].forEach((id) => {
                 if (node.id === id) {
                   nodesData.push(node);
                 }
@@ -218,6 +222,18 @@ exports.createResolvers = ({
             return nodesData;
           }
           return [];
+        },
+      }
+    }
+  })
+  groups.forEach((group) => {
+    resolvers[group.parent] = {
+      [group.field.uid]: {
+        resolve: (source) => {
+          if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
+            return [];
+          }
+          return source[group.field.uid] || null;
         },
       }
     }
