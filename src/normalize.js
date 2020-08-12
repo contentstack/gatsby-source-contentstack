@@ -210,6 +210,18 @@ exports.extendSchemaWithDefaultEntryFields = (schema) => {
       multiple: false,
       mandatory: false,
   });
+  schema.push({
+    data_type: "datetime",
+    uid: "updated_at",
+    multiple: false,
+    mandatory: false,
+  });
+  schema.push({
+    data_type: "string",
+    uid: "updated_by",
+    multiple: false,
+    mandatory: false,
+  });
   return schema;
 }
 
