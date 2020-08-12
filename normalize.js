@@ -360,7 +360,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         break;
       case 'blocks':
         var blockparent = parent.concat('_', field.uid);
-        var blockType = buildBlockCustomSchema(field.blocks, types, references, blockparent, prefix);
+        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, blockparent, prefix);
         types.push(blockType);
         if (field.mandatory) {
           if (field.multiple) {

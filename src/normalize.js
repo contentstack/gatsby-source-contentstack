@@ -338,7 +338,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
         break;
       case 'blocks':
         const blockparent = parent.concat('_', field.uid);
-        const blockType = buildBlockCustomSchema(field.blocks, types, references, blockparent, prefix);
+        const blockType = buildBlockCustomSchema(field.blocks, types, references, groups, blockparent, prefix);
         types.push(blockType);
         if (field.mandatory) {
           if (field.multiple) {
