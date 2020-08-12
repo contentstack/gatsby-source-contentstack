@@ -6,6 +6,7 @@ const {
   makeEntryNodeUid,
   makeAssetNodeUid,
   buildCustomSchema,
+  extendSchemaWithDefaultEntryFields,
 } = require('./normalize');
 
 const {
@@ -23,7 +24,7 @@ exports.createSchemaCustomization = async ({
   try {
     contentTypes = await fetchContentTypes(configOptions);
   } catch (error) {
-    console.error('Contentsatck fetch content type failed!');
+    console.error('Contentstack fetch content type failed!');
   }
   if (configOptions.enableSchemaGeneration) {
     const typePrefix = configOptions.type_prefix || 'Contentstack';
@@ -33,9 +34,10 @@ exports.createSchemaCustomization = async ({
     contentTypes.forEach((contentType) => {
       const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
       const name = `${typePrefix}_${contentTypeUid}`;
-      const result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
-      references = references.concat(result.references)
-      groups = groups.concat(result.groups)
+      const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
+      let result = buildCustomSchema(extendedSchema, [], [], [], name, typePrefix);
+      references = references.concat(result.references);
+      groups = groups.concat(result.groups);
       const typeDefs = [
         `type linktype{
               title: String

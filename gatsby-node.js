@@ -13,7 +13,6 @@ var _regenerator = require('babel-runtime/regenerator');
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
-const { extendSchemaWithDefaultEntryFields } = require('./src/normalize');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
@@ -26,7 +25,8 @@ var _require = require('./normalize'),
     processAsset = _require.processAsset,
     makeEntryNodeUid = _require.makeEntryNodeUid,
     makeAssetNodeUid = _require.makeAssetNodeUid,
-    buildCustomSchema = _require.buildCustomSchema;
+    buildCustomSchema = _require.buildCustomSchema,
+    extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields;
 
 var _require2 = require('./fetch'),
     fetchData = _require2.fetchData,
