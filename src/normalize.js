@@ -278,13 +278,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
         fields[field.uid] = {
           resolve: (source) => source[field.uid] || null,
         };
-        if (field.mandatory) {
-          if (field.multiple) {
-            fields[field.uid].type = '[Int]!';
-          } else {
-            fields[field.uid].type = 'Int!';
-          }
-        } else if (field.multiple) {
+        if (field.multiple) {
           fields[field.uid].type = '[Int]';
         } else {
           fields[field.uid].type = 'Int';
