@@ -4,6 +4,10 @@ var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
+var _extends4 = require('babel-runtime/helpers/extends');
+
+var _extends5 = _interopRequireDefault(_extends4);
+
 var _set = require('babel-runtime/core-js/set');
 
 var _set2 = _interopRequireDefault(_set);
@@ -269,7 +273,7 @@ exports.createResolvers = function (_ref6) {
 
   var resolvers = {};
   references.forEach(function (reference) {
-    resolvers[reference.parent] = (0, _defineProperty3.default)({}, reference.uid, {
+    resolvers[reference.parent] = (0, _extends5.default)({}, resolvers[reference.parent], (0, _defineProperty3.default)({}, reference.uid, {
       resolve: function resolve(source, args, context, info) {
         if (source[reference.uid + '___NODE']) {
           var nodesData = [];
@@ -284,17 +288,17 @@ exports.createResolvers = function (_ref6) {
         }
         return [];
       }
-    });
+    }));
   });
   groups.forEach(function (group) {
-    resolvers[group.parent] = (0, _defineProperty3.default)({}, group.field.uid, {
+    resolvers[group.parent] = (0, _extends5.default)({}, resolvers[group.parent], (0, _defineProperty3.default)({}, group.field.uid, {
       resolve: function resolve(source) {
         if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
           return [];
         }
         return source[group.field.uid] || null;
       }
-    });
+    }));
   });
   createResolvers(resolvers);
 };

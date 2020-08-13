@@ -203,40 +203,46 @@ exports.sourceNodes = async ({
 
 
 exports.createResolvers = ({
-  createResolvers
+  createResolvers,
 }) => {
-  let resolvers = {}
+  const resolvers = {};
   references.forEach((reference) => {
     resolvers[reference.parent] = {
-      [reference.uid]: {
-        resolve(source, args, context, info) {
-          if (source[`${reference.uid}___NODE`]) {
-            const nodesData = [];
-            context.nodeModel.getAllNodes().find((node) => {
-              source[`${reference.uid}___NODE`].forEach((id) => {
-                if (node.id === id) {
-                  nodesData.push(node);
-                }
+      ...resolvers[reference.parent],
+      ...{
+        [reference.uid]: {
+          resolve(source, args, context, info) {
+            if (source[`${reference.uid}___NODE`]) {
+              const nodesData = [];
+              context.nodeModel.getAllNodes().find((node) => {
+                source[`${reference.uid}___NODE`].forEach((id) => {
+                  if (node.id === id) {
+                    nodesData.push(node);
+                  }
+                });
               });
-            });
-            return nodesData;
-          }
-          return [];
+              return nodesData;
+            }
+            return [];
+          },
         },
-      }
-    }
-  })
+      },
+    };
+  });
   groups.forEach((group) => {
     resolvers[group.parent] = {
-      [group.field.uid]: {
-        resolve: (source) => {
-          if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
-            return [];
-          }
-          return source[group.field.uid] || null;
+      ...resolvers[group.parent],
+      ...{
+        [group.field.uid]: {
+          resolve: (source) => {
+            if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
+              return [];
+            }
+            return source[group.field.uid] || null;
+          },
         },
-      }
-    }
-  })
-  createResolvers(resolvers)
-}
+      },
+    };
+  });
+  createResolvers(resolvers);
+};
