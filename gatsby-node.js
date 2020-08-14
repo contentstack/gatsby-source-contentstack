@@ -1,5 +1,9 @@
 'use strict';
 
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
 var _set = require('babel-runtime/core-js/set');
 
 var _set2 = _interopRequireDefault(_set);
@@ -28,7 +32,8 @@ var _require2 = require('./fetch'),
     fetchContentTypes = _require2.fetchContentTypes;
 
 var contentTypes = [];
-
+var references = [];
+var groups = [];
 exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
     var actions = _ref2.actions,
@@ -61,7 +66,9 @@ exports.createSchemaCustomization = function () {
               contentTypes.forEach(function (contentType) {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
                 var name = typePrefix + '_' + contentTypeUid;
-                var result = buildCustomSchema(contentType.schema, [], name, typePrefix);
+                var result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
+                references = references.concat(result.references);
+                groups = groups.concat(result.groups);
                 var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
                   name: name,
                   fields: result.fields,
@@ -254,3 +261,38 @@ exports.sourceNodes = function () {
     return _ref3.apply(this, arguments);
   };
 }();
+
+exports.createResolvers = function (_ref6) {
+  var createResolvers = _ref6.createResolvers;
+
+  var resolvers = {};
+  references.forEach(function (reference) {
+    resolvers[reference.parent] = (0, _defineProperty3.default)({}, reference.uid, {
+      resolve: function resolve(source, args, context, info) {
+        if (source[reference.uid + '___NODE']) {
+          var nodesData = [];
+          context.nodeModel.getAllNodes().find(function (node) {
+            source[reference.uid + '___NODE'].forEach(function (id) {
+              if (node.id === id) {
+                nodesData.push(node);
+              }
+            });
+          });
+          return nodesData;
+        }
+        return [];
+      }
+    });
+  });
+  groups.forEach(function (group) {
+    resolvers[group.parent] = (0, _defineProperty3.default)({}, group.field.uid, {
+      resolve: function resolve(source) {
+        if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
+          return [];
+        }
+        return source[group.field.uid] || null;
+      }
+    });
+  });
+  createResolvers(resolvers);
+};

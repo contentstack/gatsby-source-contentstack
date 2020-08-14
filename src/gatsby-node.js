@@ -14,7 +14,8 @@ const {
 } = require('./fetch');
 
 let contentTypes = [];
-
+let references = [];
+let groups = [];
 exports.createSchemaCustomization = async ({
   actions,
   schema,
@@ -32,7 +33,9 @@ exports.createSchemaCustomization = async ({
     contentTypes.forEach((contentType) => {
       const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
       const name = `${typePrefix}_${contentTypeUid}`;
-      const result = buildCustomSchema(contentType.schema, [], name, typePrefix);
+      const result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
+      references = references.concat(result.references)
+      groups = groups.concat(result.groups)
       const typeDefs = [
         `type linktype{
               title: String
@@ -195,3 +198,43 @@ exports.sourceNodes = async ({
   newState[`${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`] = nextSyncToken;
   setPluginStatus(newState);
 };
+
+
+exports.createResolvers = ({
+  createResolvers
+}) => {
+  let resolvers = {}
+  references.forEach((reference) => {
+    resolvers[reference.parent] = {
+      [reference.uid]: {
+        resolve(source, args, context, info) {
+          if (source[`${reference.uid}___NODE`]) {
+            const nodesData = [];
+            context.nodeModel.getAllNodes().find((node) => {
+              source[`${reference.uid}___NODE`].forEach((id) => {
+                if (node.id === id) {
+                  nodesData.push(node);
+                }
+              });
+            });
+            return nodesData;
+          }
+          return [];
+        },
+      }
+    }
+  })
+  groups.forEach((group) => {
+    resolvers[group.parent] = {
+      [group.field.uid]: {
+        resolve: (source) => {
+          if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
+            return [];
+          }
+          return source[group.field.uid] || null;
+        },
+      }
+    }
+  })
+  createResolvers(resolvers)
+}
