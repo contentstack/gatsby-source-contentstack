@@ -206,6 +206,7 @@ exports.createResolvers = ({
   let resolvers = {}
   references.forEach((reference) => {
     resolvers[reference.parent] = {
+      ...resolvers[reference.parent],
       [reference.uid]: {
         resolve(source, args, context, info) {
           if (source[`${reference.uid}___NODE`]) {
@@ -226,6 +227,7 @@ exports.createResolvers = ({
   })
   groups.forEach((group) => {
     resolvers[group.parent] = {
+      ...resolvers[group.parent],
       [group.field.uid]: {
         resolve: (source) => {
           if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
