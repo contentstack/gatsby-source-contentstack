@@ -34,8 +34,8 @@ exports.createSchemaCustomization = async ({
       const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
       const name = `${typePrefix}_${contentTypeUid}`;
       const result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
-      references = references.concat(result.references)
-      groups = groups.concat(result.groups)
+      references = references.concat(result.references);
+      groups = groups.concat(result.groups);
       const typeDefs = [
         `type linktype{
               title: String
@@ -201,11 +201,12 @@ exports.sourceNodes = async ({
 
 
 exports.createResolvers = ({
-  createResolvers
+  createResolvers,
 }) => {
-  let resolvers = {}
+  const resolvers = {};
   references.forEach((reference) => {
     resolvers[reference.parent] = {
+      ...resolvers[reference.parent],
       [reference.uid]: {
         resolve(source, args, context, info) {
           if (source[`${reference.uid}___NODE`]) {
@@ -221,11 +222,12 @@ exports.createResolvers = ({
           }
           return [];
         },
-      }
-    }
-  })
+      },
+    };
+  });
   groups.forEach((group) => {
     resolvers[group.parent] = {
+      ...resolvers[group.parent],
       [group.field.uid]: {
         resolve: (source) => {
           if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
@@ -233,8 +235,8 @@ exports.createResolvers = ({
           }
           return source[group.field.uid] || null;
         },
-      }
-    }
-  })
-  createResolvers(resolvers)
-}
+      },
+    };
+  });
+  createResolvers(resolvers);
+};
