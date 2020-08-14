@@ -208,7 +208,7 @@ var fetchCsData = function () {
             apiUrl = config.cdn + '/' + url + '?' + queryParams;
             option = {
               headers: {
-                'X-User-Agent': 'contentstack-gatsby-source-pilugin-' + version
+                'X-User-Agent': 'contentstack-gatsby-source-plugin-' + version
               }
             };
             return _context4.abrupt('return', new _promise2.default(function (resolve, reject) {
