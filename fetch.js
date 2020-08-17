@@ -19,7 +19,8 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var queryString = require('query-string');
-var fetch = require('node-fetch');
+// const fetch = require('node-fetch');
+var axios = require('axios');
 
 var _require = require('./package.json'),
     version = _require.version;
@@ -207,19 +208,23 @@ var fetchCsData = function () {
             queryParams = queryString.stringify(query);
             apiUrl = config.cdn + '/' + url + '?' + queryParams;
             option = {
+              method: 'get',
+              url: apiUrl,
               headers: {
                 'X-User-Agent': 'contentstack-gatsby-source-pilugin-' + version
-              }
+              },
+              responseType: 'json'
             };
             return _context4.abrupt('return', new _promise2.default(function (resolve, reject) {
-              fetch(apiUrl, option).then(function (response) {
-                return response.json();
-              }).then(function (data) {
-                if (data.error_code) {
+              axios(option).then(function (data) {
+                if (data.status >= 400 || !data) {
+                  return reject(data || 'Something went wrong.');
+                }
+                if (data.data && data.data.error_code) {
                   console.error(data);
-                  reject(data);
+                  reject(data.data);
                 } else {
-                  resolve(data);
+                  resolve(data.data);
                 }
               }).catch(function (err) {
                 console.error(err);

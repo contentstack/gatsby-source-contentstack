@@ -102,14 +102,14 @@ const fetchCsData = async (url, config, query) => {
   return new Promise((resolve, reject) => {
     axios(option)
       .then((data) => {
-        if (data.status >= 400) {
-          return reject(data);
+        if (data.status >= 400 || !data) {
+          return reject(data || 'Something went wrong.');
         }
-        if (data?.data?.error_code) {
+        if (data.data && data.data.error_code) {
           console.error(data);
-          reject(data?.data);
+          reject(data.data);
         } else {
-          resolve(data?.data);
+          resolve(data.data);
         }
       })
       .catch((err) => {
