@@ -23,7 +23,7 @@ var queryString = require('query-string');
 var axios = require('axios');
 
 var _require = require('./package.json'),
-    version = _require.version;
+  version = _require.version;
 
 exports.fetchData = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(configOptions, reporter) {
@@ -46,13 +46,13 @@ exports.fetchData = function () {
             syncEntryParams = configOptions.syncToken ? {
               sync_token: configOptions.syncToken
             } : {
-              init: true
-            };
+                init: true
+              };
             syncAssetParams = configOptions.syncToken ? {
               sync_token: configOptions.syncToken
             } : {
-              init: true
-            };
+                init: true
+              };
 
 
             syncEntryParams.type = 'entry_published';
@@ -88,8 +88,8 @@ exports.fetchData = function () {
             syncParams = configOptions.syncToken ? {
               sync_token: configOptions.syncToken
             } : {
-              init: true
-            };
+                init: true
+              };
             _context.prev = 26;
             _context.next = 29;
             return fetchSyncData(syncParams, configOptions);
@@ -211,7 +211,7 @@ var fetchCsData = function () {
               method: 'get',
               url: apiUrl,
               headers: {
-                'X-User-Agent': 'contentstack-gatsby-source-pilugin-' + version
+                'X-User-Agent': 'contentstack-gatsby-source-plugin-' + version
               },
               responseType: 'json'
             };

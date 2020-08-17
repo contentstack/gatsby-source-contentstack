@@ -52,7 +52,7 @@ exports.processEntry = (contentType, entry, createNodeId, createContentDigest, t
 exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   const resolveEntry = {
     ...entry,
-    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix)
+    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix),
   };
   return resolveEntry;
 };
@@ -161,18 +161,15 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
   return entryObj;
 };
 
-const buildBlockCustomSchema = (blocks, types, parent, prefix) => {
+const buildBlockCustomSchema = (blocks, types, references, groups, parent, prefix) => {
   const blockFields = {};
   let blockType = `type ${parent} {`;
   blocks.forEach((block) => {
-    if (block.schema.length === 1 && block.schema[0].data_type === 'reference') {
-      return
-    }
     const newparent = parent.concat(block.uid);
     blockType = blockType.concat(`${block.uid} : ${newparent} `);
     const {
       fields,
-    } = buildCustomSchema(block.schema, types, newparent, prefix);
+    } = buildCustomSchema(block.schema, types, references, groups, newparent, prefix);
     for (const key in fields) {
       if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
         fields[key] = fields[key].type;
@@ -188,12 +185,11 @@ const buildBlockCustomSchema = (blocks, types, parent, prefix) => {
   return blockType;
 };
 
-const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, prefix) => {
+const buildCustomSchema = exports.buildCustomSchema = (schema, types, references, groups, parent, prefix) => {
   const fields = {};
+  groups = groups || [];
+  references = references || [];
   types = types || [];
-  if (schema.length === 1 && schema[0].data_type === 'reference') {
-    return
-  }
   schema.forEach((field) => {
     switch (field.data_type) {
       case 'text':
@@ -275,7 +271,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
             if (field.multiple && source[`${field.uid}___NODE`]) {
               const nodesData = [];
               context.nodeModel.getAllNodes({
-                type: `${prefix}_assets`
+                type: `${prefix}_assets`,
               }).find((node) => {
                 source[`${field.uid}___NODE`].forEach((id) => {
                   if (node.id === id) {
@@ -288,8 +284,8 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
 
             if (source[`${field.uid}___NODE`]) {
               return context.nodeModel.getAllNodes({
-                  type: `${prefix}_assets`
-                })
+                type: `${prefix}_assets`,
+              })
                 .find((node) => node.id === source[`${field.uid}___NODE`]);
             }
             return null;
@@ -310,41 +306,39 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
       case 'group':
       case 'global_field':
         const newparent = parent.concat('_', field.uid);
-        const result = buildCustomSchema(field.schema, types, newparent, prefix);
-        if (result) {
-          for (const key in result.fields) {
-            if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
-              result.fields[key] = result.fields[key].type;
-            }
-          }
-          if (Object.keys(result.fields).length > 0) {
-            const type = `type ${newparent} ${JSON.stringify(result.fields).replace(/"/g, '')}`;
-            types.push(type);
-            fields[field.uid] = {
-              resolve: (source) => {
-                if (field.multiple && !Array.isArray(source[field.uid])) {
-                  return [];
-                }
-                return source[field.uid] || null;
-              },
-            };
-            if (field.mandatory) {
-              if (field.multiple) {
-                fields[field.uid].type = `[${newparent}]!`;
-              } else {
-                fields[field.uid].type = `${newparent}!`;
-              }
-            } else if (field.multiple) {
-              fields[field.uid].type = `[${newparent}]`;
-            } else {
-              fields[field.uid].type = `${newparent}`;
-            }
+        const result = buildCustomSchema(field.schema, types, references, groups, newparent, prefix);
+
+        for (const key in result.fields) {
+          if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
+            result.fields[key] = result.fields[key].type;
           }
         }
+        if (Object.keys(result.fields).length > 0) {
+          const type = `type ${newparent} ${JSON.stringify(result.fields).replace(/"/g, '')}`;
+          types.push(type);
+
+          groups.push({
+            parent,
+            field,
+          });
+
+          if (field.mandatory) {
+            if (field.multiple) {
+              fields[field.uid] = `[${newparent}]!`;
+            } else {
+              fields[field.uid] = `${newparent}!`;
+            }
+          } else if (field.multiple) {
+            fields[field.uid] = `[${newparent}]`;
+          } else {
+            fields[field.uid] = `${newparent}`;
+          }
+        }
+
         break;
       case 'blocks':
         const blockparent = parent.concat('_', field.uid);
-        const blockType = buildBlockCustomSchema(field.blocks, types, blockparent, prefix);
+        const blockType = buildBlockCustomSchema(field.blocks, types, references, groups, blockparent, prefix);
         types.push(blockType);
         if (field.mandatory) {
           if (field.multiple) {
@@ -358,10 +352,49 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
           fields[field.uid] = `${blockparent}`;
         }
         break;
+      case 'reference':
+        let unionType = 'union ';
+        if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
+          field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
+          const type = `type ${prefix}_${field.reference_to} implements Node { title: String! }`;
+          types.push(type);
+          if (field.mandatory) {
+            fields[field.uid] = `[${prefix}_${field.reference_to}]!`;
+          } else {
+            fields[field.uid] = `[${prefix}_${field.reference_to}]`;
+          }
+        } else {
+          const unions = [];
+          field.reference_to.forEach((reference) => {
+            const referenceType = `${prefix}_${reference}`;
+            unionType = unionType.concat(referenceType);
+            unions.push(referenceType);
+            const type = `type ${referenceType} implements Node { title: String! }`;
+            types.push(type);
+          });
+          let name = '';
+          name = name.concat(unions.join(''), '_Union');
+          unionType = unionType.concat('_Union = ', unions.join(' | '));
+          types.push(unionType);
+
+          references.push({
+            parent,
+            uid: field.uid,
+          });
+
+          if (field.mandatory) {
+            fields[field.uid] = `[${name}]!`;
+          } else {
+            fields[field.uid] = `[${name}]`;
+          }
+        }
+        break;
     }
   });
   return {
     fields,
     types,
+    references,
+    groups,
   };
 };

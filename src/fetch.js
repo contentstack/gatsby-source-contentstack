@@ -95,7 +95,7 @@ const fetchCsData = async (url, config, query) => {
     method: 'get',
     url: apiUrl,
     headers: {
-      'X-User-Agent': `contentstack-gatsby-source-pilugin-${version}`,
+      'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
     },
     responseType: 'json'
   };
@@ -130,7 +130,7 @@ const getPagedData = async (
 ) => {
   query.skip = skip;
   query.limit = limit;
-  query.include_global_field_schema = true
+  query.include_global_field_schema = true;
   const response = await fetchCsData(url, config, query);
   if (!aggregatedResponse) {
     aggregatedResponse = response[responseKey];
