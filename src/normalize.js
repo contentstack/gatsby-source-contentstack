@@ -52,7 +52,7 @@ exports.processEntry = (contentType, entry, createNodeId, createContentDigest, t
 exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   const resolveEntry = {
     ...entry,
-    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix)
+    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix),
   };
   return resolveEntry;
 };
@@ -227,8 +227,8 @@ exports.extendSchemaWithDefaultEntryFields = (schema) => {
 
 const buildCustomSchema = exports.buildCustomSchema = (schema, types, references, groups, parent, prefix) => {
   const fields = {};
-  groups = groups || []
-  references = references || []
+  groups = groups || [];
+  references = references || [];
   types = types || [];
   schema.forEach((field) => {
     switch (field.data_type) {
@@ -305,7 +305,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
             if (field.multiple && source[`${field.uid}___NODE`]) {
               const nodesData = [];
               context.nodeModel.getAllNodes({
-                type: `${prefix}_assets`
+                type: `${prefix}_assets`,
               }).find((node) => {
                 source[`${field.uid}___NODE`].forEach((id) => {
                   if (node.id === id) {
@@ -318,8 +318,8 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
 
             if (source[`${field.uid}___NODE`]) {
               return context.nodeModel.getAllNodes({
-                  type: `${prefix}_assets`
-                })
+                type: `${prefix}_assets`,
+              })
                 .find((node) => node.id === source[`${field.uid}___NODE`]);
             }
             return null;
@@ -354,8 +354,8 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
           groups.push({
             parent,
             field,
-          })
-          
+          });
+
           if (field.mandatory) {
             if (field.multiple) {
               fields[field.uid] = `[${newparent}]!`;
@@ -412,7 +412,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
           types.push(unionType);
 
           references.push({
-            parent: parent,
+            parent,
             uid: field.uid,
           });
 
@@ -424,7 +424,6 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
         }
         break;
     }
-
   });
   return {
     fields,
