@@ -69,11 +69,20 @@ const makeEntryNodeUid = exports.makeEntryNodeUid = (entry, createNodeId, typePr
 
 const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   let groupObj = null;
-  if (field.multiple && value instanceof Array) {
+  if (field.multiple) {
     groupObj = [];
-    value.forEach((groupValue) => {
-      groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
-    });
+    if (value instanceof Array) {
+      value.forEach((groupValue) => {
+        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+      });
+    } else {
+      // In some cases null value is null, this makes graphql treat all the objects as null
+      // So need to pass a valid array instance.
+      // This also helps to handle when a user changes a group to multiple after initially
+      // setting a group to single.. the server passes an object and the previous condition
+      // again makes groupObj null
+      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+    }
   } else {
     groupObj = {};
     groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
