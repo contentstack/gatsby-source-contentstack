@@ -306,6 +306,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
       case 'group':
       case 'global_field':
         const newparent = parent.concat('_', field.uid);
+
         const result = buildCustomSchema(field.schema, types, references, groups, newparent, prefix);
 
         for (const key in result.fields) {
@@ -313,8 +314,22 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
             result.fields[key] = result.fields[key].type;
           }
         }
+
         if (Object.keys(result.fields).length > 0) {
-          const type = `type ${newparent} ${JSON.stringify(result.fields).replace(/"/g, '')}`;
+
+          let _interface, type;
+
+          // Creates an interface for global_field, keeps it independent of content type.
+          if (field.data_type === 'global_field') {
+            let globalType = prefix + '_' + field.reference_to;
+            const interfaceFields = { ...result.fields, id: 'ID!' };
+            _interface = `interface ${globalType} @nodeInterface ${JSON.stringify(interfaceFields).replace(/"/g, '')}`;
+            types.push(_interface);
+            type = `type ${newparent} implements Node & ${globalType} ${JSON.stringify(result.fields).replace(/"/g, '')}`;
+          } else {
+            type = `type ${newparent} ${JSON.stringify(result.fields).replace(/"/g, '')}`;
+          }
+
           types.push(type);
 
           groups.push({

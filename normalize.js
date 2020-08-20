@@ -328,6 +328,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
       case 'group':
       case 'global_field':
         var newparent = parent.concat('_', field.uid);
+
         var result = buildCustomSchema(field.schema, types, references, groups, newparent, prefix);
 
         for (var key in result.fields) {
@@ -335,8 +336,23 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             result.fields[key] = result.fields[key].type;
           }
         }
+
         if ((0, _keys2.default)(result.fields).length > 0) {
-          var _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
+
+          var _interface = void 0,
+              _type = void 0;
+
+          // Creates an interface for global_field, keeps it independent of content type.
+          if (field.data_type === 'global_field') {
+            var globalType = prefix + '_' + field.reference_to;
+            var interfaceFields = (0, _extends3.default)({}, result.fields, { id: 'ID!' });
+            _interface = 'interface ' + globalType + ' @nodeInterface ' + (0, _stringify2.default)(interfaceFields).replace(/"/g, '');
+            types.push(_interface);
+            _type = 'type ' + newparent + ' implements Node & ' + globalType + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
+          } else {
+            _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
+          }
+
           types.push(_type);
 
           groups.push({
