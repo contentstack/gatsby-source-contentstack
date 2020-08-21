@@ -76,7 +76,7 @@ const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, cre
         groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
       });
     } else {
-      // In some cases null value is null, this makes graphql treat all the objects as null
+      // In some cases value is null, this makes graphql treat all the objects as null
       // So need to pass a valid array instance.
       // This also helps to handle when a user changes a group to multiple after initially
       // setting a group to single.. the server passes an object and the previous condition
