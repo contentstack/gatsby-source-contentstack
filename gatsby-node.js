@@ -29,7 +29,8 @@ var _require = require('./normalize'),
     processAsset = _require.processAsset,
     makeEntryNodeUid = _require.makeEntryNodeUid,
     makeAssetNodeUid = _require.makeAssetNodeUid,
-    buildCustomSchema = _require.buildCustomSchema;
+    buildCustomSchema = _require.buildCustomSchema,
+    extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields;
 
 var _require2 = require('./fetch'),
     fetchData = _require2.fetchData,
@@ -60,7 +61,7 @@ exports.createSchemaCustomization = function () {
             _context.prev = 6;
             _context.t0 = _context['catch'](0);
 
-            console.error('Contentsatck fetch content type failed!');
+            console.error('Contentstack fetch content type failed!');
 
           case 9:
             if (configOptions.enableSchemaGeneration) {
@@ -70,7 +71,8 @@ exports.createSchemaCustomization = function () {
               contentTypes.forEach(function (contentType) {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
                 var name = typePrefix + '_' + contentTypeUid;
-                var result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
+                var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
+                var result = buildCustomSchema(extendedSchema, [], [], [], name, typePrefix);
                 references = references.concat(result.references);
                 groups = groups.concat(result.groups);
                 var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({

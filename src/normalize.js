@@ -194,6 +194,46 @@ const buildBlockCustomSchema = (blocks, types, references, groups, parent, prefi
   return blockType;
 };
 
+exports.extendSchemaWithDefaultEntryFields = (schema) => {
+  schema.push({
+    data_type: "text",
+    uid: "uid",
+    multiple: false,
+    mandatory: false,
+  });
+  schema.push({
+      data_type: "text",
+      uid: "locale",
+      multiple: false,
+      mandatory: false,
+  });
+  schema.push({
+      data_type: "group",
+      uid: "publish_details",
+      schema: [{
+          data_type: "text",
+          uid: "locale",
+          multiple: false,
+          mandatory: false,
+      }],
+      multiple: false,
+      mandatory: false,
+  });
+  schema.push({
+    data_type: "isodate",
+    uid: "updated_at",
+    multiple: false,
+    mandatory: false,
+  });
+  schema.push({
+    data_type: "string",
+    uid: "updated_by",
+    multiple: false,
+    mandatory: false,
+  });
+  return schema;
+}
+
 const buildCustomSchema = exports.buildCustomSchema = (schema, types, references, groups, parent, prefix) => {
   const fields = {};
   groups = groups || [];
@@ -247,13 +287,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
         fields[field.uid] = {
           resolve: (source) => source[field.uid] || null,
         };
-        if (field.mandatory) {
-          if (field.multiple) {
-            fields[field.uid].type = '[Int]!';
-          } else {
-            fields[field.uid].type = 'Int!';
-          }
-        } else if (field.multiple) {
+        if (field.multiple) {
           fields[field.uid].type = '[Int]';
         } else {
           fields[field.uid].type = 'Int';

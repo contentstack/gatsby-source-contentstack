@@ -6,6 +6,7 @@ const {
   makeEntryNodeUid,
   makeAssetNodeUid,
   buildCustomSchema,
+  extendSchemaWithDefaultEntryFields,
 } = require('./normalize');
 
 const {
@@ -23,7 +24,7 @@ exports.createSchemaCustomization = async ({
   try {
     contentTypes = await fetchContentTypes(configOptions);
   } catch (error) {
-    console.error('Contentsatck fetch content type failed!');
+    console.error('Contentstack fetch content type failed!');
   }
   if (configOptions.enableSchemaGeneration) {
     const typePrefix = configOptions.type_prefix || 'Contentstack';
@@ -33,7 +34,8 @@ exports.createSchemaCustomization = async ({
     contentTypes.forEach((contentType) => {
       const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
       const name = `${typePrefix}_${contentTypeUid}`;
-      const result = buildCustomSchema(contentType.schema, [], [], [], name, typePrefix);
+      const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
+      let result = buildCustomSchema(extendedSchema, [], [], [], name, typePrefix);
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
       const typeDefs = [
@@ -207,20 +209,22 @@ exports.createResolvers = ({
   references.forEach((reference) => {
     resolvers[reference.parent] = {
       ...resolvers[reference.parent],
-      [reference.uid]: {
-        resolve(source, args, context, info) {
-          if (source[`${reference.uid}___NODE`]) {
-            const nodesData = [];
-            context.nodeModel.getAllNodes().find((node) => {
-              source[`${reference.uid}___NODE`].forEach((id) => {
-                if (node.id === id) {
-                  nodesData.push(node);
-                }
+      ...{
+        [reference.uid]: {
+          resolve(source, args, context, info) {
+            if (source[`${reference.uid}___NODE`]) {
+              const nodesData = [];
+              context.nodeModel.getAllNodes().find((node) => {
+                source[`${reference.uid}___NODE`].forEach((id) => {
+                  if (node.id === id) {
+                    nodesData.push(node);
+                  }
+                });
               });
-            });
-            return nodesData;
-          }
-          return [];
+              return nodesData;
+            }
+            return [];
+          },
         },
       },
     };
@@ -228,12 +232,14 @@ exports.createResolvers = ({
   groups.forEach((group) => {
     resolvers[group.parent] = {
       ...resolvers[group.parent],
-      [group.field.uid]: {
-        resolve: (source) => {
-          if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
-            return [];
-          }
-          return source[group.field.uid] || null;
+      ...{
+        [group.field.uid]: {
+          resolve: (source) => {
+            if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
+              return [];
+            }
+            return source[group.field.uid] || null;
+          },
         },
       },
     };
