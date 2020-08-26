@@ -175,6 +175,7 @@ const buildBlockCustomSchema = (blocks, types, references, groups, parent, prefi
 
   const blockFields = {};
   let blockType = `type ${parent} {`;
+
   blocks.forEach((block) => {
     const newparent = parent.concat(block.uid);
     blockType = blockType.concat(`${block.uid} : ${newparent} `);
@@ -354,7 +355,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
         break;
       case 'group':
       case 'global_field':
-        const newparent = parent.concat('_', field.uid);
+        let newparent = parent.concat('_', field.uid);
         let isInsideGlobalField = false; // Tracks if iterating inside global field
 
         // Handles nested modular blocks and groups inside global field
@@ -437,7 +438,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
 
         break;
       case 'blocks':
-        const blockparent = parent.concat('_', field.uid);
+        let blockparent = parent.concat('_', field.uid);
 
         if (extendedInterface) {
           globalField.path = `${globalField.path}|${field.uid}`;
