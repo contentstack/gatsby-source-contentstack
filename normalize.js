@@ -300,10 +300,10 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           resolve: function resolve(source, args, context) {
             if (field.multiple && source[field.uid + '___NODE']) {
               var nodesData = [];
-              context.nodeModel.getAllNodes({
-                type: prefix + '_assets'
-              }).find(function (node) {
-                source[field.uid + '___NODE'].forEach(function (id) {
+              source[field.uid + '___NODE'].forEach(function (id) {
+                context.nodeModel.getAllNodes({
+                  type: prefix + '_assets'
+                }).find(function (node) {
                   if (node.id === id) {
                     nodesData.push(node);
                   }
