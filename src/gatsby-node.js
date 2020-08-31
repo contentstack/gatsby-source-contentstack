@@ -211,8 +211,8 @@ exports.createResolvers = ({
         resolve(source, args, context, info) {
           if (source[`${reference.uid}___NODE`]) {
             const nodesData = [];
-            context.nodeModel.getAllNodes().find((node) => {
-              source[`${reference.uid}___NODE`].forEach((id) => {
+            source[`${reference.uid}___NODE`].forEach((id) => {
+              context.nodeModel.getAllNodes().find((node) => {
                 if (node.id === id) {
                   nodesData.push(node);
                 }

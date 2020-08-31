@@ -279,10 +279,10 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
           resolve: (source, args, context) => {
             if (field.multiple && source[`${field.uid}___NODE`]) {
               const nodesData = [];
-              context.nodeModel.getAllNodes({
-                type: `${prefix}_assets`,
-              }).find((node) => {
-                source[`${field.uid}___NODE`].forEach((id) => {
+              source[`${field.uid}___NODE`].forEach((id) => {
+                context.nodeModel.getAllNodes({
+                  type: `${prefix}_assets`,
+                }).find((node) => {
                   if (node.id === id) {
                     nodesData.push(node);
                   }
