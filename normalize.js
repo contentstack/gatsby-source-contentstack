@@ -90,7 +90,7 @@ var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeId
         groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
       });
     } else {
-      // In some cases null value is null, this makes graphql treat all the objects as null
+      // In some cases value is null, this makes graphql treat all the objects as null
       // So need to pass a valid array instance.
       // This also helps to handle when a user changes a group to multiple after initially
       // setting a group to single.. the server passes an object and the previous condition
@@ -300,10 +300,10 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           resolve: function resolve(source, args, context) {
             if (field.multiple && source[field.uid + '___NODE']) {
               var nodesData = [];
-              context.nodeModel.getAllNodes({
-                type: prefix + '_assets'
-              }).find(function (node) {
-                source[field.uid + '___NODE'].forEach(function (id) {
+              source[field.uid + '___NODE'].forEach(function (id) {
+                context.nodeModel.getAllNodes({
+                  type: prefix + '_assets'
+                }).find(function (node) {
                   if (node.id === id) {
                     nodesData.push(node);
                   }
