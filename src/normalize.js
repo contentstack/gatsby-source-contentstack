@@ -366,7 +366,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
           extendedInterface = globalField.path;
         }
 
-        // Updates extendedInterface and globalField.path before recursive call, such that instance of these variables are used by each call
+        // Updates extendedInterface and globalField.path before recursive call, such that correct instance of these variables are used by each call
         if (globalFieldSchema && field.data_type !== 'global_field') {
           globalField.path = `${globalField.path}|${field.uid}`;
           extendedInterface = globalField.path.split('|').join('_');
@@ -430,8 +430,8 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
         if (extendedInterface) {
           extendedInterface = globalField.path.split('|');
           extendedInterface.splice(extendedInterface.length - 1, 1); // Removes last element
-          globalField.path = extendedInterface.join('|'); // gets globalField.path to one step back as last recursive call is done
-          extendedInterface = extendedInterface.join('_'); // gets extendedInterface to one step back.
+          globalField.path = extendedInterface.join('|'); // gets globalField.path to previous state as last recursive call is done
+          extendedInterface = extendedInterface.join('_'); // gets extendedInterface to previous state.
           isInsideGlobalField = false; // tracks if the current iteration is inside nested child of global fields
         }
 
