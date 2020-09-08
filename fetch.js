@@ -227,7 +227,7 @@ var fetchCsData = function () {
                   resolve(data.data);
                 }
               }).catch(function (err) {
-                console.error(err);
+                if (err.response && err.response.data) console.error(err.response.data);else console.error('Error: ' + err.isAxiosError, 'Response: ' + err.response);
                 reject(err);
               });
             }));
