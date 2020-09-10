@@ -17,11 +17,13 @@ let contentTypes = [];
 let references = [];
 let groups = [];
 exports.createSchemaCustomization = async ({
+  cache,
   actions,
   schema,
 }, configOptions) => {
   try {
     contentTypes = await fetchContentTypes(configOptions);
+    await cache.set(configOptions.type_prefix, contentTypes);
   } catch (error) {
     console.error('Contentsatck fetch content type failed!');
   }
@@ -54,6 +56,7 @@ exports.createSchemaCustomization = async ({
 };
 
 exports.sourceNodes = async ({
+  cache,
   actions,
   getNode,
   getNodes,
@@ -125,7 +128,7 @@ exports.sourceNodes = async ({
   });
 
   // adding nodes
-
+  contentstackData.contentTypes = await cache.get(configOptions.type_prefix);
   contentstackData.contentTypes.forEach((contentType) => {
     contentType.uid = ((contentType.uid).replace(/-/g, '_'));
     const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
