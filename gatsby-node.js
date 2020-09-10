@@ -42,33 +42,32 @@ exports.createSchemaCustomization = function () {
     var cache = _ref2.cache,
         actions = _ref2.actions,
         schema = _ref2.schema;
-
-    var _contentTypes, typePrefix, createTypes;
-
+    var contentTypes, typePrefix, createTypes;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.prev = 0;
-            _context.next = 3;
+            contentTypes = void 0;
+            _context.prev = 1;
+            _context.next = 4;
             return fetchContentTypes(configOptions);
 
-          case 3:
-            _contentTypes = _context.sent;
-            _context.next = 6;
-            return cache.set(configOptions.type_prefix, _contentTypes);
+          case 4:
+            contentTypes = _context.sent;
+            _context.next = 7;
+            return cache.set(configOptions.type_prefix, contentTypes);
 
-          case 6:
-            _context.next = 11;
+          case 7:
+            _context.next = 12;
             break;
 
-          case 8:
-            _context.prev = 8;
-            _context.t0 = _context['catch'](0);
+          case 9:
+            _context.prev = 9;
+            _context.t0 = _context['catch'](1);
 
             console.error('Contentsatck fetch content type failed!');
 
-          case 11:
+          case 12:
             if (configOptions.enableSchemaGeneration) {
               typePrefix = configOptions.type_prefix || 'Contentstack';
               createTypes = actions.createTypes;
@@ -89,12 +88,12 @@ exports.createSchemaCustomization = function () {
               });
             }
 
-          case 12:
+          case 13:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[0, 8]]);
+    }, _callee, undefined, [[1, 9]]);
   }));
 
   return function (_x, _x2) {
