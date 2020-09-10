@@ -35,7 +35,6 @@ var _require2 = require('./fetch'),
     fetchData = _require2.fetchData,
     fetchContentTypes = _require2.fetchContentTypes;
 
-var contentTypes = [];
 var references = [];
 var groups = [];
 exports.createSchemaCustomization = function () {
@@ -43,7 +42,9 @@ exports.createSchemaCustomization = function () {
     var cache = _ref2.cache,
         actions = _ref2.actions,
         schema = _ref2.schema;
-    var typePrefix, createTypes;
+
+    var _contentTypes, typePrefix, createTypes;
+
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -53,9 +54,9 @@ exports.createSchemaCustomization = function () {
             return fetchContentTypes(configOptions);
 
           case 3:
-            contentTypes = _context.sent;
+            _contentTypes = _context.sent;
             _context.next = 6;
-            return cache.set(configOptions.type_prefix, contentTypes);
+            return cache.set(configOptions.type_prefix, _contentTypes);
 
           case 6:
             _context.next = 11;
@@ -155,8 +156,11 @@ exports.sourceNodes = function () {
           case 9:
             _ref5 = _context2.sent;
             contentstackData = _ref5.contentstackData;
+            _context2.next = 13;
+            return cache.get(configOptions.type_prefix);
 
-            contentstackData.contentTypes = contentTypes;
+          case 13:
+            contentstackData.contentTypes = _context2.sent;
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
                 merged[item.type] = [];
@@ -197,12 +201,6 @@ exports.sourceNodes = function () {
             });
 
             // adding nodes
-            _context2.next = 21;
-            return cache.get(configOptions.type_prefix);
-
-          case 21:
-            contentstackData.contentTypes = _context2.sent;
-
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
               var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
@@ -264,7 +262,7 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 34:
+          case 33:
           case 'end':
             return _context2.stop();
         }

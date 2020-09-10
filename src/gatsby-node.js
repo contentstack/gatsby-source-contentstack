@@ -13,7 +13,6 @@ const {
   fetchContentTypes,
 } = require('./fetch');
 
-let contentTypes = [];
 let references = [];
 let groups = [];
 exports.createSchemaCustomization = async ({
@@ -22,7 +21,7 @@ exports.createSchemaCustomization = async ({
   schema,
 }, configOptions) => {
   try {
-    contentTypes = await fetchContentTypes(configOptions);
+    let contentTypes = await fetchContentTypes(configOptions);
     await cache.set(configOptions.type_prefix, contentTypes);
   } catch (error) {
     console.error('Contentsatck fetch content type failed!');
@@ -87,7 +86,7 @@ exports.sourceNodes = async ({
   const {
     contentstackData,
   } = await fetchData(configOptions, reporter);
-  contentstackData.contentTypes = contentTypes;
+  contentstackData.contentTypes = await cache.get(configOptions.type_prefix);
   const syncData = contentstackData.syncData.reduce((merged, item) => {
     if (!merged[item.type]) {
       merged[item.type] = [];
@@ -128,7 +127,6 @@ exports.sourceNodes = async ({
   });
 
   // adding nodes
-  contentstackData.contentTypes = await cache.get(configOptions.type_prefix);
   contentstackData.contentTypes.forEach((contentType) => {
     contentType.uid = ((contentType.uid).replace(/-/g, '_'));
     const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
