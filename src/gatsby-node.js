@@ -20,8 +20,11 @@ exports.createSchemaCustomization = async ({
   actions,
   schema,
 }, configOptions) => {
+
+  let contentTypes;
+
   try {
-    let contentTypes = await fetchContentTypes(configOptions);
+    contentTypes = await fetchContentTypes(configOptions);
     await cache.set(configOptions.type_prefix, contentTypes);
   } catch (error) {
     console.error('Contentsatck fetch content type failed!');
