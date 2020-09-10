@@ -40,7 +40,8 @@ var references = [];
 var groups = [];
 exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
-    var actions = _ref2.actions,
+    var cache = _ref2.cache,
+        actions = _ref2.actions,
         schema = _ref2.schema;
     var typePrefix, createTypes;
     return _regenerator2.default.wrap(function _callee$(_context) {
@@ -53,16 +54,20 @@ exports.createSchemaCustomization = function () {
 
           case 3:
             contentTypes = _context.sent;
-            _context.next = 9;
-            break;
+            _context.next = 6;
+            return cache.set(configOptions.type_prefix, contentTypes);
 
           case 6:
-            _context.prev = 6;
+            _context.next = 11;
+            break;
+
+          case 8:
+            _context.prev = 8;
             _context.t0 = _context['catch'](0);
 
             console.error('Contentsatck fetch content type failed!');
 
-          case 9:
+          case 11:
             if (configOptions.enableSchemaGeneration) {
               typePrefix = configOptions.type_prefix || 'Contentstack';
               createTypes = actions.createTypes;
@@ -83,12 +88,12 @@ exports.createSchemaCustomization = function () {
               });
             }
 
-          case 10:
+          case 12:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[0, 6]]);
+    }, _callee, undefined, [[0, 8]]);
   }));
 
   return function (_x, _x2) {
@@ -98,7 +103,8 @@ exports.createSchemaCustomization = function () {
 
 exports.sourceNodes = function () {
   var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref4, configOptions) {
-    var actions = _ref4.actions,
+    var cache = _ref4.cache,
+        actions = _ref4.actions,
         getNode = _ref4.getNode,
         getNodes = _ref4.getNodes,
         createNodeId = _ref4.createNodeId,
@@ -191,6 +197,11 @@ exports.sourceNodes = function () {
             });
 
             // adding nodes
+            _context2.next = 21;
+            return cache.get(configOptions.type_prefix);
+
+          case 21:
+            contentstackData.contentTypes = _context2.sent;
 
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -253,7 +264,7 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 31:
+          case 34:
           case 'end':
             return _context2.stop();
         }
