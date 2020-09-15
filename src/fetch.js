@@ -1,5 +1,6 @@
 const queryString = require('query-string');
-const axios = require('axios');
+const fetch = require('node-fetch');
+
 const {
   version,
   // eslint-disable-next-line import/no-unresolved
@@ -90,32 +91,23 @@ const fetchCsData = async (url, config, query) => {
   const queryParams = queryString.stringify(query);
   const apiUrl = `${config.cdn}/${url}?${queryParams}`;
   const option = {
-    method: 'get',
-    url: apiUrl,
     headers: {
       'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
-    },
-    responseType: 'json'
+    }
   };
   return new Promise((resolve, reject) => {
-    axios(option)
-      .then((data) => {
-        if (data.status >= 400 || !data || !data.data) {
-          return reject(data || 'Something went wrong.');
-        }
-
-        if (data.data && data.data.error_code) {
+    fetch(apiUrl, option)
+      .then(response => response.json())
+      .then(data => {
+        if (data.error_code) {
           console.error(data);
-          reject(data.data);
+          reject(data);
         } else {
-          resolve(data.data);
+          resolve(data);
         }
       })
       .catch((err) => {
-        if (err.response && err.response.data)
-          console.error(err.response.data);
-        else
-          console.error('Error: ' + err.isAxiosError, 'Response: ' + err.response);
+        console.error(err);
         reject(err);
       });
   });
