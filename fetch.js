@@ -19,7 +19,7 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var queryString = require('query-string');
-var axios = require('axios');
+var fetch = require('node-fetch');
 
 var _require = require('./package.json'),
     version = _require.version;
@@ -207,27 +207,22 @@ var fetchCsData = function () {
             queryParams = queryString.stringify(query);
             apiUrl = config.cdn + '/' + url + '?' + queryParams;
             option = {
-              method: 'get',
-              url: apiUrl,
               headers: {
                 'X-User-Agent': 'contentstack-gatsby-source-plugin-' + version
-              },
-              responseType: 'json'
+              }
             };
             return _context4.abrupt('return', new _promise2.default(function (resolve, reject) {
-              axios(option).then(function (data) {
-                if (data.status >= 400 || !data || !data.data) {
-                  return reject(data || 'Something went wrong.');
-                }
-
-                if (data.data && data.data.error_code) {
+              fetch(apiUrl, option).then(function (response) {
+                return response.json();
+              }).then(function (data) {
+                if (data.error_code) {
                   console.error(data);
-                  reject(data.data);
+                  reject(data);
                 } else {
-                  resolve(data.data);
+                  resolve(data);
                 }
               }).catch(function (err) {
-                if (err.response && err.response.data) console.error(err.response.data);else console.error('Error: ' + err.isAxiosError, 'Response: ' + err.response);
+                console.error(err);
                 reject(err);
               });
             }));
