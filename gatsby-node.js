@@ -277,8 +277,8 @@ exports.createResolvers = function (_ref6) {
       resolve: function resolve(source, args, context, info) {
         if (source[reference.uid + '___NODE']) {
           var nodesData = [];
-          context.nodeModel.getAllNodes().find(function (node) {
-            source[reference.uid + '___NODE'].forEach(function (id) {
+          source[reference.uid + '___NODE'].forEach(function (id) {
+            context.nodeModel.getAllNodes().find(function (node) {
               if (node.id === id) {
                 nodesData.push(node);
               }

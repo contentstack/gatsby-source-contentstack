@@ -209,22 +209,20 @@ exports.createResolvers = ({
   references.forEach((reference) => {
     resolvers[reference.parent] = {
       ...resolvers[reference.parent],
-      ...{
-        [reference.uid]: {
-          resolve(source, args, context, info) {
-            if (source[`${reference.uid}___NODE`]) {
-              const nodesData = [];
+      [reference.uid]: {
+        resolve(source, args, context, info) {
+          if (source[`${reference.uid}___NODE`]) {
+            const nodesData = [];
+            source[`${reference.uid}___NODE`].forEach((id) => {
               context.nodeModel.getAllNodes().find((node) => {
-                source[`${reference.uid}___NODE`].forEach((id) => {
-                  if (node.id === id) {
-                    nodesData.push(node);
-                  }
-                });
+                if (node.id === id) {
+                  nodesData.push(node);
+                }
               });
-              return nodesData;
-            }
-            return [];
-          },
+            });
+            return nodesData;
+          }
+          return [];
         },
       },
     };
