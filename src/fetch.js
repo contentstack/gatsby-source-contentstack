@@ -1,8 +1,9 @@
 const queryString = require('query-string');
 const fetch = require('node-fetch');
+
 const {
   version,
-// eslint-disable-next-line import/no-unresolved
+  // eslint-disable-next-line import/no-unresolved
 } = require('./package.json');
 
 
@@ -16,14 +17,14 @@ exports.fetchData = async (configOptions, reporter) => {
     const syncEntryParams = configOptions.syncToken ? {
       sync_token: configOptions.syncToken,
     } : {
-      init: true,
-    };
+        init: true,
+      };
 
     const syncAssetParams = configOptions.syncToken ? {
       sync_token: configOptions.syncToken,
     } : {
-      init: true,
-    };
+        init: true,
+      };
 
     syncEntryParams.type = 'entry_published';
     syncAssetParams.type = 'asset_published';
@@ -40,8 +41,8 @@ exports.fetchData = async (configOptions, reporter) => {
     const syncParams = configOptions.syncToken ? {
       sync_token: configOptions.syncToken,
     } : {
-      init: true,
-    };
+        init: true,
+      };
 
     try {
       syncData = await fetchSyncData(syncParams, configOptions);
@@ -92,12 +93,12 @@ const fetchCsData = async (url, config, query) => {
   const option = {
     headers: {
       'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
-    },
+    }
   };
   return new Promise((resolve, reject) => {
     fetch(apiUrl, option)
-      .then((response) => response.json())
-      .then((data) => {
+      .then(response => response.json())
+      .then(data => {
         if (data.error_code) {
           console.error(data);
           reject(data);
