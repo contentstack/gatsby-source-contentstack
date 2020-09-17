@@ -148,12 +148,14 @@ const getSchemaValue = (obj, key) => {
 const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   const entryObj = {};
   schema.forEach((field) => {
-    const value = getSchemaValue(entry, field);
+    let value = getSchemaValue(entry, field);
     switch (field.data_type) {
       case 'reference':
         entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
       case 'file':
+        // Issue #60. Graphql does not treat empty string as null.
+        if (!value) value = null;
         entryObj[`${field.uid}___NODE`] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
       case 'group':
