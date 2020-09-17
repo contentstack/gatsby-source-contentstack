@@ -36,34 +36,39 @@ var _require2 = require('./fetch'),
     fetchData = _require2.fetchData,
     fetchContentTypes = _require2.fetchContentTypes;
 
-var contentTypes = [];
 var references = [];
 var groups = [];
 exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
-    var actions = _ref2.actions,
+    var cache = _ref2.cache,
+        actions = _ref2.actions,
         schema = _ref2.schema;
-    var typePrefix, createTypes;
+    var contentTypes, typePrefix, createTypes;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.prev = 0;
-            _context.next = 3;
+            contentTypes = void 0;
+            _context.prev = 1;
+            _context.next = 4;
             return fetchContentTypes(configOptions);
 
-          case 3:
+          case 4:
             contentTypes = _context.sent;
-            _context.next = 9;
+            _context.next = 7;
+            return cache.set(configOptions.type_prefix, contentTypes);
+
+          case 7:
+            _context.next = 12;
             break;
 
-          case 6:
-            _context.prev = 6;
-            _context.t0 = _context['catch'](0);
+          case 9:
+            _context.prev = 9;
+            _context.t0 = _context['catch'](1);
 
             console.error('Contentstack fetch content type failed!');
 
-          case 9:
+          case 12:
             if (configOptions.enableSchemaGeneration) {
               typePrefix = configOptions.type_prefix || 'Contentstack';
               createTypes = actions.createTypes;
@@ -85,12 +90,12 @@ exports.createSchemaCustomization = function () {
               });
             }
 
-          case 10:
+          case 13:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[0, 6]]);
+    }, _callee, undefined, [[1, 9]]);
   }));
 
   return function (_x, _x2) {
@@ -100,7 +105,8 @@ exports.createSchemaCustomization = function () {
 
 exports.sourceNodes = function () {
   var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref4, configOptions) {
-    var actions = _ref4.actions,
+    var cache = _ref4.cache,
+        actions = _ref4.actions,
         getNode = _ref4.getNode,
         getNodes = _ref4.getNodes,
         createNodeId = _ref4.createNodeId,
@@ -151,8 +157,11 @@ exports.sourceNodes = function () {
           case 9:
             _ref5 = _context2.sent;
             contentstackData = _ref5.contentstackData;
+            _context2.next = 13;
+            return cache.get(configOptions.type_prefix);
 
-            contentstackData.contentTypes = contentTypes;
+          case 13:
+            contentstackData.contentTypes = _context2.sent;
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
                 merged[item.type] = [];
@@ -193,7 +202,6 @@ exports.sourceNodes = function () {
             });
 
             // adding nodes
-
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
               var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
@@ -255,7 +263,7 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 31:
+          case 33:
           case 'end':
             return _context2.stop();
         }
