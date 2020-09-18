@@ -49,28 +49,28 @@ exports.createSchemaCustomization = function () {
         switch (_context.prev = _context.next) {
           case 0:
             contentTypes = void 0;
-            _context.prev = 1;
-            _context.next = 4;
+            typePrefix = configOptions.type_prefix || 'Contentstack';
+            _context.prev = 2;
+            _context.next = 5;
             return fetchContentTypes(configOptions);
 
-          case 4:
+          case 5:
             contentTypes = _context.sent;
-            _context.next = 7;
-            return cache.set(configOptions.type_prefix, contentTypes);
+            _context.next = 8;
+            return cache.set(typePrefix, contentTypes);
 
-          case 7:
-            _context.next = 12;
+          case 8:
+            _context.next = 13;
             break;
 
-          case 9:
-            _context.prev = 9;
-            _context.t0 = _context['catch'](1);
+          case 10:
+            _context.prev = 10;
+            _context.t0 = _context['catch'](2);
 
             console.error('Contentstack fetch content type failed!');
 
-          case 12:
+          case 13:
             if (configOptions.enableSchemaGeneration) {
-              typePrefix = configOptions.type_prefix || 'Contentstack';
               createTypes = actions.createTypes;
 
               contentTypes.forEach(function (contentType) {
@@ -90,12 +90,12 @@ exports.createSchemaCustomization = function () {
               });
             }
 
-          case 13:
+          case 14:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[1, 9]]);
+    }, _callee, undefined, [[2, 10]]);
   }));
 
   return function (_x, _x2) {
@@ -158,7 +158,7 @@ exports.sourceNodes = function () {
             _ref5 = _context2.sent;
             contentstackData = _ref5.contentstackData;
             _context2.next = 13;
-            return cache.get(configOptions.type_prefix);
+            return cache.get(typePrefix);
 
           case 13:
             contentstackData.contentTypes = _context2.sent;
