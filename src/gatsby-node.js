@@ -24,14 +24,14 @@ exports.createSchemaCustomization = async ({
 
   let contentTypes;
 
+  const typePrefix = configOptions.type_prefix || 'Contentstack';
   try {
     contentTypes = await fetchContentTypes(configOptions);
-    await cache.set(configOptions.type_prefix, contentTypes);
+    await cache.set(typePrefix, contentTypes);
   } catch (error) {
     console.error('Contentstack fetch content type failed!');
   }
   if (configOptions.enableSchemaGeneration) {
-    const typePrefix = configOptions.type_prefix || 'Contentstack';
     const {
       createTypes,
     } = actions;
@@ -91,7 +91,7 @@ exports.sourceNodes = async ({
   const {
     contentstackData,
   } = await fetchData(configOptions, reporter);
-  contentstackData.contentTypes = await cache.get(configOptions.type_prefix);
+  contentstackData.contentTypes = await cache.get(typePrefix);
   const syncData = contentstackData.syncData.reduce((merged, item) => {
     if (!merged[item.type]) {
       merged[item.type] = [];
