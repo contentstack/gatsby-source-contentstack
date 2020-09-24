@@ -1,5 +1,13 @@
 'use strict';
 
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+var _extends4 = require('babel-runtime/helpers/extends');
+
+var _extends5 = _interopRequireDefault(_extends4);
+
 var _set = require('babel-runtime/core-js/set');
 
 var _set2 = _interopRequireDefault(_set);
@@ -7,10 +15,6 @@ var _set2 = _interopRequireDefault(_set);
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _keys = require('babel-runtime/core-js/object/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
 
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
@@ -28,76 +32,73 @@ var _require2 = require('./normalize'),
     processAsset = _require2.processAsset,
     makeEntryNodeUid = _require2.makeEntryNodeUid,
     makeAssetNodeUid = _require2.makeAssetNodeUid,
-    buildCustomSchema = _require2.buildCustomSchema;
+    buildCustomSchema = _require2.buildCustomSchema,
+    extendSchemaWithDefaultEntryFields = _require2.extendSchemaWithDefaultEntryFields;
 
 var _require3 = require('./fetch'),
     fetchData = _require3.fetchData,
     fetchContentTypes = _require3.fetchContentTypes;
 
-var contentTypes = [];
-
+var references = [];
+var groups = [];
 exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
-    var actions = _ref2.actions,
+    var cache = _ref2.cache,
+        actions = _ref2.actions,
         schema = _ref2.schema;
-    var typePrefix, createTypes;
+    var contentTypes, typePrefix, createTypes;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.prev = 0;
-            _context.next = 3;
+            contentTypes = void 0;
+            typePrefix = configOptions.type_prefix || 'Contentstack';
+            _context.prev = 2;
+            _context.next = 5;
             return fetchContentTypes(configOptions);
 
-          case 3:
+          case 5:
             contentTypes = _context.sent;
-            _context.next = 9;
+            _context.next = 8;
+            return cache.set(typePrefix, contentTypes);
+
+          case 8:
+            _context.next = 13;
             break;
 
-          case 6:
-            _context.prev = 6;
-            _context.t0 = _context['catch'](0);
+          case 10:
+            _context.prev = 10;
+            _context.t0 = _context['catch'](2);
 
-            console.error('Contentsatck fetch content type failed!');
+            console.error('Contentstack fetch content type failed!');
 
-          case 9:
+          case 13:
             if (configOptions.enableSchemaGeneration) {
-              typePrefix = configOptions.type_prefix || 'Contentstack';
               createTypes = actions.createTypes;
 
               contentTypes.forEach(function (contentType) {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
                 var name = typePrefix + '_' + contentTypeUid;
-                var result = buildCustomSchema(contentType.schema, [], name, typePrefix);
-                if ((0, _keys2.default)(result.references).length === 0) {
-                  var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
-                    name: name,
-                    fields: result.fields,
-                    interfaces: ['Node']
-                  })];
-                  result.types = result.types.concat(typeDefs);
-                  createTypes(result.types);
-                } else {
-                  var _typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildUnionType({
-                    name: result.references.name,
-                    types: result.references.unions
-                  }), schema.buildObjectType({
-                    name: name,
-                    fields: result.fields,
-                    interfaces: ['Node']
-                  })];
-                  result.types = result.types.concat(_typeDefs);
-                  createTypes(result.types);
-                }
+                var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
+                var result = buildCustomSchema(extendedSchema, [], [], [], name, typePrefix);
+                references = references.concat(result.references);
+                groups = groups.concat(result.groups);
+                var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
+                  name: name,
+                  fields: result.fields,
+                  interfaces: ['Node']
+                })];
+                result.types = result.types.concat(typeDefs);
+                createTypes(result.types);
               });
             }
 
-          case 10:
+          case 14:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[0, 6]]);
+    }, _callee, undefined, [[2, 10]]);
   }));
 
   return function (_x, _x2) {
@@ -107,7 +108,8 @@ exports.createSchemaCustomization = function () {
 
 exports.sourceNodes = function () {
   var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref4, configOptions) {
-    var actions = _ref4.actions,
+    var cache = _ref4.cache,
+        actions = _ref4.actions,
         getNode = _ref4.getNode,
         getNodes = _ref4.getNodes,
         createNodeId = _ref4.createNodeId,
@@ -159,8 +161,11 @@ exports.sourceNodes = function () {
           case 9:
             _ref5 = _context2.sent;
             contentstackData = _ref5.contentstackData;
+            _context2.next = 13;
+            return cache.get(typePrefix);
 
-            contentstackData.contentTypes = contentTypes;
+          case 13:
+            contentstackData.contentTypes = _context2.sent;
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
                 merged[item.type] = [];
@@ -205,8 +210,14 @@ exports.sourceNodes = function () {
             });
 
             // adding nodes
+            contentstackData.contentTypes.forEach(function (contentType) {
+              contentType.uid = contentType.uid.replace(/-/g, '_');
+              var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
+              createNode(contentTypeNode);
+            });
 
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
+              item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var contentType = contentstackData.contentTypes.find(function (contentType) {
                 return item.content_type_uid === contentType.uid;
               });
@@ -218,11 +229,6 @@ exports.sourceNodes = function () {
             syncData.asset_published && syncData.asset_published.forEach(function (item) {
               var assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
               createNode(assetNode);
-            });
-
-            contentstackData.contentTypes.forEach(function (contentType) {
-              var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
-              createNode(contentTypeNode);
             });
 
             // deleting nodes
@@ -244,6 +250,7 @@ exports.sourceNodes = function () {
             });
 
             syncData.content_type_deleted && syncData.content_type_deleted.forEach(function (item) {
+              item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var sameContentTypeNodes = getNodes().filter(function (n) {
                 return n.internal.type === typePrefix + '_' + item.content_type_uid;
               });
@@ -264,7 +271,7 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 31:
+          case 33:
           case 'end':
             return _context2.stop();
         }
@@ -331,3 +338,38 @@ exports.onCreateNode = function () {
     return _ref6.apply(this, arguments);
   };
 }();
+
+exports.createResolvers = function (_ref8) {
+  var createResolvers = _ref8.createResolvers;
+
+  var resolvers = {};
+  references.forEach(function (reference) {
+    resolvers[reference.parent] = (0, _extends5.default)({}, resolvers[reference.parent], (0, _defineProperty3.default)({}, reference.uid, {
+      resolve: function resolve(source, args, context, info) {
+        if (source[reference.uid + '___NODE']) {
+          var nodesData = [];
+          source[reference.uid + '___NODE'].forEach(function (id) {
+            context.nodeModel.getAllNodes().find(function (node) {
+              if (node.id === id) {
+                nodesData.push(node);
+              }
+            });
+          });
+          return nodesData;
+        }
+        return [];
+      }
+    }));
+  });
+  groups.forEach(function (group) {
+    resolvers[group.parent] = (0, _extends5.default)({}, resolvers[group.parent], (0, _defineProperty3.default)({}, group.field.uid, {
+      resolve: function resolve(source) {
+        if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
+          return [];
+        }
+        return source[group.field.uid] || null;
+      }
+    }));
+  });
+  createResolvers(resolvers);
+};

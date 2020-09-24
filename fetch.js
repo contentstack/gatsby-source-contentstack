@@ -253,10 +253,11 @@ var getPagedData = function () {
           case 0:
             query.skip = skip;
             query.limit = limit;
-            _context5.next = 4;
+            query.include_global_field_schema = true;
+            _context5.next = 5;
             return fetchCsData(url, config, query);
 
-          case 4:
+          case 5:
             response = _context5.sent;
 
             if (!aggregatedResponse) {
@@ -266,16 +267,16 @@ var getPagedData = function () {
             }
 
             if (!(skip + limit <= response.count)) {
-              _context5.next = 8;
+              _context5.next = 9;
               break;
             }
 
             return _context5.abrupt('return', getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse));
 
-          case 8:
+          case 9:
             return _context5.abrupt('return', aggregatedResponse);
 
-          case 9:
+          case 10:
           case 'end':
             return _context5.stop();
         }

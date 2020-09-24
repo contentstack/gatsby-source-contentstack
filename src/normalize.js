@@ -50,7 +50,10 @@ exports.processEntry = (contentType, entry, createNodeId, createContentDigest, t
 };
 
 exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
-  const resolveEntry = { ...entry, ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) };
+  const resolveEntry = {
+    ...entry,
+    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix),
+  };
   return resolveEntry;
 };
 
@@ -66,11 +69,20 @@ const makeEntryNodeUid = exports.makeEntryNodeUid = (entry, createNodeId, typePr
 
 const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   let groupObj = null;
-  if (field.multiple && value instanceof Array) {
+  if (field.multiple) {
     groupObj = [];
-    value.forEach((groupValue) => {
-      groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
-    });
+    if (value instanceof Array) {
+      value.forEach((groupValue) => {
+        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+      });
+    } else {
+      // In some cases value is null, this makes graphql treat all the objects as null
+      // So need to pass a valid array instance.
+      // This also helps to handle when a user changes a group to multiple after initially
+      // setting a group to single.. the server passes an object and the previous condition
+      // again makes groupObj null
+      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+    }
   } else {
     groupObj = {};
     groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
@@ -136,12 +148,14 @@ const getSchemaValue = (obj, key) => {
 const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   const entryObj = {};
   schema.forEach((field) => {
-    const value = getSchemaValue(entry, field);
+    let value = getSchemaValue(entry, field);
     switch (field.data_type) {
       case 'reference':
         entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
       case 'file':
+        // Issue #60. Graphql does not treat empty string as null.
+        if (!value) value = null;
         entryObj[`${field.uid}___NODE`] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
       case 'group':
@@ -158,15 +172,18 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
   return entryObj;
 };
 
-const buildBlockCustomSchema = (blocks, types, parent, prefix) => {
+const buildBlockCustomSchema = (blocks, types, references, groups, parent, prefix) => {
+
   const blockFields = {};
   let blockType = `type ${parent} {`;
+
   blocks.forEach((block) => {
     const newparent = parent.concat(block.uid);
     blockType = blockType.concat(`${block.uid} : ${newparent} `);
     const {
       fields,
-    } = buildCustomSchema(block.schema, types, newparent, prefix);
+    } = buildCustomSchema(block.schema, types, references, groups, newparent, prefix);
+
     for (const key in fields) {
       if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
         fields[key] = fields[key].type;
@@ -182,9 +199,50 @@ const buildBlockCustomSchema = (blocks, types, parent, prefix) => {
   return blockType;
 };
 
-const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, prefix) => {
+exports.extendSchemaWithDefaultEntryFields = (schema) => {
+  schema.push({
+    data_type: "text",
+    uid: "uid",
+    multiple: false,
+    mandatory: false,
+  });
+  schema.push({
+    data_type: "text",
+    uid: "locale",
+    multiple: false,
+    mandatory: false,
+  });
+  schema.push({
+    data_type: "group",
+    uid: "publish_details",
+    schema: [{
+      data_type: "text",
+      uid: "locale",
+      multiple: false,
+      mandatory: false,
+    }],
+    multiple: false,
+    mandatory: false,
+  });
+  schema.push({
+    data_type: "isodate",
+    uid: "updated_at",
+    multiple: false,
+    mandatory: false,
+  });
+  schema.push({
+    data_type: "string",
+    uid: "updated_by",
+    multiple: false,
+    mandatory: false,
+  });
+  return schema;
+}
+
+const buildCustomSchema = exports.buildCustomSchema = (schema, types, references, groups, parent, prefix) => {
   const fields = {};
-  let references = {};
+  groups = groups || [];
+  references = references || [];
   types = types || [];
   schema.forEach((field) => {
     switch (field.data_type) {
@@ -266,8 +324,10 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
           resolve: (source, args, context) => {
             if (field.multiple && source[`${field.uid}___NODE`]) {
               const nodesData = [];
-              context.nodeModel.getAllNodes({ type: `${prefix}_assets` }).find((node) => {
-                source[`${field.uid}___NODE`].forEach((id) => {
+              source[`${field.uid}___NODE`].forEach((id) => {
+                context.nodeModel.getAllNodes({
+                  type: `${prefix}_assets`,
+                }).find((node) => {
                   if (node.id === id) {
                     nodesData.push(node);
                   }
@@ -277,7 +337,9 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
             }
 
             if (source[`${field.uid}___NODE`]) {
-              return context.nodeModel.getAllNodes({ type: `${prefix}_assets` })
+              return context.nodeModel.getAllNodes({
+                type: `${prefix}_assets`,
+              })
                 .find((node) => node.id === source[`${field.uid}___NODE`]);
             }
             return null;
@@ -297,40 +359,46 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
         break;
       case 'group':
       case 'global_field':
-        const newparent = parent.concat('_', field.uid);
-        const result = buildCustomSchema(field.schema, types, newparent, prefix);
+        let newparent = parent.concat('_', field.uid);
+
+        const result = buildCustomSchema(field.schema, types, references, groups, newparent, prefix);
+
         for (const key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
             result.fields[key] = result.fields[key].type;
           }
         }
+
         if (Object.keys(result.fields).length > 0) {
-          const type = `type ${newparent} ${JSON.stringify(result.fields).replace(/"/g, '')}`;
+
+          let type = `type ${newparent} ${JSON.stringify(result.fields).replace(/"/g, '')}`;
+
           types.push(type);
-          fields[field.uid] = {
-            resolve: (source) => {
-              if (field.multiple && !Array.isArray(source[field.uid])) {
-                return [];
-              }
-              return source[field.uid] || null;
-            },
-          };
+
+          groups.push({
+            parent,
+            field,
+          });
+
           if (field.mandatory) {
             if (field.multiple) {
-              fields[field.uid].type = `[${newparent}]!`;
+              fields[field.uid] = `[${newparent}]!`;
             } else {
-              fields[field.uid].type = `${newparent}!`;
+              fields[field.uid] = `${newparent}!`;
             }
           } else if (field.multiple) {
-            fields[field.uid].type = `[${newparent}]`;
+            fields[field.uid] = `[${newparent}]`;
           } else {
-            fields[field.uid].type = `${newparent}`;
+            fields[field.uid] = `${newparent}`;
           }
         }
+
         break;
       case 'blocks':
-        const blockparent = parent.concat('_', field.uid);
-        const blockType = buildBlockCustomSchema(field.blocks, types, blockparent, prefix);
+        let blockparent = parent.concat('_', field.uid);
+
+        const blockType = buildBlockCustomSchema(field.blocks, types, references, groups, blockparent, prefix);
+
         types.push(blockType);
         if (field.mandatory) {
           if (field.multiple) {
@@ -343,6 +411,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
         } else {
           fields[field.uid] = `${blockparent}`;
         }
+
         break;
       case 'reference':
         let unionType = 'union ';
@@ -369,30 +438,15 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
           unionType = unionType.concat('_Union = ', unions.join(' | '));
           types.push(unionType);
 
-          references = {
-            name,
-            unions,
-          };
-          fields[field.uid] = {
-            resolve: (source, args, context) => {
-              if (source[`${field.uid}___NODE`]) {
-                const nodesData = [];
-                context.nodeModel.getAllNodes({ type: name }).find((node) => {
-                  source[`${field.uid}___NODE`].forEach((id) => {
-                    if (node.id === id) {
-                      nodesData.push(node);
-                    }
-                  });
-                });
-                return nodesData;
-              }
-              return [];
-            },
-          };
+          references.push({
+            parent,
+            uid: field.uid,
+          });
+
           if (field.mandatory) {
-            fields[field.uid].type = `[${name}]!`;
+            fields[field.uid] = `[${name}]!`;
           } else {
-            fields[field.uid].type = `[${name}]`;
+            fields[field.uid] = `[${name}]`;
           }
         }
         break;
@@ -402,5 +456,6 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, parent, pr
     fields,
     types,
     references,
+    groups,
   };
 };

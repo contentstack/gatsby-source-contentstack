@@ -83,11 +83,20 @@ var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId,
 
 var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
   var groupObj = null;
-  if (field.multiple && value instanceof Array) {
+  if (field.multiple) {
     groupObj = [];
-    value.forEach(function (groupValue) {
-      groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
-    });
+    if (value instanceof Array) {
+      value.forEach(function (groupValue) {
+        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+      });
+    } else {
+      // In some cases value is null, this makes graphql treat all the objects as null
+      // So need to pass a valid array instance.
+      // This also helps to handle when a user changes a group to multiple after initially
+      // setting a group to single.. the server passes an object and the previous condition
+      // again makes groupObj null
+      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+    }
   } else {
     groupObj = {};
     groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
@@ -161,6 +170,8 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
         entryObj[field.uid + '___NODE'] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
       case 'file':
+        // Issue #60. Graphql does not treat empty string as null.
+        if (!value) value = null;
         entryObj[field.uid + '___NODE'] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
       case 'group':
@@ -177,14 +188,16 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   return entryObj;
 };
 
-var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, parent, prefix) {
+var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, parent, prefix) {
+
   var blockFields = {};
   var blockType = 'type ' + parent + ' {';
+
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
     blockType = blockType.concat(block.uid + ' : ' + newparent + ' ');
 
-    var _buildCustomSchema = buildCustomSchema(block.schema, types, newparent, prefix),
+    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, newparent, prefix),
         fields = _buildCustomSchema.fields;
 
     for (var key in fields) {
@@ -202,9 +215,50 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, pare
   return blockType;
 };
 
-var buildCustomSchema = exports.buildCustomSchema = function (schema, types, parent, prefix) {
+exports.extendSchemaWithDefaultEntryFields = function (schema) {
+  schema.push({
+    data_type: "text",
+    uid: "uid",
+    multiple: false,
+    mandatory: false
+  });
+  schema.push({
+    data_type: "text",
+    uid: "locale",
+    multiple: false,
+    mandatory: false
+  });
+  schema.push({
+    data_type: "group",
+    uid: "publish_details",
+    schema: [{
+      data_type: "text",
+      uid: "locale",
+      multiple: false,
+      mandatory: false
+    }],
+    multiple: false,
+    mandatory: false
+  });
+  schema.push({
+    data_type: "isodate",
+    uid: "updated_at",
+    multiple: false,
+    mandatory: false
+  });
+  schema.push({
+    data_type: "string",
+    uid: "updated_by",
+    multiple: false,
+    mandatory: false
+  });
+  return schema;
+};
+
+var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, parent, prefix) {
   var fields = {};
-  var references = {};
+  groups = groups || [];
+  references = references || [];
   types = types || [];
   schema.forEach(function (field) {
     switch (field.data_type) {
@@ -290,8 +344,10 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
           resolve: function resolve(source, args, context) {
             if (field.multiple && source[field.uid + '___NODE']) {
               var nodesData = [];
-              context.nodeModel.getAllNodes({ type: prefix + '_assets' }).find(function (node) {
-                source[field.uid + '___NODE'].forEach(function (id) {
+              source[field.uid + '___NODE'].forEach(function (id) {
+                context.nodeModel.getAllNodes({
+                  type: prefix + '_assets'
+                }).find(function (node) {
                   if (node.id === id) {
                     nodesData.push(node);
                   }
@@ -301,7 +357,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
             }
 
             if (source[field.uid + '___NODE']) {
-              return context.nodeModel.getAllNodes({ type: prefix + '_assets' }).find(function (node) {
+              return context.nodeModel.getAllNodes({
+                type: prefix + '_assets'
+              }).find(function (node) {
                 return node.id === source[field.uid + '___NODE'];
               });
             }
@@ -323,39 +381,45 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
       case 'group':
       case 'global_field':
         var newparent = parent.concat('_', field.uid);
-        var result = buildCustomSchema(field.schema, types, newparent, prefix);
+
+        var result = buildCustomSchema(field.schema, types, references, groups, newparent, prefix);
+
         for (var key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
             result.fields[key] = result.fields[key].type;
           }
         }
+
         if ((0, _keys2.default)(result.fields).length > 0) {
+
           var _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
+
           types.push(_type);
-          fields[field.uid] = {
-            resolve: function resolve(source) {
-              if (field.multiple && !Array.isArray(source[field.uid])) {
-                return [];
-              }
-              return source[field.uid] || null;
-            }
-          };
+
+          groups.push({
+            parent: parent,
+            field: field
+          });
+
           if (field.mandatory) {
             if (field.multiple) {
-              fields[field.uid].type = '[' + newparent + ']!';
+              fields[field.uid] = '[' + newparent + ']!';
             } else {
-              fields[field.uid].type = newparent + '!';
+              fields[field.uid] = newparent + '!';
             }
           } else if (field.multiple) {
-            fields[field.uid].type = '[' + newparent + ']';
+            fields[field.uid] = '[' + newparent + ']';
           } else {
-            fields[field.uid].type = '' + newparent;
+            fields[field.uid] = '' + newparent;
           }
         }
+
         break;
       case 'blocks':
         var blockparent = parent.concat('_', field.uid);
-        var blockType = buildBlockCustomSchema(field.blocks, types, blockparent, prefix);
+
+        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, blockparent, prefix);
+
         types.push(blockType);
         if (field.mandatory) {
           if (field.multiple) {
@@ -368,6 +432,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
         } else {
           fields[field.uid] = '' + blockparent;
         }
+
         break;
       case 'reference':
         var unionType = 'union ';
@@ -394,30 +459,15 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
           unionType = unionType.concat('_Union = ', unions.join(' | '));
           types.push(unionType);
 
-          references = {
-            name: name,
-            unions: unions
-          };
-          fields[field.uid] = {
-            resolve: function resolve(source, args, context) {
-              if (source[field.uid + '___NODE']) {
-                var nodesData = [];
-                context.nodeModel.getAllNodes({ type: name }).find(function (node) {
-                  source[field.uid + '___NODE'].forEach(function (id) {
-                    if (node.id === id) {
-                      nodesData.push(node);
-                    }
-                  });
-                });
-                return nodesData;
-              }
-              return [];
-            }
-          };
+          references.push({
+            parent: parent,
+            uid: field.uid
+          });
+
           if (field.mandatory) {
-            fields[field.uid].type = '[' + name + ']!';
+            fields[field.uid] = '[' + name + ']!';
           } else {
-            fields[field.uid].type = '[' + name + ']';
+            fields[field.uid] = '[' + name + ']';
           }
         }
         break;
@@ -426,6 +476,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, par
   return {
     fields: fields,
     types: types,
-    references: references
+    references: references,
+    groups: groups
   };
 };

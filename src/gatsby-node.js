@@ -8,6 +8,7 @@ const {
   makeEntryNodeUid,
   makeAssetNodeUid,
   buildCustomSchema,
+  extendSchemaWithDefaultEntryFields,
 } = require('./normalize');
 
 const {
@@ -15,65 +16,53 @@ const {
   fetchContentTypes,
 } = require('./fetch');
 
-
-let contentTypes = [];
-
+let references = [];
+let groups = [];
 exports.createSchemaCustomization = async ({
+  cache,
   actions,
   schema,
 }, configOptions) => {
+
+  let contentTypes;
+
+  const typePrefix = configOptions.type_prefix || 'Contentstack';
   try {
     contentTypes = await fetchContentTypes(configOptions);
+    await cache.set(typePrefix, contentTypes);
   } catch (error) {
-    console.error('Contentsatck fetch content type failed!');
+    console.error('Contentstack fetch content type failed!');
   }
   if (configOptions.enableSchemaGeneration) {
-    const typePrefix = configOptions.type_prefix || 'Contentstack';
     const {
       createTypes,
     } = actions;
     contentTypes.forEach((contentType) => {
       const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
       const name = `${typePrefix}_${contentTypeUid}`;
-      const result = buildCustomSchema(contentType.schema, [], name, typePrefix);
-      if (Object.keys(result.references).length === 0) {
-        const typeDefs = [
-          `type linktype{
+      const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
+      let result = buildCustomSchema(extendedSchema, [], [], [], name, typePrefix);
+      references = references.concat(result.references);
+      groups = groups.concat(result.groups);
+      const typeDefs = [
+        `type linktype{
               title: String
               href: String
             }`,
-          schema.buildObjectType({
-            name,
-            fields: result.fields,
-            interfaces: ['Node'],
-          }),
-        ];
-        result.types = result.types.concat(typeDefs);
-        createTypes(result.types);
-      } else {
-        const typeDefs = [
-          `type linktype{
-              title: String
-              href: String
-            }`,
-          schema.buildUnionType({
-            name: result.references.name,
-            types: result.references.unions,
-          }),
-          schema.buildObjectType({
-            name,
-            fields: result.fields,
-            interfaces: ['Node'],
-          }),
-        ];
-        result.types = result.types.concat(typeDefs);
-        createTypes(result.types);
-      }
+        schema.buildObjectType({
+          name,
+          fields: result.fields,
+          interfaces: ['Node'],
+        }),
+      ];
+      result.types = result.types.concat(typeDefs);
+      createTypes(result.types);
     });
   }
 };
 
 exports.sourceNodes = async ({
+  cache,
   actions,
   getNode,
   getNodes,
@@ -105,7 +94,7 @@ exports.sourceNodes = async ({
   const {
     contentstackData,
   } = await fetchData(configOptions, reporter);
-  contentstackData.contentTypes = contentTypes;
+  contentstackData.contentTypes = await cache.get(typePrefix);
   const syncData = contentstackData.syncData.reduce((merged, item) => {
     if (!merged[item.type]) {
       merged[item.type] = [];
@@ -150,8 +139,14 @@ exports.sourceNodes = async ({
   });
 
   // adding nodes
+  contentstackData.contentTypes.forEach((contentType) => {
+    contentType.uid = ((contentType.uid).replace(/-/g, '_'));
+    const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
+    createNode(contentTypeNode);
+  });
 
   syncData.entry_published && syncData.entry_published.forEach((item) => {
+    item.content_type_uid = ((item.content_type_uid).replace(/-/g, '_'));
     const contentType = contentstackData.contentTypes.find((contentType) => item.content_type_uid === contentType.uid);
     const normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
     const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
@@ -162,12 +157,6 @@ exports.sourceNodes = async ({
     const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
     createNode(assetNode);
   });
-
-  contentstackData.contentTypes.forEach((contentType) => {
-    const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
-    createNode(contentTypeNode);
-  });
-
 
   function deleteContentstackNodes(item, type) {
     let nodeId = '';
@@ -205,6 +194,7 @@ exports.sourceNodes = async ({
   });
 
   syncData.content_type_deleted && syncData.content_type_deleted.forEach((item) => {
+    item.content_type_uid = ((item.content_type_uid).replace(/-/g, '_'));
     const sameContentTypeNodes = getNodes().filter(
       (n) => n.internal.type === `${typePrefix}_${item.content_type_uid}`,
     );
@@ -230,7 +220,7 @@ exports.onCreateNode = async ({
 }, configOptions) => {
   // use a custom type prefix if specified
   const typePrefix = configOptions.type_prefix || 'Contentstack';
-  
+
   // filter the images from all the aasets
   const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
   const matches = regexp.exec(node.url);
@@ -250,4 +240,45 @@ exports.onCreateNode = async ({
       node.localImage___NODE = fileNode.id;
     }
   }
+};
+
+exports.createResolvers = ({ createResolvers }) => {
+  const resolvers = {};
+  references.forEach((reference) => {
+    resolvers[reference.parent] = {
+      ...resolvers[reference.parent],
+      [reference.uid]: {
+        resolve(source, args, context, info) {
+          if (source[`${reference.uid}___NODE`]) {
+            const nodesData = [];
+            source[`${reference.uid}___NODE`].forEach((id) => {
+              context.nodeModel.getAllNodes().find((node) => {
+                if (node.id === id) {
+                  nodesData.push(node);
+                }
+              });
+            });
+            return nodesData;
+          }
+          return [];
+        },
+      },
+    };
+  });
+  groups.forEach((group) => {
+    resolvers[group.parent] = {
+      ...resolvers[group.parent],
+      ...{
+        [group.field.uid]: {
+          resolve: (source) => {
+            if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
+              return [];
+            }
+            return source[group.field.uid] || null;
+          },
+        },
+      },
+    };
+  });
+  createResolvers(resolvers);
 };
