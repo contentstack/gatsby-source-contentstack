@@ -298,7 +298,7 @@ exports.onCreateNode = function () {
             // use a custom type prefix if specified
             typePrefix = configOptions.type_prefix || 'Contentstack';
 
-            // filter the images from all the aasets
+            // filter the images from all the assets
 
             regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
             matches = regexp.exec(node.url);
