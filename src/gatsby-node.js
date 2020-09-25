@@ -221,7 +221,7 @@ exports.onCreateNode = async ({
   // use a custom type prefix if specified
   const typePrefix = configOptions.type_prefix || 'Contentstack';
 
-  // filter the images from all the aasets
+  // filter the images from all the assets
   const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
   const matches = regexp.exec(node.url);
 
