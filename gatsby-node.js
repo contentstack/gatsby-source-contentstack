@@ -195,7 +195,7 @@ exports.sourceNodes = function () {
               });
               if (n.localAsset___NODE) {
                 // Prevent GraphQL type inference from crashing on this property
-                touchNode({ nodeId: n.localImage___NODE });
+                touchNode({ nodeId: n.localAsset___NODE });
               }
             });
 
@@ -303,7 +303,7 @@ exports.onCreateNode = function () {
             regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
             matches = regexp.exec(node.url);
 
-            if (!(configOptions.downloadImages && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets' && matches !== null)) {
+            if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets' && matches !== null)) {
               _context3.next = 8;
               break;
             }
@@ -323,7 +323,7 @@ exports.onCreateNode = function () {
 
 
             if (fileNode) {
-              node.localImage___NODE = fileNode.id;
+              node.localAsset___NODE = fileNode.id;
             }
 
           case 8:

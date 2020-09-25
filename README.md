@@ -40,7 +40,7 @@ plugins: [
       type_prefix: `Contentstack`, // (default)
 
       // Optional: Specify true if you want to download all your contentstack images locally
-      downloadImages: `boolean_value`
+      downloadAssets: `boolean_value`
     },
   },
 ]

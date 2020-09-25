@@ -124,7 +124,7 @@ exports.sourceNodes = async ({
     });
     if (n.localAsset___NODE) {
       // Prevent GraphQL type inference from crashing on this property
-      touchNode({ nodeId: n.localImage___NODE });
+      touchNode({ nodeId: n.localAsset___NODE });
     }
   });
 
@@ -225,7 +225,7 @@ exports.onCreateNode = async ({
   const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
   const matches = regexp.exec(node.url);
 
-  if (configOptions.downloadImages && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets` && matches !== null) {
+  if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets` && matches !== null) {
     // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
     const fileNode = await createRemoteFileNode({
       // the url of the remote image to generate a node for
@@ -237,7 +237,7 @@ exports.onCreateNode = async ({
     });
 
     if (fileNode) {
-      node.localImage___NODE = fileNode.id;
+      node.localAsset___NODE = fileNode.id;
     }
   }
 };
