@@ -213,6 +213,7 @@ exports.sourceNodes = async ({
 };
 
 exports.onCreateNode = async ({
+  cache,
   actions: { createNode },
   getCache,
   createNodeId,
@@ -222,19 +223,31 @@ exports.onCreateNode = async ({
   const typePrefix = configOptions.type_prefix || 'Contentstack';
 
   // filter the images from all the assets
-  const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
-  const matches = regexp.exec(node.url);
+  // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
+  // const matches = regexp.exec(node.url);
 
-  if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets` && matches !== null) {
-    // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-    const fileNode = await createRemoteFileNode({
-      // the url of the remote image to generate a node for
-      url: encodeURI(node.url),
-      getCache,
-      createNode,
-      createNodeId,
-      parentNodeId: node.id,
-    });
+  if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
+    const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
+
+    const cachedFileNode = cache.get(cachedNodeId);
+
+    let fileNode;
+    // Checks for cached fileNode
+    if (cachedFileNode) {
+      fileNode = cachedFileNode;
+    } else {
+      // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
+      fileNode = await createRemoteFileNode({
+        // the url of the remote image to generate a node for
+        url: encodeURI(node.url),
+        getCache,
+        createNode,
+        createNodeId,
+        parentNodeId: node.id,
+      });
+      // Cache the fileNode, so it does not have to downloaded again
+      cache.set(cachedNodeId, fileNode);
+    }
 
     if (fileNode) {
       node.localAsset___NODE = fileNode.id;

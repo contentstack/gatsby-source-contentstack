@@ -286,11 +286,12 @@ exports.sourceNodes = function () {
 
 exports.onCreateNode = function () {
   var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(_ref7, configOptions) {
-    var createNode = _ref7.actions.createNode,
+    var cache = _ref7.cache,
+        createNode = _ref7.actions.createNode,
         getCache = _ref7.getCache,
         createNodeId = _ref7.createNodeId,
         node = _ref7.node;
-    var typePrefix, regexp, matches, fileNode;
+    var typePrefix, cachedNodeId, cachedFileNode, fileNode;
     return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -299,16 +300,30 @@ exports.onCreateNode = function () {
             typePrefix = configOptions.type_prefix || 'Contentstack';
 
             // filter the images from all the assets
+            // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
+            // const matches = regexp.exec(node.url);
 
-            regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
-            matches = regexp.exec(node.url);
-
-            if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets' && matches !== null)) {
-              _context3.next = 8;
+            if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
+              _context3.next = 14;
               break;
             }
 
-            _context3.next = 6;
+            cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
+            cachedFileNode = cache.get(cachedNodeId);
+            fileNode = void 0;
+            // Checks for cached fileNode
+
+            if (!cachedFileNode) {
+              _context3.next = 9;
+              break;
+            }
+
+            fileNode = cachedFileNode;
+            _context3.next = 13;
+            break;
+
+          case 9:
+            _context3.next = 11;
             return createRemoteFileNode({
               // the url of the remote image to generate a node for
               url: encodeURI(node.url),
@@ -318,15 +333,19 @@ exports.onCreateNode = function () {
               parentNodeId: node.id
             });
 
-          case 6:
+          case 11:
             fileNode = _context3.sent;
 
+            // Cache the fileNode, so it does not have to downloaded again
+            cache.set(cachedNodeId, fileNode);
+
+          case 13:
 
             if (fileNode) {
               node.localAsset___NODE = fileNode.id;
             }
 
-          case 8:
+          case 14:
           case 'end':
             return _context3.stop();
         }
