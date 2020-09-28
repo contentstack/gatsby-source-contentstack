@@ -1,4 +1,5 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
+const ProgressBar = require('progress');
 
 const {
   normalizeEntry,
@@ -218,6 +219,7 @@ exports.onCreateNode = async ({
   getCache,
   createNodeId,
   node,
+  getNodesByType
 }, configOptions) => {
   // use a custom type prefix if specified
   const typePrefix = configOptions.type_prefix || 'Contentstack';
@@ -236,6 +238,13 @@ exports.onCreateNode = async ({
     if (cachedFileNode) {
       fileNode = cachedFileNode;
     } else {
+      const assets = getNodesByType(`${typePrefix}_assets`);
+      const bar = new ProgressBar(' downloading [:bar] :rate/bps :percent :etas', {
+        complete: '=',
+        incomplete: ' ',
+        width: 20,
+        total: assets.length
+      });
       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
       fileNode = await createRemoteFileNode({
         // the url of the remote image to generate a node for
@@ -245,6 +254,7 @@ exports.onCreateNode = async ({
         createNodeId,
         parentNodeId: node.id,
       });
+      bar.tick();
       // Cache the fileNode, so it does not have to downloaded again
       await cache.set(cachedNodeId, fileNode);
     }

@@ -25,6 +25,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var _require = require('gatsby-source-filesystem'),
     createRemoteFileNode = _require.createRemoteFileNode;
 
+var ProgressBar = require('progress');
+
 var _require2 = require('./normalize'),
     normalizeEntry = _require2.normalizeEntry,
     processContentType = _require2.processContentType,
@@ -290,8 +292,9 @@ exports.onCreateNode = function () {
         createNode = _ref7.actions.createNode,
         getCache = _ref7.getCache,
         createNodeId = _ref7.createNodeId,
-        node = _ref7.node;
-    var typePrefix, cachedNodeId, cachedFileNode, fileNode;
+        node = _ref7.node,
+        getNodesByType = _ref7.getNodesByType;
+    var typePrefix, cachedNodeId, cachedFileNode, fileNode, assets, bar;
     return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -304,7 +307,7 @@ exports.onCreateNode = function () {
             // const matches = regexp.exec(node.url);
 
             if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
-              _context3.next = 17;
+              _context3.next = 20;
               break;
             }
 
@@ -323,11 +326,20 @@ exports.onCreateNode = function () {
             }
 
             fileNode = cachedFileNode;
-            _context3.next = 16;
+            _context3.next = 19;
             break;
 
           case 11:
-            _context3.next = 13;
+            assets = getNodesByType(typePrefix + '_assets');
+            bar = new ProgressBar(' downloading [:bar] :rate/bps :percent :etas', {
+              complete: '=',
+              incomplete: ' ',
+              width: 20,
+              total: assets.length
+            });
+            // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
+
+            _context3.next = 15;
             return createRemoteFileNode({
               // the url of the remote image to generate a node for
               url: encodeURI(node.url),
@@ -337,18 +349,21 @@ exports.onCreateNode = function () {
               parentNodeId: node.id
             });
 
-          case 13:
+          case 15:
             fileNode = _context3.sent;
-            _context3.next = 16;
+
+            bar.tick();
+            // Cache the fileNode, so it does not have to downloaded again
+            _context3.next = 19;
             return cache.set(cachedNodeId, fileNode);
 
-          case 16:
+          case 19:
 
             if (fileNode) {
               node.localAsset___NODE = fileNode.id;
             }
 
-          case 17:
+          case 20:
           case 'end':
             return _context3.stop();
         }
