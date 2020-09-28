@@ -229,7 +229,7 @@ exports.onCreateNode = async ({
   if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
     const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
 
-    const cachedFileNode = cache.get(cachedNodeId);
+    const cachedFileNode = await cache.get(cachedNodeId);
 
     let fileNode;
     // Checks for cached fileNode
@@ -246,7 +246,7 @@ exports.onCreateNode = async ({
         parentNodeId: node.id,
       });
       // Cache the fileNode, so it does not have to downloaded again
-      cache.set(cachedNodeId, fileNode);
+      await cache.set(cachedNodeId, fileNode);
     }
 
     if (fileNode) {
