@@ -1,5 +1,5 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
-const ProgressBar = require('progress');
+const cliProgress = require('cli-progress');
 
 const {
   normalizeEntry,
@@ -19,15 +19,10 @@ const {
 
 let references = [];
 let groups = [];
-
-const bar = new ProgressBar('Downloading [:bar] :rate/bps :percent :etas', {
-  complete: '=',
-  incomplete: ' ',
-  width: 20,
-  total: 0
-});
-// To be used for ProgressBar
-let totalAssets = 0;
+// Create a new progress bar instance and use shades_classic theme
+const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+let totalDownloaded = 0;
+let downloadStarted = false;
 
 exports.createSchemaCustomization = async ({
   cache,
@@ -243,14 +238,16 @@ exports.onCreateNode = async ({
 
     const cachedFileNode = await cache.get(cachedNodeId);
 
-    totalAssets += 1;
-    bar.total = totalAssets;
-
     let fileNode;
     // Checks for cached fileNode
     if (cachedFileNode) {
       fileNode = cachedFileNode;
     } else {
+      // Start the progress bar with a total assets and start value of 0
+      const assets = getNodesByType(`${typePrefix}_assets`);
+      if (!downloadStarted)
+        bar.start(assets.length, 0);
+
       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
       fileNode = await createRemoteFileNode({
         // the url of the remote image to generate a node for
@@ -262,15 +259,19 @@ exports.onCreateNode = async ({
       });
 
       if (fileNode) {
-        bar.tick();
+        totalDownloaded++;
+        bar.update(totalDownloaded);
+        if (totalDownloaded === assets.length)
+          bar.stop();
+
         // Cache the fileNode, so it does not have to downloaded again
         await cache.set(cachedNodeId, fileNode);
       }
     }
 
-    if (fileNode) {
+    if (fileNode)
       node.localAsset___NODE = fileNode.id;
-    }
+
   }
 };
 
