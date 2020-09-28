@@ -252,9 +252,8 @@ exports.onCreateNode = async ({
         await cache.set(cachedNodeId, fileNode);
     }
 
-    if (fileNode) {z
+    if (fileNode)
       node.localAsset___NODE = fileNode.id;
-    }
   }
 };
 

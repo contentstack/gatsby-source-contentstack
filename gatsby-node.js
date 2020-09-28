@@ -351,10 +351,7 @@ exports.onCreateNode = function () {
 
           case 17:
 
-            if (fileNode) {
-              z;
-              node.localAsset___NODE = fileNode.id;
-            }
+            if (fileNode) node.localAsset___NODE = fileNode.id;
 
           case 18:
           case 'end':
