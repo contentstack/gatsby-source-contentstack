@@ -43,6 +43,16 @@ var _require3 = require('./fetch'),
 
 var references = [];
 var groups = [];
+
+var bar = new ProgressBar('Downloading [:bar] :rate/bps :percent :etas', {
+  complete: '=',
+  incomplete: ' ',
+  width: 20,
+  total: 0
+});
+// To be used for ProgressBar
+var totalAssets = 0;
+
 exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
     var cache = _ref2.cache,
@@ -294,7 +304,7 @@ exports.onCreateNode = function () {
         createNodeId = _ref7.createNodeId,
         node = _ref7.node,
         getNodesByType = _ref7.getNodesByType;
-    var typePrefix, cachedNodeId, cachedFileNode, fileNode, assets, bar;
+    var typePrefix, cachedNodeId, cachedFileNode, fileNode;
     return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -307,7 +317,7 @@ exports.onCreateNode = function () {
             // const matches = regexp.exec(node.url);
 
             if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
-              _context3.next = 20;
+              _context3.next = 21;
               break;
             }
 
@@ -317,28 +327,24 @@ exports.onCreateNode = function () {
 
           case 5:
             cachedFileNode = _context3.sent;
+
+
+            totalAssets += 1;
+            bar.total = totalAssets;
+
             fileNode = void 0;
             // Checks for cached fileNode
 
             if (!cachedFileNode) {
-              _context3.next = 11;
+              _context3.next = 13;
               break;
             }
 
             fileNode = cachedFileNode;
-            _context3.next = 19;
+            _context3.next = 20;
             break;
 
-          case 11:
-            assets = getNodesByType(typePrefix + '_assets');
-            bar = new ProgressBar(' downloading [:bar] :rate/bps :percent :etas', {
-              complete: '=',
-              incomplete: ' ',
-              width: 20,
-              total: assets.length
-            });
-            // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-
+          case 13:
             _context3.next = 15;
             return createRemoteFileNode({
               // the url of the remote image to generate a node for
@@ -352,18 +358,23 @@ exports.onCreateNode = function () {
           case 15:
             fileNode = _context3.sent;
 
+            if (!fileNode) {
+              _context3.next = 20;
+              break;
+            }
+
             bar.tick();
             // Cache the fileNode, so it does not have to downloaded again
-            _context3.next = 19;
+            _context3.next = 20;
             return cache.set(cachedNodeId, fileNode);
 
-          case 19:
+          case 20:
 
             if (fileNode) {
               node.localAsset___NODE = fileNode.id;
             }
 
-          case 20:
+          case 21:
           case 'end':
             return _context3.stop();
         }

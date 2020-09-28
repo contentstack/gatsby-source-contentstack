@@ -19,6 +19,16 @@ const {
 
 let references = [];
 let groups = [];
+
+const bar = new ProgressBar('Downloading [:bar] :rate/bps :percent :etas', {
+  complete: '=',
+  incomplete: ' ',
+  width: 20,
+  total: 0
+});
+// To be used for ProgressBar
+let totalAssets = 0;
+
 exports.createSchemaCustomization = async ({
   cache,
   actions,
@@ -233,18 +243,14 @@ exports.onCreateNode = async ({
 
     const cachedFileNode = await cache.get(cachedNodeId);
 
+    totalAssets += 1;
+    bar.total = totalAssets;
+
     let fileNode;
     // Checks for cached fileNode
     if (cachedFileNode) {
       fileNode = cachedFileNode;
     } else {
-      const assets = getNodesByType(`${typePrefix}_assets`);
-      const bar = new ProgressBar(' downloading [:bar] :rate/bps :percent :etas', {
-        complete: '=',
-        incomplete: ' ',
-        width: 20,
-        total: assets.length
-      });
       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
       fileNode = await createRemoteFileNode({
         // the url of the remote image to generate a node for
@@ -254,9 +260,12 @@ exports.onCreateNode = async ({
         createNodeId,
         parentNodeId: node.id,
       });
-      bar.tick();
-      // Cache the fileNode, so it does not have to downloaded again
-      await cache.set(cachedNodeId, fileNode);
+
+      if (fileNode) {
+        bar.tick();
+        // Cache the fileNode, so it does not have to downloaded again
+        await cache.set(cachedNodeId, fileNode);
+      }
     }
 
     if (fileNode) {
