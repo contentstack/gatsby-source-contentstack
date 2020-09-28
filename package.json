@@ -23,7 +23,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "cli-progress": "^3.8.2",
     "gatsby-source-filesystem": "^2.3.14",
     "node-fetch": "2.1.2",
     "query-string": "6.0.0"

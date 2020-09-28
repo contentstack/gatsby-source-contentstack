@@ -25,8 +25,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var _require = require('gatsby-source-filesystem'),
     createRemoteFileNode = _require.createRemoteFileNode;
 
-var cliProgress = require('cli-progress');
-
 var _require2 = require('./normalize'),
     normalizeEntry = _require2.normalizeEntry,
     processContentType = _require2.processContentType,
@@ -43,10 +41,6 @@ var _require3 = require('./fetch'),
 
 var references = [];
 var groups = [];
-// Create a new progress bar instance and use shades_classic theme
-var bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-var totalDownloaded = 0;
-var downloadStarted = false;
 
 exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
@@ -297,9 +291,8 @@ exports.onCreateNode = function () {
         createNode = _ref7.actions.createNode,
         getCache = _ref7.getCache,
         createNodeId = _ref7.createNodeId,
-        node = _ref7.node,
-        getNodesByType = _ref7.getNodesByType;
-    var typePrefix, cachedNodeId, cachedFileNode, fileNode, assets;
+        node = _ref7.node;
+    var typePrefix, cachedNodeId, cachedFileNode, fileNode;
     return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -312,7 +305,7 @@ exports.onCreateNode = function () {
             // const matches = regexp.exec(node.url);
 
             if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
-              _context3.next = 23;
+              _context3.next = 18;
               break;
             }
 
@@ -331,17 +324,11 @@ exports.onCreateNode = function () {
             }
 
             fileNode = cachedFileNode;
-            _context3.next = 22;
+            _context3.next = 17;
             break;
 
           case 11:
-            // Start the progress bar with a total assets and start value of 0
-            assets = getNodesByType(typePrefix + '_assets');
-
-            if (!downloadStarted) bar.start(assets.length, 0);
-
-            // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-            _context3.next = 15;
+            _context3.next = 13;
             return createRemoteFileNode({
               // the url of the remote image to generate a node for
               url: encodeURI(node.url),
@@ -351,27 +338,25 @@ exports.onCreateNode = function () {
               parentNodeId: node.id
             });
 
-          case 15:
+          case 13:
             fileNode = _context3.sent;
 
             if (!fileNode) {
-              _context3.next = 22;
+              _context3.next = 17;
               break;
             }
 
-            totalDownloaded++;
-            bar.update(totalDownloaded);
-            if (totalDownloaded === assets.length) bar.stop();
-
-            // Cache the fileNode, so it does not have to downloaded again
-            _context3.next = 22;
+            _context3.next = 17;
             return cache.set(cachedNodeId, fileNode);
 
-          case 22:
+          case 17:
 
-            if (fileNode) node.localAsset___NODE = fileNode.id;
+            if (fileNode) {
+              z;
+              node.localAsset___NODE = fileNode.id;
+            }
 
-          case 23:
+          case 18:
           case 'end':
             return _context3.stop();
         }
