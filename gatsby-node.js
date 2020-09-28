@@ -304,26 +304,30 @@ exports.onCreateNode = function () {
             // const matches = regexp.exec(node.url);
 
             if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
-              _context3.next = 14;
+              _context3.next = 17;
               break;
             }
 
             cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
-            cachedFileNode = cache.get(cachedNodeId);
+            _context3.next = 5;
+            return cache.get(cachedNodeId);
+
+          case 5:
+            cachedFileNode = _context3.sent;
             fileNode = void 0;
             // Checks for cached fileNode
 
             if (!cachedFileNode) {
-              _context3.next = 9;
+              _context3.next = 11;
               break;
             }
 
             fileNode = cachedFileNode;
-            _context3.next = 13;
+            _context3.next = 16;
             break;
 
-          case 9:
-            _context3.next = 11;
+          case 11:
+            _context3.next = 13;
             return createRemoteFileNode({
               // the url of the remote image to generate a node for
               url: encodeURI(node.url),
@@ -333,19 +337,18 @@ exports.onCreateNode = function () {
               parentNodeId: node.id
             });
 
-          case 11:
-            fileNode = _context3.sent;
-
-            // Cache the fileNode, so it does not have to downloaded again
-            cache.set(cachedNodeId, fileNode);
-
           case 13:
+            fileNode = _context3.sent;
+            _context3.next = 16;
+            return cache.set(cachedNodeId, fileNode);
+
+          case 16:
 
             if (fileNode) {
               node.localAsset___NODE = fileNode.id;
             }
 
-          case 14:
+          case 17:
           case 'end':
             return _context3.stop();
         }
