@@ -39,6 +39,8 @@ var _require3 = require('./fetch'),
     fetchData = _require3.fetchData,
     fetchContentTypes = _require3.fetchContentTypes;
 
+var downloadAssets = require('./download-assets');
+
 var references = [];
 var groups = [];
 
@@ -116,7 +118,9 @@ exports.sourceNodes = function () {
         createNodeId = _ref4.createNodeId,
         store = _ref4.store,
         reporter = _ref4.reporter,
-        createContentDigest = _ref4.createContentDigest;
+        createContentDigest = _ref4.createContentDigest,
+        getNodesByType = _ref4.getNodesByType,
+        getCache = _ref4.getCache;
 
     var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref5, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
 
@@ -210,6 +214,10 @@ exports.sourceNodes = function () {
               assetsNodeIds.add(entryNodeId);
             });
 
+            if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets') {
+              downloadAssets({ getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType });
+            }
+
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -272,7 +280,7 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 33:
+          case 34:
           case 'end':
             return _context2.stop();
         }
@@ -285,94 +293,52 @@ exports.sourceNodes = function () {
   };
 }();
 
-exports.onCreateNode = function () {
-  var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(_ref7, configOptions) {
-    var cache = _ref7.cache,
-        createNode = _ref7.actions.createNode,
-        getCache = _ref7.getCache,
-        createNodeId = _ref7.createNodeId,
-        node = _ref7.node;
-    var typePrefix, cachedNodeId, cachedFileNode, fileNode;
-    return _regenerator2.default.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            // use a custom type prefix if specified
-            typePrefix = configOptions.type_prefix || 'Contentstack';
+// exports.onCreateNode = async ({
+//   cache,
+//   actions: { createNode },
+//   getCache,
+//   createNodeId,
+//   node,
+// }, configOptions) => {
+//   // use a custom type prefix if specified
+//   const typePrefix = configOptions.type_prefix || 'Contentstack';
 
-            // filter the images from all the assets
-            // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
-            // const matches = regexp.exec(node.url);
+//   // filter the images from all the assets
+//   // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
+//   // const matches = regexp.exec(node.url);
 
-            if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
-              _context3.next = 20;
-              break;
-            }
+//   if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
+//     const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
 
-            cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
-            _context3.next = 5;
-            return cache.get(cachedNodeId);
+//     const cachedFileNode = await cache.get(cachedNodeId);
 
-          case 5:
-            cachedFileNode = _context3.sent;
-            fileNode = void 0;
-            // Checks for cached fileNode
+//     let fileNode;
+//     // Checks for cached fileNode
+//     if (cachedFileNode) {
+//       fileNode = cachedFileNode;
+//     } else {
+//       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
+//       fileNode = await createRemoteFileNode({
+//         // the url of the remote image to generate a node for
+//         url: encodeURI(node.url),
+//         getCache,
+//         createNode,
+//         createNodeId,
+//         parentNodeId: node.id,
+//       });
 
-            if (!cachedFileNode) {
-              _context3.next = 11;
-              break;
-            }
+//       if (fileNode)
+//         // Cache the fileNode, so it does not have to downloaded again
+//         await cache.set(cachedNodeId, fileNode);
+//     }
 
-            fileNode = cachedFileNode;
-            _context3.next = 19;
-            break;
+//     if (fileNode)
+//       node.localAsset___NODE = fileNode.id;
+//   }
+// };
 
-          case 11:
-            // The following env variables are used by createRemoteFileNode method
-            process.env.GATSBY_STALL_TIMEOUT = 60000;
-            process.env.GATSBY_STALL_TIMEOUT = 10;
-
-            // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-            _context3.next = 15;
-            return createRemoteFileNode({
-              // the url of the remote image to generate a node for
-              url: encodeURI(node.url),
-              getCache: getCache,
-              createNode: createNode,
-              createNodeId: createNodeId,
-              parentNodeId: node.id
-            });
-
-          case 15:
-            fileNode = _context3.sent;
-
-            if (!fileNode) {
-              _context3.next = 19;
-              break;
-            }
-
-            _context3.next = 19;
-            return cache.set(cachedNodeId, fileNode);
-
-          case 19:
-
-            if (fileNode) node.localAsset___NODE = fileNode.id;
-
-          case 20:
-          case 'end':
-            return _context3.stop();
-        }
-      }
-    }, _callee3, undefined);
-  }));
-
-  return function (_x5, _x6) {
-    return _ref6.apply(this, arguments);
-  };
-}();
-
-exports.createResolvers = function (_ref8) {
-  var createResolvers = _ref8.createResolvers;
+exports.createResolvers = function (_ref6) {
+  var createResolvers = _ref6.createResolvers;
 
   var resolvers = {};
   references.forEach(function (reference) {

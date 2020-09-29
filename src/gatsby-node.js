@@ -16,6 +16,8 @@ const {
   fetchContentTypes,
 } = require('./fetch');
 
+const downloadAssets = require('./download-assets');
+
 let references = [];
 let groups = [];
 
@@ -71,6 +73,8 @@ exports.sourceNodes = async ({
   store,
   reporter,
   createContentDigest,
+  getNodesByType,
+  getCache
 }, configOptions) => {
   const {
     createNode,
@@ -138,6 +142,10 @@ exports.sourceNodes = async ({
     const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
     assetsNodeIds.add(entryNodeId);
   });
+
+  if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
+    downloadAssets({ getCache, createNode, createNodeId, getNodesByType });
+  }
 
   // adding nodes
   contentstackData.contentTypes.forEach((contentType) => {
@@ -213,53 +221,49 @@ exports.sourceNodes = async ({
   setPluginStatus(newState);
 };
 
-exports.onCreateNode = async ({
-  cache,
-  actions: { createNode },
-  getCache,
-  createNodeId,
-  node,
-}, configOptions) => {
-  // use a custom type prefix if specified
-  const typePrefix = configOptions.type_prefix || 'Contentstack';
+// exports.onCreateNode = async ({
+//   cache,
+//   actions: { createNode },
+//   getCache,
+//   createNodeId,
+//   node,
+// }, configOptions) => {
+//   // use a custom type prefix if specified
+//   const typePrefix = configOptions.type_prefix || 'Contentstack';
 
-  // filter the images from all the assets
-  // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
-  // const matches = regexp.exec(node.url);
+//   // filter the images from all the assets
+//   // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
+//   // const matches = regexp.exec(node.url);
 
-  if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
-    const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
+//   if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
+//     const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
 
-    const cachedFileNode = await cache.get(cachedNodeId);
+//     const cachedFileNode = await cache.get(cachedNodeId);
 
-    let fileNode;
-    // Checks for cached fileNode
-    if (cachedFileNode) {
-      fileNode = cachedFileNode;
-    } else {
-      // The following env variables are used by createRemoteFileNode method
-      process.env.GATSBY_STALL_TIMEOUT = 60000;
-      process.env.GATSBY_STALL_TIMEOUT = 10;
+//     let fileNode;
+//     // Checks for cached fileNode
+//     if (cachedFileNode) {
+//       fileNode = cachedFileNode;
+//     } else {
+//       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
+//       fileNode = await createRemoteFileNode({
+//         // the url of the remote image to generate a node for
+//         url: encodeURI(node.url),
+//         getCache,
+//         createNode,
+//         createNodeId,
+//         parentNodeId: node.id,
+//       });
 
-      // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-      fileNode = await createRemoteFileNode({
-        // the url of the remote image to generate a node for
-        url: encodeURI(node.url),
-        getCache,
-        createNode,
-        createNodeId,
-        parentNodeId: node.id,
-      });
+//       if (fileNode)
+//         // Cache the fileNode, so it does not have to downloaded again
+//         await cache.set(cachedNodeId, fileNode);
+//     }
 
-      if (fileNode)
-        // Cache the fileNode, so it does not have to downloaded again
-        await cache.set(cachedNodeId, fileNode);
-    }
-
-    if (fileNode)
-      node.localAsset___NODE = fileNode.id;
-  }
-};
+//     if (fileNode)
+//       node.localAsset___NODE = fileNode.id;
+//   }
+// };
 
 exports.createResolvers = ({ createResolvers }) => {
   const resolvers = {};
