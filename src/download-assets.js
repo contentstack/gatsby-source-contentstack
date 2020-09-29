@@ -26,6 +26,19 @@ module.exports = ({
   );
 };
 
+const processDownload = async (node, fn, params) => {
+
+  params[0].url = encodeURI(node.url);
+  params[0].parentNodeId = node.id;
+  console.log('params[0]', params[0]);
+  const fileNode = await fn.apply(null, params);
+
+  tasks.done(item);
+
+  if (fileNode)
+    item.localAsset___NODE = fileNode.id;
+};
+
 const tasks = {
   queue: [],
   totalActive: 0,
@@ -58,18 +71,12 @@ const tasks = {
   }
 };
 
-function runTask(concurrencyLimit, idleDelay, fn, ...rest) {
+async function runTask(concurrencyLimit, idleDelay, fn, ...rest) {
   if (tasks.isPending() && tasks.totalActive < concurrencyLimit) {
     const item = tasks.getNext();
     console.log('Processing ' + item + ' Total Active Items ' + tasks.totalActive);
 
-    rest[0].url = encodeURI(item.url);
-    rest[0].parentNodeId = item.id;
-    console.log('rest[0]', rest[0]);
-    const fileNode = fn.apply(null, rest);
-
-    if (fileNode)
-      item.localAsset___NODE = fileNode.id;
+    await processDownload(item, fn, rest);
 
     runTask(concurrencyLimit, idleDelay, fn, ...rest);
 
