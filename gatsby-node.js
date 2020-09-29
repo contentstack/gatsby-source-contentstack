@@ -8,6 +8,10 @@ var _extends4 = require('babel-runtime/helpers/extends');
 
 var _extends5 = _interopRequireDefault(_extends4);
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
 var _set = require('babel-runtime/core-js/set');
 
 var _set2 = _interopRequireDefault(_set);
@@ -237,14 +241,25 @@ exports.sourceNodes = function () {
             });
 
             if (!configOptions.downloadAssets) {
-              _context2.next = 27;
+              _context2.next = 33;
               break;
             }
 
-            _context2.next = 27;
+            _context2.prev = 25;
+            _context2.next = 28;
             return downloadAssets({ cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType, reporter: reporter }, typePrefix, configOptions);
 
-          case 27:
+          case 28:
+            _context2.next = 33;
+            break;
+
+          case 30:
+            _context2.prev = 30;
+            _context2.t0 = _context2['catch'](25);
+
+            reporter.panic('Something went wrong while downloading assets.', (0, _stringify2.default)(_context2.t0));
+
+          case 33:
 
             // deleting nodes
 
@@ -286,12 +301,12 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 36:
+          case 42:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, undefined);
+    }, _callee2, undefined, [[25, 30]]);
   }));
 
   return function (_x3, _x4) {

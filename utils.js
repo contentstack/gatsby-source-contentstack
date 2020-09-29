@@ -25,3 +25,18 @@ exports.createProgress = function (message, reporter) {
     }
   };
 };
+
+exports.checkIfSvg = function (data) {
+  // Get every char after ".", $ is from end
+  // eslint-disable-next-line
+  var extenstionReg = /[^.]+$/,
+      extName = '';
+  try {
+    extName = extenstionReg.exec(data);
+    extName = extName && extName.length ? extName[0] : null;
+  } catch (err) {
+    error(errStr);
+    throw new Error(err);
+  }
+  return extName === 'svg' ? true : false;
+};

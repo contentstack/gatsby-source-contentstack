@@ -3,7 +3,7 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
 
 const { makeAssetNodeUid } = require('./normalize');
-const { createProgress } = require('./utils');
+const { createProgress, checkIfSvg } = require('./utils');
 
 let bar; // Keep track of the total number of jobs we push in the queue
 let totalJobs = 0;
@@ -16,89 +16,103 @@ module.exports = async ({
   getNodesByType,
   reporter
 }, typePrefix, configOptions) => {
-  const assets = getNodesByType(`${typePrefix}_assets`);
 
-  configOptions.MAX_CONCURRENCY_LIMIT = configOptions.MAX_CONCURRENCY_LIMIT || 20;
+  try {
+    const assets = getNodesByType(`${typePrefix}_assets`);
 
-  const batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
+    configOptions.MAX_CONCURRENCY_LIMIT = configOptions.MAX_CONCURRENCY_LIMIT || 20;
 
-  for (let i = 0; i < batches.length; i++) {
+    const batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
 
-    const batchPromises = [];
+    for (let i = 0; i < batches.length; i++) {
 
-    const skip = i * configOptions.MAX_CONCURRENCY_LIMIT;
+      const batchPromises = [];
 
-    const lastCount = (i + 1) * configOptions.MAX_CONCURRENCY_LIMIT;
-    console.log('skip', skip, 'lastCount', lastCount);
-    reporter.info(`Skip: ${skip}, limit: ${lastCount}`);
+      const skip = i * configOptions.MAX_CONCURRENCY_LIMIT;
 
-    let shouldBreak = false;
-    for (let j = skip; j < lastCount; j++) {
-      // Last batch will contain null references when accessed, can be handled in a better way
-      if (!assets[j] && i === batches.length) {
-        shouldBreak = true;
+      const lastCount = (i + 1) * configOptions.MAX_CONCURRENCY_LIMIT;
+      reporter.info(`Skip: ${skip}, limit: ${lastCount}`);
+
+      let shouldBreak = false;
+      for (let j = skip; j < lastCount; j++) {
+        // Last batch will contain null references when accessed, can be handled in a better way
+        if (!assets[j] && i === batches.length) {
+          shouldBreak = true;
+          break;
+        }
+
+        // filter the images from all the assets
+        const regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
+        const matches = regexp.exec(assets[j].url);
+        // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297
+        let isSvgExt = false;
+        try {
+          isSvgExt = checkIfSvg(assets[j].url);
+        } catch (error) {
+          reporter.panic('Something went wrong.', JSON.stringify(error));
+        }
+
+        // Only download images
+        if (matches && !isSvgExt) {
+
+          batchPromises.push(
+            await createRemoteFileNodePromise({
+              cache, getCache, createNode, createNodeId,
+            }, assets[j], typePrefix, reporter)
+          );
+        }
+      }
+      // To track last batch
+      if (shouldBreak)
         break;
-      }
 
-      // filter the images from all the assets
-      const regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
-      const matches = regexp.exec(assets[j].url);
-      // Only download images
-      if (matches) {
-
-        batchPromises.push(
-          await createRemoteFileNodePromise({
-            cache,
-            getCache,
-            createNode,
-            createNodeId,
-          }, assets[j], typePrefix, reporter)
-        );
-      }
+      await Promise.all(batchPromises);
     }
-    if (shouldBreak)
-      break;
 
-    await Promise.all(batchPromises);
+    bar && bar.done();
+
+  } catch (error) {
+    reporter.panic('Something went wrong while downloading assets: ', JSON.stringify(error));
+    throw error;
   }
 
-  if (bar)
-    bar.done();
 };
 
 const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) => {
-  if (totalJobs === 0) {
-    bar = createProgress(`Downloading remote files`, reporter);
-    bar.start();
+  try {
+    if (totalJobs === 0) {
+      bar = createProgress(`Downloading remote files`, reporter);
+      bar.start();
+    }
+
+    totalJobs += 1;
+    bar.total = totalJobs;
+
+    let fileNode;
+
+    const assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix);
+
+    // Get asset from cache
+    fileNode = await params.cache.get(assetUid);
+
+    if (!fileNode) {
+      fileNode = await createRemoteFileNode({ ...params, url: encodeURI(node.url), parentNodeId: node.id });
+
+      // Cache fileNode to prevent re-downloading asset
+      await params.cache.set(assetUid, fileNode);
+    }
+
+    bar.tick();
+
+    if (fileNode)
+      node.localAsset___NODE = fileNode.id;
+
+    return fileNode;
+
+  } catch (error) {
+    reporter.panic('Something went wrong while creating file nodes: ', JSON.stringify(error));
+    throw error;
   }
-
-  totalJobs += 1;
-  bar.total = totalJobs;
-
-  let fileNode;
-
-  const assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix);
-
-  // Get asset from cache
-  fileNode = await params.cache.get(assetUid);
-
-  if (!fileNode) {
-    fileNode = await createRemoteFileNode({
-      ...params,
-      url: encodeURI(node.url),
-      parentNodeId: node.id
-    });
-
-    // Cache fileNode to prevent re-downloading asset
-    await params.cache.set(assetUid, fileNode);
-  }
-
-  bar.tick();
-
-  if (fileNode)
-    node.localAsset___NODE = fileNode.id;
-
-  return fileNode;
 };
 
 const getBatches = (count, batchLimit) => {
@@ -106,95 +120,3 @@ const getBatches = (count, batchLimit) => {
   // Returns array filled with indexes
   return Array(partitions).fill(null).map((_, i) => i);
 };
-
-// module.exports = ({
-//   getCache,
-//   createNode,
-//   createNodeId,
-//   getNodesByType
-// }, typePrefix, configOptions) => {
-//   const assets = getNodesByType(`${typePrefix}_assets`);
-
-//   tasks.getTotalTasks(assets); // Get total tasks to be performed
-//   for (let i = 0; i < assets.length; i++)
-//     tasks.add(assets[i]);
-
-//   runTask(
-//     configOptions.MAX_CONCURRENCY_LIMIT || 20,
-//     configOptions.IDLE_DELAY || 100,
-//     createRemoteFileNode,
-//     {
-//       getCache,
-//       createNode,
-//       createNodeId,
-//     }
-//   );
-// };
-
-// const processDownload = async (node, fn, params) => {
-
-//   params[0].url = encodeURI(node.url);
-//   params[0].parentNodeId = node.id;
-//   console.log('params[0]', params[0]);
-//   const fileNode = await fn.apply(null, params);
-
-//   tasks.done(node);
-
-//   if (fileNode)
-//     node.localAsset___NODE = fileNode.id;
-// };
-
-// const tasks = {
-//   queue: [],
-//   totalActive: 0,
-//   totalCompleted: 0,
-//   totalTasks: 0,
-//   getTotalTasks: function (items) {
-//     this.totalTasks = items.length;
-//   },
-//   add: function (item) {
-//     if (!item || item.length === 0)
-//       return;
-
-//     const q = this.queue;
-//     q.push(item);
-//   },
-//   done: function () {
-//     this.totalCompleted++;
-//     this.totalActive--;
-//   },
-//   getNext: function () {
-//     this.totalActive++;
-//     // It will remove the returned item from queue
-//     return this.queue.shift();
-//   },
-//   isPending: function () {
-//     return this.queue.length > 0;
-//   },
-//   isCompleted: function () {
-//     return this.totalCompleted === this.totalTasks;
-//   }
-// };
-
-// async function runTask(concurrencyLimit, idleDelay, fn, ...rest) {
-//   if (tasks.isPending() && tasks.totalActive < concurrencyLimit) {
-//     const item = tasks.getNext();
-//     console.log('Processing ' + item.url + ' Total Active Items ' + tasks.totalActive);
-
-//     await processDownload(item, fn, rest);
-
-//     runTask(concurrencyLimit, idleDelay, fn, ...rest);
-
-//   } else if (tasks.totalActive >= concurrencyLimit) {
-//     console.log('Hold state');
-//     setTimeout(function () {
-//       runTask(concurrencyLimit, idleDelay, fn, ...rest);
-//     }, idleDelay);
-
-//   } else {
-//     if (!tasks.isCompleted())
-//       setTimeout(function () {
-//         runTask(concurrencyLimit, idleDelay, fn, ...rest);
-//       }, idleDelay);
-//   }
-// }

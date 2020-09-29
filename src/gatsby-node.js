@@ -164,7 +164,11 @@ exports.sourceNodes = async ({
   });
 
   if (configOptions.downloadAssets) {
-    await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
+    try {
+      await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
+    } catch (error) {
+      reporter.panic('Something went wrong while downloading assets.', JSON.stringify(error));
+    }
   }
 
   function deleteContentstackNodes(item, type) {
