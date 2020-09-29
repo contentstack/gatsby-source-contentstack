@@ -16,69 +16,18 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
-var runTask = function () {
-  var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(concurrencyLimit, idleDelay, fn) {
-    for (var _len = arguments.length, rest = Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
-      rest[_key - 3] = arguments[_key];
-    }
-
-    var item;
-    return _regenerator2.default.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            if (!(tasks.isPending() && tasks.totalActive < concurrencyLimit)) {
-              _context4.next = 8;
-              break;
-            }
-
-            item = tasks.getNext();
-
-            console.log('Processing ' + item.url + ' Total Active Items ' + tasks.totalActive);
-
-            _context4.next = 5;
-            return processDownload(item, fn, rest);
-
-          case 5:
-
-            runTask.apply(undefined, [concurrencyLimit, idleDelay, fn].concat(rest));
-
-            _context4.next = 9;
-            break;
-
-          case 8:
-            if (tasks.totalActive >= concurrencyLimit) {
-              console.log('Hold state');
-              setTimeout(function () {
-                runTask.apply(undefined, [concurrencyLimit, idleDelay, fn].concat(rest));
-              }, idleDelay);
-            } else {
-              if (!tasks.isCompleted()) setTimeout(function () {
-                runTask.apply(undefined, [concurrencyLimit, idleDelay, fn].concat(rest));
-              }, idleDelay);
-            }
-
-          case 9:
-          case 'end':
-            return _context4.stop();
-        }
-      }
-    }, _callee4, this);
-  }));
-
-  return function runTask(_x9, _x10, _x11) {
-    return _ref5.apply(this, arguments);
-  };
-}();
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _require = require('gatsby-source-filesystem'),
     createRemoteFileNode = _require.createRemoteFileNode;
 
+var _require2 = require('./normalize'),
+    makeAssetNodeUid = _require2.makeAssetNodeUid;
+
 module.exports = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, typePrefix, configOptions) {
-    var getCache = _ref2.getCache,
+    var cache = _ref2.cache,
+        getCache = _ref2.getCache,
         createNode = _ref2.createNode,
         createNodeId = _ref2.createNodeId,
         getNodesByType = _ref2.getNodesByType;
@@ -102,8 +51,8 @@ module.exports = function () {
             }
 
             batchPromises = [];
-            skip = i * MAX_CONCURRENCY_LIMIT;
-            lastCount = (i + 1) * MAX_CONCURRENCY_LIMIT;
+            skip = i * configOptions.MAX_CONCURRENCY_LIMIT;
+            lastCount = (i + 1) * configOptions.MAX_CONCURRENCY_LIMIT;
 
             console.log('skip', skip, 'lastCount', lastCount);
 
@@ -116,7 +65,7 @@ module.exports = function () {
               break;
             }
 
-            if (assets[j]) {
+            if (!(!assets[j] && i === batches.length)) {
               _context.next = 15;
               break;
             }
@@ -128,10 +77,11 @@ module.exports = function () {
             _context.t0 = batchPromises;
             _context.next = 18;
             return createRemoteFileNodePromise({
+              cache: cache,
               getCache: getCache,
               createNode: createNode,
               createNodeId: createNodeId
-            }, assets[j]);
+            }, assets[j], typePrefix);
 
           case 18:
             _context.t1 = _context.sent;
@@ -174,24 +124,46 @@ module.exports = function () {
 }();
 
 var createRemoteFileNodePromise = function () {
-  var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(params, node) {
-    var fileNode;
+  var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(params, node, typePrefix) {
+    var fileNode, assetUid;
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            _context2.next = 2;
+            fileNode = void 0;
+            assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix);
+
+            // Get asset from cache
+
+            _context2.next = 4;
+            return params.cache.get(assetUid);
+
+          case 4:
+            fileNode = _context2.sent;
+
+            if (fileNode) {
+              _context2.next = 11;
+              break;
+            }
+
+            _context2.next = 8;
             return createRemoteFileNode((0, _extends3.default)({}, params, {
               url: encodeURI(node.url),
               parentNodeId: node.id
             }));
 
-          case 2:
+          case 8:
             fileNode = _context2.sent;
+            _context2.next = 11;
+            return params.cache.set(assetUid, fileNode);
+
+          case 11:
 
             if (fileNode) node.localAsset___NODE = fileNode.id;
 
-          case 4:
+            return _context2.abrupt('return', fileNode);
+
+          case 13:
           case 'end':
             return _context2.stop();
         }
@@ -199,7 +171,7 @@ var createRemoteFileNodePromise = function () {
     }, _callee2, undefined);
   }));
 
-  return function createRemoteFileNodePromise(_x4, _x5) {
+  return function createRemoteFileNodePromise(_x4, _x5, _x6) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -236,68 +208,70 @@ var getBatches = function getBatches(count, batchLimit) {
 //   );
 // };
 
-var processDownload = function () {
-  var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(node, fn, params) {
-    var fileNode;
-    return _regenerator2.default.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
+// const processDownload = async (node, fn, params) => {
 
-            params[0].url = encodeURI(node.url);
-            params[0].parentNodeId = node.id;
-            console.log('params[0]', params[0]);
-            _context3.next = 5;
-            return fn.apply(null, params);
+//   params[0].url = encodeURI(node.url);
+//   params[0].parentNodeId = node.id;
+//   console.log('params[0]', params[0]);
+//   const fileNode = await fn.apply(null, params);
 
-          case 5:
-            fileNode = _context3.sent;
+//   tasks.done(node);
 
+//   if (fileNode)
+//     node.localAsset___NODE = fileNode.id;
+// };
 
-            tasks.done(node);
+// const tasks = {
+//   queue: [],
+//   totalActive: 0,
+//   totalCompleted: 0,
+//   totalTasks: 0,
+//   getTotalTasks: function (items) {
+//     this.totalTasks = items.length;
+//   },
+//   add: function (item) {
+//     if (!item || item.length === 0)
+//       return;
 
-            if (fileNode) node.localAsset___NODE = fileNode.id;
+//     const q = this.queue;
+//     q.push(item);
+//   },
+//   done: function () {
+//     this.totalCompleted++;
+//     this.totalActive--;
+//   },
+//   getNext: function () {
+//     this.totalActive++;
+//     // It will remove the returned item from queue
+//     return this.queue.shift();
+//   },
+//   isPending: function () {
+//     return this.queue.length > 0;
+//   },
+//   isCompleted: function () {
+//     return this.totalCompleted === this.totalTasks;
+//   }
+// };
 
-          case 8:
-          case 'end':
-            return _context3.stop();
-        }
-      }
-    }, _callee3, undefined);
-  }));
+// async function runTask(concurrencyLimit, idleDelay, fn, ...rest) {
+//   if (tasks.isPending() && tasks.totalActive < concurrencyLimit) {
+//     const item = tasks.getNext();
+//     console.log('Processing ' + item.url + ' Total Active Items ' + tasks.totalActive);
 
-  return function processDownload(_x6, _x7, _x8) {
-    return _ref4.apply(this, arguments);
-  };
-}();
+//     await processDownload(item, fn, rest);
 
-var tasks = {
-  queue: [],
-  totalActive: 0,
-  totalCompleted: 0,
-  totalTasks: 0,
-  getTotalTasks: function getTotalTasks(items) {
-    this.totalTasks = items.length;
-  },
-  add: function add(item) {
-    if (!item || item.length === 0) return;
+//     runTask(concurrencyLimit, idleDelay, fn, ...rest);
 
-    var q = this.queue;
-    q.push(item);
-  },
-  done: function done() {
-    this.totalCompleted++;
-    this.totalActive--;
-  },
-  getNext: function getNext() {
-    this.totalActive++;
-    // It will remove the returned item from queue
-    return this.queue.shift();
-  },
-  isPending: function isPending() {
-    return this.queue.length > 0;
-  },
-  isCompleted: function isCompleted() {
-    return this.totalCompleted === this.totalTasks;
-  }
-};
+//   } else if (tasks.totalActive >= concurrencyLimit) {
+//     console.log('Hold state');
+//     setTimeout(function () {
+//       runTask(concurrencyLimit, idleDelay, fn, ...rest);
+//     }, idleDelay);
+
+//   } else {
+//     if (!tasks.isCompleted())
+//       setTimeout(function () {
+//         runTask(concurrencyLimit, idleDelay, fn, ...rest);
+//       }, idleDelay);
+//   }
+// }

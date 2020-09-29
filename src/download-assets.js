@@ -2,7 +2,10 @@
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
 
+const { makeAssetNodeUid } = require('./normalize');
+
 module.exports = async ({
+  cache,
   getCache,
   createNode,
   createNodeId,
@@ -18,25 +21,26 @@ module.exports = async ({
 
     const batchPromises = [];
 
-    const skip = i * MAX_CONCURRENCY_LIMIT;
+    const skip = i * configOptions.MAX_CONCURRENCY_LIMIT;
 
-    const lastCount = (i + 1) * MAX_CONCURRENCY_LIMIT;
+    const lastCount = (i + 1) * configOptions.MAX_CONCURRENCY_LIMIT;
     console.log('skip', skip, 'lastCount', lastCount);
 
     let shouldBreak = false;
     for (let j = skip; j < lastCount; j++) {
       // Last batch will contain null references when accessed, can be handled in a better way
-      if (!assets[j]) {
+      if (!assets[j] && i === batches.length) {
         shouldBreak = true;
         break;
       }
 
       batchPromises.push(
         await createRemoteFileNodePromise({
+          cache,
           getCache,
           createNode,
           createNodeId,
-        }, assets[j])
+        }, assets[j], typePrefix)
       );
     }
     if (shouldBreak)
@@ -46,14 +50,29 @@ module.exports = async ({
   }
 };
 
-const createRemoteFileNodePromise = async (params, node) => {
-  const fileNode = await createRemoteFileNode({
-    ...params,
-    url: encodeURI(node.url),
-    parentNodeId: node.id
-  });
+const createRemoteFileNodePromise = async (params, node, typePrefix) => {
+  let fileNode;
+
+  const assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix);
+
+  // Get asset from cache
+  fileNode = await params.cache.get(assetUid);
+
+  if (!fileNode) {
+    fileNode = await createRemoteFileNode({
+      ...params,
+      url: encodeURI(node.url),
+      parentNodeId: node.id
+    });
+
+    // Cache fileNode to prevent re-downloading asset
+    await params.cache.set(assetUid, fileNode);
+  }
+
   if (fileNode)
     node.localAsset___NODE = fileNode.id;
+
+  return fileNode;
 };
 
 const getBatches = (count, batchLimit) => {
@@ -86,70 +105,70 @@ const getBatches = (count, batchLimit) => {
 //   );
 // };
 
-const processDownload = async (node, fn, params) => {
+// const processDownload = async (node, fn, params) => {
 
-  params[0].url = encodeURI(node.url);
-  params[0].parentNodeId = node.id;
-  console.log('params[0]', params[0]);
-  const fileNode = await fn.apply(null, params);
+//   params[0].url = encodeURI(node.url);
+//   params[0].parentNodeId = node.id;
+//   console.log('params[0]', params[0]);
+//   const fileNode = await fn.apply(null, params);
 
-  tasks.done(node);
+//   tasks.done(node);
 
-  if (fileNode)
-    node.localAsset___NODE = fileNode.id;
-};
+//   if (fileNode)
+//     node.localAsset___NODE = fileNode.id;
+// };
 
-const tasks = {
-  queue: [],
-  totalActive: 0,
-  totalCompleted: 0,
-  totalTasks: 0,
-  getTotalTasks: function (items) {
-    this.totalTasks = items.length;
-  },
-  add: function (item) {
-    if (!item || item.length === 0)
-      return;
+// const tasks = {
+//   queue: [],
+//   totalActive: 0,
+//   totalCompleted: 0,
+//   totalTasks: 0,
+//   getTotalTasks: function (items) {
+//     this.totalTasks = items.length;
+//   },
+//   add: function (item) {
+//     if (!item || item.length === 0)
+//       return;
 
-    const q = this.queue;
-    q.push(item);
-  },
-  done: function () {
-    this.totalCompleted++;
-    this.totalActive--;
-  },
-  getNext: function () {
-    this.totalActive++;
-    // It will remove the returned item from queue
-    return this.queue.shift();
-  },
-  isPending: function () {
-    return this.queue.length > 0;
-  },
-  isCompleted: function () {
-    return this.totalCompleted === this.totalTasks;
-  }
-};
+//     const q = this.queue;
+//     q.push(item);
+//   },
+//   done: function () {
+//     this.totalCompleted++;
+//     this.totalActive--;
+//   },
+//   getNext: function () {
+//     this.totalActive++;
+//     // It will remove the returned item from queue
+//     return this.queue.shift();
+//   },
+//   isPending: function () {
+//     return this.queue.length > 0;
+//   },
+//   isCompleted: function () {
+//     return this.totalCompleted === this.totalTasks;
+//   }
+// };
 
-async function runTask(concurrencyLimit, idleDelay, fn, ...rest) {
-  if (tasks.isPending() && tasks.totalActive < concurrencyLimit) {
-    const item = tasks.getNext();
-    console.log('Processing ' + item.url + ' Total Active Items ' + tasks.totalActive);
+// async function runTask(concurrencyLimit, idleDelay, fn, ...rest) {
+//   if (tasks.isPending() && tasks.totalActive < concurrencyLimit) {
+//     const item = tasks.getNext();
+//     console.log('Processing ' + item.url + ' Total Active Items ' + tasks.totalActive);
 
-    await processDownload(item, fn, rest);
+//     await processDownload(item, fn, rest);
 
-    runTask(concurrencyLimit, idleDelay, fn, ...rest);
+//     runTask(concurrencyLimit, idleDelay, fn, ...rest);
 
-  } else if (tasks.totalActive >= concurrencyLimit) {
-    console.log('Hold state');
-    setTimeout(function () {
-      runTask(concurrencyLimit, idleDelay, fn, ...rest);
-    }, idleDelay);
+//   } else if (tasks.totalActive >= concurrencyLimit) {
+//     console.log('Hold state');
+//     setTimeout(function () {
+//       runTask(concurrencyLimit, idleDelay, fn, ...rest);
+//     }, idleDelay);
 
-  } else {
-    if (!tasks.isCompleted())
-      setTimeout(function () {
-        runTask(concurrencyLimit, idleDelay, fn, ...rest);
-      }, idleDelay);
-  }
-}
+//   } else {
+//     if (!tasks.isCompleted())
+//       setTimeout(function () {
+//         runTask(concurrencyLimit, idleDelay, fn, ...rest);
+//       }, idleDelay);
+//   }
+// }
