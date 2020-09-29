@@ -98,7 +98,7 @@ module.exports = function () {
             try {
               isSvgExt = checkIfSvg(assets[j].url);
             } catch (error) {
-              reporter.panic('Something went wrong.', (0, _stringify2.default)(error));
+              reporter.panic('Something went wrong. Details: ' + (0, _stringify2.default)(error));
             }
 
             // Only download images
@@ -152,7 +152,7 @@ module.exports = function () {
             _context.prev = 39;
             _context.t2 = _context['catch'](0);
 
-            reporter.panic('Something went wrong while downloading assets: ', (0, _stringify2.default)(_context.t2));
+            reporter.panic('Something went wrong while downloading assets. Details: ' + (0, _stringify2.default)(_context.t2));
             throw _context.t2;
 
           case 43:
@@ -221,7 +221,7 @@ var createRemoteFileNodePromise = function () {
             _context2.prev = 20;
             _context2.t0 = _context2['catch'](0);
 
-            reporter.panic('Something went wrong while creating file nodes: ', (0, _stringify2.default)(_context2.t0));
+            reporter.panic('Something went wrong while creating file nodes, Details: ' + (0, _stringify2.default)(_context2.t0));
             throw _context2.t0;
 
           case 24:

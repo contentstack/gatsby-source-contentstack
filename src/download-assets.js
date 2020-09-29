@@ -49,7 +49,7 @@ module.exports = async ({
         try {
           isSvgExt = checkIfSvg(assets[j].url);
         } catch (error) {
-          reporter.panic('Something went wrong.', JSON.stringify(error));
+          reporter.panic('Something went wrong. Details: ' + JSON.stringify(error));
         }
 
         // Only download images
@@ -72,7 +72,7 @@ module.exports = async ({
     bar && bar.done();
 
   } catch (error) {
-    reporter.panic('Something went wrong while downloading assets: ', JSON.stringify(error));
+    reporter.panic('Something went wrong while downloading assets. Details: ' + JSON.stringify(error));
     throw error;
   }
 
@@ -110,7 +110,7 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
     return fileNode;
 
   } catch (error) {
-    reporter.panic('Something went wrong while creating file nodes: ', JSON.stringify(error));
+    reporter.panic('Something went wrong while creating file nodes, Details: ' + JSON.stringify(error));
     throw error;
   }
 };

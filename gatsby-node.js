@@ -257,7 +257,7 @@ exports.sourceNodes = function () {
             _context2.prev = 30;
             _context2.t0 = _context2['catch'](25);
 
-            reporter.panic('Something went wrong while downloading assets.', (0, _stringify2.default)(_context2.t0));
+            reporter.panic('Something went wrong while downloading assets. Details: ' + (0, _stringify2.default)(_context2.t0));
 
           case 33:
 
