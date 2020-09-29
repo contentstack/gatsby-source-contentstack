@@ -2,7 +2,7 @@
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
 
-module.exports = ({
+module.exports = async ({
   getCache,
   createNode,
   createNodeId,
@@ -10,21 +10,81 @@ module.exports = ({
 }, typePrefix, configOptions) => {
   const assets = getNodesByType(`${typePrefix}_assets`);
 
-  tasks.getTotalTasks(assets); // Get total tasks to be performed
-  for (let i = 0; i < assets.length; i++)
-    tasks.add(assets[i]);
+  configOptions.MAX_CONCURRENCY_LIMIT = configOptions.MAX_CONCURRENCY_LIMIT || 20;
 
-  runTask(
-    configOptions.MAX_CONCURRENCY_LIMIT || 20,
-    configOptions.IDLE_DELAY || 100,
-    createRemoteFileNode,
-    {
-      getCache,
-      createNode,
-      createNodeId,
+  const batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
+
+  for (let i = 0; i < batches.length; i++) {
+
+    const batchPromises = [];
+
+    const skip = i * MAX_CONCURRENCY_LIMIT;
+
+    const lastCount = (i + 1) * MAX_CONCURRENCY_LIMIT;
+    console.log('skip', skip, 'lastCount', lastCount);
+
+    let shouldBreak = false;
+    for (let j = skip; j < lastCount; j++) {
+      // Last batch will contain null references when accessed, can be handled in a better way
+      if (!assets[j]) {
+        shouldBreak = true;
+        break;
+      }
+
+      batchPromises.push(
+        await createRemoteFileNodePromise({
+          getCache,
+          createNode,
+          createNodeId,
+        }, assets[j])
+      );
     }
-  );
+    if (shouldBreak)
+      break;
+
+    await Promise.all(batchPromises);
+  }
 };
+
+const createRemoteFileNodePromise = async (params, node) => {
+  const fileNode = await createRemoteFileNode({
+    ...params,
+    url: encodeURI(node.url),
+    parentNodeId: node.id
+  });
+  if (fileNode)
+    node.localAsset___NODE = fileNode.id;
+};
+
+const getBatches = (count, batchLimit) => {
+  const partitions = Math.ceil(count / batchLimit);
+  // Returns array filled with indexes
+  return Array(partitions).fill(null).map((_, i) => i);
+};
+
+// module.exports = ({
+//   getCache,
+//   createNode,
+//   createNodeId,
+//   getNodesByType
+// }, typePrefix, configOptions) => {
+//   const assets = getNodesByType(`${typePrefix}_assets`);
+
+//   tasks.getTotalTasks(assets); // Get total tasks to be performed
+//   for (let i = 0; i < assets.length; i++)
+//     tasks.add(assets[i]);
+
+//   runTask(
+//     configOptions.MAX_CONCURRENCY_LIMIT || 20,
+//     configOptions.IDLE_DELAY || 100,
+//     createRemoteFileNode,
+//     {
+//       getCache,
+//       createNode,
+//       createNodeId,
+//     }
+//   );
+// };
 
 const processDownload = async (node, fn, params) => {
 
@@ -33,10 +93,10 @@ const processDownload = async (node, fn, params) => {
   console.log('params[0]', params[0]);
   const fileNode = await fn.apply(null, params);
 
-  tasks.done(item);
+  tasks.done(node);
 
   if (fileNode)
-    item.localAsset___NODE = fileNode.id;
+    node.localAsset___NODE = fileNode.id;
 };
 
 const tasks = {
@@ -74,7 +134,7 @@ const tasks = {
 async function runTask(concurrencyLimit, idleDelay, fn, ...rest) {
   if (tasks.isPending() && tasks.totalActive < concurrencyLimit) {
     const item = tasks.getNext();
-    console.log('Processing ' + item + ' Total Active Items ' + tasks.totalActive);
+    console.log('Processing ' + item.url + ' Total Active Items ' + tasks.totalActive);
 
     await processDownload(item, fn, rest);
 

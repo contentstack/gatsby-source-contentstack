@@ -214,10 +214,6 @@ exports.sourceNodes = function () {
               assetsNodeIds.add(entryNodeId);
             });
 
-            if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets') {
-              downloadAssets({ getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType });
-            }
-
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -239,6 +235,16 @@ exports.sourceNodes = function () {
               var assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
               createNode(assetNode);
             });
+
+            if (!configOptions.downloadAssets) {
+              _context2.next = 27;
+              break;
+            }
+
+            _context2.next = 27;
+            return downloadAssets({ cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType }, typePrefix, configOptions);
+
+          case 27:
 
             // deleting nodes
 
@@ -280,7 +286,7 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 34:
+          case 36:
           case 'end':
             return _context2.stop();
         }

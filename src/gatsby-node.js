@@ -143,10 +143,6 @@ exports.sourceNodes = async ({
     assetsNodeIds.add(entryNodeId);
   });
 
-  if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
-    downloadAssets({ getCache, createNode, createNodeId, getNodesByType });
-  }
-
   // adding nodes
   contentstackData.contentTypes.forEach((contentType) => {
     contentType.uid = ((contentType.uid).replace(/-/g, '_'));
@@ -166,6 +162,10 @@ exports.sourceNodes = async ({
     const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
     createNode(assetNode);
   });
+
+  if (configOptions.downloadAssets) {
+    await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType }, typePrefix, configOptions);
+  }
 
   function deleteContentstackNodes(item, type) {
     let nodeId = '';
