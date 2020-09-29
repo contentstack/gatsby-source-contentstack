@@ -237,6 +237,10 @@ exports.onCreateNode = async ({
     if (cachedFileNode) {
       fileNode = cachedFileNode;
     } else {
+      // The following env variables are used by createRemoteFileNode method
+      process.env.GATSBY_STALL_TIMEOUT = 60000;
+      process.env.GATSBY_STALL_TIMEOUT = 10;
+
       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
       fileNode = await createRemoteFileNode({
         // the url of the remote image to generate a node for

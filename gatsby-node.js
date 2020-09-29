@@ -305,7 +305,7 @@ exports.onCreateNode = function () {
             // const matches = regexp.exec(node.url);
 
             if (!(configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === typePrefix + '_assets')) {
-              _context3.next = 18;
+              _context3.next = 20;
               break;
             }
 
@@ -324,11 +324,16 @@ exports.onCreateNode = function () {
             }
 
             fileNode = cachedFileNode;
-            _context3.next = 17;
+            _context3.next = 19;
             break;
 
           case 11:
-            _context3.next = 13;
+            // The following env variables are used by createRemoteFileNode method
+            process.env.GATSBY_STALL_TIMEOUT = 60000;
+            process.env.GATSBY_STALL_TIMEOUT = 10;
+
+            // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
+            _context3.next = 15;
             return createRemoteFileNode({
               // the url of the remote image to generate a node for
               url: encodeURI(node.url),
@@ -338,22 +343,22 @@ exports.onCreateNode = function () {
               parentNodeId: node.id
             });
 
-          case 13:
+          case 15:
             fileNode = _context3.sent;
 
             if (!fileNode) {
-              _context3.next = 17;
+              _context3.next = 19;
               break;
             }
 
-            _context3.next = 17;
+            _context3.next = 19;
             return cache.set(cachedNodeId, fileNode);
 
-          case 17:
+          case 19:
 
             if (fileNode) node.localAsset___NODE = fileNode.id;
 
-          case 18:
+          case 20:
           case 'end':
             return _context3.stop();
         }
