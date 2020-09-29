@@ -3,13 +3,18 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
 
 const { makeAssetNodeUid } = require('./normalize');
+const { createProgress } = require('./utils');
+
+let bar; // Keep track of the total number of jobs we push in the queue
+let totalJobs = 0;
 
 module.exports = async ({
   cache,
   getCache,
   createNode,
   createNodeId,
-  getNodesByType
+  getNodesByType,
+  reporter
 }, typePrefix, configOptions) => {
   const assets = getNodesByType(`${typePrefix}_assets`);
 
@@ -25,6 +30,7 @@ module.exports = async ({
 
     const lastCount = (i + 1) * configOptions.MAX_CONCURRENCY_LIMIT;
     console.log('skip', skip, 'lastCount', lastCount);
+    reporter.info(`Skip: ${skip}, limit: ${lastCount}`);
 
     let shouldBreak = false;
     for (let j = skip; j < lastCount; j++) {
@@ -34,23 +40,41 @@ module.exports = async ({
         break;
       }
 
-      batchPromises.push(
-        await createRemoteFileNodePromise({
-          cache,
-          getCache,
-          createNode,
-          createNodeId,
-        }, assets[j], typePrefix)
-      );
+      // filter the images from all the assets
+      const regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
+      const matches = regexp.exec(assets[j].url);
+      // Only download images
+      if (matches) {
+
+        batchPromises.push(
+          await createRemoteFileNodePromise({
+            cache,
+            getCache,
+            createNode,
+            createNodeId,
+          }, assets[j], typePrefix, reporter)
+        );
+      }
     }
     if (shouldBreak)
       break;
 
     await Promise.all(batchPromises);
   }
+
+  if (bar)
+    bar.done();
 };
 
-const createRemoteFileNodePromise = async (params, node, typePrefix) => {
+const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) => {
+  if (totalJobs === 0) {
+    bar = createProgress(`Downloading remote files`, reporter);
+    bar.start();
+  }
+
+  totalJobs += 1;
+  bar.total = totalJobs;
+
   let fileNode;
 
   const assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix);
@@ -68,6 +92,8 @@ const createRemoteFileNodePromise = async (params, node, typePrefix) => {
     // Cache fileNode to prevent re-downloading asset
     await params.cache.set(assetUid, fileNode);
   }
+
+  bar.tick();
 
   if (fileNode)
     node.localAsset___NODE = fileNode.id;

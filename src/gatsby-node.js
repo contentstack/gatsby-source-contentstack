@@ -74,7 +74,7 @@ exports.sourceNodes = async ({
   reporter,
   createContentDigest,
   getNodesByType,
-  getCache
+  getCache,
 }, configOptions) => {
   const {
     createNode,
@@ -164,7 +164,7 @@ exports.sourceNodes = async ({
   });
 
   if (configOptions.downloadAssets) {
-    await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType }, typePrefix, configOptions);
+    await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
   }
 
   function deleteContentstackNodes(item, type) {

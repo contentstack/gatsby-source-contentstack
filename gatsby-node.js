@@ -242,7 +242,7 @@ exports.sourceNodes = function () {
             }
 
             _context2.next = 27;
-            return downloadAssets({ cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType }, typePrefix, configOptions);
+            return downloadAssets({ cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType, reporter: reporter }, typePrefix, configOptions);
 
           case 27:
 

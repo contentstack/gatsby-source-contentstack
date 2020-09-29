@@ -24,14 +24,21 @@ var _require = require('gatsby-source-filesystem'),
 var _require2 = require('./normalize'),
     makeAssetNodeUid = _require2.makeAssetNodeUid;
 
+var _require3 = require('./utils'),
+    createProgress = _require3.createProgress;
+
+var bar = void 0; // Keep track of the total number of jobs we push in the queue
+var totalJobs = 0;
+
 module.exports = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, typePrefix, configOptions) {
     var cache = _ref2.cache,
         getCache = _ref2.getCache,
         createNode = _ref2.createNode,
         createNodeId = _ref2.createNodeId,
-        getNodesByType = _ref2.getNodesByType;
-    var assets, batches, i, batchPromises, skip, lastCount, shouldBreak, j;
+        getNodesByType = _ref2.getNodesByType,
+        reporter = _ref2.reporter;
+    var assets, batches, i, batchPromises, skip, lastCount, shouldBreak, j, regexp, matches;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -46,7 +53,7 @@ module.exports = function () {
 
           case 4:
             if (!(i < batches.length)) {
-              _context.next = 30;
+              _context.next = 34;
               break;
             }
 
@@ -55,62 +62,78 @@ module.exports = function () {
             lastCount = (i + 1) * configOptions.MAX_CONCURRENCY_LIMIT;
 
             console.log('skip', skip, 'lastCount', lastCount);
+            reporter.info('Skip: ' + skip + ', limit: ' + lastCount);
 
             shouldBreak = false;
             j = skip;
 
-          case 11:
+          case 12:
             if (!(j < lastCount)) {
-              _context.next = 23;
+              _context.next = 27;
               break;
             }
 
             if (!(!assets[j] && i === batches.length)) {
-              _context.next = 15;
+              _context.next = 16;
               break;
             }
 
             shouldBreak = true;
-            return _context.abrupt('break', 23);
+            return _context.abrupt('break', 27);
 
-          case 15:
+          case 16:
+
+            // filter the images from all the assets
+            regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
+            matches = regexp.exec(assets[j].url);
+            // Only download images
+
+            if (!matches) {
+              _context.next = 24;
+              break;
+            }
+
             _context.t0 = batchPromises;
-            _context.next = 18;
+            _context.next = 22;
             return createRemoteFileNodePromise({
               cache: cache,
               getCache: getCache,
               createNode: createNode,
               createNodeId: createNodeId
-            }, assets[j], typePrefix);
+            }, assets[j], typePrefix, reporter);
 
-          case 18:
+          case 22:
             _context.t1 = _context.sent;
 
             _context.t0.push.call(_context.t0, _context.t1);
 
-          case 20:
+          case 24:
             j++;
-            _context.next = 11;
+            _context.next = 12;
             break;
 
-          case 23:
+          case 27:
             if (!shouldBreak) {
-              _context.next = 25;
+              _context.next = 29;
               break;
             }
 
-            return _context.abrupt('break', 30);
+            return _context.abrupt('break', 34);
 
-          case 25:
-            _context.next = 27;
+          case 29:
+            _context.next = 31;
             return _promise2.default.all(batchPromises);
 
-          case 27:
+          case 31:
             i++;
             _context.next = 4;
             break;
 
-          case 30:
+          case 34:
+
+            if (bar) bar.done();
+
+          case 35:
           case 'end':
             return _context.stop();
         }
@@ -124,46 +147,56 @@ module.exports = function () {
 }();
 
 var createRemoteFileNodePromise = function () {
-  var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(params, node, typePrefix) {
+  var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(params, node, typePrefix, reporter) {
     var fileNode, assetUid;
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
+            if (totalJobs === 0) {
+              bar = createProgress('Downloading remote files', reporter);
+              bar.start();
+            }
+
+            totalJobs += 1;
+            bar.total = totalJobs;
+
             fileNode = void 0;
             assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix);
 
             // Get asset from cache
 
-            _context2.next = 4;
+            _context2.next = 7;
             return params.cache.get(assetUid);
 
-          case 4:
+          case 7:
             fileNode = _context2.sent;
 
             if (fileNode) {
-              _context2.next = 11;
+              _context2.next = 14;
               break;
             }
 
-            _context2.next = 8;
+            _context2.next = 11;
             return createRemoteFileNode((0, _extends3.default)({}, params, {
               url: encodeURI(node.url),
               parentNodeId: node.id
             }));
 
-          case 8:
+          case 11:
             fileNode = _context2.sent;
-            _context2.next = 11;
+            _context2.next = 14;
             return params.cache.set(assetUid, fileNode);
 
-          case 11:
+          case 14:
+
+            bar.tick();
 
             if (fileNode) node.localAsset___NODE = fileNode.id;
 
             return _context2.abrupt('return', fileNode);
 
-          case 13:
+          case 17:
           case 'end':
             return _context2.stop();
         }
@@ -171,7 +204,7 @@ var createRemoteFileNodePromise = function () {
     }, _callee2, undefined);
   }));
 
-  return function createRemoteFileNodePromise(_x4, _x5, _x6) {
+  return function createRemoteFileNodePromise(_x4, _x5, _x6, _x7) {
     return _ref3.apply(this, arguments);
   };
 }();
