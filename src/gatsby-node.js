@@ -165,9 +165,10 @@ exports.sourceNodes = async ({
 
   if (configOptions.downloadAssets) {
     try {
-      await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
+    await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
     } catch (error) {
-      reporter.panic('Something went wrong while downloading assets. Details: ' + JSON.stringify(error));
+      console.log('error--->', error);
+      reporter.info('Something went wrong while downloading assets. Details: ' + error);
     }
   }
 

@@ -145,17 +145,17 @@ module.exports = function () {
 
             bar && bar.done();
 
-            _context.next = 43;
+            _context.next = 42;
             break;
 
           case 39:
             _context.prev = 39;
             _context.t2 = _context['catch'](0);
 
-            reporter.panic('Something went wrong while downloading assets. Details: ' + (0, _stringify2.default)(_context.t2));
-            throw _context.t2;
+            reporter.info('Something went wrong while downloading assets. Details: ' + _context.t2);
+            // throw error;
 
-          case 43:
+          case 42:
           case 'end':
             return _context.stop();
         }
@@ -221,10 +221,10 @@ var createRemoteFileNodePromise = function () {
             _context2.prev = 20;
             _context2.t0 = _context2['catch'](0);
 
-            reporter.panic('Something went wrong while creating file nodes, Details: ' + (0, _stringify2.default)(_context2.t0));
-            throw _context2.t0;
+            reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0);
+            // throw error;
 
-          case 24:
+          case 23:
           case 'end':
             return _context2.stop();
         }
