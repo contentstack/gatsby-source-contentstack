@@ -43,7 +43,7 @@ module.exports = function () {
         createNodeId = _ref2.createNodeId,
         getNodesByType = _ref2.getNodesByType,
         reporter = _ref2.reporter;
-    var assets, batches, i, batchPromises, skip, lastCount, shouldBreak, j, regexp, matches, isSvgExt;
+    var assets, batches, i, batchPromises, skip, lastCount, shouldBreak, j, regexp, matches, isUnsupportedExt;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -78,7 +78,7 @@ module.exports = function () {
               break;
             }
 
-            if (!(!assets[j] && i === batches.length)) {
+            if (!(!assets[j] && i + 1 === batches.length)) {
               _context.next = 16;
               break;
             }
@@ -90,20 +90,23 @@ module.exports = function () {
 
             // filter the images from all the assets
             regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
-            matches = regexp.exec(assets[j].url);
+            matches = void 0;
             // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297
 
-            isSvgExt = false;
+            isUnsupportedExt = false;
 
             try {
-              isSvgExt = checkIfUnsupportedFormat(assets[j].url);
+              if (assets[j]) {
+                matches = regexp.exec(assets[j].url);
+                isUnsupportedExt = checkIfUnsupportedFormat(assets[j].url);
+              }
             } catch (error) {
               reporter.panic('Something went wrong. Details: ' + (0, _stringify2.default)(error));
             }
 
             // Only download images
 
-            if (!(matches && !isSvgExt)) {
+            if (!(matches && !isUnsupportedExt)) {
               _context.next = 26;
               break;
             }

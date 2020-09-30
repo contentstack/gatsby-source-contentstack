@@ -36,24 +36,28 @@ module.exports = async ({
       let shouldBreak = false;
       for (let j = skip; j < lastCount; j++) {
         // Last batch will contain null references when accessed, can be handled in a better way
-        if (!assets[j] && i === batches.length) {
+        if (!assets[j] && (i + 1) === batches.length) {
           shouldBreak = true;
           break;
         }
 
         // filter the images from all the assets
         const regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
-        const matches = regexp.exec(assets[j].url);
+
+        let matches;
         // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297
-        let isSvgExt = false;
+        let isUnsupportedExt = false;
         try {
-          isSvgExt = checkIfUnsupportedFormat(assets[j].url);
+          if (assets[j]) {
+            matches = regexp.exec(assets[j].url);
+            isUnsupportedExt = checkIfUnsupportedFormat(assets[j].url);
+          }
         } catch (error) {
           reporter.panic('Something went wrong. Details: ' + JSON.stringify(error));
         }
 
         // Only download images
-        if (matches && !isSvgExt) {
+        if (matches && !isUnsupportedExt) {
 
           batchPromises.push(
             await createRemoteFileNodePromise({
