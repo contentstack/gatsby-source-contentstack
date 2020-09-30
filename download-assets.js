@@ -89,7 +89,7 @@ module.exports = function () {
           case 16:
 
             // filter the images from all the assets
-            regexp = new RegExp('https://(images).contentstack.io/v3/assets/');
+            regexp = new RegExp('https://(stag-images|images).contentstack.io/v3/assets/');
             matches = void 0;
             // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297
 
