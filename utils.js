@@ -26,7 +26,7 @@ exports.createProgress = function (message, reporter) {
   };
 };
 
-exports.checkIfSvg = function (data) {
+exports.checkIfUnsupportedFormat = function (data) {
   // Get every char after ".", $ is from end
   // eslint-disable-next-line
   var extenstionReg = /[^.]+$/,
@@ -38,5 +38,5 @@ exports.checkIfSvg = function (data) {
     error(errStr);
     throw new Error(err);
   }
-  return extName === 'svg' ? true : false;
+  return extName === 'svg' || extName === 'gif' ? true : false;
 };

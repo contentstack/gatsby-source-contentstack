@@ -30,7 +30,7 @@ var _require2 = require('./normalize'),
 
 var _require3 = require('./utils'),
     createProgress = _require3.createProgress,
-    checkIfSvg = _require3.checkIfSvg;
+    checkIfUnsupportedFormat = _require3.checkIfUnsupportedFormat;
 
 var bar = void 0; // Keep track of the total number of jobs we push in the queue
 var totalJobs = 0;
@@ -96,7 +96,7 @@ module.exports = function () {
             isSvgExt = false;
 
             try {
-              isSvgExt = checkIfSvg(assets[j].url);
+              isSvgExt = checkIfUnsupportedFormat(assets[j].url);
             } catch (error) {
               reporter.panic('Something went wrong. Details: ' + (0, _stringify2.default)(error));
             }

@@ -3,7 +3,7 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
 
 const { makeAssetNodeUid } = require('./normalize');
-const { createProgress, checkIfSvg } = require('./utils');
+const { createProgress, checkIfUnsupportedFormat } = require('./utils');
 
 let bar; // Keep track of the total number of jobs we push in the queue
 let totalJobs = 0;
@@ -47,7 +47,7 @@ module.exports = async ({
         // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297
         let isSvgExt = false;
         try {
-          isSvgExt = checkIfSvg(assets[j].url);
+          isSvgExt = checkIfUnsupportedFormat(assets[j].url);
         } catch (error) {
           reporter.panic('Something went wrong. Details: ' + JSON.stringify(error));
         }

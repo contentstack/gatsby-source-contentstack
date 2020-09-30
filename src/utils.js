@@ -25,7 +25,7 @@ exports.createProgress = function (message, reporter) {
   }
 };
 
-exports.checkIfSvg = data => {
+exports.checkIfUnsupportedFormat = data => {
   // Get every char after ".", $ is from end
   // eslint-disable-next-line
   let extenstionReg = /[^.]+$/,
@@ -37,5 +37,5 @@ exports.checkIfSvg = data => {
     error(errStr);
     throw new Error(err);
   }
-  return extName === 'svg' ? true : false;
+  return extName === 'svg' || extName === 'gif' ? true : false;
 };
