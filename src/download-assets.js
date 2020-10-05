@@ -6,7 +6,9 @@ const { makeAssetNodeUid } = require('./normalize');
 const { createProgress, checkIfUnsupportedFormat } = require('./utils');
 
 let bar; // Keep track of the total number of jobs we push in the queue
+let sizeBar;
 let totalJobs = 0;
+let totalSize = 0;
 
 module.exports = async ({
   cache,
@@ -89,6 +91,11 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
       bar.start();
     }
 
+    if (totalSize === 0) {
+      sizeBar = createProgress(`Total downloaded size`, reporter);
+      sizeBar.start();
+    }
+
     totalJobs += 1;
     bar.total = totalJobs;
 
@@ -101,6 +108,9 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
 
     if (!fileNode) {
       fileNode = await createRemoteFileNode({ ...params, url: encodeURI(node.url), parentNodeId: node.id });
+
+      totalSize += (fileNode.size / 1000000); // Get size in megabytes
+      sizeBar.tick();
 
       // Cache fileNode to prevent re-downloading asset
       await params.cache.set(assetUid, fileNode);

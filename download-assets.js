@@ -33,7 +33,9 @@ var _require3 = require('./utils'),
     checkIfUnsupportedFormat = _require3.checkIfUnsupportedFormat;
 
 var bar = void 0; // Keep track of the total number of jobs we push in the queue
+var sizeBar = void 0;
 var totalJobs = 0;
+var totalSize = 0;
 
 module.exports = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, typePrefix, configOptions) {
@@ -185,6 +187,11 @@ var createRemoteFileNodePromise = function () {
               bar.start();
             }
 
+            if (totalSize === 0) {
+              sizeBar = createProgress('Total downloaded size', reporter);
+              sizeBar.start();
+            }
+
             totalJobs += 1;
             bar.total = totalJobs;
 
@@ -193,26 +200,32 @@ var createRemoteFileNodePromise = function () {
 
             // Get asset from cache
 
-            _context2.next = 8;
+            _context2.next = 9;
             return params.cache.get(assetUid);
 
-          case 8:
+          case 9:
             fileNode = _context2.sent;
 
             if (fileNode) {
-              _context2.next = 15;
+              _context2.next = 18;
               break;
             }
 
-            _context2.next = 12;
+            _context2.next = 13;
             return createRemoteFileNode((0, _extends3.default)({}, params, { url: encodeURI(node.url), parentNodeId: node.id }));
 
-          case 12:
+          case 13:
             fileNode = _context2.sent;
-            _context2.next = 15;
+
+
+            totalSize += fileNode.size / 1000000; // Get size in megabytes
+            sizeBar.tick();
+
+            // Cache fileNode to prevent re-downloading asset
+            _context2.next = 18;
             return params.cache.set(assetUid, fileNode);
 
-          case 15:
+          case 18:
 
             bar.tick();
 
@@ -220,19 +233,19 @@ var createRemoteFileNodePromise = function () {
 
             return _context2.abrupt('return', fileNode);
 
-          case 20:
-            _context2.prev = 20;
+          case 23:
+            _context2.prev = 23;
             _context2.t0 = _context2['catch'](0);
 
             reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0);
             // throw error;
 
-          case 23:
+          case 26:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, undefined, [[0, 20]]);
+    }, _callee2, undefined, [[0, 23]]);
   }));
 
   return function createRemoteFileNodePromise(_x4, _x5, _x6, _x7) {
