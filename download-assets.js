@@ -52,7 +52,7 @@ module.exports = function () {
             assets = getNodesByType(typePrefix + '_assets');
 
 
-            configOptions.MAX_CONCURRENCY_LIMIT = configOptions.MAX_CONCURRENCY_LIMIT || 20;
+            configOptions.MAX_CONCURRENCY_LIMIT = process.env.GATSBY_CONCURRENT_DOWNLOAD || 20;
 
             batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
             i = 0;
@@ -67,7 +67,7 @@ module.exports = function () {
             skip = i * configOptions.MAX_CONCURRENCY_LIMIT;
             lastCount = (i + 1) * configOptions.MAX_CONCURRENCY_LIMIT;
 
-            reporter.info('Skip: ' + skip + ', limit: ' + lastCount);
+            reporter.verbose('Skip: ' + skip + ', limit: ' + lastCount);
 
             shouldBreak = false;
             j = skip;
