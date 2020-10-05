@@ -1,5 +1,3 @@
-const { createRemoteFileNode } = require('gatsby-source-filesystem');
-
 const {
   normalizeEntry,
   processContentType,
@@ -20,6 +18,13 @@ const downloadAssets = require('./download-assets');
 
 let references = [];
 let groups = [];
+
+exports.onPreBootstrap = ({ reporter }) => {
+  const args = process.argv;
+  if (args.includes('--verbose')) {
+    reporter.setVerbose(true);
+  }
+};
 
 exports.createSchemaCustomization = async ({
   cache,
@@ -165,7 +170,7 @@ exports.sourceNodes = async ({
 
   if (configOptions.downloadAssets) {
     try {
-    await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
+      await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
     } catch (error) {
       console.log('error--->', error);
       reporter.info('Something went wrong while downloading assets. Details: ' + error);

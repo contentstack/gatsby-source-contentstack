@@ -22,33 +22,39 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _require = require('gatsby-source-filesystem'),
-    createRemoteFileNode = _require.createRemoteFileNode;
+var _require = require('./normalize'),
+    normalizeEntry = _require.normalizeEntry,
+    processContentType = _require.processContentType,
+    processEntry = _require.processEntry,
+    processAsset = _require.processAsset,
+    makeEntryNodeUid = _require.makeEntryNodeUid,
+    makeAssetNodeUid = _require.makeAssetNodeUid,
+    buildCustomSchema = _require.buildCustomSchema,
+    extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields;
 
-var _require2 = require('./normalize'),
-    normalizeEntry = _require2.normalizeEntry,
-    processContentType = _require2.processContentType,
-    processEntry = _require2.processEntry,
-    processAsset = _require2.processAsset,
-    makeEntryNodeUid = _require2.makeEntryNodeUid,
-    makeAssetNodeUid = _require2.makeAssetNodeUid,
-    buildCustomSchema = _require2.buildCustomSchema,
-    extendSchemaWithDefaultEntryFields = _require2.extendSchemaWithDefaultEntryFields;
-
-var _require3 = require('./fetch'),
-    fetchData = _require3.fetchData,
-    fetchContentTypes = _require3.fetchContentTypes;
+var _require2 = require('./fetch'),
+    fetchData = _require2.fetchData,
+    fetchContentTypes = _require2.fetchContentTypes;
 
 var downloadAssets = require('./download-assets');
 
 var references = [];
 var groups = [];
 
+exports.onPreBootstrap = function (_ref) {
+  var reporter = _ref.reporter;
+
+  var args = process.argv;
+  if (args.includes('--verbose')) {
+    reporter.setVerbose(true);
+  }
+};
+
 exports.createSchemaCustomization = function () {
-  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
-    var cache = _ref2.cache,
-        actions = _ref2.actions,
-        schema = _ref2.schema;
+  var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref3, configOptions) {
+    var cache = _ref3.cache,
+        actions = _ref3.actions,
+        schema = _ref3.schema;
     var contentTypes, typePrefix, createTypes;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
@@ -105,24 +111,24 @@ exports.createSchemaCustomization = function () {
   }));
 
   return function (_x, _x2) {
-    return _ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
 exports.sourceNodes = function () {
-  var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref4, configOptions) {
-    var cache = _ref4.cache,
-        actions = _ref4.actions,
-        getNode = _ref4.getNode,
-        getNodes = _ref4.getNodes,
-        createNodeId = _ref4.createNodeId,
-        store = _ref4.store,
-        reporter = _ref4.reporter,
-        createContentDigest = _ref4.createContentDigest,
-        getNodesByType = _ref4.getNodesByType,
-        getCache = _ref4.getCache;
+  var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref5, configOptions) {
+    var cache = _ref5.cache,
+        actions = _ref5.actions,
+        getNode = _ref5.getNode,
+        getNodes = _ref5.getNodes,
+        createNodeId = _ref5.createNodeId,
+        store = _ref5.store,
+        reporter = _ref5.reporter,
+        createContentDigest = _ref5.createContentDigest,
+        getNodesByType = _ref5.getNodesByType,
+        getCache = _ref5.getCache;
 
-    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref5, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
+    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref6, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
 
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
@@ -164,8 +170,8 @@ exports.sourceNodes = function () {
             return fetchData(configOptions, reporter);
 
           case 9:
-            _ref5 = _context2.sent;
-            contentstackData = _ref5.contentstackData;
+            _ref6 = _context2.sent;
+            contentstackData = _ref6.contentstackData;
             _context2.next = 13;
             return cache.get(typePrefix);
 
@@ -307,7 +313,7 @@ exports.sourceNodes = function () {
   }));
 
   return function (_x3, _x4) {
-    return _ref3.apply(this, arguments);
+    return _ref4.apply(this, arguments);
   };
 }();
 
@@ -355,8 +361,8 @@ exports.sourceNodes = function () {
 //   }
 // };
 
-exports.createResolvers = function (_ref6) {
-  var createResolvers = _ref6.createResolvers;
+exports.createResolvers = function (_ref7) {
+  var createResolvers = _ref7.createResolvers;
 
   var resolvers = {};
   references.forEach(function (reference) {
