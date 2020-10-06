@@ -149,23 +149,25 @@ module.exports = function () {
           case 36:
 
             bar && bar.done();
+            sizeBar && sizeBar.done();
+            reporter.verbose('Total size of downloaded files ' + totalSize);
 
-            _context.next = 42;
+            _context.next = 44;
             break;
 
-          case 39:
-            _context.prev = 39;
+          case 41:
+            _context.prev = 41;
             _context.t2 = _context['catch'](0);
 
             reporter.info('Something went wrong while downloading assets. Details: ' + _context.t2);
             // throw error;
 
-          case 42:
+          case 44:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[0, 39]]);
+    }, _callee, undefined, [[0, 41]]);
   }));
 
   return function (_x, _x2, _x3) {
@@ -206,15 +208,19 @@ var createRemoteFileNodePromise = function () {
           case 9:
             fileNode = _context2.sent;
 
+
+            // Handles condition if the asset has been updated, then it will be downloaded again
+            if (fileNode.updatedAt !== node.updatedAt) fileNode = null;
+
             if (fileNode) {
-              _context2.next = 17;
+              _context2.next = 18;
               break;
             }
 
-            _context2.next = 13;
+            _context2.next = 14;
             return createRemoteFileNode((0, _extends3.default)({}, params, { url: encodeURI(node.url), parentNodeId: node.id }));
 
-          case 13:
+          case 14:
             fileNode = _context2.sent;
 
 
@@ -226,10 +232,10 @@ var createRemoteFileNodePromise = function () {
               sizeBar.tick(fileSize);
             }
             // Cache fileNode to prevent re-downloading asset
-            _context2.next = 17;
+            _context2.next = 18;
             return params.cache.set(assetUid, fileNode);
 
-          case 17:
+          case 18:
 
             bar.tick();
 
@@ -237,19 +243,19 @@ var createRemoteFileNodePromise = function () {
 
             return _context2.abrupt('return', fileNode);
 
-          case 22:
-            _context2.prev = 22;
+          case 23:
+            _context2.prev = 23;
             _context2.t0 = _context2['catch'](0);
 
             reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0);
             // throw error;
 
-          case 25:
+          case 26:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, undefined, [[0, 22]]);
+    }, _callee2, undefined, [[0, 23]]);
   }));
 
   return function createRemoteFileNodePromise(_x4, _x5, _x6, _x7) {

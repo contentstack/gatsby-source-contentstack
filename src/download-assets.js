@@ -76,6 +76,8 @@ module.exports = async ({
     }
 
     bar && bar.done();
+    sizeBar && sizeBar.done();
+    reporter.verbose(`Total size of downloaded files ${totalSize}`);
 
   } catch (error) {
     reporter.info('Something went wrong while downloading assets. Details: ' + error);
@@ -105,6 +107,10 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
 
     // Get asset from cache
     fileNode = await params.cache.get(assetUid);
+
+    // Handles condition if the asset has been updated, then it will be downloaded again
+    if (fileNode.updatedAt !== node.updatedAt)
+      fileNode = null;
 
     if (!fileNode) {
       fileNode = await createRemoteFileNode({ ...params, url: encodeURI(node.url), parentNodeId: node.id });
