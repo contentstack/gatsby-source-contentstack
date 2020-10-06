@@ -92,7 +92,7 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
     }
 
     if (totalSize === 0) {
-      sizeBar = createProgress(`Total downloaded size`, reporter);
+      sizeBar = createProgress(`Total KBs downloaded`, reporter);
       sizeBar.start();
     }
 
@@ -109,9 +109,12 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
     if (!fileNode) {
       fileNode = await createRemoteFileNode({ ...params, url: encodeURI(node.url), parentNodeId: node.id });
 
-      totalSize += (fileNode.size / 1000000); // Get size in megabytes
-      sizeBar.tick();
-
+      if (fileNode) {
+        const fileSize = parseInt(fileNode.size / 1000);  // Get size in megabytes
+        totalSize = totalSize + fileSize;
+        sizeBar.total = totalSize;
+        sizeBar.tick(fileSize);
+      }
       // Cache fileNode to prevent re-downloading asset
       await params.cache.set(assetUid, fileNode);
     }
