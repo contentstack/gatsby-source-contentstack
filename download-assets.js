@@ -210,10 +210,10 @@ var createRemoteFileNodePromise = function () {
 
 
             // Handles condition if the asset has been updated, then it will be downloaded again
-            if (fileNode.updatedAt !== node.updatedAt) fileNode = null;
+            if (fileNode && fileNode.updated_at !== node.updated_at) fileNode = null;
 
             if (fileNode) {
-              _context2.next = 18;
+              _context2.next = 23;
               break;
             }
 
@@ -223,19 +223,24 @@ var createRemoteFileNodePromise = function () {
           case 14:
             fileNode = _context2.sent;
 
-
-            if (fileNode) {
-              fileSize = parseInt(fileNode.size / 1000); // Get size in megabytes
-
-              totalSize = totalSize + fileSize;
-              sizeBar.total = totalSize;
-              sizeBar.tick(fileSize);
+            if (!fileNode) {
+              _context2.next = 23;
+              break;
             }
+
+            // Save updated_at value in the cached fileNode
+            fileNode.updated_at = node.updated_at;
+
+            fileSize = parseInt(fileNode.size / 1000); // Get size in megabytes
+
+            totalSize = totalSize + fileSize;
+            sizeBar.total = totalSize;
+            sizeBar.tick(fileSize);
             // Cache fileNode to prevent re-downloading asset
-            _context2.next = 18;
+            _context2.next = 23;
             return params.cache.set(assetUid, fileNode);
 
-          case 18:
+          case 23:
 
             bar.tick();
 
@@ -243,19 +248,19 @@ var createRemoteFileNodePromise = function () {
 
             return _context2.abrupt('return', fileNode);
 
-          case 23:
-            _context2.prev = 23;
+          case 28:
+            _context2.prev = 28;
             _context2.t0 = _context2['catch'](0);
 
             reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0);
             // throw error;
 
-          case 26:
+          case 31:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, undefined, [[0, 23]]);
+    }, _callee2, undefined, [[0, 28]]);
   }));
 
   return function createRemoteFileNodePromise(_x4, _x5, _x6, _x7) {

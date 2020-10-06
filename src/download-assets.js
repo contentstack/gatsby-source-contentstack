@@ -109,20 +109,23 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
     fileNode = await params.cache.get(assetUid);
 
     // Handles condition if the asset has been updated, then it will be downloaded again
-    if (fileNode.updatedAt !== node.updatedAt)
+    if (fileNode && fileNode.updated_at !== node.updated_at)
       fileNode = null;
 
     if (!fileNode) {
       fileNode = await createRemoteFileNode({ ...params, url: encodeURI(node.url), parentNodeId: node.id });
 
       if (fileNode) {
+        // Save updated_at value in the cached fileNode
+        fileNode.updated_at = node.updated_at;
+        
         const fileSize = parseInt(fileNode.size / 1000);  // Get size in megabytes
         totalSize = totalSize + fileSize;
         sizeBar.total = totalSize;
         sizeBar.tick(fileSize);
+        // Cache fileNode to prevent re-downloading asset
+        await params.cache.set(assetUid, fileNode);
       }
-      // Cache fileNode to prevent re-downloading asset
-      await params.cache.set(assetUid, fileNode);
     }
 
     bar.tick();
