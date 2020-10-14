@@ -94,7 +94,7 @@ const fetchCsData = async (url, config, query) => {
     headers: {
       'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
       api_key: config.api_key,
-      access_token: config.access_token
+      access_token: config.delivery_token
     }
   };
   return new Promise((resolve, reject) => {

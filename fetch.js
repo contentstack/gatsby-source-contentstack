@@ -210,7 +210,7 @@ var fetchCsData = function () {
               headers: {
                 'X-User-Agent': 'contentstack-gatsby-source-plugin-' + version,
                 api_key: config.api_key,
-                access_token: config.access_token
+                access_token: config.delivery_token
               }
             };
             return _context4.abrupt('return', new _promise2.default(function (resolve, reject) {
