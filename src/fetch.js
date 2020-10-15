@@ -85,14 +85,16 @@ const fetchSyncData = async (query, config) => {
 const fetchCsData = async (url, config, query) => {
   query = query || {};
   query.include_count = true;
-  query.api_key = config.api_key;
-  query.access_token = config.delivery_token;
+  // query.api_key = config.api_key;
+  // query.access_token = config.delivery_token;
   query.environment = config.environment;
   const queryParams = queryString.stringify(query);
   const apiUrl = `${config.cdn}/${url}?${queryParams}`;
   const option = {
     headers: {
       'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
+      api_key: config.api_key,
+      access_token: config.delivery_token
     }
   };
   return new Promise((resolve, reject) => {
