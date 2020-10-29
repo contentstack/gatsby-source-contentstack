@@ -1,5 +1,6 @@
 const {
   normalizeEntry,
+  normalizeContentType,
   processContentType,
   processEntry,
   processAsset,
@@ -134,6 +135,8 @@ exports.sourceNodes = async ({
   // adding nodes
   contentstackData.contentTypes.forEach((contentType) => {
     contentType.uid = ((contentType.uid).replace(/-/g, '_'));
+    // Normalize content type
+    normalizeContentType(contentType.schema);
     const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
     createNode(contentTypeNode);
   });

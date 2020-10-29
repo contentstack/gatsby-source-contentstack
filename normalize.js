@@ -71,6 +71,29 @@ exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNod
   return resolveEntry;
 };
 
+var normalizeContentType = exports.normalizeContentType = function (contentTypeSchema) {
+  // Only normalize reference_to field for now
+  contentTypeSchema.forEach(function (schema) {
+    switch (schema.data_type) {
+      case 'group':
+        normalizeContentType(schema.schema);
+        break;
+      case 'global_field':
+        if (typeof schema.reference_to === 'string') schema.reference_to = [schema.reference_to];
+        normalizeContentType(schema.schema);
+        break;
+      case 'blocks':
+        schema.blocks.forEach(function (blockSchema) {
+          normalizeContentType(blockSchema.schema);
+        });
+        break;
+      default:
+        break;
+    }
+  });
+  return contentTypeSchema;
+};
+
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId, typePrefix) {
   var publishedLocale = asset.publish_details.locale;
   return createNodeId(typePrefix.toLowerCase() + '-assets-' + asset.uid + '-' + publishedLocale);

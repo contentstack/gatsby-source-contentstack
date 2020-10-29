@@ -57,6 +57,30 @@ exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, cre
   return resolveEntry;
 };
 
+const normalizeContentType = exports.normalizeContentType = contentTypeSchema => {
+  // Only normalize reference_to field for now
+  contentTypeSchema.forEach(schema => {
+    switch (schema.data_type) {
+      case 'group':
+        normalizeContentType(schema.schema);
+        break;
+      case 'global_field':
+        if (typeof schema.reference_to === 'string')
+          schema.reference_to = [schema.reference_to];
+        normalizeContentType(schema.schema);
+        break;
+      case 'blocks':
+        schema.blocks.forEach(blockSchema => {
+          normalizeContentType(blockSchema.schema);
+        });
+        break;
+      default:
+        break;
+    }
+  });
+  return contentTypeSchema;
+};
+
 const makeAssetNodeUid = exports.makeAssetNodeUid = (asset, createNodeId, typePrefix) => {
   const publishedLocale = asset.publish_details.locale;
   return createNodeId(`${typePrefix.toLowerCase()}-assets-${asset.uid}-${publishedLocale}`);
