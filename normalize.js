@@ -75,6 +75,20 @@ var normalizeContentType = exports.normalizeContentType = function (contentTypeS
   // Only normalize reference_to field for now
   contentTypeSchema.forEach(function (schema) {
     switch (schema.data_type) {
+      case 'text':
+        if (schema.field_metadata) {
+          if (schema.field_metadata.default_value === '') {
+            schema.field_metadata.default_value = null;
+          } else if (schema.field_metadata.default_value === true) {
+            schema.field_metadata.default_value = [true];
+          } else if (schema.field_metadata.default_value === false) {
+            schema.field_metadata.default_value = [false];
+          } else {
+            // Expected to be a string or an object
+            schema.field_metadata.default_value = [schema.field_metadata.default_value];
+          }
+        }
+        break;
       case 'group':
         normalizeContentType(schema.schema);
         break;
