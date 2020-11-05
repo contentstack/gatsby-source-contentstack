@@ -24,7 +24,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _require = require('./normalize'),
     normalizeEntry = _require.normalizeEntry,
-    normalizeContentType = _require.normalizeContentType,
     processContentType = _require.processContentType,
     processEntry = _require.processEntry,
     processAsset = _require.processAsset,
@@ -44,7 +43,7 @@ exports.createSchemaCustomization = function () {
     var cache = _ref2.cache,
         actions = _ref2.actions,
         schema = _ref2.schema;
-    var contentTypes, typePrefix, createTypes;
+    var contentTypes, typePrefix, createTypes, contentTypeInterface;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -88,6 +87,19 @@ exports.createSchemaCustomization = function () {
                 })];
                 result.types = result.types.concat(typeDefs);
                 createTypes(result.types);
+              });
+
+              contentTypeInterface = typePrefix + 'ContentTypes';
+
+              createTypes('\n      interface ' + contentTypeInterface + ' @nodeInterface {\n        id: ID!\n        title: String\n        uid: String\n      }\n    ');
+
+              // Create custom schema for content types
+              contentTypes.forEach(function (contentType) {
+                var contentTypeUid = contentType.uid.replace(/-/g, '_');
+                var name = typePrefix + 'ContentTypes' + contentTypeUid;
+
+                var typeDefs = '\n        type ' + name + ' implement Node & ' + contentTypeInterface + ' @infer {\n          id: ID!\n          title: String\n          uid: String\n        }\n      ';
+                createTypes(typeDefs);
               });
             }
 
@@ -206,7 +218,6 @@ exports.sourceNodes = function () {
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
               // Normalize content type
-              normalizeContentType(contentType.schema);
               var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
               createNode(contentTypeNode);
             });

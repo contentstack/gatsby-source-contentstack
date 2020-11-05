@@ -19,6 +19,7 @@ var _stringify2 = _interopRequireDefault(_stringify);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
+  var contentTypeUid = contentType.uid.replace(/-/g, '_');
   var nodeId = createNodeId(typePrefix.toLowerCase() + '-contentType-' + contentType.uid);
   var nodeContent = (0, _stringify2.default)(contentType);
   var nodeData = (0, _extends3.default)({}, contentType, {
@@ -26,7 +27,7 @@ exports.processContentType = function (contentType, createNodeId, createContentD
     parent: null,
     children: [],
     internal: {
-      type: typePrefix + 'ContentTypes',
+      type: typePrefix + 'ContentTypes' + contentTypeUid,
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent)
     }
@@ -69,43 +70,6 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
   var resolveEntry = (0, _extends3.default)({}, entry, builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
   return resolveEntry;
-};
-
-var normalizeContentType = exports.normalizeContentType = function (contentTypeSchema) {
-  // Only normalize reference_to field for now
-  contentTypeSchema.forEach(function (schema) {
-    switch (schema.data_type) {
-      case 'text':
-        if (schema.field_metadata) {
-          if (schema.field_metadata.default_value === '') {
-            schema.field_metadata.default_value = null;
-          } else if (schema.field_metadata.default_value === true) {
-            schema.field_metadata.default_value = [true];
-          } else if (schema.field_metadata.default_value === false) {
-            schema.field_metadata.default_value = [false];
-          } else {
-            // Expected to be a string or an object
-            schema.field_metadata.default_value = [schema.field_metadata.default_value];
-          }
-        }
-        break;
-      case 'group':
-        normalizeContentType(schema.schema);
-        break;
-      case 'global_field':
-        if (typeof schema.reference_to === 'string') schema.reference_to = [schema.reference_to];
-        normalizeContentType(schema.schema);
-        break;
-      case 'blocks':
-        schema.blocks.forEach(function (blockSchema) {
-          normalizeContentType(blockSchema.schema);
-        });
-        break;
-      default:
-        break;
-    }
-  });
-  return contentTypeSchema;
 };
 
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId, typePrefix) {

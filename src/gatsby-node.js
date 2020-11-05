@@ -1,6 +1,5 @@
 const {
   normalizeEntry,
-  normalizeContentType,
   processContentType,
   processEntry,
   processAsset,
@@ -56,6 +55,30 @@ exports.createSchemaCustomization = async ({
       ];
       result.types = result.types.concat(typeDefs);
       createTypes(result.types);
+    });
+
+    const contentTypeInterface = `${typePrefix}ContentTypes`;
+    createTypes(`
+      interface ${contentTypeInterface} @nodeInterface {
+        id: ID!
+        title: String
+        uid: String
+      }
+    `);
+
+    // Create custom schema for content types
+    contentTypes.forEach(contentType => {
+      const contentTypeUid = contentType.uid.replace(/-/g, '_');
+      const name = `${typePrefix}ContentTypes${contentTypeUid}`;
+
+      const typeDefs = `
+        type ${name} implement Node & ${contentTypeInterface} @infer {
+          id: ID!
+          title: String
+          uid: String
+        }
+      `;
+      createTypes(typeDefs);
     });
   }
 };
@@ -136,7 +159,6 @@ exports.sourceNodes = async ({
   contentstackData.contentTypes.forEach((contentType) => {
     contentType.uid = ((contentType.uid).replace(/-/g, '_'));
     // Normalize content type
-    normalizeContentType(contentType.schema);
     const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
     createNode(contentTypeNode);
   });
