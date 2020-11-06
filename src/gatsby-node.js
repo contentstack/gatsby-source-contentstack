@@ -7,6 +7,7 @@ const {
   makeAssetNodeUid,
   buildCustomSchema,
   extendSchemaWithDefaultEntryFields,
+  buildCustomContentTypeSchema
 } = require('./normalize');
 
 const {
@@ -72,12 +73,15 @@ exports.createSchemaCustomization = async ({
       const name = `${typePrefix}ContentTypes${contentTypeUid}`;
 
       const typeDefs = `
-        type ${name} implement Node & ${contentTypeInterface} @infer {
+        type ${name} implements Node & ${contentTypeInterface} @infer {
           id: ID!
           title: String
           uid: String
+          schema: ${name}_schema
         }
       `;
+      const nestedTypeDefs = buildCustomContentTypeSchema(contentType.schema, [], name);
+
       createTypes(typeDefs);
     });
   }

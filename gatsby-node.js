@@ -30,7 +30,8 @@ var _require = require('./normalize'),
     makeEntryNodeUid = _require.makeEntryNodeUid,
     makeAssetNodeUid = _require.makeAssetNodeUid,
     buildCustomSchema = _require.buildCustomSchema,
-    extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields;
+    extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields,
+    buildCustomContentTypeSchema = _require.buildCustomContentTypeSchema;
 
 var _require2 = require('./fetch'),
     fetchData = _require2.fetchData,
@@ -98,7 +99,9 @@ exports.createSchemaCustomization = function () {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
                 var name = typePrefix + 'ContentTypes' + contentTypeUid;
 
-                var typeDefs = '\n        type ' + name + ' implement Node & ' + contentTypeInterface + ' @infer {\n          id: ID!\n          title: String\n          uid: String\n        }\n      ';
+                var typeDefs = '\n        type ' + name + ' implements Node & ' + contentTypeInterface + ' @infer {\n          id: ID!\n          title: String\n          uid: String\n          schema: ' + name + '_schema\n        }\n      ';
+                var nestedTypeDefs = buildCustomContentTypeSchema(contentType.schema, [], name);
+
                 createTypes(typeDefs);
               });
             }

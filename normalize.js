@@ -481,3 +481,32 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
     groups: groups
   };
 };
+
+var buildCustomContentTypeSchema = exports.buildCustomContentTypeSchema = function (schema, types, parent) {
+  types = types || [];
+
+  schema.forEach(function (innerSchema) {
+    switch (innerSchema.data_type) {
+      case 'group':
+      case 'global_field':
+        {
+          var newparent = parent + '_schema';
+          var result = buildCustomContentTypeSchema(innerSchema.schema, types, newparent);
+
+          break;
+        }
+      case 'blocks':
+        {
+          var _newparent = parent + '_schema';
+          innerSchema.forEach(function (blockSchema) {
+            var result = buildCustomContentTypeSchema(blockSchema.schema, types, _newparent);
+          });
+          break;
+        }
+      default:
+        break;
+    }
+  });
+
+  return { types: types };
+};

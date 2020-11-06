@@ -460,3 +460,30 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
     groups,
   };
 };
+
+const buildCustomContentTypeSchema = exports.buildCustomContentTypeSchema = (schema, types, parent) => {
+  types = types || [];
+
+  schema.forEach(innerSchema => {
+    switch (innerSchema.data_type) {
+      case 'group':
+      case 'global_field': {
+        const newparent = `${parent}_schema`;
+        const result = buildCustomContentTypeSchema(innerSchema.schema, types, newparent);
+
+        break;
+      }
+      case 'blocks': {
+        const newparent = `${parent}_schema`;
+        innerSchema.forEach(blockSchema => {
+          const result = buildCustomContentTypeSchema(blockSchema.schema, types, newparent);
+        });
+        break;
+      }
+      default:
+        break;
+    }
+  });
+
+  return { types };
+};
