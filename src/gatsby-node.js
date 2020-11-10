@@ -114,6 +114,7 @@ exports.createSchemaCustomization = async (
                 if (node.id === id) nodesData.push(node);
               });
             });
+            return nodesData;
           },
         },
       };
@@ -123,6 +124,12 @@ exports.createSchemaCustomization = async (
           name: name,
           fields: fields,
           interfaces: ["Node", contentTypeInterface],
+          extensions: {
+            // While in SDL you have two different directives, @infer and @dontInfer to
+            // control inference behavior, Gatsby Type Builders take a single `infer`
+            // extension which accepts a Boolean
+            infer: false,
+          },
         })
       );
       createTypes(typeDefs);
@@ -158,6 +165,11 @@ function getTypeDefs(
           typePrefix
         );
 
+        // Union types are created appending parent name and field uid
+        // separated by "_".
+        const unionTypes = getUnionTypes(schema.schema, newParent);
+        const unionName = getUnionName(schema.schema, newParent);
+
         const fields = getObjectFieldsByTypes(schema);
         fields.schema = {
           type: `[${unionName}]`,
@@ -171,10 +183,7 @@ function getTypeDefs(
             return nodesData;
           },
         };
-        // Union types are created appending parent name and field uid
-        // separated by "_".
-        const unionTypes = getUnionTypes(schema.schema, newParent);
-        const unionName = getUnionName(schema.schema, newParent);
+
         // After recursive call is over, create union
         // NOTE: object types are created in default block
         typeDefs.push(
@@ -192,6 +201,7 @@ function getTypeDefs(
             name: newParent,
             fields: fields,
             interfaces: ["Node"],
+            extensions: { infer: false },
           })
         );
 
@@ -214,6 +224,129 @@ function getTypeDefs(
         break;
       }
       case "blocks":
+        const newParent = `${name}_${schema.uid}`;
+
+        /** BLOCKS **/
+        schema.blocks.forEach((block) => {
+          getTypeDefs(
+            schema,
+            gatsbySchema,
+            typeDefs,
+            newParent,
+            createNode,
+            createNodeId,
+            createContentDigest,
+            typePrefix
+          );
+          const blockType = `${newParent}_${block.uid}`;
+          const unionTypes = getUnionTypes(block.schema, blockType);
+          const unionName = getUnionName(block.schema, blockType);
+
+          const fields = getObjectFieldsByTypes(block);
+          fields.schema = {
+            type: `[${unionName}]`,
+            resolve: (source, args, context) => {
+              const nodesData = [];
+              source.schema___NODE.forEach((node) => {
+                context.nodeModel.getAllNodes().find((id) => {
+                  if (node.id === id) nodesData.push(node);
+                });
+              });
+              return nodesData;
+            },
+          };
+
+          typeDefs.push(
+            gatsbySchema.buildUnionType({
+              name: unionName,
+              types: unionTypes,
+              resolveType(value) {
+                return value.internal.type;
+              },
+            })
+          );
+
+          typeDefs.push(
+            gatsbySchema.buildObjectType({
+              name: newParent,
+              fields: fields,
+              interfaces: ["Node"],
+              extensions: { infer: false },
+            })
+          );
+
+          const contentTypeInnerObject = getContentTypeInnerObject(block);
+          contentTypeInnerObject.schema___NODE = getChildNodes(
+            block.schema,
+            blockType,
+            typePrefix,
+            createNodeId
+          );
+          // Create node
+          const nodeData = processContentTypeInnerObject(
+            contentTypeInnerObject,
+            createNodeId,
+            createContentDigest,
+            typePrefix,
+            blockType
+          );
+          createNode(nodeData);
+        });
+
+        const unionTypes = getUnionTypes(schema.blocks, newParent);
+        const unionName = getUnionName(schema.blocks, newParent);
+
+        const fields = getObjectFieldsByTypes(schema);
+        fields.blocks = {
+          type: `[${unionName}]`,
+          resolve: (source, args, context) => {
+            const nodesData = [];
+            source.schema___NODE.forEach((id) => {
+              context.nodeModel.getAllNodes().find((node) => {
+                if (node.id === id) nodesData.push(node);
+              });
+            });
+            return nodesData;
+          },
+        };
+
+        typeDefs.push(
+          gatsbySchema.buildUnionType({
+            name: unionName,
+            types: unionTypes,
+            resolveType(value) {
+              return value.internal.type;
+            },
+          })
+        );
+
+        typeDefs.push(
+          gatsbySchema.buildObjectType({
+            name: newParent,
+            fields: fields,
+            interfaces: ["Node"],
+            extensions: { infer: false },
+          })
+        );
+
+        const contentTypeInnerObject = getContentTypeInnerObject(schema);
+        contentTypeInnerObject.schema___NODE = getChildNodes(
+          schema.blocks,
+          newParent,
+          typePrefix,
+          createNodeId
+        );
+
+        // Create node
+        const nodeData = processContentTypeInnerObject(
+          contentTypeInnerObject,
+          createNodeId,
+          createContentDigest,
+          typePrefix,
+          newParent
+        );
+        createNode(nodeData);
+
         break;
       default: {
         // This will never have schema array in content type
@@ -225,6 +358,9 @@ function getTypeDefs(
             name: type,
             fields: fields,
             interfaces: ["Node"],
+            extensions: {
+              infer: false,
+            },
           })
         );
         const contentTypeInnerObject = getContentTypeInnerObject(schema);
