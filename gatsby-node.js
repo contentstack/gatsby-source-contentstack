@@ -1,28 +1,32 @@
-'use strict';
+"use strict";
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+var _defineProperty2 = require("babel-runtime/helpers/defineProperty");
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _extends4 = require('babel-runtime/helpers/extends');
+var _extends4 = require("babel-runtime/helpers/extends");
 
 var _extends5 = _interopRequireDefault(_extends4);
 
-var _set = require('babel-runtime/core-js/set');
+var _set = require("babel-runtime/core-js/set");
 
 var _set2 = _interopRequireDefault(_set);
 
-var _regenerator = require('babel-runtime/regenerator');
+var _typeof2 = require("babel-runtime/helpers/typeof");
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
+var _regenerator = require("babel-runtime/regenerator");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+var _asyncToGenerator2 = require("babel-runtime/helpers/asyncToGenerator");
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _require = require('./normalize'),
+var _require = require("./normalize"),
     normalizeEntry = _require.normalizeEntry,
     processContentType = _require.processContentType,
     processEntry = _require.processEntry,
@@ -31,9 +35,10 @@ var _require = require('./normalize'),
     makeAssetNodeUid = _require.makeAssetNodeUid,
     buildCustomSchema = _require.buildCustomSchema,
     extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields,
-    buildCustomContentTypeSchema = _require.buildCustomContentTypeSchema;
+    getChildNodes = _require.getChildNodes,
+    processContentTypeInnerObject = _require.processContentTypeInnerObject;
 
-var _require2 = require('./fetch'),
+var _require2 = require("./fetch"),
     fetchData = _require2.fetchData,
     fetchContentTypes = _require2.fetchContentTypes;
 
@@ -50,7 +55,7 @@ exports.createSchemaCustomization = function () {
         switch (_context.prev = _context.next) {
           case 0:
             contentTypes = void 0;
-            typePrefix = configOptions.type_prefix || 'Contentstack';
+            typePrefix = configOptions.type_prefix || "Contentstack";
             _context.prev = 2;
             _context.next = 5;
             return fetchContentTypes(configOptions);
@@ -66,48 +71,69 @@ exports.createSchemaCustomization = function () {
 
           case 10:
             _context.prev = 10;
-            _context.t0 = _context['catch'](2);
+            _context.t0 = _context["catch"](2);
 
-            console.error('Contentstack fetch content type failed!');
+            console.error("Contentstack fetch content type failed!");
 
           case 13:
             if (configOptions.enableSchemaGeneration) {
               createTypes = actions.createTypes;
 
               contentTypes.forEach(function (contentType) {
-                var contentTypeUid = contentType.uid.replace(/-/g, '_');
-                var name = typePrefix + '_' + contentTypeUid;
+                var contentTypeUid = contentType.uid.replace(/-/g, "_");
+                var name = typePrefix + "_" + contentTypeUid;
                 var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
                 var result = buildCustomSchema(extendedSchema, [], [], [], name, typePrefix);
                 references = references.concat(result.references);
                 groups = groups.concat(result.groups);
-                var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
+                var typeDefs = ["type linktype{\n              title: String\n              href: String\n            }", schema.buildObjectType({
                   name: name,
                   fields: result.fields,
-                  interfaces: ['Node']
+                  interfaces: ["Node"]
                 })];
                 result.types = result.types.concat(typeDefs);
                 createTypes(result.types);
               });
 
-              contentTypeInterface = typePrefix + 'ContentTypes';
+              contentTypeInterface = typePrefix + "ContentTypes";
 
-              createTypes('\n      interface ' + contentTypeInterface + ' @nodeInterface {\n        id: ID!\n        title: String\n        uid: String\n      }\n    ');
+              createTypes("\n      interface " + contentTypeInterface + " @nodeInterface {\n        id: ID!\n        title: String\n        uid: String\n      }\n    ");
 
               // Create custom schema for content types
               contentTypes.forEach(function (contentType) {
-                var contentTypeUid = contentType.uid.replace(/-/g, '_');
-                var name = typePrefix + 'ContentTypes' + contentTypeUid;
+                var contentTypeUid = contentType.uid.replace(/-/g, "_");
+                var name = typePrefix + "ContentTypes" + contentTypeUid;
 
-                var typeDefs = '\n        type ' + name + ' implements Node & ' + contentTypeInterface + ' @infer {\n          id: ID!\n          title: String\n          uid: String\n          schema: ' + name + '_schema\n        }\n      ';
-                var nestedTypeDefs = buildCustomContentTypeSchema(contentType.schema, [], name);
+                var result = getTypeDefs(contentType, schema, [], name, createNode, createNodeId, createContentDigest, typePrefix);
+                createTypes(result);
 
+                var unionTypes = getUnionTypes(contentType.schema, name);
+                var unionName = getUnionName(contentType.schema, name);
+
+                var typeDefs = [];
+
+                typeDefs.push(schema.buildUnionType({
+                  name: unionName,
+                  types: unionTypes
+                }));
+
+                var fields = {
+                  title: "String!",
+                  uid: "String!",
+                  schema: "[" + unionName + "]"
+                };
+
+                typeDefs.push(schema.buildObjectType({
+                  name: name,
+                  fields: fields,
+                  interfaces: ["Node", contentTypeInterface]
+                }));
                 createTypes(typeDefs);
               });
             }
 
           case 14:
-          case 'end':
+          case "end":
             return _context.stop();
         }
       }
@@ -118,6 +144,136 @@ exports.createSchemaCustomization = function () {
     return _ref.apply(this, arguments);
   };
 }();
+
+function getTypeDefs(contentType, gatsbySchema, typeDefs, name, createNode, createNodeId, createContentDigest, typePrefix) {
+  typeDefs = typeDefs || [];
+
+  contentType.schema.forEach(function (schema) {
+    switch (schema.data_type) {
+      case "group":
+      case "global_field":
+        {
+          var newParent = name + "_" + schema.uid;
+          getTypeDefs(schema, gatsbySchema, typeDefs, newParent, createNode, createNodeId, createContentDigest, typePrefix);
+
+          var fields = getObjectFieldsByTypes(schema);
+          // Union types are created appending parent name and field uid
+          // separated by "_".
+          var unionTypes = getUnionTypes(schema.schema, newParent);
+          var unionName = getUnionName(schema.schema, newParent);
+          fields.schema = "[" + unionName + "]";
+          // After recursive call is over, create union
+          // NOTE: object types are created in default block
+          typeDefs.push(gatsbySchema.buildUnionType({
+            name: unionName,
+            types: unionTypes
+            // resolveType(value) {
+            //   console.log('value', value);
+            //   return value;
+            // }
+          }));
+
+          typeDefs.push(gatsbySchema.buildObjectType({
+            name: newParent,
+            fields: fields,
+            interfaces: ["Node"]
+          }));
+
+          var contentTypeInnerObject = getContentTypeInnerObject(schema);
+          contentTypeInnerObject.schema___NODE = getChildNodes(schema.schema, newParent, typePrefix, createNodeId);
+          // Create node
+          var nodeData = processContentTypeInnerObject(contentTypeInnerObject, createNodeId, createContentDigest, typePrefix, newParent);
+          createNode(nodeData);
+          break;
+        }
+      case "blocks":
+        break;
+      default:
+        {
+          // This will never have schema array in content type
+          var type = name + "_" + schema.uid;
+          var _fields = getObjectFieldsByTypes(schema);
+
+          typeDefs.push(gatsbySchema.buildObjectType({
+            name: type,
+            fields: _fields,
+            interfaces: ["Node"]
+          }));
+          var _contentTypeInnerObject = getContentTypeInnerObject(schema);
+          // Create node
+          var _nodeData = processContentTypeInnerObject(_contentTypeInnerObject, createNodeId, createContentDigest, typePrefix, type);
+          createNode(_nodeData);
+          break;
+        }
+    }
+  });
+
+  return typeDefs;
+}
+
+function getContentTypeInnerObject(obj) {
+  var newObj = {};
+  for (var key in obj) {
+    switch ((0, _typeof3.default)(obj[key])) {
+      case "boolean":
+        newObj[key] = obj[key];
+        break;
+      case "number":
+        newObj[key] = obj[key];
+        break;
+      case "string":
+        newObj[key] = obj[key];
+        break;
+      // case 'object':
+      //   newObj[key] = 'Int';
+      //   break;
+      default:
+        break;
+    }
+  }
+  return newObj;
+}
+
+function getObjectFieldsByTypes(obj) {
+  var newObj = {};
+  for (var key in obj) {
+    switch ((0, _typeof3.default)(obj[key])) {
+      case "boolean":
+        newObj[key] = "Boolean";
+        break;
+      case "number":
+        newObj[key] = "Int";
+        break;
+      case "string":
+        newObj[key] = "String";
+        break;
+      // case 'object':
+      //   newObj[key] = 'Int';
+      //   break;
+      default:
+        break;
+    }
+  }
+  return newObj;
+}
+
+function getUnionTypes(schema, parent) {
+  var unionTypes = [];
+  schema.forEach(function (field) {
+    var type = parent + "_" + field.uid;
+    unionTypes.push(type);
+  });
+  return unionTypes;
+}
+
+function getUnionName(schema, parent) {
+  var string = parent;
+  schema.forEach(function (field) {
+    string += field.uid;
+  });
+  string = string + "Union";
+  return string;
+}
 
 exports.sourceNodes = function () {
   var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref4, configOptions) {
@@ -137,13 +293,13 @@ exports.sourceNodes = function () {
         switch (_context2.prev = _context2.next) {
           case 0:
             deleteContentstackNodes = function deleteContentstackNodes(item, type) {
-              var nodeId = '';
+              var nodeId = "";
               var node = null;
-              if (type === 'entry') {
-                nodeId = createNodeId(typePrefix.toLowerCase() + '-entry-' + item.uid + '-' + item.locale);
+              if (type === "entry") {
+                nodeId = createNodeId(typePrefix.toLowerCase() + "-entry-" + item.uid + "-" + item.locale);
               }
-              if (type === 'asset') {
-                nodeId = createNodeId(typePrefix.toLowerCase() + '-assets-' + item.uid + '-' + item.locale);
+              if (type === "asset") {
+                nodeId = createNodeId(typePrefix.toLowerCase() + "-assets-" + item.uid + "-" + item.locale);
               }
               node = getNode(nodeId);
               if (node) {
@@ -158,11 +314,11 @@ exports.sourceNodes = function () {
             _store$getState = store.getState(), status = _store$getState.status;
             // use a custom type prefix if specified
 
-            typePrefix = configOptions.type_prefix || 'Contentstack';
+            typePrefix = configOptions.type_prefix || "Contentstack";
 
 
-            if (status && status.plugins && status.plugins['gatsby-source-contentstack']) {
-              syncToken = status.plugins['gatsby-source-contentstack'][typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key];
+            if (status && status.plugins && status.plugins["gatsby-source-contentstack"]) {
+              syncToken = status.plugins["gatsby-source-contentstack"][typePrefix.toLowerCase() + "-sync-token-" + configOptions.api_key];
             }
 
             configOptions.syncToken = syncToken || null;
@@ -191,15 +347,15 @@ exports.sourceNodes = function () {
             entriesNodeIds = new _set2.default();
             assetsNodeIds = new _set2.default();
             existingNodes = getNodes().filter(function (n) {
-              return n.internal.owner === 'gatsby-source-contentstack';
+              return n.internal.owner === "gatsby-source-contentstack";
             });
 
 
             existingNodes.forEach(function (n) {
-              if (n.internal.type !== typePrefix + 'ContentTypes' && n.internal.type !== typePrefix + '_assets') {
+              if (n.internal.type !== typePrefix + "ContentTypes" && n.internal.type !== typePrefix + "_assets") {
                 entriesNodeIds.add(n.id);
               }
-              if (n.internal.type === typePrefix + '_assets') {
+              if (n.internal.type === typePrefix + "_assets") {
                 assetsNodeIds.add(n.id);
               }
               touchNode({
@@ -219,14 +375,13 @@ exports.sourceNodes = function () {
 
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
-              contentType.uid = contentType.uid.replace(/-/g, '_');
-              // Normalize content type
+              contentType.uid = contentType.uid.replace(/-/g, "_");
               var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
               createNode(contentTypeNode);
             });
 
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
-              item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
+              item.content_type_uid = item.content_type_uid.replace(/-/g, "_");
               var contentType = contentstackData.contentTypes.find(function (contentType) {
                 return item.content_type_uid === contentType.uid;
               });
@@ -243,25 +398,25 @@ exports.sourceNodes = function () {
             // deleting nodes
 
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'entry');
+              deleteContentstackNodes(item.data, "entry");
             });
 
             syncData.asset_unpublished && syncData.asset_unpublished.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'asset');
+              deleteContentstackNodes(item.data, "asset");
             });
 
             syncData.entry_deleted && syncData.entry_deleted.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'entry');
+              deleteContentstackNodes(item.data, "entry");
             });
 
             syncData.asset_deleted && syncData.asset_deleted.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'asset');
+              deleteContentstackNodes(item.data, "asset");
             });
 
             syncData.content_type_deleted && syncData.content_type_deleted.forEach(function (item) {
-              item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
+              item.content_type_uid = item.content_type_uid.replace(/-/g, "_");
               var sameContentTypeNodes = getNodes().filter(function (n) {
-                return n.internal.type === typePrefix + '_' + item.content_type_uid;
+                return n.internal.type === typePrefix + "_" + item.content_type_uid;
               });
               sameContentTypeNodes.forEach(function (node) {
                 return deleteNode({
@@ -277,11 +432,11 @@ exports.sourceNodes = function () {
 
             newState = {};
 
-            newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
+            newState[typePrefix.toLowerCase() + "-sync-token-" + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
           case 33:
-          case 'end':
+          case "end":
             return _context2.stop();
         }
       }
@@ -300,9 +455,9 @@ exports.createResolvers = function (_ref6) {
   references.forEach(function (reference) {
     resolvers[reference.parent] = (0, _extends5.default)({}, resolvers[reference.parent], (0, _defineProperty3.default)({}, reference.uid, {
       resolve: function resolve(source, args, context, info) {
-        if (source[reference.uid + '___NODE']) {
+        if (source[reference.uid + "___NODE"]) {
           var nodesData = [];
-          source[reference.uid + '___NODE'].forEach(function (id) {
+          source[reference.uid + "___NODE"].forEach(function (id) {
             context.nodeModel.getAllNodes().find(function (node) {
               if (node.id === id) {
                 nodesData.push(node);

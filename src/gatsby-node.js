@@ -7,40 +7,43 @@ const {
   makeAssetNodeUid,
   buildCustomSchema,
   extendSchemaWithDefaultEntryFields,
-  buildCustomContentTypeSchema
-} = require('./normalize');
+  getChildNodes,
+  processContentTypeInnerObject,
+} = require("./normalize");
 
-const {
-  fetchData,
-  fetchContentTypes,
-} = require('./fetch');
+const { fetchData, fetchContentTypes } = require("./fetch");
 
 let references = [];
 let groups = [];
-exports.createSchemaCustomization = async ({
-  cache,
-  actions,
-  schema,
-}, configOptions) => {
-
+exports.createSchemaCustomization = async (
+  { cache, actions, schema },
+  configOptions
+) => {
   let contentTypes;
 
-  const typePrefix = configOptions.type_prefix || 'Contentstack';
+  const typePrefix = configOptions.type_prefix || "Contentstack";
   try {
     contentTypes = await fetchContentTypes(configOptions);
     await cache.set(typePrefix, contentTypes);
   } catch (error) {
-    console.error('Contentstack fetch content type failed!');
+    console.error("Contentstack fetch content type failed!");
   }
   if (configOptions.enableSchemaGeneration) {
-    const {
-      createTypes,
-    } = actions;
+    const { createTypes } = actions;
     contentTypes.forEach((contentType) => {
-      const contentTypeUid = ((contentType.uid).replace(/-/g, '_'));
+      const contentTypeUid = contentType.uid.replace(/-/g, "_");
       const name = `${typePrefix}_${contentTypeUid}`;
-      const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-      let result = buildCustomSchema(extendedSchema, [], [], [], name, typePrefix);
+      const extendedSchema = extendSchemaWithDefaultEntryFields(
+        contentType.schema
+      );
+      let result = buildCustomSchema(
+        extendedSchema,
+        [],
+        [],
+        [],
+        name,
+        typePrefix
+      );
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
       const typeDefs = [
@@ -51,7 +54,7 @@ exports.createSchemaCustomization = async ({
         schema.buildObjectType({
           name,
           fields: result.fields,
-          interfaces: ['Node'],
+          interfaces: ["Node"],
         }),
       ];
       result.types = result.types.concat(typeDefs);
@@ -68,57 +71,254 @@ exports.createSchemaCustomization = async ({
     `);
 
     // Create custom schema for content types
-    contentTypes.forEach(contentType => {
-      const contentTypeUid = contentType.uid.replace(/-/g, '_');
+    contentTypes.forEach((contentType) => {
+      const contentTypeUid = contentType.uid.replace(/-/g, "_");
       const name = `${typePrefix}ContentTypes${contentTypeUid}`;
 
-      const typeDefs = `
-        type ${name} implements Node & ${contentTypeInterface} @infer {
-          id: ID!
-          title: String
-          uid: String
-          schema: ${name}_schema
-        }
-      `;
-      const nestedTypeDefs = buildCustomContentTypeSchema(contentType.schema, [], name);
+      const result = getTypeDefs(
+        contentType,
+        schema,
+        [],
+        name,
+        createNode,
+        createNodeId,
+        createContentDigest,
+        typePrefix
+      );
+      createTypes(result);
 
+      const unionTypes = getUnionTypes(contentType.schema, name);
+      const unionName = getUnionName(contentType.schema, name);
+
+      const typeDefs = [];
+
+      typeDefs.push(
+        schema.buildUnionType({
+          name: unionName,
+          types: unionTypes,
+        })
+      );
+
+      const fields = {
+        title: "String!",
+        uid: "String!",
+        schema: `[${unionName}]`,
+      };
+
+      typeDefs.push(
+        schema.buildObjectType({
+          name: name,
+          fields: fields,
+          interfaces: ["Node", contentTypeInterface],
+        })
+      );
       createTypes(typeDefs);
     });
   }
 };
 
-exports.sourceNodes = async ({
-  cache,
-  actions,
-  getNode,
-  getNodes,
+function getTypeDefs(
+  contentType,
+  gatsbySchema,
+  typeDefs,
+  name,
+  createNode,
   createNodeId,
-  store,
-  reporter,
   createContentDigest,
-}, configOptions) => {
-  const {
-    createNode,
-    deleteNode,
-    touchNode,
-    setPluginStatus,
-  } = actions;
-  let syncToken;
-  const {
-    status,
-  } = store.getState();
-  // use a custom type prefix if specified
-  const typePrefix = configOptions.type_prefix || 'Contentstack';
+  typePrefix
+) {
+  typeDefs = typeDefs || [];
 
-  if (status && status.plugins && status.plugins['gatsby-source-contentstack']) {
-    syncToken = status.plugins['gatsby-source-contentstack'][`${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`];
+  contentType.schema.forEach((schema) => {
+    switch (schema.data_type) {
+      case "group":
+      case "global_field": {
+        const newParent = `${name}_${schema.uid}`;
+        getTypeDefs(
+          schema,
+          gatsbySchema,
+          typeDefs,
+          newParent,
+          createNode,
+          createNodeId,
+          createContentDigest,
+          typePrefix
+        );
+
+        const fields = getObjectFieldsByTypes(schema);
+        // Union types are created appending parent name and field uid
+        // separated by "_".
+        const unionTypes = getUnionTypes(schema.schema, newParent);
+        const unionName = getUnionName(schema.schema, newParent);
+        fields.schema = `[${unionName}]`;
+        // After recursive call is over, create union
+        // NOTE: object types are created in default block
+        typeDefs.push(
+          gatsbySchema.buildUnionType({
+            name: unionName,
+            types: unionTypes,
+            // resolveType(value) {
+            //   console.log('value', value);
+            //   return value;
+            // }
+          })
+        );
+
+        typeDefs.push(
+          gatsbySchema.buildObjectType({
+            name: newParent,
+            fields: fields,
+            interfaces: ["Node"],
+          })
+        );
+
+        const contentTypeInnerObject = getContentTypeInnerObject(schema);
+        contentTypeInnerObject.schema___NODE = getChildNodes(
+          schema.schema,
+          newParent,
+          typePrefix,
+          createNodeId
+        );
+        // Create node
+        const nodeData = processContentTypeInnerObject(
+          contentTypeInnerObject,
+          createNodeId,
+          createContentDigest,
+          typePrefix,
+          newParent
+        );
+        createNode(nodeData);
+        break;
+      }
+      case "blocks":
+        break;
+      default: {
+        // This will never have schema array in content type
+        const type = `${name}_${schema.uid}`;
+        const fields = getObjectFieldsByTypes(schema);
+
+        typeDefs.push(
+          gatsbySchema.buildObjectType({
+            name: type,
+            fields: fields,
+            interfaces: ["Node"],
+          })
+        );
+        const contentTypeInnerObject = getContentTypeInnerObject(schema);
+        // Create node
+        const nodeData = processContentTypeInnerObject(
+          contentTypeInnerObject,
+          createNodeId,
+          createContentDigest,
+          typePrefix,
+          type
+        );
+        createNode(nodeData);
+        break;
+      }
+    }
+  });
+
+  return typeDefs;
+}
+
+function getContentTypeInnerObject(obj) {
+  const newObj = {};
+  for (let key in obj) {
+    switch (typeof obj[key]) {
+      case "boolean":
+        newObj[key] = obj[key];
+        break;
+      case "number":
+        newObj[key] = obj[key];
+        break;
+      case "string":
+        newObj[key] = obj[key];
+        break;
+      // case 'object':
+      //   newObj[key] = 'Int';
+      //   break;
+      default:
+        break;
+    }
+  }
+  return newObj;
+}
+
+function getObjectFieldsByTypes(obj) {
+  const newObj = {};
+  for (let key in obj) {
+    switch (typeof obj[key]) {
+      case "boolean":
+        newObj[key] = "Boolean";
+        break;
+      case "number":
+        newObj[key] = "Int";
+        break;
+      case "string":
+        newObj[key] = "String";
+        break;
+      // case 'object':
+      //   newObj[key] = 'Int';
+      //   break;
+      default:
+        break;
+    }
+  }
+  return newObj;
+}
+
+function getUnionTypes(schema, parent) {
+  let unionTypes = [];
+  schema.forEach((field) => {
+    let type = `${parent}_${field.uid}`;
+    unionTypes.push(type);
+  });
+  return unionTypes;
+}
+
+function getUnionName(schema, parent) {
+  let string = parent;
+  schema.forEach((field) => {
+    string += field.uid;
+  });
+  string = string + "Union";
+  return string;
+}
+
+exports.sourceNodes = async (
+  {
+    cache,
+    actions,
+    getNode,
+    getNodes,
+    createNodeId,
+    store,
+    reporter,
+    createContentDigest,
+  },
+  configOptions
+) => {
+  const { createNode, deleteNode, touchNode, setPluginStatus } = actions;
+  let syncToken;
+  const { status } = store.getState();
+  // use a custom type prefix if specified
+  const typePrefix = configOptions.type_prefix || "Contentstack";
+
+  if (
+    status &&
+    status.plugins &&
+    status.plugins["gatsby-source-contentstack"]
+  ) {
+    syncToken =
+      status.plugins["gatsby-source-contentstack"][
+        `${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`
+      ];
   }
 
   configOptions.syncToken = syncToken || null;
 
-  const {
-    contentstackData,
-  } = await fetchData(configOptions, reporter);
+  const { contentstackData } = await fetchData(configOptions, reporter);
   contentstackData.contentTypes = await cache.get(typePrefix);
   const syncData = contentstackData.syncData.reduce((merged, item) => {
     if (!merged[item.type]) {
@@ -132,13 +332,15 @@ exports.sourceNodes = async ({
   const entriesNodeIds = new Set();
   const assetsNodeIds = new Set();
 
-
   const existingNodes = getNodes().filter(
-    (n) => n.internal.owner === 'gatsby-source-contentstack',
+    (n) => n.internal.owner === "gatsby-source-contentstack"
   );
 
   existingNodes.forEach((n) => {
-    if (n.internal.type !== `${typePrefix}ContentTypes` && n.internal.type !== `${typePrefix}_assets`) {
+    if (
+      n.internal.type !== `${typePrefix}ContentTypes` &&
+      n.internal.type !== `${typePrefix}_assets`
+    ) {
       entriesNodeIds.add(n.id);
     }
     if (n.internal.type === `${typePrefix}_assets`) {
@@ -149,45 +351,77 @@ exports.sourceNodes = async ({
     });
   });
 
-  syncData.entry_published && syncData.entry_published.forEach((item) => {
-    const entryNodeId = makeEntryNodeUid(item.data, createNodeId, typePrefix);
-    entriesNodeIds.add(entryNodeId);
-  });
+  syncData.entry_published &&
+    syncData.entry_published.forEach((item) => {
+      const entryNodeId = makeEntryNodeUid(item.data, createNodeId, typePrefix);
+      entriesNodeIds.add(entryNodeId);
+    });
 
-  syncData.asset_published && syncData.asset_published.forEach((item) => {
-    const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
-    assetsNodeIds.add(entryNodeId);
-  });
+  syncData.asset_published &&
+    syncData.asset_published.forEach((item) => {
+      const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
+      assetsNodeIds.add(entryNodeId);
+    });
 
   // adding nodes
   contentstackData.contentTypes.forEach((contentType) => {
-    contentType.uid = ((contentType.uid).replace(/-/g, '_'));
-    // Normalize content type
-    const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
+    contentType.uid = contentType.uid.replace(/-/g, "_");
+    const contentTypeNode = processContentType(
+      contentType,
+      createNodeId,
+      createContentDigest,
+      typePrefix
+    );
     createNode(contentTypeNode);
   });
 
-  syncData.entry_published && syncData.entry_published.forEach((item) => {
-    item.content_type_uid = ((item.content_type_uid).replace(/-/g, '_'));
-    const contentType = contentstackData.contentTypes.find((contentType) => item.content_type_uid === contentType.uid);
-    const normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
-    const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
-    createNode(entryNode);
-  });
+  syncData.entry_published &&
+    syncData.entry_published.forEach((item) => {
+      item.content_type_uid = item.content_type_uid.replace(/-/g, "_");
+      const contentType = contentstackData.contentTypes.find(
+        (contentType) => item.content_type_uid === contentType.uid
+      );
+      const normalizedEntry = normalizeEntry(
+        contentType,
+        item.data,
+        entriesNodeIds,
+        assetsNodeIds,
+        createNodeId,
+        typePrefix
+      );
+      const entryNode = processEntry(
+        contentType,
+        normalizedEntry,
+        createNodeId,
+        createContentDigest,
+        typePrefix
+      );
+      createNode(entryNode);
+    });
 
-  syncData.asset_published && syncData.asset_published.forEach((item) => {
-    const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
-    createNode(assetNode);
-  });
+  syncData.asset_published &&
+    syncData.asset_published.forEach((item) => {
+      const assetNode = processAsset(
+        item.data,
+        createNodeId,
+        createContentDigest,
+        typePrefix
+      );
+      createNode(assetNode);
+    });
 
   function deleteContentstackNodes(item, type) {
-    let nodeId = '';
+    let nodeId = "";
     let node = null;
-    if (type === 'entry') {
-      nodeId = createNodeId(`${typePrefix.toLowerCase()}-entry-${item.uid}-${item.locale}`);
+    if (type === "entry") {
+      nodeId = createNodeId(
+        `${typePrefix.toLowerCase()}-entry-${item.uid}-${item.locale}`
+      );
     }
-    if (type === 'asset') {
-      nodeId = createNodeId(`${typePrefix.toLowerCase()}-assets-${item.uid}-${item.locale}`);
+    if (type === "asset") {
+      nodeId = createNodeId(
+        `${typePrefix.toLowerCase()}-assets-${item.uid}-${item.locale}`
+      );
     }
     node = getNode(nodeId);
     if (node) {
@@ -199,45 +433,51 @@ exports.sourceNodes = async ({
 
   // deleting nodes
 
-  syncData.entry_unpublished && syncData.entry_unpublished.forEach((item) => {
-    deleteContentstackNodes(item.data, 'entry');
-  });
+  syncData.entry_unpublished &&
+    syncData.entry_unpublished.forEach((item) => {
+      deleteContentstackNodes(item.data, "entry");
+    });
 
-  syncData.asset_unpublished && syncData.asset_unpublished.forEach((item) => {
-    deleteContentstackNodes(item.data, 'asset');
-  });
+  syncData.asset_unpublished &&
+    syncData.asset_unpublished.forEach((item) => {
+      deleteContentstackNodes(item.data, "asset");
+    });
 
-  syncData.entry_deleted && syncData.entry_deleted.forEach((item) => {
-    deleteContentstackNodes(item.data, 'entry');
-  });
+  syncData.entry_deleted &&
+    syncData.entry_deleted.forEach((item) => {
+      deleteContentstackNodes(item.data, "entry");
+    });
 
-  syncData.asset_deleted && syncData.asset_deleted.forEach((item) => {
-    deleteContentstackNodes(item.data, 'asset');
-  });
+  syncData.asset_deleted &&
+    syncData.asset_deleted.forEach((item) => {
+      deleteContentstackNodes(item.data, "asset");
+    });
 
-  syncData.content_type_deleted && syncData.content_type_deleted.forEach((item) => {
-    item.content_type_uid = ((item.content_type_uid).replace(/-/g, '_'));
-    const sameContentTypeNodes = getNodes().filter(
-      (n) => n.internal.type === `${typePrefix}_${item.content_type_uid}`,
-    );
-    sameContentTypeNodes.forEach((node) => deleteNode({
-      node,
-    }));
-  });
+  syncData.content_type_deleted &&
+    syncData.content_type_deleted.forEach((item) => {
+      item.content_type_uid = item.content_type_uid.replace(/-/g, "_");
+      const sameContentTypeNodes = getNodes().filter(
+        (n) => n.internal.type === `${typePrefix}_${item.content_type_uid}`
+      );
+      sameContentTypeNodes.forEach((node) =>
+        deleteNode({
+          node,
+        })
+      );
+    });
 
   // Updating the syncToken
   const nextSyncToken = contentstackData.sync_token;
 
   // Storing the sync state for the next sync
   const newState = {};
-  newState[`${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`] = nextSyncToken;
+  newState[
+    `${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`
+  ] = nextSyncToken;
   setPluginStatus(newState);
 };
 
-
-exports.createResolvers = ({
-  createResolvers,
-}) => {
+exports.createResolvers = ({ createResolvers }) => {
   const resolvers = {};
   references.forEach((reference) => {
     resolvers[reference.parent] = {
@@ -266,7 +506,10 @@ exports.createResolvers = ({
       ...{
         [group.field.uid]: {
           resolve: (source) => {
-            if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
+            if (
+              group.field.multiple &&
+              !Array.isArray(source[group.field.uid])
+            ) {
               return [];
             }
             return source[group.field.uid] || null;
