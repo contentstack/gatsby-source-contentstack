@@ -96,13 +96,26 @@ exports.createSchemaCustomization = async (
         schema.buildUnionType({
           name: unionName,
           types: unionTypes,
+          resolveType(value) {
+            return value.internal.type;
+          },
         })
       );
 
       const fields = {
         title: "String!",
         uid: "String!",
-        schema: `[${unionName}]`,
+        schema: {
+          type: `[${unionName}]`,
+          resolve: (source, args, context) => {
+            const nodesData = [];
+            source.schema___NODE.forEach((id) => {
+              context.nodeModel.getAllNodes().find((node) => {
+                if (node.id === id) nodesData.push(node);
+              });
+            });
+          },
+        },
       };
 
       typeDefs.push(
@@ -146,21 +159,31 @@ function getTypeDefs(
         );
 
         const fields = getObjectFieldsByTypes(schema);
+        fields.schema = {
+          type: `[${unionName}]`,
+          resolve: (source, args, context) => {
+            const nodesData = [];
+            source.schema___NODE.forEach((id) => {
+              context.nodeModel.getAllNodes().find((node) => {
+                if (node.id === id) nodesData.push(node);
+              });
+            });
+            return nodesData;
+          },
+        };
         // Union types are created appending parent name and field uid
         // separated by "_".
         const unionTypes = getUnionTypes(schema.schema, newParent);
         const unionName = getUnionName(schema.schema, newParent);
-        fields.schema = `[${unionName}]`;
         // After recursive call is over, create union
         // NOTE: object types are created in default block
         typeDefs.push(
           gatsbySchema.buildUnionType({
             name: unionName,
             types: unionTypes,
-            // resolveType(value) {
-            //   console.log('value', value);
-            //   return value;
-            // }
+            resolveType(value) {
+              return value.internal.type;
+            },
           })
         );
 

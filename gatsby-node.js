@@ -116,13 +116,26 @@ exports.createSchemaCustomization = function () {
 
                 typeDefs.push(schema.buildUnionType({
                   name: unionName,
-                  types: unionTypes
+                  types: unionTypes,
+                  resolveType: function resolveType(value) {
+                    return value.internal.type;
+                  }
                 }));
 
                 var fields = {
                   title: "String!",
                   uid: "String!",
-                  schema: "[" + unionName + "]"
+                  schema: {
+                    type: "[" + unionName + "]",
+                    resolve: function resolve(source, args, context) {
+                      var nodesData = [];
+                      source.schema___NODE.forEach(function (id) {
+                        context.nodeModel.getAllNodes().find(function (node) {
+                          if (node.id === id) nodesData.push(node);
+                        });
+                      });
+                    }
+                  }
                 };
 
                 typeDefs.push(schema.buildObjectType({
@@ -159,20 +172,30 @@ function getTypeDefs(contentType, gatsbySchema, typeDefs, name, createNode, crea
           getTypeDefs(schema, gatsbySchema, typeDefs, newParent, createNode, createNodeId, createContentDigest, typePrefix);
 
           var fields = getObjectFieldsByTypes(schema);
+          fields.schema = {
+            type: "[" + unionName + "]",
+            resolve: function resolve(source, args, context) {
+              var nodesData = [];
+              source.schema___NODE.forEach(function (id) {
+                context.nodeModel.getAllNodes().find(function (node) {
+                  if (node.id === id) nodesData.push(node);
+                });
+              });
+              return nodesData;
+            }
+          };
           // Union types are created appending parent name and field uid
           // separated by "_".
           var unionTypes = getUnionTypes(schema.schema, newParent);
           var unionName = getUnionName(schema.schema, newParent);
-          fields.schema = "[" + unionName + "]";
           // After recursive call is over, create union
           // NOTE: object types are created in default block
           typeDefs.push(gatsbySchema.buildUnionType({
             name: unionName,
-            types: unionTypes
-            // resolveType(value) {
-            //   console.log('value', value);
-            //   return value;
-            // }
+            types: unionTypes,
+            resolveType: function resolveType(value) {
+              return value.internal.type;
+            }
           }));
 
           typeDefs.push(gatsbySchema.buildObjectType({
