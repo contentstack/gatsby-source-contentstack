@@ -48,8 +48,10 @@ exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
     var cache = _ref2.cache,
         actions = _ref2.actions,
-        schema = _ref2.schema;
-    var contentTypes, typePrefix, createTypes, contentTypeInterface;
+        schema = _ref2.schema,
+        createNodeId = _ref2.createNodeId,
+        createContentDigest = _ref2.createContentDigest;
+    var contentTypes, typePrefix, createTypes, createNode, contentTypeInterface;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -77,7 +79,7 @@ exports.createSchemaCustomization = function () {
 
           case 13:
             if (configOptions.enableSchemaGeneration) {
-              createTypes = actions.createTypes;
+              createTypes = actions.createTypes, createNode = actions.createNode;
 
               contentTypes.forEach(function (contentType) {
                 var contentTypeUid = contentType.uid.replace(/-/g, "_");

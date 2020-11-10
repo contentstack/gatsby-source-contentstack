@@ -16,7 +16,7 @@ const { fetchData, fetchContentTypes } = require("./fetch");
 let references = [];
 let groups = [];
 exports.createSchemaCustomization = async (
-  { cache, actions, schema },
+  { cache, actions, schema, createNodeId, createContentDigest },
   configOptions
 ) => {
   let contentTypes;
@@ -29,7 +29,7 @@ exports.createSchemaCustomization = async (
     console.error("Contentstack fetch content type failed!");
   }
   if (configOptions.enableSchemaGeneration) {
-    const { createTypes } = actions;
+    const { createTypes, createNode } = actions;
     contentTypes.forEach((contentType) => {
       const contentTypeUid = contentType.uid.replace(/-/g, "_");
       const name = `${typePrefix}_${contentTypeUid}`;
