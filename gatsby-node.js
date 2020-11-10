@@ -226,8 +226,9 @@ function getTypeDefs(contentType, gatsbySchema, typeDefs, name, createNode, crea
 
         /** BLOCKS **/
         schema.blocks.forEach(function (block) {
-          getTypeDefs(schema, gatsbySchema, typeDefs, newParent, createNode, createNodeId, createContentDigest, typePrefix);
           var blockType = newParent + "_" + block.uid;
+
+          getTypeDefs(block, gatsbySchema, typeDefs, blockType, createNode, createNodeId, createContentDigest, typePrefix);
           var unionTypes = getUnionTypes(block.schema, blockType);
           var unionName = getUnionName(block.schema, blockType);
 
@@ -254,7 +255,7 @@ function getTypeDefs(contentType, gatsbySchema, typeDefs, name, createNode, crea
           }));
 
           typeDefs.push(gatsbySchema.buildObjectType({
-            name: newParent,
+            name: blockType,
             fields: fields,
             interfaces: ["Node"],
             extensions: { infer: false }
@@ -275,7 +276,7 @@ function getTypeDefs(contentType, gatsbySchema, typeDefs, name, createNode, crea
           type: "[" + unionName + "]",
           resolve: function resolve(source, args, context) {
             var nodesData = [];
-            source.schema___NODE.forEach(function (id) {
+            source.blocks___NODE.forEach(function (id) {
               context.nodeModel.getAllNodes().find(function (node) {
                 if (node.id === id) nodesData.push(node);
               });
@@ -300,7 +301,7 @@ function getTypeDefs(contentType, gatsbySchema, typeDefs, name, createNode, crea
         }));
 
         var contentTypeInnerObject = getContentTypeInnerObject(schema);
-        contentTypeInnerObject.schema___NODE = getChildNodes(schema.blocks, newParent, typePrefix, createNodeId);
+        contentTypeInnerObject.blocks___NODE = getChildNodes(schema.blocks, newParent, typePrefix, createNodeId);
 
         // Create node
         var nodeData = processContentTypeInnerObject(contentTypeInnerObject, createNodeId, createContentDigest, typePrefix, newParent);

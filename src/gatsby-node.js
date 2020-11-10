@@ -228,17 +228,18 @@ function getTypeDefs(
 
         /** BLOCKS **/
         schema.blocks.forEach((block) => {
+          const blockType = `${newParent}_${block.uid}`;
+
           getTypeDefs(
-            schema,
+            block,
             gatsbySchema,
             typeDefs,
-            newParent,
+            blockType,
             createNode,
             createNodeId,
             createContentDigest,
             typePrefix
           );
-          const blockType = `${newParent}_${block.uid}`;
           const unionTypes = getUnionTypes(block.schema, blockType);
           const unionName = getUnionName(block.schema, blockType);
 
@@ -268,7 +269,7 @@ function getTypeDefs(
 
           typeDefs.push(
             gatsbySchema.buildObjectType({
-              name: newParent,
+              name: blockType,
               fields: fields,
               interfaces: ["Node"],
               extensions: { infer: false },
@@ -301,7 +302,7 @@ function getTypeDefs(
           type: `[${unionName}]`,
           resolve: (source, args, context) => {
             const nodesData = [];
-            source.schema___NODE.forEach((id) => {
+            source.blocks___NODE.forEach((id) => {
               context.nodeModel.getAllNodes().find((node) => {
                 if (node.id === id) nodesData.push(node);
               });
@@ -330,7 +331,7 @@ function getTypeDefs(
         );
 
         const contentTypeInnerObject = getContentTypeInnerObject(schema);
-        contentTypeInnerObject.schema___NODE = getChildNodes(
+        contentTypeInnerObject.blocks___NODE = getChildNodes(
           schema.blocks,
           newParent,
           typePrefix,
