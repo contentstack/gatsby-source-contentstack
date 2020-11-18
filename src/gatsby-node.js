@@ -86,6 +86,8 @@ exports.createSchemaCustomization = async (
         description: 'String',
       };
 
+      const typeDefs = [];
+
       typeDefs.push(
         schema.buildObjectType({
           name: name,

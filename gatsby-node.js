@@ -111,6 +111,8 @@ exports.createSchemaCustomization = function () {
                   description: 'String'
                 };
 
+                var typeDefs = [];
+
                 typeDefs.push(schema.buildObjectType({
                   name: name,
                   fields: fields,
