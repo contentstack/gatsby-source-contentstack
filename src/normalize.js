@@ -4,7 +4,7 @@ exports.processContentType = (
   createContentDigest,
   typePrefix
 ) => {
-  const contentTypeUid = contentType.uid.replace(/-/g, "_");
+  const contentTypeUid = contentType.uid.replace(/-/g, '_');
   const nodeId = createNodeId(
     `${typePrefix.toLowerCase()}-contentType-${contentType.uid}`
   );
@@ -18,7 +18,7 @@ exports.processContentType = (
   );
 
   const _contentType = { ...contentType };
-  delete _contentType["schema"];
+  delete _contentType['schema'];
 
   const nodeContent = JSON.stringify(_contentType);
   const nodeData = {
@@ -42,7 +42,7 @@ const getChildNodes = (exports.getChildNodes = function(
   createNodeId
 ) {
   const childNodes = [];
-  schema.forEach((obj) => {
+  schema.forEach(obj => {
     const idString = `${typePrefix.toLowerCase()}-contentType-${type}_${
       obj.uid
     }`;
@@ -179,7 +179,7 @@ const normalizeGroup = (
   if (field.multiple) {
     groupObj = [];
     if (value instanceof Array) {
-      value.forEach((groupValue) => {
+      value.forEach(groupValue => {
         groupObj.push(
           builtEntry(
             field.schema,
@@ -236,9 +236,9 @@ const normalizeModularBlock = (
 ) => {
   const modularBlocksObj = [];
   if (value) {
-    value.map((block) => {
-      Object.keys(block).forEach((key) => {
-        const blockSchema = blocks.filter((block) => block.uid === key);
+    value.map(block => {
+      Object.keys(block).forEach(key => {
+        const blockSchema = blocks.filter(block => block.uid === key);
         if (!blockSchema.length) {
           // block value no longer exists block schema so ignore it
           return;
@@ -269,8 +269,8 @@ const normalizeReferenceField = (
 ) => {
   const reference = [];
   if (value && !Array.isArray(value)) return;
-  value.forEach((entry) => {
-    if (typeof entry === "object" && entry.uid) {
+  value.forEach(entry => {
+    if (typeof entry === 'object' && entry.uid) {
       if (
         entriesNodeIds.has(
           createNodeId(
@@ -307,7 +307,7 @@ const normalizeFileField = (
   let reference = {};
   if (Array.isArray(value)) {
     reference = [];
-    value.forEach((assetUid) => {
+    value.forEach(assetUid => {
       if (
         assetsNodeIds.has(
           createNodeId(
@@ -336,7 +336,7 @@ const normalizeFileField = (
 
 const getSchemaValue = (obj, key) => {
   if (obj === null) return null;
-  if (typeof obj !== "object") return null;
+  if (typeof obj !== 'object') return null;
   return Object.prototype.hasOwnProperty.call(obj, key.uid)
     ? obj[key.uid]
     : null;
@@ -352,10 +352,10 @@ const builtEntry = (
   typePrefix
 ) => {
   const entryObj = {};
-  schema.forEach((field) => {
+  schema.forEach(field => {
     let value = getSchemaValue(entry, field);
     switch (field.data_type) {
-      case "reference":
+      case 'reference':
         entryObj[`${field.uid}___NODE`] =
           value &&
           normalizeReferenceField(
@@ -366,7 +366,7 @@ const builtEntry = (
             typePrefix
           );
         break;
-      case "file":
+      case 'file':
         // Issue #60. Graphql does not treat empty string as null.
         if (!value) value = null;
         entryObj[`${field.uid}___NODE`] =
@@ -379,8 +379,8 @@ const builtEntry = (
             typePrefix
           );
         break;
-      case "group":
-      case "global_field":
+      case 'group':
+      case 'global_field':
         entryObj[field.uid] = normalizeGroup(
           field,
           value,
@@ -391,7 +391,7 @@ const builtEntry = (
           typePrefix
         );
         break;
-      case "blocks":
+      case 'blocks':
         entryObj[field.uid] = normalizeModularBlock(
           field.blocks,
           value,
@@ -420,7 +420,7 @@ const buildBlockCustomSchema = (
   const blockFields = {};
   let blockType = `type ${parent} {`;
 
-  blocks.forEach((block) => {
+  blocks.forEach(block => {
     const newparent = parent.concat(block.uid);
     blockType = blockType.concat(`${block.uid} : ${newparent} `);
     const { fields } = buildCustomSchema(
@@ -433,43 +433,43 @@ const buildBlockCustomSchema = (
     );
 
     for (const key in fields) {
-      if (Object.prototype.hasOwnProperty.call(fields[key], "type")) {
+      if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
         fields[key] = fields[key].type;
       }
     }
     if (Object.keys(fields).length > 0) {
       const type = `type ${newparent} ${JSON.stringify(fields).replace(
         /"/g,
-        ""
+        ''
       )}`;
       types.push(type);
       blockFields[block.uid] = `${newparent}`;
     }
   });
-  blockType = blockType.concat("}");
+  blockType = blockType.concat('}');
   return blockType;
 };
 
-exports.extendSchemaWithDefaultEntryFields = (schema) => {
+exports.extendSchemaWithDefaultEntryFields = schema => {
   schema.push({
-    data_type: "text",
-    uid: "uid",
+    data_type: 'text',
+    uid: 'uid',
     multiple: false,
     mandatory: false,
   });
   schema.push({
-    data_type: "text",
-    uid: "locale",
+    data_type: 'text',
+    uid: 'locale',
     multiple: false,
     mandatory: false,
   });
   schema.push({
-    data_type: "group",
-    uid: "publish_details",
+    data_type: 'group',
+    uid: 'publish_details',
     schema: [
       {
-        data_type: "text",
-        uid: "locale",
+        data_type: 'text',
+        uid: 'locale',
         multiple: false,
         mandatory: false,
       },
@@ -478,14 +478,14 @@ exports.extendSchemaWithDefaultEntryFields = (schema) => {
     mandatory: false,
   });
   schema.push({
-    data_type: "isodate",
-    uid: "updated_at",
+    data_type: 'isodate',
+    uid: 'updated_at',
     multiple: false,
     mandatory: false,
   });
   schema.push({
-    data_type: "string",
-    uid: "updated_by",
+    data_type: 'string',
+    uid: 'updated_by',
     multiple: false,
     mandatory: false,
   });
@@ -504,92 +504,92 @@ const buildCustomSchema = (exports.buildCustomSchema = (
   groups = groups || [];
   references = references || [];
   types = types || [];
-  schema.forEach((field) => {
+  schema.forEach(field => {
     switch (field.data_type) {
-      case "text":
+      case 'text':
         fields[field.uid] = {
-          resolve: (source) => source[field.uid] || null,
+          resolve: source => source[field.uid] || null,
         };
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid].type = "[String]!";
+            fields[field.uid].type = '[String]!';
           } else {
-            fields[field.uid].type = "String!";
+            fields[field.uid].type = 'String!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = "[String]";
+          fields[field.uid].type = '[String]';
         } else {
-          fields[field.uid].type = "String";
+          fields[field.uid].type = 'String';
         }
         break;
-      case "isodate":
+      case 'isodate':
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = "[Date]!";
+            fields[field.uid] = '[Date]!';
           } else {
-            fields[field.uid] = "Date!";
+            fields[field.uid] = 'Date!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[Date]";
+          fields[field.uid] = '[Date]';
         } else {
-          fields[field.uid] = "Date";
+          fields[field.uid] = 'Date';
         }
         break;
-      case "boolean":
+      case 'boolean':
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = "[Boolean]!";
+            fields[field.uid] = '[Boolean]!';
           } else {
-            fields[field.uid] = "Boolean!";
+            fields[field.uid] = 'Boolean!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[Boolean]";
+          fields[field.uid] = '[Boolean]';
         } else {
-          fields[field.uid] = "Boolean";
+          fields[field.uid] = 'Boolean';
         }
         break;
-      case "number":
+      case 'number':
         fields[field.uid] = {
-          resolve: (source) => source[field.uid] || null,
+          resolve: source => source[field.uid] || null,
         };
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid].type = "[Int]!";
+            fields[field.uid].type = '[Int]!';
           } else {
-            fields[field.uid].type = "Int!";
+            fields[field.uid].type = 'Int!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = "[Int]";
+          fields[field.uid].type = '[Int]';
         } else {
-          fields[field.uid].type = "Int";
+          fields[field.uid].type = 'Int';
         }
         break;
-      case "link":
+      case 'link':
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = "[linktype]!";
+            fields[field.uid] = '[linktype]!';
           } else {
-            fields[field.uid] = "linktype!";
+            fields[field.uid] = 'linktype!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[linktype]";
+          fields[field.uid] = '[linktype]';
         } else {
-          fields[field.uid] = "linktype";
+          fields[field.uid] = 'linktype';
         }
         break;
-      case "file":
+      case 'file':
         const type = `type ${prefix}_assets implements Node { url: String }`;
         types.push(type);
         fields[field.uid] = {
           resolve: (source, args, context) => {
             if (field.multiple && source[`${field.uid}___NODE`]) {
               const nodesData = [];
-              source[`${field.uid}___NODE`].forEach((id) => {
+              source[`${field.uid}___NODE`].forEach(id => {
                 context.nodeModel
                   .getAllNodes({
                     type: `${prefix}_assets`,
                   })
-                  .find((node) => {
+                  .find(node => {
                     if (node.id === id) {
                       nodesData.push(node);
                     }
@@ -603,7 +603,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
                 .getAllNodes({
                   type: `${prefix}_assets`,
                 })
-                .find((node) => node.id === source[`${field.uid}___NODE`]);
+                .find(node => node.id === source[`${field.uid}___NODE`]);
             }
             return null;
           },
@@ -620,9 +620,9 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           fields[field.uid].type = `${prefix}_assets`;
         }
         break;
-      case "group":
-      case "global_field":
-        let newparent = parent.concat("_", field.uid);
+      case 'group':
+      case 'global_field':
+        let newparent = parent.concat('_', field.uid);
 
         const result = buildCustomSchema(
           field.schema,
@@ -635,7 +635,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
 
         for (const key in result.fields) {
           if (
-            Object.prototype.hasOwnProperty.call(result.fields[key], "type")
+            Object.prototype.hasOwnProperty.call(result.fields[key], 'type')
           ) {
             result.fields[key] = result.fields[key].type;
           }
@@ -644,7 +644,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         if (Object.keys(result.fields).length > 0) {
           let type = `type ${newparent} ${JSON.stringify(result.fields).replace(
             /"/g,
-            ""
+            ''
           )}`;
 
           types.push(type);
@@ -668,8 +668,8 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         }
 
         break;
-      case "blocks":
-        let blockparent = parent.concat("_", field.uid);
+      case 'blocks':
+        let blockparent = parent.concat('_', field.uid);
 
         const blockType = buildBlockCustomSchema(
           field.blocks,
@@ -694,10 +694,10 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         }
 
         break;
-      case "reference":
-        let unionType = "union ";
+      case 'reference':
+        let unionType = 'union ';
         if (
-          typeof field.reference_to === "string" ||
+          typeof field.reference_to === 'string' ||
           field.reference_to.length === 1
         ) {
           field.reference_to = Array.isArray(field.reference_to)
@@ -712,16 +712,16 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           }
         } else {
           const unions = [];
-          field.reference_to.forEach((reference) => {
+          field.reference_to.forEach(reference => {
             const referenceType = `${prefix}_${reference}`;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
             const type = `type ${referenceType} implements Node { title: String! }`;
             types.push(type);
           });
-          let name = "";
-          name = name.concat(unions.join(""), "_Union");
-          unionType = unionType.concat("_Union = ", unions.join(" | "));
+          let name = '';
+          name = name.concat(unions.join(''), '_Union');
+          unionType = unionType.concat('_Union = ', unions.join(' | '));
           types.push(unionType);
 
           references.push({

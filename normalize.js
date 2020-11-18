@@ -1,32 +1,32 @@
-"use strict";
+'use strict';
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
+var _typeof2 = require('babel-runtime/helpers/typeof');
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
-var _keys = require("babel-runtime/core-js/object/keys");
+var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
 
-var _stringify = require("babel-runtime/core-js/json/stringify");
+var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _extends2 = require("babel-runtime/helpers/extends");
+var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
-  var contentTypeUid = contentType.uid.replace(/-/g, "_");
-  var nodeId = createNodeId(typePrefix.toLowerCase() + "-contentType-" + contentType.uid);
+  var contentTypeUid = contentType.uid.replace(/-/g, '_');
+  var nodeId = createNodeId(typePrefix.toLowerCase() + '-contentType-' + contentType.uid);
 
-  var type = typePrefix + "ContentTypes" + contentTypeUid;
+  var type = typePrefix + 'ContentTypes' + contentTypeUid;
   contentType.schema___NODE = getChildNodes(contentType.schema, type, typePrefix, createNodeId);
 
   var _contentType = (0, _extends3.default)({}, contentType);
-  delete _contentType["schema"];
+  delete _contentType['schema'];
 
   var nodeContent = (0, _stringify2.default)(_contentType);
   var nodeData = (0, _extends3.default)({}, _contentType, {
@@ -34,7 +34,7 @@ exports.processContentType = function (contentType, createNodeId, createContentD
     parent: null,
     children: [],
     internal: {
-      type: typePrefix + "ContentTypes" + contentTypeUid,
+      type: typePrefix + 'ContentTypes' + contentTypeUid,
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent)
     }
@@ -45,7 +45,7 @@ exports.processContentType = function (contentType, createNodeId, createContentD
 var getChildNodes = exports.getChildNodes = function (schema, type, typePrefix, createNodeId) {
   var childNodes = [];
   schema.forEach(function (obj) {
-    var idString = typePrefix.toLowerCase() + "-contentType-" + type + "_" + obj.uid;
+    var idString = typePrefix.toLowerCase() + '-contentType-' + type + '_' + obj.uid;
     var nodeId = createNodeId(idString);
     childNodes.push(nodeId);
   });
@@ -53,7 +53,7 @@ var getChildNodes = exports.getChildNodes = function (schema, type, typePrefix, 
 };
 
 exports.processContentTypeInnerObject = function (object, createNodeId, createContentDigest, typePrefix, type) {
-  var idString = typePrefix.toLowerCase() + "-contentType-" + type;
+  var idString = typePrefix.toLowerCase() + '-contentType-' + type;
   var nodeId = createNodeId(idString);
   var nodeContent = (0, _stringify2.default)(object);
   var nodeData = (0, _extends3.default)({}, object, {
@@ -77,7 +77,7 @@ exports.processAsset = function (asset, createNodeId, createContentDigest, typeP
     parent: null,
     children: [],
     internal: {
-      type: typePrefix + "_assets",
+      type: typePrefix + '_assets',
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent)
     }
@@ -93,7 +93,7 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
     parent: null,
     children: [],
     internal: {
-      type: typePrefix + "_" + contentType.uid,
+      type: typePrefix + '_' + contentType.uid,
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent)
     }
@@ -108,12 +108,12 @@ exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNod
 
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId, typePrefix) {
   var publishedLocale = asset.publish_details.locale;
-  return createNodeId(typePrefix.toLowerCase() + "-assets-" + asset.uid + "-" + publishedLocale);
+  return createNodeId(typePrefix.toLowerCase() + '-assets-' + asset.uid + '-' + publishedLocale);
 };
 
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId, typePrefix) {
   var publishedLocale = entry.publish_details.locale;
-  return createNodeId(typePrefix.toLowerCase() + "-entry-" + entry.uid + "-" + publishedLocale);
+  return createNodeId(typePrefix.toLowerCase() + '-entry-' + entry.uid + '-' + publishedLocale);
 };
 
 var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
@@ -164,12 +164,12 @@ var normalizeReferenceField = function normalizeReferenceField(value, locale, en
   var reference = [];
   if (value && !Array.isArray(value)) return;
   value.forEach(function (entry) {
-    if ((typeof entry === "undefined" ? "undefined" : (0, _typeof3.default)(entry)) === "object" && entry.uid) {
-      if (entriesNodeIds.has(createNodeId(typePrefix.toLowerCase() + "-entry-" + entry.uid + "-" + locale))) {
-        reference.push(createNodeId(typePrefix.toLowerCase() + "-entry-" + entry.uid + "-" + locale));
+    if ((typeof entry === 'undefined' ? 'undefined' : (0, _typeof3.default)(entry)) === 'object' && entry.uid) {
+      if (entriesNodeIds.has(createNodeId(typePrefix.toLowerCase() + '-entry-' + entry.uid + '-' + locale))) {
+        reference.push(createNodeId(typePrefix.toLowerCase() + '-entry-' + entry.uid + '-' + locale));
       }
-    } else if (entriesNodeIds.has(createNodeId(typePrefix.toLowerCase() + "-entry-" + entry + "-" + locale))) {
-      reference.push(createNodeId(typePrefix.toLowerCase() + "-entry-" + entry + "-" + locale));
+    } else if (entriesNodeIds.has(createNodeId(typePrefix.toLowerCase() + '-entry-' + entry + '-' + locale))) {
+      reference.push(createNodeId(typePrefix.toLowerCase() + '-entry-' + entry + '-' + locale));
     }
   });
   return reference;
@@ -180,19 +180,19 @@ var normalizeFileField = function normalizeFileField(value, locale, assetsNodeId
   if (Array.isArray(value)) {
     reference = [];
     value.forEach(function (assetUid) {
-      if (assetsNodeIds.has(createNodeId(typePrefix.toLowerCase() + "-assets-" + assetUid + "-" + locale))) {
-        reference.push(createNodeId(typePrefix.toLowerCase() + "-assets-" + assetUid + "-" + locale));
+      if (assetsNodeIds.has(createNodeId(typePrefix.toLowerCase() + '-assets-' + assetUid + '-' + locale))) {
+        reference.push(createNodeId(typePrefix.toLowerCase() + '-assets-' + assetUid + '-' + locale));
       }
     });
-  } else if (assetsNodeIds.has(createNodeId(typePrefix.toLowerCase() + "-assets-" + value + "-" + locale))) {
-    reference = createNodeId(typePrefix.toLowerCase() + "-assets-" + value + "-" + locale);
+  } else if (assetsNodeIds.has(createNodeId(typePrefix.toLowerCase() + '-assets-' + value + '-' + locale))) {
+    reference = createNodeId(typePrefix.toLowerCase() + '-assets-' + value + '-' + locale);
   }
   return reference;
 };
 
 var getSchemaValue = function getSchemaValue(obj, key) {
   if (obj === null) return null;
-  if ((typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) !== "object") return null;
+  if ((typeof obj === 'undefined' ? 'undefined' : (0, _typeof3.default)(obj)) !== 'object') return null;
   return Object.prototype.hasOwnProperty.call(obj, key.uid) ? obj[key.uid] : null;
 };
 
@@ -201,19 +201,19 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   schema.forEach(function (field) {
     var value = getSchemaValue(entry, field);
     switch (field.data_type) {
-      case "reference":
-        entryObj[field.uid + "___NODE"] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
+      case 'reference':
+        entryObj[field.uid + '___NODE'] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
-      case "file":
+      case 'file':
         // Issue #60. Graphql does not treat empty string as null.
         if (!value) value = null;
-        entryObj[field.uid + "___NODE"] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid + '___NODE'] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
-      case "group":
-      case "global_field":
+      case 'group':
+      case 'global_field':
         entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
         break;
-      case "blocks":
+      case 'blocks':
         entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
         break;
       default:
@@ -225,49 +225,49 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 
 var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, parent, prefix) {
   var blockFields = {};
-  var blockType = "type " + parent + " {";
+  var blockType = 'type ' + parent + ' {';
 
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
-    blockType = blockType.concat(block.uid + " : " + newparent + " ");
+    blockType = blockType.concat(block.uid + ' : ' + newparent + ' ');
 
     var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, newparent, prefix),
         fields = _buildCustomSchema.fields;
 
     for (var key in fields) {
-      if (Object.prototype.hasOwnProperty.call(fields[key], "type")) {
+      if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
         fields[key] = fields[key].type;
       }
     }
     if ((0, _keys2.default)(fields).length > 0) {
-      var type = "type " + newparent + " " + (0, _stringify2.default)(fields).replace(/"/g, "");
+      var type = 'type ' + newparent + ' ' + (0, _stringify2.default)(fields).replace(/"/g, '');
       types.push(type);
-      blockFields[block.uid] = "" + newparent;
+      blockFields[block.uid] = '' + newparent;
     }
   });
-  blockType = blockType.concat("}");
+  blockType = blockType.concat('}');
   return blockType;
 };
 
 exports.extendSchemaWithDefaultEntryFields = function (schema) {
   schema.push({
-    data_type: "text",
-    uid: "uid",
+    data_type: 'text',
+    uid: 'uid',
     multiple: false,
     mandatory: false
   });
   schema.push({
-    data_type: "text",
-    uid: "locale",
+    data_type: 'text',
+    uid: 'locale',
     multiple: false,
     mandatory: false
   });
   schema.push({
-    data_type: "group",
-    uid: "publish_details",
+    data_type: 'group',
+    uid: 'publish_details',
     schema: [{
-      data_type: "text",
-      uid: "locale",
+      data_type: 'text',
+      uid: 'locale',
       multiple: false,
       mandatory: false
     }],
@@ -275,14 +275,14 @@ exports.extendSchemaWithDefaultEntryFields = function (schema) {
     mandatory: false
   });
   schema.push({
-    data_type: "isodate",
-    uid: "updated_at",
+    data_type: 'isodate',
+    uid: 'updated_at',
     multiple: false,
     mandatory: false
   });
   schema.push({
-    data_type: "string",
-    uid: "updated_by",
+    data_type: 'string',
+    uid: 'updated_by',
     multiple: false,
     mandatory: false
   });
@@ -296,7 +296,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
   types = types || [];
   schema.forEach(function (field) {
     switch (field.data_type) {
-      case "text":
+      case 'text':
         fields[field.uid] = {
           resolve: function resolve(source) {
             return source[field.uid] || null;
@@ -304,43 +304,43 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         };
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid].type = "[String]!";
+            fields[field.uid].type = '[String]!';
           } else {
-            fields[field.uid].type = "String!";
+            fields[field.uid].type = 'String!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = "[String]";
+          fields[field.uid].type = '[String]';
         } else {
-          fields[field.uid].type = "String";
+          fields[field.uid].type = 'String';
         }
         break;
-      case "isodate":
+      case 'isodate':
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = "[Date]!";
+            fields[field.uid] = '[Date]!';
           } else {
-            fields[field.uid] = "Date!";
+            fields[field.uid] = 'Date!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[Date]";
+          fields[field.uid] = '[Date]';
         } else {
-          fields[field.uid] = "Date";
+          fields[field.uid] = 'Date';
         }
         break;
-      case "boolean":
+      case 'boolean':
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = "[Boolean]!";
+            fields[field.uid] = '[Boolean]!';
           } else {
-            fields[field.uid] = "Boolean!";
+            fields[field.uid] = 'Boolean!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[Boolean]";
+          fields[field.uid] = '[Boolean]';
         } else {
-          fields[field.uid] = "Boolean";
+          fields[field.uid] = 'Boolean';
         }
         break;
-      case "number":
+      case 'number':
         fields[field.uid] = {
           resolve: function resolve(source) {
             return source[field.uid] || null;
@@ -348,39 +348,39 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         };
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid].type = "[Int]!";
+            fields[field.uid].type = '[Int]!';
           } else {
-            fields[field.uid].type = "Int!";
+            fields[field.uid].type = 'Int!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = "[Int]";
+          fields[field.uid].type = '[Int]';
         } else {
-          fields[field.uid].type = "Int";
+          fields[field.uid].type = 'Int';
         }
         break;
-      case "link":
+      case 'link':
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = "[linktype]!";
+            fields[field.uid] = '[linktype]!';
           } else {
-            fields[field.uid] = "linktype!";
+            fields[field.uid] = 'linktype!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[linktype]";
+          fields[field.uid] = '[linktype]';
         } else {
-          fields[field.uid] = "linktype";
+          fields[field.uid] = 'linktype';
         }
         break;
-      case "file":
-        var type = "type " + prefix + "_assets implements Node { url: String }";
+      case 'file':
+        var type = 'type ' + prefix + '_assets implements Node { url: String }';
         types.push(type);
         fields[field.uid] = {
           resolve: function resolve(source, args, context) {
-            if (field.multiple && source[field.uid + "___NODE"]) {
+            if (field.multiple && source[field.uid + '___NODE']) {
               var nodesData = [];
-              source[field.uid + "___NODE"].forEach(function (id) {
+              source[field.uid + '___NODE'].forEach(function (id) {
                 context.nodeModel.getAllNodes({
-                  type: prefix + "_assets"
+                  type: prefix + '_assets'
                 }).find(function (node) {
                   if (node.id === id) {
                     nodesData.push(node);
@@ -390,11 +390,11 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
               return nodesData;
             }
 
-            if (source[field.uid + "___NODE"]) {
+            if (source[field.uid + '___NODE']) {
               return context.nodeModel.getAllNodes({
-                type: prefix + "_assets"
+                type: prefix + '_assets'
               }).find(function (node) {
-                return node.id === source[field.uid + "___NODE"];
+                return node.id === source[field.uid + '___NODE'];
               });
             }
             return null;
@@ -402,30 +402,30 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         };
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid].type = "[" + prefix + "_assets]!";
+            fields[field.uid].type = '[' + prefix + '_assets]!';
           } else {
-            fields[field.uid].type = prefix + "_assets!";
+            fields[field.uid].type = prefix + '_assets!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = "[" + prefix + "_assets]";
+          fields[field.uid].type = '[' + prefix + '_assets]';
         } else {
-          fields[field.uid].type = prefix + "_assets";
+          fields[field.uid].type = prefix + '_assets';
         }
         break;
-      case "group":
-      case "global_field":
-        var newparent = parent.concat("_", field.uid);
+      case 'group':
+      case 'global_field':
+        var newparent = parent.concat('_', field.uid);
 
         var result = buildCustomSchema(field.schema, types, references, groups, newparent, prefix);
 
         for (var key in result.fields) {
-          if (Object.prototype.hasOwnProperty.call(result.fields[key], "type")) {
+          if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
             result.fields[key] = result.fields[key].type;
           }
         }
 
         if ((0, _keys2.default)(result.fields).length > 0) {
-          var _type = "type " + newparent + " " + (0, _stringify2.default)(result.fields).replace(/"/g, "");
+          var _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
 
           types.push(_type);
 
@@ -436,60 +436,60 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
           if (field.mandatory) {
             if (field.multiple) {
-              fields[field.uid] = "[" + newparent + "]!";
+              fields[field.uid] = '[' + newparent + ']!';
             } else {
-              fields[field.uid] = newparent + "!";
+              fields[field.uid] = newparent + '!';
             }
           } else if (field.multiple) {
-            fields[field.uid] = "[" + newparent + "]";
+            fields[field.uid] = '[' + newparent + ']';
           } else {
-            fields[field.uid] = "" + newparent;
+            fields[field.uid] = '' + newparent;
           }
         }
 
         break;
-      case "blocks":
-        var blockparent = parent.concat("_", field.uid);
+      case 'blocks':
+        var blockparent = parent.concat('_', field.uid);
 
         var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, blockparent, prefix);
 
         types.push(blockType);
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid] = "[" + blockparent + "]!";
+            fields[field.uid] = '[' + blockparent + ']!';
           } else {
-            fields[field.uid] = blockparent + "!";
+            fields[field.uid] = blockparent + '!';
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[" + blockparent + "]";
+          fields[field.uid] = '[' + blockparent + ']';
         } else {
-          fields[field.uid] = "" + blockparent;
+          fields[field.uid] = '' + blockparent;
         }
 
         break;
-      case "reference":
-        var unionType = "union ";
-        if (typeof field.reference_to === "string" || field.reference_to.length === 1) {
+      case 'reference':
+        var unionType = 'union ';
+        if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
-          var _type2 = "type " + prefix + "_" + field.reference_to + " implements Node { title: String! }";
+          var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node { title: String! }';
           types.push(_type2);
           if (field.mandatory) {
-            fields[field.uid] = "[" + prefix + "_" + field.reference_to + "]!";
+            fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']!';
           } else {
-            fields[field.uid] = "[" + prefix + "_" + field.reference_to + "]";
+            fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']';
           }
         } else {
           var unions = [];
           field.reference_to.forEach(function (reference) {
-            var referenceType = prefix + "_" + reference;
+            var referenceType = prefix + '_' + reference;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            var type = "type " + referenceType + " implements Node { title: String! }";
+            var type = 'type ' + referenceType + ' implements Node { title: String! }';
             types.push(type);
           });
-          var name = "";
-          name = name.concat(unions.join(""), "_Union");
-          unionType = unionType.concat("_Union = ", unions.join(" | "));
+          var name = '';
+          name = name.concat(unions.join(''), '_Union');
+          unionType = unionType.concat('_Union = ', unions.join(' | '));
           types.push(unionType);
 
           references.push({
@@ -498,9 +498,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           });
 
           if (field.mandatory) {
-            fields[field.uid] = "[" + name + "]!";
+            fields[field.uid] = '[' + name + ']!';
           } else {
-            fields[field.uid] = "[" + name + "]";
+            fields[field.uid] = '[' + name + ']';
           }
         }
         break;
