@@ -13,7 +13,7 @@ exports.processContentType = (
 
   const nodeContent = JSON.stringify(contentType);
   const nodeData = {
-    ..._contentType,
+    ...contentType,
     id: nodeId,
     parent: null,
     children: [],

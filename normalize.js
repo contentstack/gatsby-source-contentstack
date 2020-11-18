@@ -25,7 +25,7 @@ exports.processContentType = function (contentType, createNodeId, createContentD
   var type = typePrefix + 'ContentTypes' + contentTypeUid;
 
   var nodeContent = (0, _stringify2.default)(contentType);
-  var nodeData = (0, _extends3.default)({}, _contentType, {
+  var nodeData = (0, _extends3.default)({}, contentType, {
     id: nodeId,
     parent: null,
     children: [],
