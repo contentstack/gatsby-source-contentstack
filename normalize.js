@@ -8,13 +8,13 @@ var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
 
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23,18 +23,14 @@ exports.processContentType = function (contentType, createNodeId, createContentD
   var nodeId = createNodeId(typePrefix.toLowerCase() + '-contentType-' + contentType.uid);
 
   var type = typePrefix + 'ContentTypes' + contentTypeUid;
-  contentType.schema___NODE = getChildNodes(contentType.schema, type, typePrefix, createNodeId);
 
-  var _contentType = (0, _extends3.default)({}, contentType);
-  delete _contentType['schema'];
-
-  var nodeContent = (0, _stringify2.default)(_contentType);
+  var nodeContent = (0, _stringify2.default)(contentType);
   var nodeData = (0, _extends3.default)({}, _contentType, {
     id: nodeId,
     parent: null,
     children: [],
     internal: {
-      type: typePrefix + 'ContentTypes' + contentTypeUid,
+      type: type,
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent)
     }

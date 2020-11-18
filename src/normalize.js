@@ -10,24 +10,15 @@ exports.processContentType = (
   );
 
   const type = `${typePrefix}ContentTypes${contentTypeUid}`;
-  contentType.schema___NODE = getChildNodes(
-    contentType.schema,
-    type,
-    typePrefix,
-    createNodeId
-  );
 
-  const _contentType = { ...contentType };
-  delete _contentType['schema'];
-
-  const nodeContent = JSON.stringify(_contentType);
+  const nodeContent = JSON.stringify(contentType);
   const nodeData = {
     ..._contentType,
     id: nodeId,
     parent: null,
     children: [],
     internal: {
-      type: `${typePrefix}ContentTypes${contentTypeUid}`,
+      type: type,
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent),
     },
