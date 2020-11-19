@@ -14,6 +14,8 @@ const {
   fetchContentTypes,
 } = require('./fetch');
 
+const fetch = require('node-fetch');
+
 let references = [];
 let groups = [];
 exports.createSchemaCustomization = async ({
@@ -258,5 +260,27 @@ exports.pluginOptionsSchema = ({ Joi }) => {
     type_prefix:  Joi.string().default(`Contentstack`).description(`Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.`),
     expediteBuild: Joi.boolean().default(false).description(`expediteBuild set this to either true or false.`),
     enableSchemaGeneration: Joi.boolean().default(false).description(`Specify true if you want to generate custom schema.`),
+  }).external(validateContentstackAccess)
+}
+
+
+const validateContentstackAccess = async pluginOptions => {
+  if (process.env.NODE_ENV === `test`) return undefined
+  
+  let host = pluginOptions.cdn ? pluginOptions.cdn : 'https://cdn.contentstack.io/v3';
+  await fetch(`${host}/content_types?include_count=false`, {
+    headers: {
+      "api_key" : `${pluginOptions.api_key}`,
+      "access_token": `${pluginOptions.delivery_token}`,
+    },
   })
+    .then(res => res.ok)
+    .then(ok => {
+      if (!ok)
+        throw new Error(
+          `Cannot access Contentstack with api_key=${pluginOptions.api_key} & delivery_token=${pluginOptions.delivery_token}.`
+        )
+    })
+
+  return undefined
 }

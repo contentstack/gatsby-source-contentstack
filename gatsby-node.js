@@ -36,6 +36,8 @@ var _require2 = require('./fetch'),
     fetchData = _require2.fetchData,
     fetchContentTypes = _require2.fetchContentTypes;
 
+var fetch = require('node-fetch');
+
 var references = [];
 var groups = [];
 exports.createSchemaCustomization = function () {
@@ -322,5 +324,49 @@ exports.pluginOptionsSchema = function (_ref7) {
     type_prefix: Joi.string().default('Contentstack').description('Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.'),
     expediteBuild: Joi.boolean().default(false).description('expediteBuild set this to either true or false.'),
     enableSchemaGeneration: Joi.boolean().default(false).description('Specify true if you want to generate custom schema.')
-  });
+  }).external(validateContentstackAccess);
 };
+
+var validateContentstackAccess = function () {
+  var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(pluginOptions) {
+    var host;
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            if (!(process.env.NODE_ENV === 'test')) {
+              _context3.next = 2;
+              break;
+            }
+
+            return _context3.abrupt('return', undefined);
+
+          case 2:
+            host = pluginOptions.cdn ? pluginOptions.cdn : 'https://cdn.contentstack.io/v3';
+            _context3.next = 5;
+            return fetch(host + '/content_types?include_count=false', {
+              headers: {
+                "api_key": '' + pluginOptions.api_key,
+                "access_token": '' + pluginOptions.delivery_token
+              }
+            }).then(function (res) {
+              return res.ok;
+            }).then(function (ok) {
+              if (!ok) throw new Error('Cannot access Contentstack with api_key=' + pluginOptions.api_key + ' & delivery_token=' + pluginOptions.delivery_token + '.');
+            });
+
+          case 5:
+            return _context3.abrupt('return', undefined);
+
+          case 6:
+          case 'end':
+            return _context3.stop();
+        }
+      }
+    }, _callee3, undefined);
+  }));
+
+  return function validateContentstackAccess(_x5) {
+    return _ref8.apply(this, arguments);
+  };
+}();
