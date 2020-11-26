@@ -304,6 +304,23 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
           fields[field.uid].type = 'Int';
         }
         break;
+      // This is to support custom field types nested inside groups, global_fields & modular_blocks
+      case 'json':
+        fields[field.uid] = {
+          resolve: source => source[field.uid] || null
+        };
+        if (field.mandatory) {
+          if (field.multiple) {
+            fields[field.uid].type = '[JSON]!';
+          } else {
+            fields[field.uid].type = 'JSON!';
+          }
+        } else if (field.multiple){
+          fields[field.uid].type = '[JSON]';
+        } else {
+          fields[field.uid].type = 'JSON';
+        }
+        break;
       case 'link':
         if (field.mandatory) {
           if (field.multiple) {
