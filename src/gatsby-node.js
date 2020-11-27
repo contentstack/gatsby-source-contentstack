@@ -7,8 +7,6 @@ const {
   makeAssetNodeUid,
   buildCustomSchema,
   extendSchemaWithDefaultEntryFields,
-  getChildNodes,
-  processContentTypeInnerObject,
 } = require('./normalize');
 
 const { fetchData, fetchContentTypes } = require('./fetch');
@@ -16,7 +14,7 @@ const { fetchData, fetchContentTypes } = require('./fetch');
 let references = [];
 let groups = [];
 exports.createSchemaCustomization = async (
-  { cache, actions, schema, createNodeId, createContentDigest },
+  { cache, actions, schema },
   configOptions
 ) => {
   let contentTypes;
@@ -29,7 +27,7 @@ exports.createSchemaCustomization = async (
     console.error('Contentstack fetch content type failed!');
   }
   if (configOptions.enableSchemaGeneration) {
-    const { createTypes, createNode } = actions;
+    const { createTypes } = actions;
     contentTypes.forEach(contentType => {
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
       const name = `${typePrefix}_${contentTypeUid}`;
@@ -61,48 +59,66 @@ exports.createSchemaCustomization = async (
       createTypes(result.types);
     });
 
-    const contentTypeInterface = `${typePrefix}ContentTypes`;
-    createTypes(`
-      interface ${contentTypeInterface} @nodeInterface {
-        id: ID!
-        title: String
-        uid: String
-        created_at: Date
-        updated_at: Date
-      }
-    `);
+    /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
+    const name = `${typePrefix}ContentTypes`;
+    const fields = {
+      title: 'String!',
+      uid: 'String!',
+      created_at: 'Date',
+      updated_at: 'Date',
+      schema: 'JSON!',
+      description: 'String',
+    };
+    createTypes([
+      schema.buildObjectType({
+        name,
+        fields,
+        interfaces: ['Node'],
+        extensions: { infer: false },
+      }),
+    ]);
 
+    // const contentTypeInterface = `${typePrefix}ContentTypes`;
+    // createTypes(`
+    //   interface ${contentTypeInterface} @nodeInterface {
+    //     id: ID!
+    //     title: String
+    //     uid: String
+    //     created_at: Date
+    //     updated_at: Date
+    //   }
+    // `);
     // Create custom schema for content types
-    contentTypes.forEach(contentType => {
-      const contentTypeUid = contentType.uid.replace(/-/g, '_');
-      const name = `${typePrefix}ContentTypes${contentTypeUid}`;
+    // contentTypes.forEach(contentType => {
+    //   const contentTypeUid = contentType.uid.replace(/-/g, '_');
+    //   const name = `${typePrefix}ContentTypes${contentTypeUid}`;
 
-      const fields = {
-        title: 'String!',
-        uid: 'String!',
-        created_at: 'Date',
-        updated_at: 'Date',
-        schema: 'JSON!',
-        description: 'String',
-      };
+    //   const fields = {
+    //     title: 'String!',
+    //     uid: 'String!',
+    //     created_at: 'Date',
+    //     updated_at: 'Date',
+    //     schema: 'JSON!',
+    //     description: 'String',
+    //   };
 
-      const typeDefs = [];
+    //   const typeDefs = [];
 
-      typeDefs.push(
-        schema.buildObjectType({
-          name: name,
-          fields: fields,
-          interfaces: ['Node', contentTypeInterface],
-          extensions: {
-            // While in SDL you have two different directives, @infer and @dontInfer to
-            // control inference behavior, Gatsby Type Builders take a single `infer`
-            // extension which accepts a Boolean
-            infer: false,
-          },
-        })
-      );
-      createTypes(typeDefs);
-    });
+    //   typeDefs.push(
+    //     schema.buildObjectType({
+    //       name: name,
+    //       fields: fields,
+    //       interfaces: ['Node', contentTypeInterface],
+    //       extensions: {
+    //         // While in SDL you have two different directives, @infer and @dontInfer to
+    //         // control inference behavior, Gatsby Type Builders take a single `infer`
+    //         // extension which accepts a Boolean
+    //         infer: false,
+    //       },
+    //     })
+    //   );
+    //   createTypes(typeDefs);
+    // });
   }
 };
 

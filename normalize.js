@@ -19,10 +19,13 @@ var _stringify2 = _interopRequireDefault(_stringify);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
-  var contentTypeUid = contentType.uid.replace(/-/g, '_');
+  // const contentTypeUid = contentType.uid.replace(/-/g, '_');
+  // const nodeId = createNodeId(
+  //   `${typePrefix.toLowerCase()}-contentType-${contentType.uid}`
+  // );
   var nodeId = createNodeId(typePrefix.toLowerCase() + '-contentType-' + contentType.uid);
-
-  var type = typePrefix + 'ContentTypes' + contentTypeUid;
+  // const type = `${typePrefix}ContentTypes${contentTypeUid}`;
+  var type = typePrefix + 'ContentTypes';
 
   var nodeContent = (0, _stringify2.default)(contentType);
   var nodeData = (0, _extends3.default)({}, contentType, {

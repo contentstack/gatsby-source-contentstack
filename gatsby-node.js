@@ -30,9 +30,7 @@ var _require = require('./normalize'),
     makeEntryNodeUid = _require.makeEntryNodeUid,
     makeAssetNodeUid = _require.makeAssetNodeUid,
     buildCustomSchema = _require.buildCustomSchema,
-    extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields,
-    getChildNodes = _require.getChildNodes,
-    processContentTypeInnerObject = _require.processContentTypeInnerObject;
+    extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields;
 
 var _require2 = require('./fetch'),
     fetchData = _require2.fetchData,
@@ -44,10 +42,8 @@ exports.createSchemaCustomization = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, configOptions) {
     var cache = _ref2.cache,
         actions = _ref2.actions,
-        schema = _ref2.schema,
-        createNodeId = _ref2.createNodeId,
-        createContentDigest = _ref2.createContentDigest;
-    var contentTypes, typePrefix, createTypes, createNode, contentTypeInterface;
+        schema = _ref2.schema;
+    var contentTypes, typePrefix, createTypes, name, fields;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -75,7 +71,7 @@ exports.createSchemaCustomization = function () {
 
           case 13:
             if (configOptions.enableSchemaGeneration) {
-              createTypes = actions.createTypes, createNode = actions.createNode;
+              createTypes = actions.createTypes;
 
               contentTypes.forEach(function (contentType) {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
@@ -93,39 +89,65 @@ exports.createSchemaCustomization = function () {
                 createTypes(result.types);
               });
 
-              contentTypeInterface = typePrefix + 'ContentTypes';
+              /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
+              name = typePrefix + 'ContentTypes';
+              fields = {
+                title: 'String!',
+                uid: 'String!',
+                created_at: 'Date',
+                updated_at: 'Date',
+                schema: 'JSON!',
+                description: 'String'
+              };
 
-              createTypes('\n      interface ' + contentTypeInterface + ' @nodeInterface {\n        id: ID!\n        title: String\n        uid: String\n        created_at: Date\n        updated_at: Date\n      }\n    ');
+              createTypes([schema.buildObjectType({
+                name: name,
+                fields: fields,
+                interfaces: ['Node'],
+                extensions: { infer: false }
+              })]);
 
+              // const contentTypeInterface = `${typePrefix}ContentTypes`;
+              // createTypes(`
+              //   interface ${contentTypeInterface} @nodeInterface {
+              //     id: ID!
+              //     title: String
+              //     uid: String
+              //     created_at: Date
+              //     updated_at: Date
+              //   }
+              // `);
               // Create custom schema for content types
-              contentTypes.forEach(function (contentType) {
-                var contentTypeUid = contentType.uid.replace(/-/g, '_');
-                var name = typePrefix + 'ContentTypes' + contentTypeUid;
+              // contentTypes.forEach(contentType => {
+              //   const contentTypeUid = contentType.uid.replace(/-/g, '_');
+              //   const name = `${typePrefix}ContentTypes${contentTypeUid}`;
 
-                var fields = {
-                  title: 'String!',
-                  uid: 'String!',
-                  created_at: 'Date',
-                  updated_at: 'Date',
-                  schema: 'JSON!',
-                  description: 'String'
-                };
+              //   const fields = {
+              //     title: 'String!',
+              //     uid: 'String!',
+              //     created_at: 'Date',
+              //     updated_at: 'Date',
+              //     schema: 'JSON!',
+              //     description: 'String',
+              //   };
 
-                var typeDefs = [];
+              //   const typeDefs = [];
 
-                typeDefs.push(schema.buildObjectType({
-                  name: name,
-                  fields: fields,
-                  interfaces: ['Node', contentTypeInterface],
-                  extensions: {
-                    // While in SDL you have two different directives, @infer and @dontInfer to
-                    // control inference behavior, Gatsby Type Builders take a single `infer`
-                    // extension which accepts a Boolean
-                    infer: false
-                  }
-                }));
-                createTypes(typeDefs);
-              });
+              //   typeDefs.push(
+              //     schema.buildObjectType({
+              //       name: name,
+              //       fields: fields,
+              //       interfaces: ['Node', contentTypeInterface],
+              //       extensions: {
+              //         // While in SDL you have two different directives, @infer and @dontInfer to
+              //         // control inference behavior, Gatsby Type Builders take a single `infer`
+              //         // extension which accepts a Boolean
+              //         infer: false,
+              //       },
+              //     })
+              //   );
+              //   createTypes(typeDefs);
+              // });
             }
 
           case 14:

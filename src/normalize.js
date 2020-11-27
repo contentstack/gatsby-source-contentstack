@@ -4,12 +4,15 @@ exports.processContentType = (
   createContentDigest,
   typePrefix
 ) => {
-  const contentTypeUid = contentType.uid.replace(/-/g, '_');
+  // const contentTypeUid = contentType.uid.replace(/-/g, '_');
+  // const nodeId = createNodeId(
+  //   `${typePrefix.toLowerCase()}-contentType-${contentType.uid}`
+  // );
   const nodeId = createNodeId(
     `${typePrefix.toLowerCase()}-contentType-${contentType.uid}`
   );
-
-  const type = `${typePrefix}ContentTypes${contentTypeUid}`;
+  // const type = `${typePrefix}ContentTypes${contentTypeUid}`;
+  const type = `${typePrefix}ContentTypes`;
 
   const nodeContent = JSON.stringify(contentType);
   const nodeData = {
