@@ -4,60 +4,15 @@ exports.processContentType = (
   createContentDigest,
   typePrefix
 ) => {
-  // const contentTypeUid = contentType.uid.replace(/-/g, '_');
-  // const nodeId = createNodeId(
-  //   `${typePrefix.toLowerCase()}-contentType-${contentType.uid}`
-  // );
+
   const nodeId = createNodeId(
     `${typePrefix.toLowerCase()}-contentType-${contentType.uid}`
   );
-  // const type = `${typePrefix}ContentTypes${contentTypeUid}`;
   const type = `${typePrefix}ContentTypes`;
 
   const nodeContent = JSON.stringify(contentType);
   const nodeData = {
     ...contentType,
-    id: nodeId,
-    parent: null,
-    children: [],
-    internal: {
-      type: type,
-      content: nodeContent,
-      contentDigest: createContentDigest(nodeContent),
-    },
-  };
-  return nodeData;
-};
-
-const getChildNodes = (exports.getChildNodes = function(
-  schema,
-  type,
-  typePrefix,
-  createNodeId
-) {
-  const childNodes = [];
-  schema.forEach(obj => {
-    const idString = `${typePrefix.toLowerCase()}-contentType-${type}_${
-      obj.uid
-    }`;
-    const nodeId = createNodeId(idString);
-    childNodes.push(nodeId);
-  });
-  return childNodes;
-});
-
-exports.processContentTypeInnerObject = function(
-  object,
-  createNodeId,
-  createContentDigest,
-  typePrefix,
-  type
-) {
-  const idString = `${typePrefix.toLowerCase()}-contentType-${type}`;
-  const nodeId = createNodeId(idString);
-  const nodeContent = JSON.stringify(object);
-  const nodeData = {
-    ...object,
     id: nodeId,
     parent: null,
     children: [],

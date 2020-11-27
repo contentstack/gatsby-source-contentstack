@@ -77,48 +77,6 @@ exports.createSchemaCustomization = async (
         extensions: { infer: false },
       }),
     ]);
-
-    // const contentTypeInterface = `${typePrefix}ContentTypes`;
-    // createTypes(`
-    //   interface ${contentTypeInterface} @nodeInterface {
-    //     id: ID!
-    //     title: String
-    //     uid: String
-    //     created_at: Date
-    //     updated_at: Date
-    //   }
-    // `);
-    // Create custom schema for content types
-    // contentTypes.forEach(contentType => {
-    //   const contentTypeUid = contentType.uid.replace(/-/g, '_');
-    //   const name = `${typePrefix}ContentTypes${contentTypeUid}`;
-
-    //   const fields = {
-    //     title: 'String!',
-    //     uid: 'String!',
-    //     created_at: 'Date',
-    //     updated_at: 'Date',
-    //     schema: 'JSON!',
-    //     description: 'String',
-    //   };
-
-    //   const typeDefs = [];
-
-    //   typeDefs.push(
-    //     schema.buildObjectType({
-    //       name: name,
-    //       fields: fields,
-    //       interfaces: ['Node', contentTypeInterface],
-    //       extensions: {
-    //         // While in SDL you have two different directives, @infer and @dontInfer to
-    //         // control inference behavior, Gatsby Type Builders take a single `infer`
-    //         // extension which accepts a Boolean
-    //         infer: false,
-    //       },
-    //     })
-    //   );
-    //   createTypes(typeDefs);
-    // });
   }
 };
 

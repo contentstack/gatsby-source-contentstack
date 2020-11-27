@@ -19,43 +19,12 @@ var _stringify2 = _interopRequireDefault(_stringify);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
-  // const contentTypeUid = contentType.uid.replace(/-/g, '_');
-  // const nodeId = createNodeId(
-  //   `${typePrefix.toLowerCase()}-contentType-${contentType.uid}`
-  // );
+
   var nodeId = createNodeId(typePrefix.toLowerCase() + '-contentType-' + contentType.uid);
-  // const type = `${typePrefix}ContentTypes${contentTypeUid}`;
   var type = typePrefix + 'ContentTypes';
 
   var nodeContent = (0, _stringify2.default)(contentType);
   var nodeData = (0, _extends3.default)({}, contentType, {
-    id: nodeId,
-    parent: null,
-    children: [],
-    internal: {
-      type: type,
-      content: nodeContent,
-      contentDigest: createContentDigest(nodeContent)
-    }
-  });
-  return nodeData;
-};
-
-var getChildNodes = exports.getChildNodes = function (schema, type, typePrefix, createNodeId) {
-  var childNodes = [];
-  schema.forEach(function (obj) {
-    var idString = typePrefix.toLowerCase() + '-contentType-' + type + '_' + obj.uid;
-    var nodeId = createNodeId(idString);
-    childNodes.push(nodeId);
-  });
-  return childNodes;
-};
-
-exports.processContentTypeInnerObject = function (object, createNodeId, createContentDigest, typePrefix, type) {
-  var idString = typePrefix.toLowerCase() + '-contentType-' + type;
-  var nodeId = createNodeId(idString);
-  var nodeContent = (0, _stringify2.default)(object);
-  var nodeData = (0, _extends3.default)({}, object, {
     id: nodeId,
     parent: null,
     children: [],
