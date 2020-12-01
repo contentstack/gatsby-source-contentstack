@@ -191,7 +191,7 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, parent, prefix) {
 
   var blockFields = {};
-  var blockType = 'type ' + parent + ' {';
+  var blockType = 'type ' + parent + ' @infer {';
 
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
@@ -206,7 +206,7 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
       }
     }
     if ((0, _keys2.default)(fields).length > 0) {
-      var type = 'type ' + newparent + ' ' + (0, _stringify2.default)(fields).replace(/"/g, '');
+      var type = 'type ' + newparent + ' @infer ' + (0, _stringify2.default)(fields).replace(/"/g, '');
       types.push(type);
       blockFields[block.uid] = '' + newparent;
     }
@@ -338,7 +338,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         }
         break;
       case 'file':
-        var type = 'type ' + prefix + '_assets implements Node { url: String }';
+        var type = 'type ' + prefix + '_assets implements Node @infer { url: String }';
         types.push(type);
         fields[field.uid] = {
           resolve: function resolve(source, args, context) {
@@ -392,7 +392,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
         if ((0, _keys2.default)(result.fields).length > 0) {
 
-          var _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
+          var _type = 'type ' + newparent + ' @infer ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
 
           types.push(_type);
 
@@ -438,7 +438,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         var unionType = 'union ';
         if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
-          var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node { title: String! }';
+          var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node @infer { title: String! }';
           types.push(_type2);
           if (field.mandatory) {
             fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']!';
@@ -451,7 +451,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             var referenceType = prefix + '_' + reference;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            var type = 'type ' + referenceType + ' implements Node { title: String! }';
+            var type = 'type ' + referenceType + ' implements Node @infer { title: String! }';
             types.push(type);
           });
           var name = '';
