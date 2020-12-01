@@ -201,14 +201,16 @@ var fetchCsData = function () {
           case 0:
             query = query || {};
             query.include_count = true;
-            query.api_key = config.api_key;
-            query.access_token = config.delivery_token;
+            // query.api_key = config.api_key;
+            // query.access_token = config.delivery_token;
             query.environment = config.environment;
             queryParams = queryString.stringify(query);
             apiUrl = config.cdn + '/' + url + '?' + queryParams;
             option = {
               headers: {
-                'X-User-Agent': 'contentstack-gatsby-source-plugin-' + version
+                'X-User-Agent': 'contentstack-gatsby-source-plugin-' + version,
+                api_key: config.api_key,
+                access_token: config.delivery_token
               }
             };
             return _context4.abrupt('return', new _promise2.default(function (resolve, reject) {
@@ -227,7 +229,7 @@ var fetchCsData = function () {
               });
             }));
 
-          case 9:
+          case 7:
           case 'end':
             return _context4.stop();
         }

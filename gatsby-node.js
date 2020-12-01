@@ -95,7 +95,8 @@ exports.createSchemaCustomization = function () {
                 var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
                   name: name,
                   fields: result.fields,
-                  interfaces: ['Node']
+                  interfaces: ['Node'],
+                  extensions: { infer: false }
                 })];
                 result.types = result.types.concat(typeDefs);
                 createTypes(result.types);

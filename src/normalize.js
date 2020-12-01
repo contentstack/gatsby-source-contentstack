@@ -175,7 +175,7 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
 const buildBlockCustomSchema = (blocks, types, references, groups, parent, prefix) => {
 
   const blockFields = {};
-  let blockType = `type ${parent} {`;
+  let blockType = `type ${parent} @infer {`;
 
   blocks.forEach((block) => {
     const newparent = parent.concat(block.uid);
@@ -190,7 +190,7 @@ const buildBlockCustomSchema = (blocks, types, references, groups, parent, prefi
       }
     }
     if (Object.keys(fields).length > 0) {
-      const type = `type ${newparent} ${JSON.stringify(fields).replace(/"/g, '')}`;
+      const type = `type ${newparent} @infer ${JSON.stringify(fields).replace(/"/g, '')}`;
       types.push(type);
       blockFields[block.uid] = `${newparent}`;
     }
@@ -318,7 +318,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
         }
         break;
       case 'file':
-        const type = `type ${prefix}_assets implements Node { url: String }`;
+        const type = `type ${prefix}_assets implements Node @infer { url: String }`;
         types.push(type);
         fields[field.uid] = {
           resolve: (source, args, context) => {
@@ -371,7 +371,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
 
         if (Object.keys(result.fields).length > 0) {
 
-          let type = `type ${newparent} ${JSON.stringify(result.fields).replace(/"/g, '')}`;
+          let type = `type ${newparent} @infer ${JSON.stringify(result.fields).replace(/"/g, '')}`;
 
           types.push(type);
 
@@ -417,7 +417,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
         let unionType = 'union ';
         if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
-          const type = `type ${prefix}_${field.reference_to} implements Node { title: String! }`;
+          const type = `type ${prefix}_${field.reference_to} implements Node @infer { title: String! }`;
           types.push(type);
           if (field.mandatory) {
             fields[field.uid] = `[${prefix}_${field.reference_to}]!`;
@@ -430,7 +430,7 @@ const buildCustomSchema = exports.buildCustomSchema = (schema, types, references
             const referenceType = `${prefix}_${reference}`;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            const type = `type ${referenceType} implements Node { title: String! }`;
+            const type = `type ${referenceType} implements Node @infer { title: String! }`;
             types.push(type);
           });
           let name = '';
