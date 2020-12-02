@@ -30,7 +30,8 @@ var _require2 = require('./normalize'),
 
 var _require3 = require('./utils'),
     createProgress = _require3.createProgress,
-    checkIfUnsupportedFormat = _require3.checkIfUnsupportedFormat;
+    checkIfUnsupportedFormat = _require3.checkIfUnsupportedFormat,
+    SUPPORTED_FILES_COUNT = _require3.SUPPORTED_FILES_COUNT;
 
 var bar = void 0; // Keep track of the total number of jobs we push in the queue
 var sizeBar = void 0;
@@ -184,28 +185,40 @@ var createRemoteFileNodePromise = function () {
           case 0:
             _context2.prev = 0;
 
-            if (totalJobs === 0) {
-              bar = createProgress('Downloading remote files', reporter);
-              bar.start();
+            if (!(totalJobs === 0)) {
+              _context2.next = 8;
+              break;
             }
+
+            bar = createProgress('Downloading remote files', reporter);
+            _context2.next = 5;
+            return params.cache.get(SUPPORTED_FILES_COUNT);
+
+          case 5:
+            totalJobs = _context2.sent;
+
+            bar.total = totalJobs;
+            bar.start();
+
+          case 8:
 
             if (totalSize === 0) {
               sizeBar = createProgress('Total KBs downloaded', reporter);
               sizeBar.start();
             }
 
-            totalJobs += 1;
-            bar.total = totalJobs;
+            // totalJobs += 1;
+            // bar.total = totalJobs;
 
             fileNode = void 0;
             assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix);
 
             // Get asset from cache
 
-            _context2.next = 9;
+            _context2.next = 13;
             return params.cache.get(assetUid);
 
-          case 9:
+          case 13:
             fileNode = _context2.sent;
 
 
@@ -213,18 +226,18 @@ var createRemoteFileNodePromise = function () {
             if (fileNode && fileNode.updated_at !== node.updated_at) fileNode = null;
 
             if (fileNode) {
-              _context2.next = 23;
+              _context2.next = 27;
               break;
             }
 
-            _context2.next = 14;
+            _context2.next = 18;
             return createRemoteFileNode((0, _extends3.default)({}, params, { url: encodeURI(node.url), parentNodeId: node.id }));
 
-          case 14:
+          case 18:
             fileNode = _context2.sent;
 
             if (!fileNode) {
-              _context2.next = 23;
+              _context2.next = 27;
               break;
             }
 
@@ -237,10 +250,10 @@ var createRemoteFileNodePromise = function () {
             sizeBar.total = totalSize;
             sizeBar.tick(fileSize);
             // Cache fileNode to prevent re-downloading asset
-            _context2.next = 23;
+            _context2.next = 27;
             return params.cache.set(assetUid, fileNode);
 
-          case 23:
+          case 27:
 
             bar.tick();
 
@@ -248,19 +261,19 @@ var createRemoteFileNodePromise = function () {
 
             return _context2.abrupt('return', fileNode);
 
-          case 28:
-            _context2.prev = 28;
+          case 32:
+            _context2.prev = 32;
             _context2.t0 = _context2['catch'](0);
 
             reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0);
             // throw error;
 
-          case 31:
+          case 35:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, undefined, [[0, 28]]);
+    }, _callee2, undefined, [[0, 32]]);
   }));
 
   return function createRemoteFileNodePromise(_x4, _x5, _x6, _x7) {

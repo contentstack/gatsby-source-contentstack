@@ -62,3 +62,5 @@ exports.checkIfUnsupportedFormat = function (data) {
   }
   return extName === 'svg' || extName === 'gif' ? true : false;
 };
+
+exports.SUPPORTED_FILES_COUNT = 'SUPPORTED_FILES_COUNT';

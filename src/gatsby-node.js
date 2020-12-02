@@ -8,6 +8,7 @@ const {
   buildCustomSchema,
   extendSchemaWithDefaultEntryFields,
 } = require('./normalize');
+const {checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT}=require('./utils');
 
 const {
   fetchData,
@@ -144,10 +145,35 @@ exports.sourceNodes = async ({
     entriesNodeIds.add(entryNodeId);
   });
 
-  syncData.asset_published && syncData.asset_published.forEach((item) => {
-    const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
+  let countOfSupportedFormatFiles = 0;
+  syncData.asset_published && syncData.asset_published.forEach(function (item) {
+    /**
+     * Get the count of assets (images), filtering out svg and gif format,
+     * as these formats are not supported by gatsby-image.
+     * We need the count to render right information in progress bar,
+     * which will show progress for downloading remote files.
+     */
+    if (configOptions.downloadAssets) {
+      let isUnsupportedExt;
+      try {
+        console.log('item.data.url', item.data.url);
+        isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
+        if (!isUnsupportedExt)
+          countOfSupportedFormatFiles++;
+
+      } catch (error) {
+        reporter.panic('Something went wrong. Details: ', error);
+      }
+    }
+    var entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
     assetsNodeIds.add(entryNodeId);
   });
+  // Cache the found count
+ configOptions.downloadAssets && await cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
+  // syncData.asset_published && syncData.asset_published.forEach((item) => {
+  //   const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
+  //   assetsNodeIds.add(entryNodeId);
+  // });
 
   // adding nodes
   contentstackData.contentTypes.forEach((contentType) => {

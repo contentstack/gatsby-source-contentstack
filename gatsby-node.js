@@ -32,9 +32,13 @@ var _require = require('./normalize'),
     buildCustomSchema = _require.buildCustomSchema,
     extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields;
 
-var _require2 = require('./fetch'),
-    fetchData = _require2.fetchData,
-    fetchContentTypes = _require2.fetchContentTypes;
+var _require2 = require('./utils'),
+    checkIfUnsupportedFormat = _require2.checkIfUnsupportedFormat,
+    SUPPORTED_FILES_COUNT = _require2.SUPPORTED_FILES_COUNT;
+
+var _require3 = require('./fetch'),
+    fetchData = _require3.fetchData,
+    fetchContentTypes = _require3.fetchContentTypes;
 
 var downloadAssets = require('./download-assets');
 
@@ -129,7 +133,7 @@ exports.sourceNodes = function () {
         getNodesByType = _ref5.getNodesByType,
         getCache = _ref5.getCache;
 
-    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref6, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, deleteContentstackNodes, nextSyncToken, newState;
+    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref6, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes, nextSyncToken, newState;
 
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
@@ -216,10 +220,44 @@ exports.sourceNodes = function () {
               entriesNodeIds.add(entryNodeId);
             });
 
+            countOfSupportedFormatFiles = 0;
+
             syncData.asset_published && syncData.asset_published.forEach(function (item) {
+              /**
+               * Get the count of assets (images), filtering out svg and gif format,
+               * as these formats are not supported by gatsby-image.
+               * We need the count to render right information in progress bar,
+               * which will show progress for downloading remote files.
+               */
+              if (configOptions.downloadAssets) {
+                var isUnsupportedExt = void 0;
+                try {
+                  console.log('item.data.url', item.data.url);
+                  isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
+                  if (!isUnsupportedExt) countOfSupportedFormatFiles++;
+                } catch (error) {
+                  reporter.panic('Something went wrong. Details: ', error);
+                }
+              }
               var entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
               assetsNodeIds.add(entryNodeId);
             });
+            // Cache the found count
+            _context2.t0 = configOptions.downloadAssets;
+
+            if (!_context2.t0) {
+              _context2.next = 26;
+              break;
+            }
+
+            _context2.next = 26;
+            return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
+
+          case 26:
+            // syncData.asset_published && syncData.asset_published.forEach((item) => {
+            //   const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
+            //   assetsNodeIds.add(entryNodeId);
+            // });
 
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
@@ -244,26 +282,26 @@ exports.sourceNodes = function () {
             });
 
             if (!configOptions.downloadAssets) {
-              _context2.next = 34;
+              _context2.next = 39;
               break;
             }
 
-            _context2.prev = 25;
-            _context2.next = 28;
+            _context2.prev = 30;
+            _context2.next = 33;
             return downloadAssets({ cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType, reporter: reporter }, typePrefix, configOptions);
 
-          case 28:
-            _context2.next = 34;
+          case 33:
+            _context2.next = 39;
             break;
 
-          case 30:
-            _context2.prev = 30;
-            _context2.t0 = _context2['catch'](25);
+          case 35:
+            _context2.prev = 35;
+            _context2.t1 = _context2['catch'](30);
 
-            console.log('error--->', _context2.t0);
-            reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t0);
+            console.log('error--->', _context2.t1);
+            reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t1);
 
-          case 34:
+          case 39:
 
             // deleting nodes
 
@@ -305,12 +343,12 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 43:
+          case 48:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, undefined, [[25, 30]]);
+    }, _callee2, undefined, [[30, 35]]);
   }));
 
   return function (_x3, _x4) {

@@ -3,7 +3,7 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
 
 const { makeAssetNodeUid } = require('./normalize');
-const { createProgress, checkIfUnsupportedFormat } = require('./utils');
+const { createProgress, checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT } = require('./utils');
 
 let bar; // Keep track of the total number of jobs we push in the queue
 let sizeBar;
@@ -90,6 +90,8 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
   try {
     if (totalJobs === 0) {
       bar = createProgress(`Downloading remote files`, reporter);
+      totalJobs = await params.cache.get(SUPPORTED_FILES_COUNT);
+      bar.total = totalJobs;
       bar.start();
     }
 
@@ -98,8 +100,8 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
       sizeBar.start();
     }
 
-    totalJobs += 1;
-    bar.total = totalJobs;
+    // totalJobs += 1;
+    // bar.total = totalJobs;
 
     let fileNode;
 
