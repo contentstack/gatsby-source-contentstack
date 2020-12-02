@@ -30,8 +30,8 @@ module.exports = async ({
     totalJobs = await cache.get(SUPPORTED_FILES_COUNT);
     // Create progress bar
     bar = createProgress(`Downloading remote files`, reporter);
-    bar.total = totalJobs;
     bar.start();
+    bar.total = totalJobs;
 
     for (let i = 0; i < batches.length; i++) {
 

@@ -69,8 +69,8 @@ module.exports = function () {
 
             // Create progress bar
             bar = createProgress('Downloading remote files', reporter);
-            bar.total = totalJobs;
             bar.start();
+            bar.total = totalJobs;
 
             i = 0;
 
