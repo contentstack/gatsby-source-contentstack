@@ -27,7 +27,7 @@ module.exports = async ({
     const batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
 
     // Get total count of files that will be downloaded, excluding unsupported formats
-    totalJobs = await params.cache.get(SUPPORTED_FILES_COUNT);
+    totalJobs = await cache.get(SUPPORTED_FILES_COUNT);
     // Create progress bar
     bar = createProgress(`Downloading remote files`, reporter);
     bar.total = totalJobs;

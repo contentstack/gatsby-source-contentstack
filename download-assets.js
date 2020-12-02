@@ -62,7 +62,7 @@ module.exports = function () {
             // Get total count of files that will be downloaded, excluding unsupported formats
 
             _context.next = 6;
-            return params.cache.get(SUPPORTED_FILES_COUNT);
+            return cache.get(SUPPORTED_FILES_COUNT);
 
           case 6:
             totalJobs = _context.sent;
