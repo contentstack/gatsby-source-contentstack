@@ -232,7 +232,6 @@ exports.sourceNodes = function () {
               if (configOptions.downloadAssets) {
                 var isUnsupportedExt = void 0;
                 try {
-                  console.log('item.data.url', item.data.url);
                   isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
                   if (!isUnsupportedExt) countOfSupportedFormatFiles++;
                 } catch (error) {

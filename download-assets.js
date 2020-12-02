@@ -58,11 +58,25 @@ module.exports = function () {
             configOptions.MAX_CONCURRENCY_LIMIT = process.env.GATSBY_CONCURRENT_DOWNLOAD || 20;
 
             batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
+
+            // Get total count of files that will be downloaded, excluding unsupported formats
+
+            _context.next = 6;
+            return params.cache.get(SUPPORTED_FILES_COUNT);
+
+          case 6:
+            totalJobs = _context.sent;
+
+            // Create progress bar
+            bar = createProgress('Downloading remote files', reporter);
+            bar.total = totalJobs;
+            bar.start();
+
             i = 0;
 
-          case 5:
+          case 11:
             if (!(i < batches.length)) {
-              _context.next = 36;
+              _context.next = 42;
               break;
             }
 
@@ -75,21 +89,21 @@ module.exports = function () {
             shouldBreak = false;
             j = skip;
 
-          case 12:
+          case 18:
             if (!(j < lastCount)) {
-              _context.next = 29;
+              _context.next = 35;
               break;
             }
 
             if (!(!assets[j] && i + 1 === batches.length)) {
-              _context.next = 16;
+              _context.next = 22;
               break;
             }
 
             shouldBreak = true;
-            return _context.abrupt('break', 29);
+            return _context.abrupt('break', 35);
 
-          case 16:
+          case 22:
 
             // filter the images from all the assets
             regexp = new RegExp('https://(stag-images|images).contentstack.io/v3/assets/');
@@ -110,65 +124,65 @@ module.exports = function () {
             // Only download images
 
             if (!(matches && !isUnsupportedExt)) {
-              _context.next = 26;
+              _context.next = 32;
               break;
             }
 
             _context.t0 = batchPromises;
-            _context.next = 24;
+            _context.next = 30;
             return createRemoteFileNodePromise({
               cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId
             }, assets[j], typePrefix, reporter);
 
-          case 24:
+          case 30:
             _context.t1 = _context.sent;
 
             _context.t0.push.call(_context.t0, _context.t1);
 
-          case 26:
+          case 32:
             j++;
-            _context.next = 12;
+            _context.next = 18;
             break;
 
-          case 29:
+          case 35:
             if (!shouldBreak) {
-              _context.next = 31;
+              _context.next = 37;
               break;
             }
 
-            return _context.abrupt('break', 36);
+            return _context.abrupt('break', 42);
 
-          case 31:
-            _context.next = 33;
+          case 37:
+            _context.next = 39;
             return _promise2.default.all(batchPromises);
 
-          case 33:
+          case 39:
             i++;
-            _context.next = 5;
+            _context.next = 11;
             break;
 
-          case 36:
+          case 42:
 
             bar && bar.done();
             sizeBar && sizeBar.done();
             reporter.verbose('Total size of downloaded files ' + totalSize);
 
-            _context.next = 44;
+            _context.next = 50;
             break;
 
-          case 41:
-            _context.prev = 41;
+          case 47:
+            _context.prev = 47;
             _context.t2 = _context['catch'](0);
 
             reporter.info('Something went wrong while downloading assets. Details: ' + _context.t2);
             // throw error;
 
-          case 44:
+          case 50:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[0, 41]]);
+    }, _callee, undefined, [[0, 47]]);
   }));
 
   return function (_x, _x2, _x3) {
@@ -185,40 +199,21 @@ var createRemoteFileNodePromise = function () {
           case 0:
             _context2.prev = 0;
 
-            if (!(totalJobs === 0)) {
-              _context2.next = 8;
-              break;
-            }
-
-            bar = createProgress('Downloading remote files', reporter);
-            _context2.next = 5;
-            return params.cache.get(SUPPORTED_FILES_COUNT);
-
-          case 5:
-            totalJobs = _context2.sent;
-
-            bar.total = totalJobs;
-            bar.start();
-
-          case 8:
 
             if (totalSize === 0) {
               sizeBar = createProgress('Total KBs downloaded', reporter);
               sizeBar.start();
             }
 
-            // totalJobs += 1;
-            // bar.total = totalJobs;
-
             fileNode = void 0;
             assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix);
 
             // Get asset from cache
 
-            _context2.next = 13;
+            _context2.next = 6;
             return params.cache.get(assetUid);
 
-          case 13:
+          case 6:
             fileNode = _context2.sent;
 
 
@@ -226,18 +221,18 @@ var createRemoteFileNodePromise = function () {
             if (fileNode && fileNode.updated_at !== node.updated_at) fileNode = null;
 
             if (fileNode) {
-              _context2.next = 27;
+              _context2.next = 20;
               break;
             }
 
-            _context2.next = 18;
+            _context2.next = 11;
             return createRemoteFileNode((0, _extends3.default)({}, params, { url: encodeURI(node.url), parentNodeId: node.id }));
 
-          case 18:
+          case 11:
             fileNode = _context2.sent;
 
             if (!fileNode) {
-              _context2.next = 27;
+              _context2.next = 20;
               break;
             }
 
@@ -250,10 +245,10 @@ var createRemoteFileNodePromise = function () {
             sizeBar.total = totalSize;
             sizeBar.tick(fileSize);
             // Cache fileNode to prevent re-downloading asset
-            _context2.next = 27;
+            _context2.next = 20;
             return params.cache.set(assetUid, fileNode);
 
-          case 27:
+          case 20:
 
             bar.tick();
 
@@ -261,19 +256,19 @@ var createRemoteFileNodePromise = function () {
 
             return _context2.abrupt('return', fileNode);
 
-          case 32:
-            _context2.prev = 32;
+          case 25:
+            _context2.prev = 25;
             _context2.t0 = _context2['catch'](0);
 
             reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0);
             // throw error;
 
-          case 35:
+          case 28:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, undefined, [[0, 32]]);
+    }, _callee2, undefined, [[0, 25]]);
   }));
 
   return function createRemoteFileNodePromise(_x4, _x5, _x6, _x7) {

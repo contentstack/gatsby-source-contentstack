@@ -156,7 +156,6 @@ exports.sourceNodes = async ({
     if (configOptions.downloadAssets) {
       let isUnsupportedExt;
       try {
-        console.log('item.data.url', item.data.url);
         isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
         if (!isUnsupportedExt)
           countOfSupportedFormatFiles++;

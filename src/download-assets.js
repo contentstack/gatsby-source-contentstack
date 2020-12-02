@@ -26,6 +26,13 @@ module.exports = async ({
 
     const batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
 
+    // Get total count of files that will be downloaded, excluding unsupported formats
+    totalJobs = await params.cache.get(SUPPORTED_FILES_COUNT);
+    // Create progress bar
+    bar = createProgress(`Downloading remote files`, reporter);
+    bar.total = totalJobs;
+    bar.start();
+
     for (let i = 0; i < batches.length; i++) {
 
       const batchPromises = [];
@@ -88,20 +95,11 @@ module.exports = async ({
 
 const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) => {
   try {
-    if (totalJobs === 0) {
-      bar = createProgress(`Downloading remote files`, reporter);
-      totalJobs = await params.cache.get(SUPPORTED_FILES_COUNT);
-      bar.total = totalJobs;
-      bar.start();
-    }
 
     if (totalSize === 0) {
       sizeBar = createProgress(`Total KBs downloaded`, reporter);
       sizeBar.start();
     }
-
-    // totalJobs += 1;
-    // bar.total = totalJobs;
 
     let fileNode;
 
