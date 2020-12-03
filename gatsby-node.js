@@ -239,7 +239,7 @@ exports.sourceNodes = function () {
                   matches = regexp.exec(item.data.url);
                   isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
 
-                  if (!matches && !isUnsupportedExt) countOfSupportedFormatFiles++;
+                  if (matches && !isUnsupportedExt) countOfSupportedFormatFiles++;
                 } catch (error) {
                   reporter.panic('Something went wrong. Details: ', error);
                 }

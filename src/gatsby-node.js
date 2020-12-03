@@ -161,8 +161,8 @@ exports.sourceNodes = async ({
       try {
         matches = regexp.exec(item.data.url);
         isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
-        
-        if (!matches && !isUnsupportedExt)
+
+        if (matches && !isUnsupportedExt)
           countOfSupportedFormatFiles++;
 
       } catch (error) {
