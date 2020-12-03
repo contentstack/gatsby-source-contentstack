@@ -8,7 +8,7 @@ const {
   buildCustomSchema,
   extendSchemaWithDefaultEntryFields,
 } = require('./normalize');
-const {checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT}=require('./utils');
+const {checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT, IMAGE_REGEXP}=require('./utils');
 
 const {
   fetchData,
@@ -154,10 +154,15 @@ exports.sourceNodes = async ({
      * which will show progress for downloading remote files.
      */
     if (configOptions.downloadAssets) {
+      // Filter the images from the assets
+      const regexp = IMAGE_REGEXP;
+      let matches;
       let isUnsupportedExt;
       try {
+        matches = regexp.exec(item.data.url);
         isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
-        if (!isUnsupportedExt)
+        
+        if (!matches && !isUnsupportedExt)
           countOfSupportedFormatFiles++;
 
       } catch (error) {

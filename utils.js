@@ -26,28 +26,6 @@ exports.createProgress = function (message, reporter) {
   };
 };
 
-// exports.createProgressForSize = function (message) {
-//   const fmt = message => ` [:bar] :current/:total :elapsed s :percent ${message}`;
-
-//   const bar = new ProgressBar(fmt(message), {
-//     total: 0,
-//     curr: 0,
-//     width: 30,
-//     clear: true
-//   });
-//   return {
-//     start: function start() { },
-//     tick: function tick() {
-//       bar.tick();
-//     },
-//     done: function done() { },
-
-//     set total(value) {
-//       bar.total = value;
-//     }
-//   };
-// }
-
 exports.checkIfUnsupportedFormat = function (data) {
   // Get every char after ".", $ is from end
   // eslint-disable-next-line
@@ -64,3 +42,4 @@ exports.checkIfUnsupportedFormat = function (data) {
 };
 
 exports.SUPPORTED_FILES_COUNT = 'SUPPORTED_FILES_COUNT';
+exports.IMAGE_REGEXP = new RegExp('https://(stag-images|images).contentstack.io/v3/assets/');

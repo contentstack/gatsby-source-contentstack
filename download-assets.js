@@ -31,7 +31,8 @@ var _require2 = require('./normalize'),
 var _require3 = require('./utils'),
     createProgress = _require3.createProgress,
     checkIfUnsupportedFormat = _require3.checkIfUnsupportedFormat,
-    SUPPORTED_FILES_COUNT = _require3.SUPPORTED_FILES_COUNT;
+    SUPPORTED_FILES_COUNT = _require3.SUPPORTED_FILES_COUNT,
+    IMAGE_REGEXP = _require3.IMAGE_REGEXP;
 
 var bar = void 0; // Keep track of the total number of jobs we push in the queue
 var sizeBar = void 0;
@@ -106,7 +107,7 @@ module.exports = function () {
           case 22:
 
             // filter the images from all the assets
-            regexp = new RegExp('https://(stag-images|images).contentstack.io/v3/assets/');
+            regexp = IMAGE_REGEXP;
             matches = void 0;
             // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297
 

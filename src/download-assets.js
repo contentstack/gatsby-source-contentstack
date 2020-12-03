@@ -3,7 +3,7 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
 
 const { makeAssetNodeUid } = require('./normalize');
-const { createProgress, checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT } = require('./utils');
+const { createProgress, checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP } = require('./utils');
 
 let bar; // Keep track of the total number of jobs we push in the queue
 let sizeBar;
@@ -51,7 +51,7 @@ module.exports = async ({
         }
 
         // filter the images from all the assets
-        const regexp = new RegExp('https://(stag-images|images).contentstack.io/v3/assets/');
+        const regexp = IMAGE_REGEXP;
 
         let matches;
         // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297

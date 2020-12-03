@@ -34,7 +34,8 @@ var _require = require('./normalize'),
 
 var _require2 = require('./utils'),
     checkIfUnsupportedFormat = _require2.checkIfUnsupportedFormat,
-    SUPPORTED_FILES_COUNT = _require2.SUPPORTED_FILES_COUNT;
+    SUPPORTED_FILES_COUNT = _require2.SUPPORTED_FILES_COUNT,
+    IMAGE_REGEXP = _require2.IMAGE_REGEXP;
 
 var _require3 = require('./fetch'),
     fetchData = _require3.fetchData,
@@ -230,10 +231,15 @@ exports.sourceNodes = function () {
                * which will show progress for downloading remote files.
                */
               if (configOptions.downloadAssets) {
+                // Filter the images from the assets
+                var regexp = IMAGE_REGEXP;
+                var matches = void 0;
                 var isUnsupportedExt = void 0;
                 try {
+                  matches = regexp.exec(item.data.url);
                   isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
-                  if (!isUnsupportedExt) countOfSupportedFormatFiles++;
+
+                  if (!matches && !isUnsupportedExt) countOfSupportedFormatFiles++;
                 } catch (error) {
                   reporter.panic('Something went wrong. Details: ', error);
                 }
