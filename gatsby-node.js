@@ -101,7 +101,7 @@ exports.createSchemaCustomization = function () {
                   name: name,
                   fields: result.fields,
                   interfaces: ['Node'],
-                  extensions: { infer: false }
+                  extensions: { infer: true }
                 })];
                 result.types = result.types.concat(typeDefs);
                 createTypes(result.types);
