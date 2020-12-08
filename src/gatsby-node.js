@@ -66,7 +66,7 @@ exports.createSchemaCustomization = async ({
           name,
           fields: result.fields,
           interfaces: ['Node'],
-          extensions: {infer: false}
+          extensions: {infer: true}
         }),
       ];
       result.types = result.types.concat(typeDefs);
