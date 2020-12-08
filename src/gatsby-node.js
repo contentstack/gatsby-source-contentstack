@@ -150,7 +150,7 @@ exports.sourceNodes = async ({
     /**
      * Get the count of assets (images), filtering out svg and gif format,
      * as these formats are not supported by gatsby-image.
-     * We need the count to render right information in progress bar,
+     * We need the right count to render in progress bar,
      * which will show progress for downloading remote files.
      */
     if (configOptions.downloadAssets) {
