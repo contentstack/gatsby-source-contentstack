@@ -19,14 +19,17 @@ var _stringify2 = _interopRequireDefault(_stringify);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
+
   var nodeId = createNodeId(typePrefix.toLowerCase() + '-contentType-' + contentType.uid);
+  var type = typePrefix + 'ContentTypes';
+
   var nodeContent = (0, _stringify2.default)(contentType);
   var nodeData = (0, _extends3.default)({}, contentType, {
     id: nodeId,
     parent: null,
     children: [],
     internal: {
-      type: typePrefix + 'ContentTypes',
+      type: type,
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent)
     }
@@ -189,7 +192,6 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 };
 
 var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, parent, prefix) {
-
   var blockFields = {};
   var blockType = 'type ' + parent + ' @infer {';
 
@@ -217,23 +219,23 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
 
 exports.extendSchemaWithDefaultEntryFields = function (schema) {
   schema.push({
-    data_type: "text",
-    uid: "uid",
+    data_type: 'text',
+    uid: 'uid',
     multiple: false,
     mandatory: false
   });
   schema.push({
-    data_type: "text",
-    uid: "locale",
+    data_type: 'text',
+    uid: 'locale',
     multiple: false,
     mandatory: false
   });
   schema.push({
-    data_type: "group",
-    uid: "publish_details",
+    data_type: 'group',
+    uid: 'publish_details',
     schema: [{
-      data_type: "text",
-      uid: "locale",
+      data_type: 'text',
+      uid: 'locale',
       multiple: false,
       mandatory: false
     }],
@@ -241,14 +243,14 @@ exports.extendSchemaWithDefaultEntryFields = function (schema) {
     mandatory: false
   });
   schema.push({
-    data_type: "isodate",
-    uid: "updated_at",
+    data_type: 'isodate',
+    uid: 'updated_at',
     multiple: false,
     mandatory: false
   });
   schema.push({
-    data_type: "string",
-    uid: "updated_by",
+    data_type: 'string',
+    uid: 'updated_by',
     multiple: false,
     mandatory: false
   });

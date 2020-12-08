@@ -60,7 +60,7 @@ exports.createSchemaCustomization = function () {
     var cache = _ref3.cache,
         actions = _ref3.actions,
         schema = _ref3.schema;
-    var contentTypes, typePrefix, createTypes;
+    var contentTypes, typePrefix, createTypes, name, fields;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -106,6 +106,24 @@ exports.createSchemaCustomization = function () {
                 result.types = result.types.concat(typeDefs);
                 createTypes(result.types);
               });
+
+              /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
+              name = typePrefix + 'ContentTypes';
+              fields = {
+                title: 'String!',
+                uid: 'String!',
+                created_at: 'Date',
+                updated_at: 'Date',
+                schema: 'JSON!',
+                description: 'String'
+              };
+
+              createTypes([schema.buildObjectType({
+                name: name,
+                fields: fields,
+                interfaces: ['Node'],
+                extensions: { infer: false }
+              })]);
             }
 
           case 14:
@@ -227,7 +245,7 @@ exports.sourceNodes = function () {
               /**
                * Get the count of assets (images), filtering out svg and gif format,
                * as these formats are not supported by gatsby-image.
-               * We need the count to render right information in progress bar,
+               * We need the right count to render in progress bar,
                * which will show progress for downloading remote files.
                */
               if (configOptions.downloadAssets) {
