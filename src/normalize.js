@@ -661,10 +661,29 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
           const type = `type ${prefix}_${field.reference_to} implements Node @infer { title: String! }`;
           types.push(type);
+
+          fields[field.uid] = {
+            resolve: (source, args, context) => {
+              const nodeData = [];
+              
+              if (source[`${field.uid}___NODE`]) {
+
+                source[`${field.uid}___NODE`].forEach(id => {
+                  context.nodeModel.getAllNodes().find(node => {
+                    if (node.id === id) {
+                      nodeData.push(node);
+                    }
+                  });
+                });
+                return nodeData;
+              }
+              return [];
+            }
+          };
           if (field.mandatory) {
-            fields[field.uid] = `[${prefix}_${field.reference_to}]!`;
+            fields[field.uid].type = `[${prefix}_${field.reference_to}]!`;
           } else {
-            fields[field.uid] = `[${prefix}_${field.reference_to}]`;
+            fields[field.uid].type = `[${prefix}_${field.reference_to}]`;
           }
         } else {
           const unions = [];

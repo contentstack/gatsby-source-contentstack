@@ -461,10 +461,29 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
           var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node @infer { title: String! }';
           types.push(_type2);
+
+          fields[field.uid] = {
+            resolve: function resolve(source, args, context) {
+              var nodeData = [];
+
+              if (source[field.uid + '___NODE']) {
+
+                source[field.uid + '___NODE'].forEach(function (id) {
+                  context.nodeModel.getAllNodes().find(function (node) {
+                    if (node.id === id) {
+                      nodeData.push(node);
+                    }
+                  });
+                });
+                return nodeData;
+              }
+              return [];
+            }
+          };
           if (field.mandatory) {
-            fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']!';
+            fields[field.uid].type = '[' + prefix + '_' + field.reference_to + ']!';
           } else {
-            fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']';
+            fields[field.uid].type = '[' + prefix + '_' + field.reference_to + ']';
           }
         } else {
           var unions = [];
