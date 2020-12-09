@@ -156,5 +156,7 @@ To use this, you need to have the following plugins installed:
 
 Note: By default, 20 images can be downloaded concurrently. However, if you want to download more you can set GATSBY_CONCURRENT_DOWNLOAD=100. The maximum limit is 200 that means  not more than 200 images can be downloaded concurrently.
 
+For ex:- GATSBY_CONCURRENT_DOWNLOAD=100 gatsby develop
+
 [gatsby]: https://www.gatsbyjs.org/
 [contentstack]: https://www.contentstack.com/
