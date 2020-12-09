@@ -120,5 +120,41 @@ referred entry is often needed, the referred entry data is provided at the `refe
 }
 ```
 
+### Querying downloaded assets
+
+## Prerequisites
+
+To use this, you need to have the following plugins installed:
+
+- gatsby-transformer-sharp
+- gatsby-plugin-sharp
+- gatsby-source-filesystem
+
+```graphql
+{
+  allContentstackAssets {
+    edges {
+      node {
+        id
+        title
+        localAsset {
+          childImageSharp {
+            fluid {
+              base64
+              aspectRatio
+              src
+              srcSet
+              sizes
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Note: By default, 20 images can be downloaded concurrently. However, if you want to download more you can set GATSBY_CONCURRENT_DOWNLOAD=100. The maximum limit is 200 that means  not more than 200 images can be downloaded concurrently.
+
 [gatsby]: https://www.gatsbyjs.org/
 [contentstack]: https://www.contentstack.com/
