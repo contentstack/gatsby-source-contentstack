@@ -184,7 +184,7 @@ exports.sourceNodes = async ({
      * We need the right count to render in progress bar,
      * which will show progress for downloading remote files.
      */
-    if (configOptions.downloadAssets) {
+    if (configOptions.downloadImages) {
       // Filter the images from the assets
       const regexp = IMAGE_REGEXP;
       let matches;
@@ -204,7 +204,7 @@ exports.sourceNodes = async ({
     assetsNodeIds.add(entryNodeId);
   });
   // Cache the found count
- configOptions.downloadAssets && await cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
+ configOptions.downloadImages && await cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
   // syncData.asset_published && syncData.asset_published.forEach((item) => {
   //   const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
   //   assetsNodeIds.add(entryNodeId);
@@ -257,7 +257,7 @@ exports.sourceNodes = async ({
       createNode(assetNode);
     });
 
-  if (configOptions.downloadAssets) {
+  if (configOptions.downloadImages) {
     try {
       await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
     } catch (error) {
@@ -347,7 +347,7 @@ exports.sourceNodes = async ({
 //   // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
 //   // const matches = regexp.exec(node.url);
 
-//   if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
+//   if (configOptions.downloadImages && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
 //     const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
 
 //     const cachedFileNode = await cache.get(cachedNodeId);

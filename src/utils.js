@@ -34,7 +34,7 @@ exports.checkIfUnsupportedFormat = data => {
     extName = extenstionReg.exec(data);
     extName = extName && extName.length ? extName[0] : null;
   } catch (err) {
-    error(errStr);
+    console.log('errStr', errStr);
     throw new Error(err);
   }
   return extName === 'svg' || extName === 'gif' ? true : false;

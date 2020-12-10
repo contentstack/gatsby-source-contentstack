@@ -248,7 +248,7 @@ exports.sourceNodes = function () {
                * We need the right count to render in progress bar,
                * which will show progress for downloading remote files.
                */
-              if (configOptions.downloadAssets) {
+              if (configOptions.downloadImages) {
                 // Filter the images from the assets
                 var regexp = IMAGE_REGEXP;
                 var matches = void 0;
@@ -266,7 +266,7 @@ exports.sourceNodes = function () {
               assetsNodeIds.add(entryNodeId);
             });
             // Cache the found count
-            _context2.t0 = configOptions.downloadAssets;
+            _context2.t0 = configOptions.downloadImages;
 
             if (!_context2.t0) {
               _context2.next = 26;
@@ -304,7 +304,7 @@ exports.sourceNodes = function () {
               createNode(assetNode);
             });
 
-            if (!configOptions.downloadAssets) {
+            if (!configOptions.downloadImages) {
               _context2.next = 39;
               break;
             }
@@ -393,7 +393,7 @@ exports.sourceNodes = function () {
 //   // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
 //   // const matches = regexp.exec(node.url);
 
-//   if (configOptions.downloadAssets && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
+//   if (configOptions.downloadImages && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
 //     const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
 
 //     const cachedFileNode = await cache.get(cachedNodeId);
