@@ -19,14 +19,17 @@ var _stringify2 = _interopRequireDefault(_stringify);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
+
   var nodeId = createNodeId(typePrefix.toLowerCase() + '-contentType-' + contentType.uid);
+  var type = typePrefix + 'ContentTypes';
+
   var nodeContent = (0, _stringify2.default)(contentType);
   var nodeData = (0, _extends3.default)({}, contentType, {
     id: nodeId,
     parent: null,
     children: [],
     internal: {
-      type: typePrefix + 'ContentTypes',
+      type: type,
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent)
     }
@@ -189,9 +192,8 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 };
 
 var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, parent, prefix) {
-
   var blockFields = {};
-  var blockType = 'type ' + parent + ' {';
+  var blockType = 'type ' + parent + ' @infer {';
 
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
@@ -206,7 +208,7 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
       }
     }
     if ((0, _keys2.default)(fields).length > 0) {
-      var type = 'type ' + newparent + ' ' + (0, _stringify2.default)(fields).replace(/"/g, '');
+      var type = 'type ' + newparent + ' @infer ' + (0, _stringify2.default)(fields).replace(/"/g, '');
       types.push(type);
       blockFields[block.uid] = '' + newparent;
     }
@@ -217,23 +219,23 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
 
 exports.extendSchemaWithDefaultEntryFields = function (schema) {
   schema.push({
-    data_type: "text",
-    uid: "uid",
+    data_type: 'text',
+    uid: 'uid',
     multiple: false,
     mandatory: false
   });
   schema.push({
-    data_type: "text",
-    uid: "locale",
+    data_type: 'text',
+    uid: 'locale',
     multiple: false,
     mandatory: false
   });
   schema.push({
-    data_type: "group",
-    uid: "publish_details",
+    data_type: 'group',
+    uid: 'publish_details',
     schema: [{
-      data_type: "text",
-      uid: "locale",
+      data_type: 'text',
+      uid: 'locale',
       multiple: false,
       mandatory: false
     }],
@@ -241,14 +243,14 @@ exports.extendSchemaWithDefaultEntryFields = function (schema) {
     mandatory: false
   });
   schema.push({
-    data_type: "isodate",
-    uid: "updated_at",
+    data_type: 'isodate',
+    uid: 'updated_at',
     multiple: false,
     mandatory: false
   });
   schema.push({
-    data_type: "string",
-    uid: "updated_by",
+    data_type: 'string',
+    uid: 'updated_by',
     multiple: false,
     mandatory: false
   });
@@ -324,6 +326,25 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           fields[field.uid].type = 'Int';
         }
         break;
+      // This is to support custom field types nested inside groups, global_fields & modular_blocks
+      case 'json':
+        fields[field.uid] = {
+          resolve: function resolve(source) {
+            return source[field.uid] || null;
+          }
+        };
+        if (field.mandatory) {
+          if (field.multiple) {
+            fields[field.uid].type = '[JSON]!';
+          } else {
+            fields[field.uid].type = 'JSON!';
+          }
+        } else if (field.multiple) {
+          fields[field.uid].type = '[JSON]';
+        } else {
+          fields[field.uid].type = 'JSON';
+        }
+        break;
       case 'link':
         if (field.mandatory) {
           if (field.multiple) {
@@ -338,7 +359,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         }
         break;
       case 'file':
-        var type = 'type ' + prefix + '_assets implements Node { url: String }';
+        var type = 'type ' + prefix + '_assets implements Node @infer { url: String }';
         types.push(type);
         fields[field.uid] = {
           resolve: function resolve(source, args, context) {
@@ -392,7 +413,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
         if ((0, _keys2.default)(result.fields).length > 0) {
 
-          var _type = 'type ' + newparent + ' ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
+          var _type = 'type ' + newparent + ' @infer ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
 
           types.push(_type);
 
@@ -438,8 +459,14 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         var unionType = 'union ';
         if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
-          var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node { title: String! }';
+          var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node @infer { title: String! }';
           types.push(_type2);
+
+          references.push({
+            parent: parent,
+            uid: field.uid
+          });
+
           if (field.mandatory) {
             fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']!';
           } else {
@@ -451,7 +478,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             var referenceType = prefix + '_' + reference;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            var type = 'type ' + referenceType + ' implements Node { title: String! }';
+            var type = 'type ' + referenceType + ' implements Node @infer { title: String! }';
             types.push(type);
           });
           var name = '';

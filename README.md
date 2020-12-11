@@ -38,6 +38,9 @@ plugins: [
 
       // Optional: Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.
       type_prefix: `Contentstack`, // (default)
+
+      // Optional: Specify true if you want to download all your contentstack images locally
+      downloadImages: `boolean_value`
     },
   },
 ]
@@ -74,7 +77,17 @@ If, for example, you have `Blogs` as one of your content types, you will be able
         description
         banner {
           filename
-          url
+          localAsset {
+            base
+            absolutePath
+            publicURL
+            url
+            childImageSharp {
+              fixed(width: 125, height: 125) {
+                base64
+              }
+            }
+          }
         }
         created_at
       }
@@ -107,10 +120,47 @@ referred entry is often needed, the referred entry data is provided at the `refe
 }
 ```
 
-## Coming soon
+### Querying downloaded images
 
-- Asset type and Image processing support using `gatsby-transformer-sharp`, `gatsby-plugin-sharp`.
+## Prerequisites
 
+To use this, you need to have the following plugins installed:
+
+- gatsby-transformer-sharp
+- gatsby-plugin-sharp
+- gatsby-source-filesystem
+
+```graphql
+{
+  allContentstackAssets {
+    edges {
+      node {
+        id
+        title
+        localAsset {
+          childImageSharp {
+            fluid {
+              base64
+              aspectRatio
+              src
+              srcSet
+              sizes
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Note: By default, 20 images can be downloaded concurrently. However, if you want to download more you can set GATSBY_CONCURRENT_DOWNLOAD=100.
+
+For ex:- GATSBY_CONCURRENT_DOWNLOAD=100 gatsby develop
+
+Remember that gatbsy-image doesn’t support GIF and SVG images.
+
+To use GIF image, Gatsby recommends to import the image directly. In the case of SVG, creating multiple variants of the image doesn’t make sense because it is vector-based graphics that you can freely scale without losing quality.
 
 
 [gatsby]: https://www.gatsbyjs.org/
