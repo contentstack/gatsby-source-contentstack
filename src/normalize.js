@@ -1,3 +1,18 @@
+function SanitizeHtml(html) {
+  const SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi
+
+  // Removing the <script> tags
+  while (SCRIPT_REGEX.test(html)) {
+    html = html.replace(SCRIPT_REGEX, "")
+  }
+
+  // Removing all events from tags...
+  html = html.replace(/ on\w+=["|'][^']*["|']/g, "")
+
+  return html
+}
+
+
 exports.processContentType = (
   contentType,
   createNodeId,
@@ -54,6 +69,17 @@ exports.processEntry = (
   createContentDigest,
   typePrefix
 ) => {
+  //Find uid of objects in schema that are text fields
+  const needSanitizing = contentType.schema.filter(obj => {
+    return obj.data_type === 'text';
+  }).map(obj => {
+    return obj.uid;
+  });
+  //For each text field sanitize its content.
+  needSanitizing.forEach((field) => {
+    entry[field] = SanitizeHtml(entry[field]);     
+  });
+
   const nodeId = makeEntryNodeUid(entry, createNodeId, typePrefix);
   const nodeContent = JSON.stringify(entry);
   const nodeData = {
