@@ -16,6 +16,7 @@ const downloadAssets = require('./download-assets');
 
 let references = [];
 let groups = [];
+let fileFields = [];
 
 exports.onPreBootstrap = ({ reporter }) => {
   const args = process.argv;
@@ -52,11 +53,13 @@ exports.createSchemaCustomization = async ({
         [],
         [],
         [],
+        [],
         name,
         typePrefix
       );
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
+      fileFields = fileFields.concat(result.fileFields);
       const typeDefs = [
         `type linktype{
               title: String
@@ -261,7 +264,6 @@ exports.sourceNodes = async ({
     try {
       await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
     } catch (error) {
-      console.log('error--->', error);
       reporter.info('Something went wrong while downloading assets. Details: ' + error);
     }
   }
@@ -333,52 +335,34 @@ exports.sourceNodes = async ({
   setPluginStatus(newState);
 };
 
-// exports.onCreateNode = async ({
-//   cache,
-//   actions: { createNode },
-//   getCache,
-//   createNodeId,
-//   node,
-// }, configOptions) => {
-//   // use a custom type prefix if specified
-//   const typePrefix = configOptions.type_prefix || 'Contentstack';
-
-//   // filter the images from all the assets
-//   // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
-//   // const matches = regexp.exec(node.url);
-
-//   if (configOptions.downloadImages && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
-//     const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
-
-//     const cachedFileNode = await cache.get(cachedNodeId);
-
-//     let fileNode;
-//     // Checks for cached fileNode
-//     if (cachedFileNode) {
-//       fileNode = cachedFileNode;
-//     } else {
-//       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-//       fileNode = await createRemoteFileNode({
-//         // the url of the remote image to generate a node for
-//         url: encodeURI(node.url),
-//         getCache,
-//         createNode,
-//         createNodeId,
-//         parentNodeId: node.id,
-//       });
-
-//       if (fileNode)
-//         // Cache the fileNode, so it does not have to downloaded again
-//         await cache.set(cachedNodeId, fileNode);
-//     }
-
-//     if (fileNode)
-//       node.localAsset___NODE = fileNode.id;
-//   }
-// };
 
 exports.createResolvers = ({ createResolvers }) => {
   const resolvers = {};
+  fileFields.forEach(fileField => {
+    resolvers[fileField.parent] = {
+      ...resolvers[fileField.parent],
+      ... {      
+      [fileField.field.uid]: {
+        resolve(source, args, context, info) {
+          if (fileField.field.multiple && source[`${fileField.field.uid}___NODE`]) {
+              const nodesData = [];
+              source[`${fileField.field.uid}___NODE`].forEach(id => {
+                context.nodeModel.getAllNodes().find(node => {
+                  if (node.id === id) {
+                    nodesData.push(node);
+                  }
+                });
+              });
+              return nodesData;
+            } else { 
+              return context.nodeModel.getAllNodes().find(
+                node => node.id === source[`${fileField.field.uid}___NODE`])
+            }
+        },
+      },
+    }
+    };
+  })
   references.forEach(reference => {
     resolvers[reference.parent] = {
       ...resolvers[reference.parent],
