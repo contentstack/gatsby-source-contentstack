@@ -4,9 +4,9 @@ var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _extends4 = require('babel-runtime/helpers/extends');
+var _extends5 = require('babel-runtime/helpers/extends');
 
-var _extends5 = _interopRequireDefault(_extends4);
+var _extends6 = _interopRequireDefault(_extends5);
 
 var _set = require('babel-runtime/core-js/set');
 
@@ -45,6 +45,7 @@ var downloadAssets = require('./download-assets');
 
 var references = [];
 var groups = [];
+var fileFields = [];
 
 exports.onPreBootstrap = function (_ref) {
   var reporter = _ref.reporter;
@@ -94,9 +95,10 @@ exports.createSchemaCustomization = function () {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
                 var name = typePrefix + '_' + contentTypeUid;
                 var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-                var result = buildCustomSchema(extendedSchema, [], [], [], name, typePrefix);
+                var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix);
                 references = references.concat(result.references);
                 groups = groups.concat(result.groups);
+                fileFields = fileFields.concat(result.fileFields);
                 var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
                   name: name,
                   fields: result.fields,
@@ -305,7 +307,7 @@ exports.sourceNodes = function () {
             });
 
             if (!configOptions.downloadImages) {
-              _context2.next = 39;
+              _context2.next = 38;
               break;
             }
 
@@ -314,17 +316,16 @@ exports.sourceNodes = function () {
             return downloadAssets({ cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType, reporter: reporter }, typePrefix, configOptions);
 
           case 33:
-            _context2.next = 39;
+            _context2.next = 38;
             break;
 
           case 35:
             _context2.prev = 35;
             _context2.t1 = _context2['catch'](30);
 
-            console.log('error--->', _context2.t1);
             reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t1);
 
-          case 39:
+          case 38:
 
             // deleting nodes
 
@@ -366,7 +367,7 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 48:
+          case 47:
           case 'end':
             return _context2.stop();
         }
@@ -379,56 +380,33 @@ exports.sourceNodes = function () {
   };
 }();
 
-// exports.onCreateNode = async ({
-//   cache,
-//   actions: { createNode },
-//   getCache,
-//   createNodeId,
-//   node,
-// }, configOptions) => {
-//   // use a custom type prefix if specified
-//   const typePrefix = configOptions.type_prefix || 'Contentstack';
-
-//   // filter the images from all the assets
-//   // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
-//   // const matches = regexp.exec(node.url);
-
-//   if (configOptions.downloadImages && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
-//     const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
-
-//     const cachedFileNode = await cache.get(cachedNodeId);
-
-//     let fileNode;
-//     // Checks for cached fileNode
-//     if (cachedFileNode) {
-//       fileNode = cachedFileNode;
-//     } else {
-//       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-//       fileNode = await createRemoteFileNode({
-//         // the url of the remote image to generate a node for
-//         url: encodeURI(node.url),
-//         getCache,
-//         createNode,
-//         createNodeId,
-//         parentNodeId: node.id,
-//       });
-
-//       if (fileNode)
-//         // Cache the fileNode, so it does not have to downloaded again
-//         await cache.set(cachedNodeId, fileNode);
-//     }
-
-//     if (fileNode)
-//       node.localAsset___NODE = fileNode.id;
-//   }
-// };
-
 exports.createResolvers = function (_ref7) {
   var createResolvers = _ref7.createResolvers;
 
   var resolvers = {};
+  fileFields.forEach(function (fileField) {
+    resolvers[fileField.parent] = (0, _extends6.default)({}, resolvers[fileField.parent], (0, _defineProperty3.default)({}, fileField.field.uid, {
+      resolve: function resolve(source, args, context, info) {
+        if (fileField.field.multiple && source[fileField.field.uid + '___NODE']) {
+          var nodesData = [];
+          source[fileField.field.uid + '___NODE'].forEach(function (id) {
+            context.nodeModel.getAllNodes().find(function (node) {
+              if (node.id === id) {
+                nodesData.push(node);
+              }
+            });
+          });
+          return nodesData;
+        } else {
+          return context.nodeModel.getAllNodes().find(function (node) {
+            return node.id === source[fileField.field.uid + '___NODE'];
+          });
+        }
+      }
+    }));
+  });
   references.forEach(function (reference) {
-    resolvers[reference.parent] = (0, _extends5.default)({}, resolvers[reference.parent], (0, _defineProperty3.default)({}, reference.uid, {
+    resolvers[reference.parent] = (0, _extends6.default)({}, resolvers[reference.parent], (0, _defineProperty3.default)({}, reference.uid, {
       resolve: function resolve(source, args, context, info) {
         if (source[reference.uid + '___NODE']) {
           var nodesData = [];
@@ -446,7 +424,7 @@ exports.createResolvers = function (_ref7) {
     }));
   });
   groups.forEach(function (group) {
-    resolvers[group.parent] = (0, _extends5.default)({}, resolvers[group.parent], (0, _defineProperty3.default)({}, group.field.uid, {
+    resolvers[group.parent] = (0, _extends6.default)({}, resolvers[group.parent], (0, _defineProperty3.default)({}, group.field.uid, {
       resolve: function resolve(source) {
         if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
           return [];
