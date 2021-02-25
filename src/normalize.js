@@ -363,6 +363,7 @@ const buildBlockCustomSchema = (
   types,
   references,
   groups,
+  fileFields,
   parent,
   prefix
 ) => {
@@ -377,6 +378,7 @@ const buildBlockCustomSchema = (
       types,
       references,
       groups,
+      fileFields,
       newparent,
       prefix
     );
@@ -455,12 +457,14 @@ const buildCustomSchema = (exports.buildCustomSchema = (
   types,
   references,
   groups,
+  fileFields,
   parent,
   prefix
 ) => {
   const fields = {};
   groups = groups || [];
   references = references || [];
+  fileFields = fileFields || [];
   types = types || [];
   schema.forEach(field => {
     switch (field.data_type) {
@@ -555,44 +559,21 @@ const buildCustomSchema = (exports.buildCustomSchema = (
       case 'file':
         const type = `type ${prefix}_assets implements Node @infer { url: String }`;
         types.push(type);
-        fields[field.uid] = {
-          resolve: (source, args, context) => {
-            if (field.multiple && source[`${field.uid}___NODE`]) {
-              const nodesData = [];
-              source[`${field.uid}___NODE`].forEach(id => {
-                context.nodeModel
-                  .getAllNodes({
-                    type: `${prefix}_assets`,
-                  })
-                  .find(node => {
-                    if (node.id === id) {
-                      nodesData.push(node);
-                    }
-                  });
-              });
-              return nodesData;
-            }
-
-            if (source[`${field.uid}___NODE`]) {
-              return context.nodeModel
-                .getAllNodes({
-                  type: `${prefix}_assets`,
-                })
-                .find(node => node.id === source[`${field.uid}___NODE`]);
-            }
-            return null;
-          },
-        };
+        fileFields.push({
+          parent,
+          field
+        })
+        
         if (field.mandatory) {
           if (field.multiple) {
-            fields[field.uid].type = `[${prefix}_assets]!`;
+            fields[field.uid] = `[${prefix}_assets]!`;
           } else {
-            fields[field.uid].type = `${prefix}_assets!`;
+            fields[field.uid] = `${prefix}_assets!`;
           }
         } else if (field.multiple) {
-          fields[field.uid].type = `[${prefix}_assets]`;
+          fields[field.uid] = `[${prefix}_assets]`;
         } else {
-          fields[field.uid].type = `${prefix}_assets`;
+          fields[field.uid] = `${prefix}_assets`;
         }
         break;
       case 'group':
@@ -604,6 +585,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           types,
           references,
           groups,
+          fileFields,
           newparent,
           prefix
         );
@@ -649,6 +631,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           types,
           references,
           groups,
+          fileFields,
           blockparent,
           prefix
         );
@@ -717,5 +700,6 @@ const buildCustomSchema = (exports.buildCustomSchema = (
     types,
     references,
     groups,
+    fileFields
   };
 });
