@@ -435,6 +435,18 @@ exports.extendSchemaWithDefaultEntryFields = schema => {
     multiple: false,
     mandatory: false,
   });
+  schema.push({
+    data_type: 'isodate',
+    uid: 'created_at',
+    multiple: false,
+    mandatory: false,
+  });
+  schema.push({
+    data_type: 'string',
+    uid: 'created_by',
+    multiple: false,
+    mandatory: false,
+  });
   return schema;
 };
 
