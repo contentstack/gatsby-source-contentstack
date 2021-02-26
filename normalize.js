@@ -191,7 +191,7 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   return entryObj;
 };
 
-var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, parent, prefix) {
+var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) {
   var blockFields = {};
   var blockType = 'type ' + parent + ' @infer {';
 
@@ -199,7 +199,7 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
     var newparent = parent.concat(block.uid);
     blockType = blockType.concat(block.uid + ' : ' + newparent + ' ');
 
-    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix),
+    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields),
         fields = _buildCustomSchema.fields;
 
     for (var key in fields) {
@@ -269,7 +269,7 @@ exports.extendSchemaWithDefaultEntryFields = function (schema) {
   return schema;
 };
 
-var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix) {
+var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) {
   var fields = {};
   groups = groups || [];
   references = references || [];
@@ -283,7 +283,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             return source[field.uid] || null;
           }
         };
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid].type = '[String]!';
           } else {
@@ -296,7 +296,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         }
         break;
       case 'isodate':
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = '[Date]!';
           } else {
@@ -309,7 +309,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         }
         break;
       case 'boolean':
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = '[Boolean]!';
           } else {
@@ -327,7 +327,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             return source[field.uid] || null;
           }
         };
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid].type = '[Int]!';
           } else {
@@ -346,7 +346,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             return source[field.uid] || null;
           }
         };
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid].type = '[JSON]!';
           } else {
@@ -359,7 +359,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         }
         break;
       case 'link':
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = '[linktype]!';
           } else {
@@ -379,7 +379,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           field: field
         });
 
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = '[' + prefix + '_assets]!';
           } else {
@@ -395,7 +395,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
       case 'global_field':
         var newparent = parent.concat('_', field.uid);
 
-        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix);
+        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
 
         for (var key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
@@ -414,7 +414,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             field: field
           });
 
-          if (field.mandatory) {
+          if (field.mandatory && !disableMandatoryFields) {
             if (field.multiple) {
               fields[field.uid] = '[' + newparent + ']!';
             } else {
@@ -431,10 +431,10 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
       case 'blocks':
         var blockparent = parent.concat('_', field.uid);
 
-        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix);
+        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields);
 
         types.push(blockType);
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = '[' + blockparent + ']!';
           } else {
@@ -459,7 +459,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             uid: field.uid
           });
 
-          if (field.mandatory) {
+          if (field.mandatory && !disableMandatoryFields) {
             fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']!';
           } else {
             fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']';
@@ -483,7 +483,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             uid: field.uid
           });
 
-          if (field.mandatory) {
+          if (field.mandatory && !disableMandatoryFields) {
             fields[field.uid] = '[' + name + ']!';
           } else {
             fields[field.uid] = '[' + name + ']';

@@ -61,33 +61,34 @@ exports.createSchemaCustomization = function () {
     var cache = _ref3.cache,
         actions = _ref3.actions,
         schema = _ref3.schema;
-    var contentTypes, typePrefix, createTypes, name, fields;
+    var contentTypes, typePrefix, disableMandatoryFields, createTypes, name, fields;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
             contentTypes = void 0;
             typePrefix = configOptions.type_prefix || 'Contentstack';
-            _context.prev = 2;
-            _context.next = 5;
+            disableMandatoryFields = configOptions.disableMandatoryFields || false;
+            _context.prev = 3;
+            _context.next = 6;
             return fetchContentTypes(configOptions);
 
-          case 5:
+          case 6:
             contentTypes = _context.sent;
-            _context.next = 8;
+            _context.next = 9;
             return cache.set(typePrefix, contentTypes);
 
-          case 8:
-            _context.next = 13;
+          case 9:
+            _context.next = 14;
             break;
 
-          case 10:
-            _context.prev = 10;
-            _context.t0 = _context['catch'](2);
+          case 11:
+            _context.prev = 11;
+            _context.t0 = _context['catch'](3);
 
             console.error('Contentstack fetch content type failed!');
 
-          case 13:
+          case 14:
             if (configOptions.enableSchemaGeneration) {
               createTypes = actions.createTypes;
 
@@ -95,7 +96,7 @@ exports.createSchemaCustomization = function () {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
                 var name = typePrefix + '_' + contentTypeUid;
                 var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-                var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix);
+                var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields);
                 references = references.concat(result.references);
                 groups = groups.concat(result.groups);
                 fileFields = fileFields.concat(result.fileFields);
@@ -128,12 +129,12 @@ exports.createSchemaCustomization = function () {
               })]);
             }
 
-          case 14:
+          case 15:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[2, 10]]);
+    }, _callee, undefined, [[3, 11]]);
   }));
 
   return function (_x, _x2) {

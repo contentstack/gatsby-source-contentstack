@@ -365,7 +365,8 @@ const buildBlockCustomSchema = (
   groups,
   fileFields,
   parent,
-  prefix
+  prefix,
+  disableMandatoryFields
 ) => {
   const blockFields = {};
   let blockType = `type ${parent} @infer {`;
@@ -380,7 +381,8 @@ const buildBlockCustomSchema = (
       groups,
       fileFields,
       newparent,
-      prefix
+      prefix,
+      disableMandatoryFields
     );
 
     for (const key in fields) {
@@ -459,7 +461,8 @@ const buildCustomSchema = (exports.buildCustomSchema = (
   groups,
   fileFields,
   parent,
-  prefix
+  prefix,
+  disableMandatoryFields
 ) => {
   const fields = {};
   groups = groups || [];
@@ -472,7 +475,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         fields[field.uid] = {
           resolve: source => source[field.uid] || null,
         };
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid].type = '[String]!';
           } else {
@@ -485,7 +488,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         }
         break;
       case 'isodate':
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = '[Date]!';
           } else {
@@ -498,7 +501,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         }
         break;
       case 'boolean':
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = '[Boolean]!';
           } else {
@@ -514,7 +517,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         fields[field.uid] = {
           resolve: source => source[field.uid] || null,
         };
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid].type = '[Int]!';
           } else {
@@ -531,7 +534,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         fields[field.uid] = {
           resolve: source => source[field.uid] || null
         };
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid].type = '[JSON]!';
           } else {
@@ -544,7 +547,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         }
         break;
       case 'link':
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = '[linktype]!';
           } else {
@@ -564,7 +567,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           field
         })
         
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = `[${prefix}_assets]!`;
           } else {
@@ -587,7 +590,8 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           groups,
           fileFields,
           newparent,
-          prefix
+          prefix,
+          disableMandatoryFields
         );
 
         for (const key in result.fields) {
@@ -609,7 +613,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
             field,
           });
 
-          if (field.mandatory) {
+          if (field.mandatory && !disableMandatoryFields) {
             if (field.multiple) {
               fields[field.uid] = `[${newparent}]!`;
             } else {
@@ -633,11 +637,12 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           groups,
           fileFields,
           blockparent,
-          prefix
+          prefix,
+          disableMandatoryFields
         );
 
         types.push(blockType);
-        if (field.mandatory) {
+        if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = `[${blockparent}]!`;
           } else {
@@ -662,7 +667,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
             uid: field.uid,
           });
 
-          if (field.mandatory) {
+          if (field.mandatory && !disableMandatoryFields) {
             fields[field.uid] = `[${prefix}_${field.reference_to}]!`;
           } else {
             fields[field.uid] = `[${prefix}_${field.reference_to}]`;
@@ -686,7 +691,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
             uid: field.uid,
           });
 
-          if (field.mandatory) {
+          if (field.mandatory && !disableMandatoryFields) {
             fields[field.uid] = `[${name}]!`;
           } else {
             fields[field.uid] = `[${name}]`;
