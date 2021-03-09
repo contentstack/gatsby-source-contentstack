@@ -451,7 +451,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         var unionType = 'union ';
         if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
-          var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node @infer { title: String! }';
+          var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node @infer { title: String' + (disableMandatoryFields ? '' : '!') + ' }';
           types.push(_type2);
 
           references.push({
@@ -470,7 +470,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             var referenceType = prefix + '_' + reference;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            var type = 'type ' + referenceType + ' implements Node @infer { title: String! }';
+            var type = 'type ' + referenceType + ' implements Node @infer { title: String' + (disableMandatoryFields ? '' : '!') + ' }';
             types.push(type);
           });
           var name = '';

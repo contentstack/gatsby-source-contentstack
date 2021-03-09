@@ -659,7 +659,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
         let unionType = 'union ';
         if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
-          const type = `type ${prefix}_${field.reference_to} implements Node @infer { title: String! }`;
+          const type = `type ${prefix}_${field.reference_to} implements Node @infer { title: String${disableMandatoryFields ? '' : '!'} }`;
           types.push(type);
 
           references.push({
@@ -678,7 +678,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (
             const referenceType = `${prefix}_${reference}`;
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            const type = `type ${referenceType} implements Node @infer { title: String! }`;
+            const type = `type ${referenceType} implements Node @infer { title: String${disableMandatoryFields ? '' : '!'} }`;
             types.push(type);
           });
           let name = '';
