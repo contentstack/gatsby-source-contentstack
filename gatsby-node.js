@@ -24,6 +24,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _require = require('./normalize'),
     normalizeEntry = _require.normalizeEntry,
+    sanitizeEntry = _require.sanitizeEntry,
     processContentType = _require.processContentType,
     processEntry = _require.processEntry,
     processAsset = _require.processAsset,
@@ -297,7 +298,8 @@ exports.sourceNodes = function () {
                 return item.content_type_uid === contentType.uid;
               });
               var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
-              var entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
+              var sanitizedEntry = sanitizeEntry(contentType.schema, normalizedEntry);
+              var entryNode = processEntry(contentType, sanitizedEntry, createNodeId, createContentDigest, typePrefix);
               createNode(entryNode);
             });
 

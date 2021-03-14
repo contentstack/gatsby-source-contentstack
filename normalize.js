@@ -69,6 +69,16 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
   return nodeData;
 };
 
+exports.sanitizeEntry = function (schema, entry) {
+  var typesToBeSanitized = ['reference', 'file'];
+  schema.forEach(function (field) {
+    if (typesToBeSanitized.includes(field.data_type)) {
+      delete entry[field.uid];
+    }
+  });
+  return entry;
+};
+
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
   var resolveEntry = (0, _extends3.default)({}, entry, builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
   return resolveEntry;

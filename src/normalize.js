@@ -70,6 +70,16 @@ exports.processEntry = (
   return nodeData;
 };
 
+exports.sanitizeEntry = (schema, entry) => {
+  const typesToBeSanitized = ['reference', 'file'];
+  schema.forEach(field => {
+    if (typesToBeSanitized.includes(field.data_type)) {
+      delete entry[field.uid];
+    }
+  })
+  return entry;
+}
+
 exports.normalizeEntry = (
   contentType,
   entry,
