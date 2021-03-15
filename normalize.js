@@ -70,9 +70,11 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
 };
 
 exports.sanitizeEntry = function (schema, entry) {
+  // Field data types that has ___NODE prefix to field.uid needs sanitization
   var typesToBeSanitized = ['reference', 'file'];
   schema.forEach(function (field) {
     if (typesToBeSanitized.includes(field.data_type)) {
+      // Deleting entry[field.uid] because entry[`${field.uid}___NODE`] already exists
       delete entry[field.uid];
     }
   });
