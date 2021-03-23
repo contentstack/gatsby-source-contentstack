@@ -90,6 +90,7 @@ exports.normalizeEntry = (
       typePrefix
     ),
   };
+  resolveEntry.locale = entry.publish_details.locale;
   return resolveEntry;
 };
 
