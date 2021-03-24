@@ -83,7 +83,6 @@ exports.sanitizeEntry = function (schema, entry) {
 
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
   var resolveEntry = (0, _extends3.default)({}, entry, builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
-  resolveEntry.locale = entry.publish_details.locale;
   return resolveEntry;
 };
 
