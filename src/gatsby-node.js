@@ -1,5 +1,6 @@
 const {
   normalizeEntry,
+  sanitizeEntry,
   processContentType,
   processEntry,
   processAsset,
@@ -239,9 +240,10 @@ exports.sourceNodes = async ({
         createNodeId,
         typePrefix
       );
+      const sanitizedEntry = sanitizeEntry(contentType.schema, normalizedEntry);
       const entryNode = processEntry(
         contentType,
-        normalizedEntry,
+        sanitizedEntry,
         createNodeId,
         createContentDigest,
         typePrefix
