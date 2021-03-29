@@ -393,17 +393,19 @@ exports.createResolvers = function (_ref7) {
       resolve: function resolve(source, args, context, info) {
         if (fileField.field.multiple && source[fileField.field.uid + '___NODE']) {
           var nodesData = [];
+
           source[fileField.field.uid + '___NODE'].forEach(function (id) {
-            context.nodeModel.getAllNodes().find(function (node) {
-              if (node.id === id) {
-                nodesData.push(node);
-              }
-            });
+            var existingNode = context.nodeModel.getNodeById({ id: id });
+
+            if (existingNode) {
+              nodesData.push(existingNode);
+            }
           });
+
           return nodesData;
         } else {
-          return context.nodeModel.getAllNodes().find(function (node) {
-            return node.id === source[fileField.field.uid + '___NODE'];
+          return context.nodeModel.getNodeById({
+            id: source[fileField.field.uid + '___NODE']
           });
         }
       }
@@ -414,13 +416,17 @@ exports.createResolvers = function (_ref7) {
       resolve: function resolve(source, args, context, info) {
         if (source[reference.uid + '___NODE']) {
           var nodesData = [];
+
           source[reference.uid + '___NODE'].forEach(function (id) {
-            context.nodeModel.getAllNodes().find(function (node) {
-              if (node.id === id) {
-                nodesData.push(node);
-              }
+            var existingNode = context.nodeModel.getNodeById({
+              id: id
             });
+
+            if (existingNode) {
+              nodesData.push(existingNode);
+            }
           });
+
           return nodesData;
         }
         return [];
@@ -440,8 +446,8 @@ exports.createResolvers = function (_ref7) {
   createResolvers(resolvers);
 };
 
-exports.pluginOptionsSchema = function (_ref7) {
-  var Joi = _ref7.Joi;
+exports.pluginOptionsSchema = function (_ref8) {
+  var Joi = _ref8.Joi;
 
   return Joi.object({
     api_key: Joi.string().required().description('API Key is a unique key assigned to each stack.'),
@@ -455,7 +461,7 @@ exports.pluginOptionsSchema = function (_ref7) {
 };
 
 var validateContentstackAccess = function () {
-  var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(pluginOptions) {
+  var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(pluginOptions) {
     var host;
     return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
@@ -494,6 +500,6 @@ var validateContentstackAccess = function () {
   }));
 
   return function validateContentstackAccess(_x5) {
-    return _ref8.apply(this, arguments);
+    return _ref9.apply(this, arguments);
   };
 }();
