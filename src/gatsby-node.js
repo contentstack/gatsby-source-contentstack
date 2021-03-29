@@ -361,9 +361,8 @@ exports.createResolvers = ({ createResolvers }) => {
 
               return nodesData;
             } else { 
-              return context.nodeModel.getNodeById({
-                id: source[`${fileField.field.uid}___NODE`]
-              })
+              const id = source[`${fileField.field.uid}___NODE`]
+              return context.nodeModel.getNodeById({ id })
             }
         },
       },

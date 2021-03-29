@@ -404,9 +404,8 @@ exports.createResolvers = function (_ref7) {
 
           return nodesData;
         } else {
-          return context.nodeModel.getNodeById({
-            id: source[fileField.field.uid + '___NODE']
-          });
+          var id = source[fileField.field.uid + '___NODE'];
+          return context.nodeModel.getNodeById({ id: id });
         }
       }
     }));
