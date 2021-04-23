@@ -350,17 +350,19 @@ exports.createResolvers = ({ createResolvers }) => {
         resolve(source, args, context, info) {
           if (fileField.field.multiple && source[`${fileField.field.uid}___NODE`]) {
               const nodesData = [];
+              
               source[`${fileField.field.uid}___NODE`].forEach(id => {
-                context.nodeModel.getAllNodes().find(node => {
-                  if (node.id === id) {
-                    nodesData.push(node);
-                  }
-                });
+                const existingNode = context.nodeModel.getNodeById({ id })
+                
+                if (existingNode) {
+                  nodesData.push(existingNode);
+                }
               });
+
               return nodesData;
             } else { 
-              return context.nodeModel.getAllNodes().find(
-                node => node.id === source[`${fileField.field.uid}___NODE`])
+              const id = source[`${fileField.field.uid}___NODE`]
+              return context.nodeModel.getNodeById({ id })
             }
         },
       },
@@ -374,13 +376,17 @@ exports.createResolvers = ({ createResolvers }) => {
         resolve(source, args, context, info) {
           if (source[`${reference.uid}___NODE`]) {
             const nodesData = [];
+
             source[`${reference.uid}___NODE`].forEach(id => {
-              context.nodeModel.getAllNodes().find(node => {
-                if (node.id === id) {
-                  nodesData.push(node);
-                }
-              });
+              const existingNode = context.nodeModel.getNodeById({
+                id 
+              })
+              
+              if (existingNode) {
+                nodesData.push(existingNode);
+              }
             });
+
             return nodesData;
           }
           return [];
