@@ -4,9 +4,9 @@ var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _extends4 = require('babel-runtime/helpers/extends');
+var _extends5 = require('babel-runtime/helpers/extends');
 
-var _extends5 = _interopRequireDefault(_extends4);
+var _extends6 = _interopRequireDefault(_extends5);
 
 var _set = require('babel-runtime/core-js/set');
 
@@ -24,6 +24,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _require = require('./normalize'),
     normalizeEntry = _require.normalizeEntry,
+    sanitizeEntry = _require.sanitizeEntry,
     processContentType = _require.processContentType,
     processEntry = _require.processEntry,
     processAsset = _require.processAsset,
@@ -43,8 +44,11 @@ var _require3 = require('./fetch'),
 
 var downloadAssets = require('./download-assets');
 
+var fetch = require('node-fetch');
+
 var references = [];
 var groups = [];
+var fileFields = [];
 
 exports.onPreBootstrap = function (_ref) {
   var reporter = _ref.reporter;
@@ -94,9 +98,10 @@ exports.createSchemaCustomization = function () {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
                 var name = typePrefix + '_' + contentTypeUid;
                 var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-                var result = buildCustomSchema(extendedSchema, [], [], [], name, typePrefix);
+                var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix);
                 references = references.concat(result.references);
                 groups = groups.concat(result.groups);
+                fileFields = fileFields.concat(result.fileFields);
                 var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
                   name: name,
                   fields: result.fields,
@@ -295,7 +300,8 @@ exports.sourceNodes = function () {
                 return item.content_type_uid === contentType.uid;
               });
               var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
-              var entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
+              var sanitizedEntry = sanitizeEntry(contentType.schema, normalizedEntry);
+              var entryNode = processEntry(contentType, sanitizedEntry, createNodeId, createContentDigest, typePrefix);
               createNode(entryNode);
             });
 
@@ -305,7 +311,7 @@ exports.sourceNodes = function () {
             });
 
             if (!configOptions.downloadImages) {
-              _context2.next = 39;
+              _context2.next = 38;
               break;
             }
 
@@ -314,17 +320,16 @@ exports.sourceNodes = function () {
             return downloadAssets({ cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType, reporter: reporter }, typePrefix, configOptions);
 
           case 33:
-            _context2.next = 39;
+            _context2.next = 38;
             break;
 
           case 35:
             _context2.prev = 35;
             _context2.t1 = _context2['catch'](30);
 
-            console.log('error--->', _context2.t1);
             reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t1);
 
-          case 39:
+          case 38:
 
             // deleting nodes
 
@@ -366,7 +371,7 @@ exports.sourceNodes = function () {
             newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 48:
+          case 47:
           case 'end':
             return _context2.stop();
         }
@@ -379,66 +384,48 @@ exports.sourceNodes = function () {
   };
 }();
 
-// exports.onCreateNode = async ({
-//   cache,
-//   actions: { createNode },
-//   getCache,
-//   createNodeId,
-//   node,
-// }, configOptions) => {
-//   // use a custom type prefix if specified
-//   const typePrefix = configOptions.type_prefix || 'Contentstack';
-
-//   // filter the images from all the assets
-//   // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
-//   // const matches = regexp.exec(node.url);
-
-//   if (configOptions.downloadImages && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
-//     const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
-
-//     const cachedFileNode = await cache.get(cachedNodeId);
-
-//     let fileNode;
-//     // Checks for cached fileNode
-//     if (cachedFileNode) {
-//       fileNode = cachedFileNode;
-//     } else {
-//       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-//       fileNode = await createRemoteFileNode({
-//         // the url of the remote image to generate a node for
-//         url: encodeURI(node.url),
-//         getCache,
-//         createNode,
-//         createNodeId,
-//         parentNodeId: node.id,
-//       });
-
-//       if (fileNode)
-//         // Cache the fileNode, so it does not have to downloaded again
-//         await cache.set(cachedNodeId, fileNode);
-//     }
-
-//     if (fileNode)
-//       node.localAsset___NODE = fileNode.id;
-//   }
-// };
-
 exports.createResolvers = function (_ref7) {
   var createResolvers = _ref7.createResolvers;
 
   var resolvers = {};
+  fileFields.forEach(function (fileField) {
+    resolvers[fileField.parent] = (0, _extends6.default)({}, resolvers[fileField.parent], (0, _defineProperty3.default)({}, fileField.field.uid, {
+      resolve: function resolve(source, args, context, info) {
+        if (fileField.field.multiple && source[fileField.field.uid + '___NODE']) {
+          var nodesData = [];
+
+          source[fileField.field.uid + '___NODE'].forEach(function (id) {
+            var existingNode = context.nodeModel.getNodeById({ id: id });
+
+            if (existingNode) {
+              nodesData.push(existingNode);
+            }
+          });
+
+          return nodesData;
+        } else {
+          var id = source[fileField.field.uid + '___NODE'];
+          return context.nodeModel.getNodeById({ id: id });
+        }
+      }
+    }));
+  });
   references.forEach(function (reference) {
-    resolvers[reference.parent] = (0, _extends5.default)({}, resolvers[reference.parent], (0, _defineProperty3.default)({}, reference.uid, {
+    resolvers[reference.parent] = (0, _extends6.default)({}, resolvers[reference.parent], (0, _defineProperty3.default)({}, reference.uid, {
       resolve: function resolve(source, args, context, info) {
         if (source[reference.uid + '___NODE']) {
           var nodesData = [];
+
           source[reference.uid + '___NODE'].forEach(function (id) {
-            context.nodeModel.getAllNodes().find(function (node) {
-              if (node.id === id) {
-                nodesData.push(node);
-              }
+            var existingNode = context.nodeModel.getNodeById({
+              id: id
             });
+
+            if (existingNode) {
+              nodesData.push(existingNode);
+            }
           });
+
           return nodesData;
         }
         return [];
@@ -446,7 +433,7 @@ exports.createResolvers = function (_ref7) {
     }));
   });
   groups.forEach(function (group) {
-    resolvers[group.parent] = (0, _extends5.default)({}, resolvers[group.parent], (0, _defineProperty3.default)({}, group.field.uid, {
+    resolvers[group.parent] = (0, _extends6.default)({}, resolvers[group.parent], (0, _defineProperty3.default)({}, group.field.uid, {
       resolve: function resolve(source) {
         if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
           return [];
@@ -457,3 +444,61 @@ exports.createResolvers = function (_ref7) {
   });
   createResolvers(resolvers);
 };
+
+exports.pluginOptionsSchema = function (_ref8) {
+  var Joi = _ref8.Joi;
+
+  return Joi.object({
+    api_key: Joi.string().required().description('API Key is a unique key assigned to each stack.'),
+    delivery_token: Joi.string().required().description('Delivery Token is a read-only credential.'),
+    environment: Joi.string().required().description('Environment where you published your data.'),
+    cdn: Joi.string().default('https://cdn.contentstack.io/v3').description('CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 '),
+    type_prefix: Joi.string().default('Contentstack').description('Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.'),
+    expediteBuild: Joi.boolean().default(false).description('expediteBuild set this to either true or false.'),
+    enableSchemaGeneration: Joi.boolean().default(false).description('Specify true if you want to generate custom schema.')
+  }).external(validateContentstackAccess);
+};
+
+var validateContentstackAccess = function () {
+  var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(pluginOptions) {
+    var host;
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            if (!(process.env.NODE_ENV === 'test')) {
+              _context3.next = 2;
+              break;
+            }
+
+            return _context3.abrupt('return', undefined);
+
+          case 2:
+            host = pluginOptions.cdn ? pluginOptions.cdn : 'https://cdn.contentstack.io/v3';
+            _context3.next = 5;
+            return fetch(host + '/content_types?include_count=false', {
+              headers: {
+                "api_key": '' + pluginOptions.api_key,
+                "access_token": '' + pluginOptions.delivery_token
+              }
+            }).then(function (res) {
+              return res.ok;
+            }).then(function (ok) {
+              if (!ok) throw new Error('Cannot access Contentstack with api_key=' + pluginOptions.api_key + ' & delivery_token=' + pluginOptions.delivery_token + '.');
+            });
+
+          case 5:
+            return _context3.abrupt('return', undefined);
+
+          case 6:
+          case 'end':
+            return _context3.stop();
+        }
+      }
+    }, _callee3, undefined);
+  }));
+
+  return function validateContentstackAccess(_x5) {
+    return _ref9.apply(this, arguments);
+  };
+}();

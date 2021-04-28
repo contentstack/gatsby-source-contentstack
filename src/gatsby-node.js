@@ -1,5 +1,6 @@
 const {
   normalizeEntry,
+  sanitizeEntry,
   processContentType,
   processEntry,
   processAsset,
@@ -14,8 +15,11 @@ const { fetchData, fetchContentTypes } = require('./fetch');
 
 const downloadAssets = require('./download-assets');
 
+const fetch = require('node-fetch');
+
 let references = [];
 let groups = [];
+let fileFields = [];
 
 exports.onPreBootstrap = ({ reporter }) => {
   const args = process.argv;
@@ -52,11 +56,13 @@ exports.createSchemaCustomization = async ({
         [],
         [],
         [],
+        [],
         name,
         typePrefix
       );
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
+      fileFields = fileFields.concat(result.fileFields);
       const typeDefs = [
         `type linktype{
               title: String
@@ -236,9 +242,10 @@ exports.sourceNodes = async ({
         createNodeId,
         typePrefix
       );
+      const sanitizedEntry = sanitizeEntry(contentType.schema, normalizedEntry);
       const entryNode = processEntry(
         contentType,
-        normalizedEntry,
+        sanitizedEntry,
         createNodeId,
         createContentDigest,
         typePrefix
@@ -261,7 +268,6 @@ exports.sourceNodes = async ({
     try {
       await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter }, typePrefix, configOptions);
     } catch (error) {
-      console.log('error--->', error);
       reporter.info('Something went wrong while downloading assets. Details: ' + error);
     }
   }
@@ -333,52 +339,36 @@ exports.sourceNodes = async ({
   setPluginStatus(newState);
 };
 
-// exports.onCreateNode = async ({
-//   cache,
-//   actions: { createNode },
-//   getCache,
-//   createNodeId,
-//   node,
-// }, configOptions) => {
-//   // use a custom type prefix if specified
-//   const typePrefix = configOptions.type_prefix || 'Contentstack';
-
-//   // filter the images from all the assets
-//   // const regexp = new RegExp('https://(images).contentstack.io/v3/assets/')
-//   // const matches = regexp.exec(node.url);
-
-//   if (configOptions.downloadImages && node.internal.owner === 'gatsby-source-contentstack' && node.internal.type === `${typePrefix}_assets`) {
-//     const cachedNodeId = makeAssetNodeUid(node, createNodeId, typePrefix);
-
-//     const cachedFileNode = await cache.get(cachedNodeId);
-
-//     let fileNode;
-//     // Checks for cached fileNode
-//     if (cachedFileNode) {
-//       fileNode = cachedFileNode;
-//     } else {
-//       // create a FileNode in Gatsby that gatsby-transformer-sharp will create optimized images for
-//       fileNode = await createRemoteFileNode({
-//         // the url of the remote image to generate a node for
-//         url: encodeURI(node.url),
-//         getCache,
-//         createNode,
-//         createNodeId,
-//         parentNodeId: node.id,
-//       });
-
-//       if (fileNode)
-//         // Cache the fileNode, so it does not have to downloaded again
-//         await cache.set(cachedNodeId, fileNode);
-//     }
-
-//     if (fileNode)
-//       node.localAsset___NODE = fileNode.id;
-//   }
-// };
 
 exports.createResolvers = ({ createResolvers }) => {
   const resolvers = {};
+  fileFields.forEach(fileField => {
+    resolvers[fileField.parent] = {
+      ...resolvers[fileField.parent],
+      ... {      
+      [fileField.field.uid]: {
+        resolve(source, args, context, info) {
+          if (fileField.field.multiple && source[`${fileField.field.uid}___NODE`]) {
+              const nodesData = [];
+              
+              source[`${fileField.field.uid}___NODE`].forEach(id => {
+                const existingNode = context.nodeModel.getNodeById({ id })
+                
+                if (existingNode) {
+                  nodesData.push(existingNode);
+                }
+              });
+
+              return nodesData;
+            } else { 
+              const id = source[`${fileField.field.uid}___NODE`]
+              return context.nodeModel.getNodeById({ id })
+            }
+        },
+      },
+    }
+    };
+  })
   references.forEach(reference => {
     resolvers[reference.parent] = {
       ...resolvers[reference.parent],
@@ -386,13 +376,17 @@ exports.createResolvers = ({ createResolvers }) => {
         resolve(source, args, context, info) {
           if (source[`${reference.uid}___NODE`]) {
             const nodesData = [];
+
             source[`${reference.uid}___NODE`].forEach(id => {
-              context.nodeModel.getAllNodes().find(node => {
-                if (node.id === id) {
-                  nodesData.push(node);
-                }
-              });
+              const existingNode = context.nodeModel.getNodeById({
+                id 
+              })
+              
+              if (existingNode) {
+                nodesData.push(existingNode);
+              }
             });
+
             return nodesData;
           }
           return [];
@@ -420,3 +414,37 @@ exports.createResolvers = ({ createResolvers }) => {
   });
   createResolvers(resolvers);
 };
+
+exports.pluginOptionsSchema = ({ Joi }) => {
+  return Joi.object({
+    api_key: Joi.string().required().description(`API Key is a unique key assigned to each stack.`),
+    delivery_token: Joi.string().required().description(`Delivery Token is a read-only credential.`),
+    environment: Joi.string().required().description(`Environment where you published your data.`),
+    cdn: Joi.string().default(`https://cdn.contentstack.io/v3`).description(`CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 `),
+    type_prefix:  Joi.string().default(`Contentstack`).description(`Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.`),
+    expediteBuild: Joi.boolean().default(false).description(`expediteBuild set this to either true or false.`),
+    enableSchemaGeneration: Joi.boolean().default(false).description(`Specify true if you want to generate custom schema.`),
+  }).external(validateContentstackAccess)
+}
+
+
+const validateContentstackAccess = async pluginOptions => {
+  if (process.env.NODE_ENV === `test`) return undefined
+  
+  let host = pluginOptions.cdn ? pluginOptions.cdn : 'https://cdn.contentstack.io/v3';
+  await fetch(`${host}/content_types?include_count=false`, {
+    headers: {
+      "api_key" : `${pluginOptions.api_key}`,
+      "access_token": `${pluginOptions.delivery_token}`,
+    },
+  })
+    .then(res => res.ok)
+    .then(ok => {
+      if (!ok)
+        throw new Error(
+          `Cannot access Contentstack with api_key=${pluginOptions.api_key} & delivery_token=${pluginOptions.delivery_token}.`
+        )
+    })
+
+  return undefined
+}
