@@ -1,5 +1,6 @@
 const {
   normalizeEntry,
+  sanitizeEntry,
   processContentType,
   processEntry,
   processAsset,
@@ -13,6 +14,8 @@ const {checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT, IMAGE_REGEXP}=require('./
 const { fetchData, fetchContentTypes } = require('./fetch');
 
 const downloadAssets = require('./download-assets');
+
+const fetch = require('node-fetch');
 
 let references = [];
 let groups = [];
@@ -241,9 +244,10 @@ exports.sourceNodes = async ({
         createNodeId,
         typePrefix
       );
+      const sanitizedEntry = sanitizeEntry(contentType.schema, normalizedEntry);
       const entryNode = processEntry(
         contentType,
-        normalizedEntry,
+        sanitizedEntry,
         createNodeId,
         createContentDigest,
         typePrefix
@@ -348,17 +352,19 @@ exports.createResolvers = ({ createResolvers }) => {
         resolve(source, args, context, info) {
           if (fileField.field.multiple && source[`${fileField.field.uid}___NODE`]) {
               const nodesData = [];
+              
               source[`${fileField.field.uid}___NODE`].forEach(id => {
-                context.nodeModel.getAllNodes().find(node => {
-                  if (node.id === id) {
-                    nodesData.push(node);
-                  }
-                });
+                const existingNode = context.nodeModel.getNodeById({ id })
+                
+                if (existingNode) {
+                  nodesData.push(existingNode);
+                }
               });
+
               return nodesData;
             } else { 
-              return context.nodeModel.getAllNodes().find(
-                node => node.id === source[`${fileField.field.uid}___NODE`])
+              const id = source[`${fileField.field.uid}___NODE`]
+              return context.nodeModel.getNodeById({ id })
             }
         },
       },
@@ -372,13 +378,17 @@ exports.createResolvers = ({ createResolvers }) => {
         resolve(source, args, context, info) {
           if (source[`${reference.uid}___NODE`]) {
             const nodesData = [];
+
             source[`${reference.uid}___NODE`].forEach(id => {
-              context.nodeModel.getAllNodes().find(node => {
-                if (node.id === id) {
-                  nodesData.push(node);
-                }
-              });
+              const existingNode = context.nodeModel.getNodeById({
+                id 
+              })
+              
+              if (existingNode) {
+                nodesData.push(existingNode);
+              }
             });
+
             return nodesData;
           }
           return [];
@@ -406,3 +416,37 @@ exports.createResolvers = ({ createResolvers }) => {
   });
   createResolvers(resolvers);
 };
+
+exports.pluginOptionsSchema = ({ Joi }) => {
+  return Joi.object({
+    api_key: Joi.string().required().description(`API Key is a unique key assigned to each stack.`),
+    delivery_token: Joi.string().required().description(`Delivery Token is a read-only credential.`),
+    environment: Joi.string().required().description(`Environment where you published your data.`),
+    cdn: Joi.string().default(`https://cdn.contentstack.io/v3`).description(`CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 `),
+    type_prefix:  Joi.string().default(`Contentstack`).description(`Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.`),
+    expediteBuild: Joi.boolean().default(false).description(`expediteBuild set this to either true or false.`),
+    enableSchemaGeneration: Joi.boolean().default(false).description(`Specify true if you want to generate custom schema.`),
+  }).external(validateContentstackAccess)
+}
+
+
+const validateContentstackAccess = async pluginOptions => {
+  if (process.env.NODE_ENV === `test`) return undefined
+  
+  let host = pluginOptions.cdn ? pluginOptions.cdn : 'https://cdn.contentstack.io/v3';
+  await fetch(`${host}/content_types?include_count=false`, {
+    headers: {
+      "api_key" : `${pluginOptions.api_key}`,
+      "access_token": `${pluginOptions.delivery_token}`,
+    },
+  })
+    .then(res => res.ok)
+    .then(ok => {
+      if (!ok)
+        throw new Error(
+          `Cannot access Contentstack with api_key=${pluginOptions.api_key} & delivery_token=${pluginOptions.delivery_token}.`
+        )
+    })
+
+  return undefined
+}
