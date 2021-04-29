@@ -37,6 +37,7 @@ exports.createSchemaCustomization = async ({
   let contentTypes;
 
   const typePrefix = configOptions.type_prefix || 'Contentstack';
+  const disableMandatoryFields = configOptions.disableMandatoryFields || false;
   try {
     contentTypes = await fetchContentTypes(configOptions);
     await cache.set(typePrefix, contentTypes);
@@ -58,7 +59,8 @@ exports.createSchemaCustomization = async ({
         [],
         [],
         name,
-        typePrefix
+        typePrefix,
+        disableMandatoryFields
       );
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
