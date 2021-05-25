@@ -96,7 +96,7 @@ module.exports = async ({
 const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) => {
   try {
 
-    if (totalSize === 0) {
+    if (!sizeBar) {
       sizeBar = createProgress(`Total KBs downloaded`, reporter);
       sizeBar.start();
     }
