@@ -36,7 +36,7 @@ plugins: [
       // Optional: Specify true if you want to generate custom schema
       enableSchemaGeneration : `boolean_value`,
 
-      // Optional: Specify true if you want to generate optional graphQl fields for mandatory ContentStack fields
+      // Optional: Specify true if you want to generate optional graphQl fields for mandatory Contentstack fields
       disableMandatoryFields : `boolean_value`,
 
       // Optional: Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.
