@@ -104,6 +104,8 @@ If, for example, you have `Blogs` as one of your content types, you will be able
 Reference fields provide references to entries of another content type(s). Since fields from
 referred entry is often needed, the referred entry data is provided at the `reference` field.
 
+**Note**: If referenced entries are not published or have been deleted, then the query will not return those entries in the response.
+
 ```graphql
 {
   allContentstackBlogs{
