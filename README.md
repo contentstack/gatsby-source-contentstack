@@ -36,6 +36,9 @@ plugins: [
       // Optional: Specify true if you want to generate custom schema
       enableSchemaGeneration : `boolean_value`,
 
+      // Optional: Specify true if you want to generate optional graphQl fields for mandatory Contentstack fields
+      disableMandatoryFields : `boolean_value`,
+
       // Optional: Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.
       type_prefix: `Contentstack`, // (default)
 
@@ -100,6 +103,8 @@ If, for example, you have `Blogs` as one of your content types, you will be able
 
 Reference fields provide references to entries of another content type(s). Since fields from
 referred entry is often needed, the referred entry data is provided at the `reference` field.
+
+**Note**: If referenced entries are not published or have been deleted, then the query will not return those entries in the response.
 
 ```graphql
 {
