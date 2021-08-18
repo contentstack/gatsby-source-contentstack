@@ -36,7 +36,7 @@ plugins: [
       // Optional: Specify true if you want to generate custom schema
       enableSchemaGeneration : `boolean_value`,
 
-      // Optional: Specify true if you want to generate optional graphQl fields for mandatory ContentStack fields
+      // Optional: Specify true if you want to generate optional graphql fields for mandatory Contentstack fields
       disableMandatoryFields : `boolean_value`,
 
       // Optional: Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.
@@ -47,7 +47,7 @@ plugins: [
     },
   },
 ]
-// Note: access_token has been replaced by delivery_token
+// Note: access_token is replaced by delivery_token
 ```
 There is a provision to speed up the ```gatsby build``` process. To do this, you can set the value of the **expediteBuild** to **true**. So when you set the value of this parameter to true, the build process is significantly enhanced as only published assets and entries are synced parallelly. 
 
@@ -102,7 +102,9 @@ If, for example, you have `Blogs` as one of your content types, you will be able
 ### Query Reference fields
 
 Reference fields provide references to entries of another content type(s). Since fields from
-referred entry is often needed, the referred entry data is provided at the `reference` field.
+referred entry are often needed, the referred entry data is provided at the `reference` field.
+
+**Note**: If referenced entries are not published or deleted, then the query will not return those entries in the response.
 
 ```graphql
 {
@@ -163,7 +165,7 @@ For ex:- GATSBY_CONCURRENT_DOWNLOAD=100 gatsby develop
 
 Remember that gatbsy-image doesn’t support GIF and SVG images.
 
-To use GIF image, Gatsby recommends to import the image directly. In the case of SVG, creating multiple variants of the image doesn’t make sense because it is vector-based graphics that you can freely scale without losing quality.
+To use GIF image, Gatsby recommends to import the image directly. In SVG, creating multiple variants of the image doesn’t make sense because it is vector-based graphics that you can freely scale without losing quality.
 
 
 [gatsby]: https://www.gatsbyjs.org/
