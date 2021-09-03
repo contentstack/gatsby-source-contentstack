@@ -1,26 +1,16 @@
-'use strict';
+"use strict";
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _extends5 = require('babel-runtime/helpers/extends');
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-var _extends6 = _interopRequireDefault(_extends5);
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var _set = require('babel-runtime/core-js/set');
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
-var _set2 = _interopRequireDefault(_set);
-
-var _regenerator = require('babel-runtime/regenerator');
-
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
-
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 var _require = require('./normalize'),
     normalizeEntry = _require.normalizeEntry,
@@ -52,24 +42,21 @@ var fileFields = [];
 
 exports.onPreBootstrap = function (_ref) {
   var reporter = _ref.reporter;
-
   var args = process.argv;
+
   if (args.includes('--verbose')) {
     reporter.setVerbose(true);
   }
 };
 
-exports.createSchemaCustomization = function () {
-  var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref3, configOptions) {
-    var cache = _ref3.cache,
-        actions = _ref3.actions,
-        schema = _ref3.schema;
-    var contentTypes, typePrefix, disableMandatoryFields, createTypes, name, fields;
-    return _regenerator2.default.wrap(function _callee$(_context) {
+exports.createSchemaCustomization = /*#__PURE__*/function () {
+  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref3, configOptions) {
+    var cache, actions, schema, contentTypes, typePrefix, disableMandatoryFields, createTypes, name, fields;
+    return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            contentTypes = void 0;
+            cache = _ref3.cache, actions = _ref3.actions, schema = _ref3.schema;
             typePrefix = configOptions.type_prefix || 'Contentstack';
             disableMandatoryFields = configOptions.disableMandatoryFields || false;
             _context.prev = 3;
@@ -87,34 +74,34 @@ exports.createSchemaCustomization = function () {
 
           case 11:
             _context.prev = 11;
-            _context.t0 = _context['catch'](3);
-
+            _context.t0 = _context["catch"](3);
             console.error('Contentstack fetch content type failed!');
 
           case 14:
             if (configOptions.enableSchemaGeneration) {
               createTypes = actions.createTypes;
-
               contentTypes.forEach(function (contentType) {
                 var contentTypeUid = contentType.uid.replace(/-/g, '_');
-                var name = typePrefix + '_' + contentTypeUid;
+                var name = "".concat(typePrefix, "_").concat(contentTypeUid);
                 var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
                 var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields);
                 references = references.concat(result.references);
                 groups = groups.concat(result.groups);
                 fileFields = fileFields.concat(result.fileFields);
-                var typeDefs = ['type linktype{\n              title: String\n              href: String\n            }', schema.buildObjectType({
+                var typeDefs = ["type linktype{\n              title: String\n              href: String\n            }", schema.buildObjectType({
                   name: name,
                   fields: result.fields,
                   interfaces: ['Node'],
-                  extensions: { infer: true }
+                  extensions: {
+                    infer: true
+                  }
                 })];
                 result.types = result.types.concat(typeDefs);
                 createTypes(result.types);
               });
-
               /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
-              name = typePrefix + 'ContentTypes';
+
+              name = "".concat(typePrefix, "ContentTypes");
               fields = {
                 title: 'String!',
                 uid: 'String!',
@@ -123,21 +110,22 @@ exports.createSchemaCustomization = function () {
                 schema: 'JSON!',
                 description: 'String'
               };
-
               createTypes([schema.buildObjectType({
                 name: name,
                 fields: fields,
                 interfaces: ['Node'],
-                extensions: { infer: false }
+                extensions: {
+                  infer: false
+                }
               })]);
             }
 
           case 15:
-          case 'end':
+          case "end":
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[3, 11]]);
+    }, _callee, null, [[3, 11]]);
   }));
 
   return function (_x, _x2) {
@@ -145,35 +133,28 @@ exports.createSchemaCustomization = function () {
   };
 }();
 
-exports.sourceNodes = function () {
-  var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(_ref5, configOptions) {
-    var cache = _ref5.cache,
-        actions = _ref5.actions,
-        getNode = _ref5.getNode,
-        getNodes = _ref5.getNodes,
-        createNodeId = _ref5.createNodeId,
-        store = _ref5.store,
-        reporter = _ref5.reporter,
-        createContentDigest = _ref5.createContentDigest,
-        getNodesByType = _ref5.getNodesByType,
-        getCache = _ref5.getCache;
+exports.sourceNodes = /*#__PURE__*/function () {
+  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref5, configOptions) {
+    var cache, actions, getNode, getNodes, createNodeId, store, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _yield$fetchData, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes, nextSyncToken, newState;
 
-    var createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _ref6, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes, nextSyncToken, newState;
-
-    return _regenerator2.default.wrap(function _callee2$(_context2) {
+    return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            deleteContentstackNodes = function deleteContentstackNodes(item, type) {
+            deleteContentstackNodes = function _deleteContentstackNo(item, type) {
               var nodeId = '';
               var node = null;
+
               if (type === 'entry') {
-                nodeId = createNodeId(typePrefix.toLowerCase() + '-entry-' + item.uid + '-' + item.locale);
+                nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(item.uid, "-").concat(item.locale));
               }
+
               if (type === 'asset') {
-                nodeId = createNodeId(typePrefix.toLowerCase() + '-assets-' + item.uid + '-' + item.locale);
+                nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(item.uid, "-").concat(item.locale));
               }
+
               node = getNode(nodeId);
+
               if (node) {
                 deleteNode({
                   node: node
@@ -181,27 +162,23 @@ exports.sourceNodes = function () {
               }
             };
 
+            cache = _ref5.cache, actions = _ref5.actions, getNode = _ref5.getNode, getNodes = _ref5.getNodes, createNodeId = _ref5.createNodeId, store = _ref5.store, reporter = _ref5.reporter, createContentDigest = _ref5.createContentDigest, getNodesByType = _ref5.getNodesByType, getCache = _ref5.getCache;
             createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus;
-            syncToken = void 0;
-            _store$getState = store.getState(), status = _store$getState.status;
-
-            // use a custom type prefix if specified
+            _store$getState = store.getState(), status = _store$getState.status; // use a custom type prefix if specified
 
             typePrefix = configOptions.type_prefix || 'Contentstack';
 
-
             if (status && status.plugins && status.plugins['gatsby-source-contentstack']) {
-              syncToken = status.plugins['gatsby-source-contentstack'][typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key];
+              syncToken = status.plugins['gatsby-source-contentstack']["".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key)];
             }
 
             configOptions.syncToken = syncToken || null;
-
             _context2.next = 9;
             return fetchData(configOptions, reporter);
 
           case 9:
-            _ref6 = _context2.sent;
-            contentstackData = _ref6.contentstackData;
+            _yield$fetchData = _context2.sent;
+            contentstackData = _yield$fetchData.contentstackData;
             _context2.next = 13;
             return cache.get(typePrefix);
 
@@ -211,42 +188,41 @@ exports.sourceNodes = function () {
               if (!merged[item.type]) {
                 merged[item.type] = [];
               }
+
               merged[item.type].push(item);
               return merged;
-            }, {});
+            }, {}); // for checking if the reference node is present or not
 
-            // for checking if the reference node is present or not
-
-            entriesNodeIds = new _set2.default();
-            assetsNodeIds = new _set2.default();
+            entriesNodeIds = new Set();
+            assetsNodeIds = new Set();
             existingNodes = getNodes().filter(function (n) {
               return n.internal.owner === 'gatsby-source-contentstack';
             });
-
-
             existingNodes.forEach(function (n) {
-              if (n.internal.type !== typePrefix + 'ContentTypes' && n.internal.type !== typePrefix + '_assets') {
+              if (n.internal.type !== "".concat(typePrefix, "ContentTypes") && n.internal.type !== "".concat(typePrefix, "_assets")) {
                 entriesNodeIds.add(n.id);
               }
-              if (n.internal.type === typePrefix + '_assets') {
+
+              if (n.internal.type === "".concat(typePrefix, "_assets")) {
                 assetsNodeIds.add(n.id);
               }
+
               touchNode({
                 nodeId: n.id
               });
+
               if (n.localAsset___NODE) {
                 // Prevent GraphQL type inference from crashing on this property
-                touchNode({ nodeId: n.localAsset___NODE });
+                touchNode({
+                  nodeId: n.localAsset___NODE
+                });
               }
             });
-
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
               var entryNodeId = makeEntryNodeUid(item.data, createNodeId, typePrefix);
               entriesNodeIds.add(entryNodeId);
             });
-
             countOfSupportedFormatFiles = 0;
-
             syncData.asset_published && syncData.asset_published.forEach(function (item) {
               /**
                * Get the count of assets (images), filtering out svg and gif format,
@@ -257,21 +233,22 @@ exports.sourceNodes = function () {
               if (configOptions.downloadImages) {
                 // Filter the images from the assets
                 var regexp = IMAGE_REGEXP;
-                var matches = void 0;
-                var isUnsupportedExt = void 0;
+                var matches;
+                var isUnsupportedExt;
+
                 try {
                   matches = regexp.exec(item.data.url);
                   isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
-
                   if (matches && !isUnsupportedExt) countOfSupportedFormatFiles++;
                 } catch (error) {
                   reporter.panic('Something went wrong. Details: ', error);
                 }
               }
+
               var entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
               assetsNodeIds.add(entryNodeId);
-            });
-            // Cache the found count
+            }); // Cache the found count
+
             _context2.t0 = configOptions.downloadImages;
 
             if (!_context2.t0) {
@@ -287,14 +264,12 @@ exports.sourceNodes = function () {
             //   const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
             //   assetsNodeIds.add(entryNodeId);
             // });
-
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
               var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
               createNode(contentTypeNode);
             });
-
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
               item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var contentType = contentstackData.contentTypes.find(function (contentType) {
@@ -305,7 +280,6 @@ exports.sourceNodes = function () {
               var entryNode = processEntry(contentType, sanitizedEntry, createNodeId, createContentDigest, typePrefix);
               createNode(entryNode);
             });
-
             syncData.asset_published && syncData.asset_published.forEach(function (item) {
               var assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
               createNode(assetNode);
@@ -318,7 +292,14 @@ exports.sourceNodes = function () {
 
             _context2.prev = 30;
             _context2.next = 33;
-            return downloadAssets({ cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId, getNodesByType: getNodesByType, reporter: reporter }, typePrefix, configOptions);
+            return downloadAssets({
+              cache: cache,
+              getCache: getCache,
+              createNode: createNode,
+              createNodeId: createNodeId,
+              getNodesByType: getNodesByType,
+              reporter: reporter
+            }, typePrefix, configOptions);
 
           case 33:
             _context2.next = 38;
@@ -326,58 +307,47 @@ exports.sourceNodes = function () {
 
           case 35:
             _context2.prev = 35;
-            _context2.t1 = _context2['catch'](30);
-
+            _context2.t1 = _context2["catch"](30);
             reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t1);
 
           case 38:
-
             // deleting nodes
-
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               deleteContentstackNodes(item.data, 'entry');
             });
-
             syncData.asset_unpublished && syncData.asset_unpublished.forEach(function (item) {
               deleteContentstackNodes(item.data, 'asset');
             });
-
             syncData.entry_deleted && syncData.entry_deleted.forEach(function (item) {
               deleteContentstackNodes(item.data, 'entry');
             });
-
             syncData.asset_deleted && syncData.asset_deleted.forEach(function (item) {
               deleteContentstackNodes(item.data, 'asset');
             });
-
             syncData.content_type_deleted && syncData.content_type_deleted.forEach(function (item) {
               item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var sameContentTypeNodes = getNodes().filter(function (n) {
-                return n.internal.type === typePrefix + '_' + item.content_type_uid;
+                return n.internal.type === "".concat(typePrefix, "_").concat(item.content_type_uid);
               });
               sameContentTypeNodes.forEach(function (node) {
                 return deleteNode({
                   node: node
                 });
               });
-            });
+            }); // Updating the syncToken
 
-            // Updating the syncToken
-            nextSyncToken = contentstackData.sync_token;
-
-            // Storing the sync state for the next sync
+            nextSyncToken = contentstackData.sync_token; // Storing the sync state for the next sync
 
             newState = {};
-
-            newState[typePrefix.toLowerCase() + '-sync-token-' + configOptions.api_key] = nextSyncToken;
+            newState["".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key)] = nextSyncToken;
             setPluginStatus(newState);
 
           case 47:
-          case 'end':
+          case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, undefined, [[30, 35]]);
+    }, _callee2, null, [[30, 35]]);
   }));
 
   return function (_x3, _x4) {
@@ -385,39 +355,15 @@ exports.sourceNodes = function () {
   };
 }();
 
-exports.createResolvers = function (_ref7) {
-  var createResolvers = _ref7.createResolvers;
-
+exports.createResolvers = function (_ref6) {
+  var createResolvers = _ref6.createResolvers;
   var resolvers = {};
   fileFields.forEach(function (fileField) {
-    resolvers[fileField.parent] = (0, _extends6.default)({}, resolvers[fileField.parent], (0, _defineProperty3.default)({}, fileField.field.uid, {
+    resolvers[fileField.parent] = _objectSpread(_objectSpread({}, resolvers[fileField.parent]), (0, _defineProperty2["default"])({}, fileField.field.uid, {
       resolve: function resolve(source, args, context, info) {
-        if (fileField.field.multiple && source[fileField.field.uid + '___NODE']) {
+        if (fileField.field.multiple && source["".concat(fileField.field.uid, "___NODE")]) {
           var nodesData = [];
-
-          source[fileField.field.uid + '___NODE'].forEach(function (id) {
-            var existingNode = context.nodeModel.getNodeById({ id: id });
-
-            if (existingNode) {
-              nodesData.push(existingNode);
-            }
-          });
-
-          return nodesData;
-        } else {
-          var id = source[fileField.field.uid + '___NODE'];
-          return context.nodeModel.getNodeById({ id: id });
-        }
-      }
-    }));
-  });
-  references.forEach(function (reference) {
-    resolvers[reference.parent] = (0, _extends6.default)({}, resolvers[reference.parent], (0, _defineProperty3.default)({}, reference.uid, {
-      resolve: function resolve(source, args, context, info) {
-        if (source[reference.uid + '___NODE']) {
-          var nodesData = [];
-
-          source[reference.uid + '___NODE'].forEach(function (id) {
+          source["".concat(fileField.field.uid, "___NODE")].forEach(function (id) {
             var existingNode = context.nodeModel.getNodeById({
               id: id
             });
@@ -426,19 +372,44 @@ exports.createResolvers = function (_ref7) {
               nodesData.push(existingNode);
             }
           });
+          return nodesData;
+        } else {
+          var id = source["".concat(fileField.field.uid, "___NODE")];
+          return context.nodeModel.getNodeById({
+            id: id
+          });
+        }
+      }
+    }));
+  });
+  references.forEach(function (reference) {
+    resolvers[reference.parent] = _objectSpread(_objectSpread({}, resolvers[reference.parent]), {}, (0, _defineProperty2["default"])({}, reference.uid, {
+      resolve: function resolve(source, args, context, info) {
+        if (source["".concat(reference.uid, "___NODE")]) {
+          var nodesData = [];
+          source["".concat(reference.uid, "___NODE")].forEach(function (id) {
+            var existingNode = context.nodeModel.getNodeById({
+              id: id
+            });
 
+            if (existingNode) {
+              nodesData.push(existingNode);
+            }
+          });
           return nodesData;
         }
+
         return [];
       }
     }));
   });
   groups.forEach(function (group) {
-    resolvers[group.parent] = (0, _extends6.default)({}, resolvers[group.parent], (0, _defineProperty3.default)({}, group.field.uid, {
+    resolvers[group.parent] = _objectSpread(_objectSpread({}, resolvers[group.parent]), (0, _defineProperty2["default"])({}, group.field.uid, {
       resolve: function resolve(source) {
         if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
           return [];
         }
+
         return source[group.field.uid] || null;
       }
     }));
@@ -446,60 +417,59 @@ exports.createResolvers = function (_ref7) {
   createResolvers(resolvers);
 };
 
-exports.pluginOptionsSchema = function (_ref8) {
-  var Joi = _ref8.Joi;
-
+exports.pluginOptionsSchema = function (_ref7) {
+  var Joi = _ref7.Joi;
   return Joi.object({
-    api_key: Joi.string().required().description('API Key is a unique key assigned to each stack.'),
-    delivery_token: Joi.string().required().description('Delivery Token is a read-only credential.'),
-    environment: Joi.string().required().description('Environment where you published your data.'),
-    cdn: Joi.string().default('https://cdn.contentstack.io/v3').description('CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 '),
-    type_prefix: Joi.string().default('Contentstack').description('Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.'),
-    expediteBuild: Joi.boolean().default(false).description('expediteBuild set this to either true or false.'),
-    enableSchemaGeneration: Joi.boolean().default(false).description('Specify true if you want to generate custom schema.')
+    api_key: Joi.string().required().description("API Key is a unique key assigned to each stack."),
+    delivery_token: Joi.string().required().description("Delivery Token is a read-only credential."),
+    environment: Joi.string().required().description("Environment where you published your data."),
+    cdn: Joi.string()["default"]("https://cdn.contentstack.io/v3").description("CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 "),
+    type_prefix: Joi.string()["default"]("Contentstack").description("Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks."),
+    expediteBuild: Joi["boolean"]()["default"](false).description("expediteBuild set this to either true or false."),
+    enableSchemaGeneration: Joi["boolean"]()["default"](false).description("Specify true if you want to generate custom schema.")
   }).external(validateContentstackAccess);
 };
 
-var validateContentstackAccess = function () {
-  var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(pluginOptions) {
+var validateContentstackAccess = /*#__PURE__*/function () {
+  var _ref8 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(pluginOptions) {
     var host;
-    return _regenerator2.default.wrap(function _callee3$(_context3) {
+    return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            if (!(process.env.NODE_ENV === 'test')) {
+            if (!(process.env.NODE_ENV === "test")) {
               _context3.next = 2;
               break;
             }
 
-            return _context3.abrupt('return', undefined);
+            return _context3.abrupt("return", undefined);
 
           case 2:
             host = pluginOptions.cdn ? pluginOptions.cdn : 'https://cdn.contentstack.io/v3';
             _context3.next = 5;
-            return fetch(host + '/content_types?include_count=false', {
+            return fetch("".concat(host, "/content_types?include_count=false"), {
               headers: {
-                "api_key": '' + pluginOptions.api_key,
-                "access_token": '' + pluginOptions.delivery_token
+                "api_key": "".concat(pluginOptions.api_key),
+                "access_token": "".concat(pluginOptions.delivery_token)
               }
             }).then(function (res) {
               return res.ok;
             }).then(function (ok) {
-              if (!ok) throw new Error('Cannot access Contentstack with api_key=' + pluginOptions.api_key + ' & delivery_token=' + pluginOptions.delivery_token + '.');
+              if (!ok) throw new Error("Cannot access Contentstack with api_key=".concat(pluginOptions.api_key, " & delivery_token=").concat(pluginOptions.delivery_token, "."));
             });
 
           case 5:
-            return _context3.abrupt('return', undefined);
+            return _context3.abrupt("return", undefined);
 
           case 6:
-          case 'end':
+          case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, undefined);
+    }, _callee3);
   }));
 
   return function validateContentstackAccess(_x5) {
-    return _ref9.apply(this, arguments);
+    return _ref8.apply(this, arguments);
   };
 }();

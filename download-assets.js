@@ -1,26 +1,16 @@
 'use strict';
 
-var _extends2 = require('babel-runtime/helpers/extends');
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-var _extends3 = _interopRequireDefault(_extends2);
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _regenerator = require('babel-runtime/regenerator');
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-var _regenerator2 = _interopRequireDefault(_regenerator);
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var _promise = require('babel-runtime/core-js/promise');
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
-var _promise2 = _interopRequireDefault(_promise);
-
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
-
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 var _require = require('gatsby-source-filesystem'),
     createRemoteFileNode = _require.createRemoteFileNode;
@@ -34,82 +24,67 @@ var _require3 = require('./utils'),
     SUPPORTED_FILES_COUNT = _require3.SUPPORTED_FILES_COUNT,
     IMAGE_REGEXP = _require3.IMAGE_REGEXP;
 
-var bar = void 0; // Keep track of the total number of jobs we push in the queue
-var sizeBar = void 0;
+var bar; // Keep track of the total number of jobs we push in the queue
+
+var sizeBar;
 var totalJobs = 0;
 var totalSize = 0;
 
-module.exports = function () {
-  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, typePrefix, configOptions) {
-    var cache = _ref2.cache,
-        getCache = _ref2.getCache,
-        createNode = _ref2.createNode,
-        createNodeId = _ref2.createNodeId,
-        getNodesByType = _ref2.getNodesByType,
-        reporter = _ref2.reporter;
-    var assets, batches, i, batchPromises, skip, lastCount, shouldBreak, j, regexp, matches, isUnsupportedExt;
-    return _regenerator2.default.wrap(function _callee$(_context) {
+module.exports = /*#__PURE__*/function () {
+  var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref2, typePrefix, configOptions) {
+    var cache, getCache, createNode, createNodeId, getNodesByType, reporter, assets, batches, i, batchPromises, skip, lastCount, shouldBreak, j, regexp, matches, isUnsupportedExt;
+    return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.prev = 0;
-            assets = getNodesByType(typePrefix + '_assets');
-
-
+            cache = _ref2.cache, getCache = _ref2.getCache, createNode = _ref2.createNode, createNodeId = _ref2.createNodeId, getNodesByType = _ref2.getNodesByType, reporter = _ref2.reporter;
+            _context.prev = 1;
+            assets = getNodesByType("".concat(typePrefix, "_assets"));
             configOptions.MAX_CONCURRENCY_LIMIT = process.env.GATSBY_CONCURRENT_DOWNLOAD || 20;
+            batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT); // Get total count of files that will be downloaded, excluding unsupported formats
 
-            batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
-
-            // Get total count of files that will be downloaded, excluding unsupported formats
-
-            _context.next = 6;
+            _context.next = 7;
             return cache.get(SUPPORTED_FILES_COUNT);
 
-          case 6:
+          case 7:
             totalJobs = _context.sent;
-
             // Create progress bar
-            bar = createProgress('Downloading remote files', reporter);
+            bar = createProgress("Downloading remote files", reporter);
             bar.start();
             bar.total = totalJobs;
-
             i = 0;
 
-          case 11:
+          case 12:
             if (!(i < batches.length)) {
-              _context.next = 42;
+              _context.next = 43;
               break;
             }
 
             batchPromises = [];
             skip = i * configOptions.MAX_CONCURRENCY_LIMIT;
             lastCount = (i + 1) * configOptions.MAX_CONCURRENCY_LIMIT;
-
-            reporter.verbose('Skip: ' + skip + ', limit: ' + lastCount);
-
+            reporter.verbose("Skip: ".concat(skip, ", limit: ").concat(lastCount));
             shouldBreak = false;
             j = skip;
 
-          case 18:
+          case 19:
             if (!(j < lastCount)) {
-              _context.next = 35;
+              _context.next = 36;
               break;
             }
 
             if (!(!assets[j] && i + 1 === batches.length)) {
-              _context.next = 22;
+              _context.next = 23;
               break;
             }
 
             shouldBreak = true;
-            return _context.abrupt('break', 35);
+            return _context.abrupt("break", 36);
 
-          case 22:
-
+          case 23:
             // filter the images from all the assets
             regexp = IMAGE_REGEXP;
-            matches = void 0;
-            // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297
+            matches = void 0; // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297
 
             isUnsupportedExt = false;
 
@@ -119,71 +94,69 @@ module.exports = function () {
                 isUnsupportedExt = checkIfUnsupportedFormat(assets[j].url);
               }
             } catch (error) {
-              reporter.panic('Something went wrong. Details: ' + (0, _stringify2.default)(error));
-            }
+              reporter.panic('Something went wrong. Details: ' + JSON.stringify(error));
+            } // Only download images
 
-            // Only download images
 
             if (!(matches && !isUnsupportedExt)) {
-              _context.next = 32;
+              _context.next = 33;
               break;
             }
 
             _context.t0 = batchPromises;
-            _context.next = 30;
+            _context.next = 31;
             return createRemoteFileNodePromise({
-              cache: cache, getCache: getCache, createNode: createNode, createNodeId: createNodeId
+              cache: cache,
+              getCache: getCache,
+              createNode: createNode,
+              createNodeId: createNodeId
             }, assets[j], typePrefix, reporter);
 
-          case 30:
+          case 31:
             _context.t1 = _context.sent;
 
             _context.t0.push.call(_context.t0, _context.t1);
 
-          case 32:
+          case 33:
             j++;
-            _context.next = 18;
+            _context.next = 19;
             break;
 
-          case 35:
+          case 36:
             if (!shouldBreak) {
-              _context.next = 37;
+              _context.next = 38;
               break;
             }
 
-            return _context.abrupt('break', 42);
+            return _context.abrupt("break", 43);
 
-          case 37:
-            _context.next = 39;
-            return _promise2.default.all(batchPromises);
+          case 38:
+            _context.next = 40;
+            return Promise.all(batchPromises);
 
-          case 39:
+          case 40:
             i++;
-            _context.next = 11;
+            _context.next = 12;
             break;
 
-          case 42:
-
+          case 43:
             bar && bar.done();
             sizeBar && sizeBar.done();
-            reporter.verbose('Total size of downloaded files ' + totalSize);
-
-            _context.next = 50;
+            reporter.verbose("Total size of downloaded files ".concat(totalSize));
+            _context.next = 51;
             break;
 
-          case 47:
-            _context.prev = 47;
-            _context.t2 = _context['catch'](0);
+          case 48:
+            _context.prev = 48;
+            _context.t2 = _context["catch"](1);
+            reporter.info('Something went wrong while downloading assets. Details: ' + _context.t2); // throw error;
 
-            reporter.info('Something went wrong while downloading assets. Details: ' + _context.t2);
-            // throw error;
-
-          case 50:
-          case 'end':
+          case 51:
+          case "end":
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[0, 47]]);
+    }, _callee, null, [[1, 48]]);
   }));
 
   return function (_x, _x2, _x3) {
@@ -191,85 +164,76 @@ module.exports = function () {
   };
 }();
 
-var createRemoteFileNodePromise = function () {
-  var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(params, node, typePrefix, reporter) {
+var createRemoteFileNodePromise = /*#__PURE__*/function () {
+  var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(params, node, typePrefix, reporter) {
     var fileNode, assetUid, fileSize;
-    return _regenerator2.default.wrap(function _callee2$(_context2) {
+    return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             _context2.prev = 0;
 
-
-            if (totalSize === 0) {
-              sizeBar = createProgress('Total KBs downloaded', reporter);
+            if (!sizeBar) {
+              sizeBar = createProgress("Total KBs downloaded", reporter);
               sizeBar.start();
             }
 
-            fileNode = void 0;
-            assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix);
+            assetUid = makeAssetNodeUid(node, params.createNodeId, typePrefix); // Get asset from cache
 
-            // Get asset from cache
-
-            _context2.next = 6;
+            _context2.next = 5;
             return params.cache.get(assetUid);
 
-          case 6:
+          case 5:
             fileNode = _context2.sent;
-
-
             // Handles condition if the asset has been updated, then it will be downloaded again
             if (fileNode && fileNode.updated_at !== node.updated_at) fileNode = null;
 
             if (fileNode) {
-              _context2.next = 20;
+              _context2.next = 19;
               break;
             }
 
-            _context2.next = 11;
-            return createRemoteFileNode((0, _extends3.default)({}, params, { url: encodeURI(node.url), parentNodeId: node.id }));
+            _context2.next = 10;
+            return createRemoteFileNode(_objectSpread(_objectSpread({}, params), {}, {
+              url: encodeURI(node.url),
+              parentNodeId: node.id
+            }));
 
-          case 11:
+          case 10:
             fileNode = _context2.sent;
 
             if (!fileNode) {
-              _context2.next = 20;
+              _context2.next = 19;
               break;
             }
 
             // Save updated_at value in the cached fileNode
             fileNode.updated_at = node.updated_at;
-
             fileSize = parseInt(fileNode.size / 1000); // Get size in megabytes
 
             totalSize = totalSize + fileSize;
             sizeBar.total = totalSize;
-            sizeBar.tick(fileSize);
-            // Cache fileNode to prevent re-downloading asset
-            _context2.next = 20;
+            sizeBar.tick(fileSize); // Cache fileNode to prevent re-downloading asset
+
+            _context2.next = 19;
             return params.cache.set(assetUid, fileNode);
 
-          case 20:
-
+          case 19:
             bar.tick();
-
             if (fileNode) node.localAsset___NODE = fileNode.id;
+            return _context2.abrupt("return", fileNode);
 
-            return _context2.abrupt('return', fileNode);
+          case 24:
+            _context2.prev = 24;
+            _context2.t0 = _context2["catch"](0);
+            reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0); // throw error;
 
-          case 25:
-            _context2.prev = 25;
-            _context2.t0 = _context2['catch'](0);
-
-            reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0);
-            // throw error;
-
-          case 28:
-          case 'end':
+          case 27:
+          case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, undefined, [[0, 25]]);
+    }, _callee2, null, [[0, 24]]);
   }));
 
   return function createRemoteFileNodePromise(_x4, _x5, _x6, _x7) {
@@ -278,8 +242,8 @@ var createRemoteFileNodePromise = function () {
 }();
 
 var getBatches = function getBatches(count, batchLimit) {
-  var partitions = Math.ceil(count / batchLimit);
-  // Returns array filled with indexes
+  var partitions = Math.ceil(count / batchLimit); // Returns array filled with indexes
+
   return Array(partitions).fill(null).map(function (_, i) {
     return i;
   });

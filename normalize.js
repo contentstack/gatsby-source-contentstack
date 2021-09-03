@@ -1,30 +1,21 @@
-'use strict';
+"use strict";
 
-var _typeof2 = require('babel-runtime/helpers/typeof');
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-var _typeof3 = _interopRequireDefault(_typeof2);
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
-var _keys = require('babel-runtime/core-js/object/keys');
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-var _keys2 = _interopRequireDefault(_keys);
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
+  var nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-contentType-").concat(contentType.uid));
+  var type = "".concat(typePrefix, "ContentTypes");
+  var nodeContent = JSON.stringify(contentType);
 
-  var nodeId = createNodeId(typePrefix.toLowerCase() + '-contentType-' + contentType.uid);
-  var type = typePrefix + 'ContentTypes';
-
-  var nodeContent = (0, _stringify2.default)(contentType);
-  var nodeData = (0, _extends3.default)({}, contentType, {
+  var nodeData = _objectSpread(_objectSpread({}, contentType), {}, {
     id: nodeId,
     parent: null,
     children: [],
@@ -34,38 +25,43 @@ exports.processContentType = function (contentType, createNodeId, createContentD
       contentDigest: createContentDigest(nodeContent)
     }
   });
+
   return nodeData;
 };
 
 exports.processAsset = function (asset, createNodeId, createContentDigest, typePrefix) {
   var nodeId = makeAssetNodeUid(asset, createNodeId, typePrefix);
-  var nodeContent = (0, _stringify2.default)(asset);
-  var nodeData = (0, _extends3.default)({}, asset, {
+  var nodeContent = JSON.stringify(asset);
+
+  var nodeData = _objectSpread(_objectSpread({}, asset), {}, {
     id: nodeId,
     parent: null,
     children: [],
     internal: {
-      type: typePrefix + '_assets',
+      type: "".concat(typePrefix, "_assets"),
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent)
     }
   });
+
   return nodeData;
 };
 
 exports.processEntry = function (contentType, entry, createNodeId, createContentDigest, typePrefix) {
   var nodeId = makeEntryNodeUid(entry, createNodeId, typePrefix);
-  var nodeContent = (0, _stringify2.default)(entry);
-  var nodeData = (0, _extends3.default)({}, entry, {
+  var nodeContent = JSON.stringify(entry);
+
+  var nodeData = _objectSpread(_objectSpread({}, entry), {}, {
     id: nodeId,
     parent: null,
     children: [],
     internal: {
-      type: typePrefix + '_' + contentType.uid,
+      type: "".concat(typePrefix, "_").concat(contentType.uid),
       content: nodeContent,
       contentDigest: createContentDigest(nodeContent)
     }
   });
+
   return nodeData;
 };
 
@@ -82,24 +78,27 @@ exports.sanitizeEntry = function (schema, entry) {
 };
 
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
-  var resolveEntry = (0, _extends3.default)({}, entry, builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+
   return resolveEntry;
 };
 
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId, typePrefix) {
   var publishedLocale = asset.publish_details.locale;
-  return createNodeId(typePrefix.toLowerCase() + '-assets-' + asset.uid + '-' + publishedLocale);
+  return createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(asset.uid, "-").concat(publishedLocale));
 };
 
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId, typePrefix) {
   var publishedLocale = entry.publish_details.locale;
-  return createNodeId(typePrefix.toLowerCase() + '-entry-' + entry.uid + '-' + publishedLocale);
+  return createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(publishedLocale));
 };
 
 var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
   var groupObj = null;
+
   if (field.multiple) {
     groupObj = [];
+
     if (value instanceof Array) {
       value.forEach(function (groupValue) {
         groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
@@ -116,27 +115,32 @@ var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeId
     groupObj = {};
     groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
   }
+
   return groupObj;
 };
 
 var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
   var modularBlocksObj = [];
+
   if (value) {
     value.map(function (block) {
-      (0, _keys2.default)(block).forEach(function (key) {
+      Object.keys(block).forEach(function (key) {
         var blockSchema = blocks.filter(function (block) {
           return block.uid === key;
         });
+
         if (!blockSchema.length) {
           // block value no longer exists block schema so ignore it
           return;
         }
+
         var blockObj = {};
         blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
         modularBlocksObj.push(blockObj);
       });
     });
   }
+
   return modularBlocksObj;
 };
 
@@ -144,12 +148,12 @@ var normalizeReferenceField = function normalizeReferenceField(value, locale, en
   var reference = [];
   if (value && !Array.isArray(value)) return;
   value.forEach(function (entry) {
-    if ((typeof entry === 'undefined' ? 'undefined' : (0, _typeof3.default)(entry)) === 'object' && entry.uid) {
-      if (entriesNodeIds.has(createNodeId(typePrefix.toLowerCase() + '-entry-' + entry.uid + '-' + locale))) {
-        reference.push(createNodeId(typePrefix.toLowerCase() + '-entry-' + entry.uid + '-' + locale));
+    if ((0, _typeof2["default"])(entry) === 'object' && entry.uid) {
+      if (entriesNodeIds.has(createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(locale)))) {
+        reference.push(createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(locale)));
       }
-    } else if (entriesNodeIds.has(createNodeId(typePrefix.toLowerCase() + '-entry-' + entry + '-' + locale))) {
-      reference.push(createNodeId(typePrefix.toLowerCase() + '-entry-' + entry + '-' + locale));
+    } else if (entriesNodeIds.has(createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry, "-").concat(locale)))) {
+      reference.push(createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry, "-").concat(locale)));
     }
   });
   return reference;
@@ -157,22 +161,24 @@ var normalizeReferenceField = function normalizeReferenceField(value, locale, en
 
 var normalizeFileField = function normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix) {
   var reference = {};
+
   if (Array.isArray(value)) {
     reference = [];
     value.forEach(function (assetUid) {
-      if (assetsNodeIds.has(createNodeId(typePrefix.toLowerCase() + '-assets-' + assetUid + '-' + locale))) {
-        reference.push(createNodeId(typePrefix.toLowerCase() + '-assets-' + assetUid + '-' + locale));
+      if (assetsNodeIds.has(createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(assetUid, "-").concat(locale)))) {
+        reference.push(createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(assetUid, "-").concat(locale)));
       }
     });
-  } else if (assetsNodeIds.has(createNodeId(typePrefix.toLowerCase() + '-assets-' + value + '-' + locale))) {
-    reference = createNodeId(typePrefix.toLowerCase() + '-assets-' + value + '-' + locale);
+  } else if (assetsNodeIds.has(createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(value, "-").concat(locale)))) {
+    reference = createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(value, "-").concat(locale));
   }
+
   return reference;
 };
 
 var getSchemaValue = function getSchemaValue(obj, key) {
   if (obj === null) return null;
-  if ((typeof obj === 'undefined' ? 'undefined' : (0, _typeof3.default)(obj)) !== 'object') return null;
+  if ((0, _typeof2["default"])(obj) !== 'object') return null;
   return Object.prototype.hasOwnProperty.call(obj, key.uid) ? obj[key.uid] : null;
 };
 
@@ -180,22 +186,27 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   var entryObj = {};
   schema.forEach(function (field) {
     var value = getSchemaValue(entry, field);
+
     switch (field.data_type) {
       case 'reference':
-        entryObj[field.uid + '___NODE'] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
+        entryObj["".concat(field.uid, "___NODE")] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
+
       case 'file':
         // Issue #60. Graphql does not treat empty string as null.
         if (!value) value = null;
-        entryObj[field.uid + '___NODE'] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
+        entryObj["".concat(field.uid, "___NODE")] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
+
       case 'group':
       case 'global_field':
         entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
         break;
+
       case 'blocks':
         entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
         break;
+
       default:
         entryObj[field.uid] = value;
     }
@@ -205,11 +216,10 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 
 var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) {
   var blockFields = {};
-  var blockType = 'type ' + parent + ' @infer {';
-
+  var blockType = "type ".concat(parent, " @infer {");
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
-    blockType = blockType.concat(block.uid + ' : ' + newparent + ' ');
+    blockType = blockType.concat("".concat(block.uid, " : ").concat(newparent, " "));
 
     var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields),
         fields = _buildCustomSchema.fields;
@@ -219,10 +229,11 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
         fields[key] = fields[key].type;
       }
     }
-    if ((0, _keys2.default)(fields).length > 0) {
-      var type = 'type ' + newparent + ' @infer ' + (0, _stringify2.default)(fields).replace(/"/g, '');
+
+    if (Object.keys(fields).length > 0) {
+      var type = "type ".concat(newparent, " @infer ").concat(JSON.stringify(fields).replace(/"/g, ''));
       types.push(type);
-      blockFields[block.uid] = '' + newparent;
+      blockFields[block.uid] = "".concat(newparent);
     }
   });
   blockType = blockType.concat('}');
@@ -295,6 +306,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             return source[field.uid] || null;
           }
         };
+
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid].type = '[String]!';
@@ -306,7 +318,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         } else {
           fields[field.uid].type = 'String';
         }
+
         break;
+
       case 'isodate':
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
@@ -319,7 +333,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         } else {
           fields[field.uid] = 'Date';
         }
+
         break;
+
       case 'boolean':
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
@@ -332,13 +348,16 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         } else {
           fields[field.uid] = 'Boolean';
         }
+
         break;
+
       case 'number':
         fields[field.uid] = {
           resolve: function resolve(source) {
             return source[field.uid] || null;
           }
         };
+
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid].type = '[Int]!';
@@ -350,14 +369,17 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         } else {
           fields[field.uid].type = 'Int';
         }
+
         break;
       // This is to support custom field types nested inside groups, global_fields & modular_blocks
+
       case 'json':
         fields[field.uid] = {
           resolve: function resolve(source) {
             return source[field.uid] || null;
           }
         };
+
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid].type = '[JSON]!';
@@ -369,7 +391,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         } else {
           fields[field.uid].type = 'JSON';
         }
+
         break;
+
       case 'link':
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
@@ -382,9 +406,11 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         } else {
           fields[field.uid] = 'linktype';
         }
+
         break;
+
       case 'file':
-        var type = 'type ' + prefix + '_assets implements Node @infer { url: String }';
+        var type = "type ".concat(prefix, "_assets implements Node @infer { url: String }");
         types.push(type);
         fileFields.push({
           parent: parent,
@@ -393,20 +419,21 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid] = '[' + prefix + '_assets]!';
+            fields[field.uid] = "[".concat(prefix, "_assets]!");
           } else {
-            fields[field.uid] = prefix + '_assets!';
+            fields[field.uid] = "".concat(prefix, "_assets!");
           }
         } else if (field.multiple) {
-          fields[field.uid] = '[' + prefix + '_assets]';
+          fields[field.uid] = "[".concat(prefix, "_assets]");
         } else {
-          fields[field.uid] = prefix + '_assets';
+          fields[field.uid] = "".concat(prefix, "_assets");
         }
+
         break;
+
       case 'group':
       case 'global_field':
         var newparent = parent.concat('_', field.uid);
-
         var result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
 
         for (var key in result.fields) {
@@ -415,12 +442,10 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           }
         }
 
-        if ((0, _keys2.default)(result.fields).length > 0) {
-
-          var _type = 'type ' + newparent + ' @infer ' + (0, _stringify2.default)(result.fields).replace(/"/g, '');
+        if (Object.keys(result.fields).length > 0) {
+          var _type = "type ".concat(newparent, " @infer ").concat(JSON.stringify(result.fields).replace(/"/g, ''));
 
           types.push(_type);
-
           groups.push({
             parent: parent,
             field: field
@@ -428,79 +453,82 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
           if (field.mandatory && !disableMandatoryFields) {
             if (field.multiple) {
-              fields[field.uid] = '[' + newparent + ']!';
+              fields[field.uid] = "[".concat(newparent, "]!");
             } else {
-              fields[field.uid] = newparent + '!';
+              fields[field.uid] = "".concat(newparent, "!");
             }
           } else if (field.multiple) {
-            fields[field.uid] = '[' + newparent + ']';
+            fields[field.uid] = "[".concat(newparent, "]");
           } else {
-            fields[field.uid] = '' + newparent;
+            fields[field.uid] = "".concat(newparent);
           }
         }
 
         break;
+
       case 'blocks':
         var blockparent = parent.concat('_', field.uid);
-
         var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields);
-
         types.push(blockType);
+
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid] = '[' + blockparent + ']!';
+            fields[field.uid] = "[".concat(blockparent, "]!");
           } else {
-            fields[field.uid] = blockparent + '!';
+            fields[field.uid] = "".concat(blockparent, "!");
           }
         } else if (field.multiple) {
-          fields[field.uid] = '[' + blockparent + ']';
+          fields[field.uid] = "[".concat(blockparent, "]");
         } else {
-          fields[field.uid] = '' + blockparent;
+          fields[field.uid] = "".concat(blockparent);
         }
 
         break;
+
       case 'reference':
         var unionType = 'union ';
+
         if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
-          var _type2 = 'type ' + prefix + '_' + field.reference_to + ' implements Node @infer { title: String' + (disableMandatoryFields ? '' : '!') + ' }';
-          types.push(_type2);
 
+          var _type2 = "type ".concat(prefix, "_").concat(field.reference_to, " implements Node @infer { title: String").concat(disableMandatoryFields ? '' : '!', " }");
+
+          types.push(_type2);
           references.push({
             parent: parent,
             uid: field.uid
           });
 
           if (field.mandatory && !disableMandatoryFields) {
-            fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']!';
+            fields[field.uid] = "[".concat(prefix, "_").concat(field.reference_to, "]!");
           } else {
-            fields[field.uid] = '[' + prefix + '_' + field.reference_to + ']';
+            fields[field.uid] = "[".concat(prefix, "_").concat(field.reference_to, "]");
           }
         } else {
           var unions = [];
           field.reference_to.forEach(function (reference) {
-            var referenceType = prefix + '_' + reference;
+            var referenceType = "".concat(prefix, "_").concat(reference);
             unionType = unionType.concat(referenceType);
             unions.push(referenceType);
-            var type = 'type ' + referenceType + ' implements Node @infer { title: String' + (disableMandatoryFields ? '' : '!') + ' }';
+            var type = "type ".concat(referenceType, " implements Node @infer { title: String").concat(disableMandatoryFields ? '' : '!', " }");
             types.push(type);
           });
           var name = '';
           name = name.concat(unions.join(''), '_Union');
           unionType = unionType.concat('_Union = ', unions.join(' | '));
           types.push(unionType);
-
           references.push({
             parent: parent,
             uid: field.uid
           });
 
           if (field.mandatory && !disableMandatoryFields) {
-            fields[field.uid] = '[' + name + ']!';
+            fields[field.uid] = "[".concat(name, "]!");
           } else {
-            fields[field.uid] = '[' + name + ']';
+            fields[field.uid] = "[".concat(name, "]");
           }
         }
+
         break;
     }
   });
