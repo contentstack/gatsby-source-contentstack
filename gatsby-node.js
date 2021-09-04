@@ -156,9 +156,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
               node = getNode(nodeId);
 
               if (node) {
-                deleteNode({
-                  node: node
-                });
+                deleteNode(node);
               }
             };
 
@@ -207,15 +205,14 @@ exports.sourceNodes = /*#__PURE__*/function () {
                 assetsNodeIds.add(n.id);
               }
 
-              touchNode({
-                nodeId: n.id
-              });
+              touchNode(n);
 
               if (n.localAsset___NODE) {
                 // Prevent GraphQL type inference from crashing on this property
-                touchNode({
+                // touchNode({ nodeId: n.localAsset___NODE });
+                touchNode(_objectSpread(_objectSpread({}, n), {}, {
                   nodeId: n.localAsset___NODE
-                });
+                }));
               }
             });
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
@@ -330,9 +327,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
                 return n.internal.type === "".concat(typePrefix, "_").concat(item.content_type_uid);
               });
               sameContentTypeNodes.forEach(function (node) {
-                return deleteNode({
-                  node: node
-                });
+                return deleteNode(node);
               });
             }); // Updating the syncToken
 
