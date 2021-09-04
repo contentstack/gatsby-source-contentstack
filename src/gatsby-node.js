@@ -169,12 +169,12 @@ exports.sourceNodes = async ({
     if (n.internal.type === `${typePrefix}_assets`) {
       assetsNodeIds.add(n.id);
     }
-    touchNode({
-      nodeId: n.id,
-    });
+
+    touchNode(n);
     if (n.localAsset___NODE) {
       // Prevent GraphQL type inference from crashing on this property
-      touchNode({ nodeId: n.localAsset___NODE });
+      // touchNode({ nodeId: n.localAsset___NODE });
+      touchNode({ ...n, nodeId: n.localAsset___NODE });
     }
   });
 
@@ -289,9 +289,7 @@ exports.sourceNodes = async ({
     }
     node = getNode(nodeId);
     if (node) {
-      deleteNode({
-        node,
-      });
+      deleteNode(node);
     }
   }
 
@@ -324,9 +322,7 @@ exports.sourceNodes = async ({
         n => n.internal.type === `${typePrefix}_${item.content_type_uid}`
       );
       sameContentTypeNodes.forEach(node =>
-        deleteNode({
-          node,
-        })
+        deleteNode(node)
       );
     });
 
