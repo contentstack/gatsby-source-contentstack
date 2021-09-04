@@ -426,7 +426,9 @@ exports.pluginOptionsSchema = function (_ref7) {
     cdn: Joi.string()["default"]("https://cdn.contentstack.io/v3").description("CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 "),
     type_prefix: Joi.string()["default"]("Contentstack").description("Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks."),
     expediteBuild: Joi["boolean"]()["default"](false).description("expediteBuild set this to either true or false."),
-    enableSchemaGeneration: Joi["boolean"]()["default"](false).description("Specify true if you want to generate custom schema.")
+    enableSchemaGeneration: Joi["boolean"]()["default"](false).description("Specify true if you want to generate custom schema."),
+    disableMandatoryFields: Joi["boolean"]()["default"](false).description("Specify true if you want to generate optional graphql fields for mandatory Contentstack fields"),
+    downloadImages: Joi["boolean"]()["default"](false).description("Specify true if you want to download all your contentstack images locally")
   }).external(validateContentstackAccess);
 };
 
