@@ -49,8 +49,6 @@
     "eslint-plugin-react": "7.18.3",
     "eslint-plugin-react-hooks": "1.7.0",
     "husky": "^4.3.8",
-    "i": "^0.3.6",
-    "npm": "^7.22.0",
     "prettier": "^1.5.3",
     "semantic-release": "^17.4.4"
   },
