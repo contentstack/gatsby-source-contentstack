@@ -7,6 +7,9 @@
     "build": "babel src --out-dir .",
     "watch": "babel -w src --out-dir ."
   },
+  "engines": {
+    "node": ">=12.13.0"
+  },
   "main": "gatsby-node.js",
   "repository": {
     "type": "git",
