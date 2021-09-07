@@ -52,6 +52,9 @@
     "prettier": "^1.5.3",
     "semantic-release": "^17.4.4"
   },
+  "peerDependencies": {
+    "gatsby": "^3.0.0"
+  },
   "husky": {
     "hooks": {
       "commit-msg": "npx --no-install commitlint --edit '$1'"
