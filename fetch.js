@@ -65,7 +65,6 @@ exports.fetchData = /*#__PURE__*/function () {
           case 20:
             _context.prev = 20;
             _context.t0 = _context["catch"](8);
-            // reporter.panic('Fetching contentstack data failed', error);
             reporter.panic({
               id: CODES.SyncError,
               context: {
@@ -96,7 +95,6 @@ exports.fetchData = /*#__PURE__*/function () {
           case 32:
             _context.prev = 32;
             _context.t1 = _context["catch"](26);
-            // reporter.panic('Fetching contentstack data failed', error);
             reporter.panic({
               id: CODES.SyncError,
               context: {

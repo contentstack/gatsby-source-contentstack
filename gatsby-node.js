@@ -8,6 +8,8 @@ var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/de
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
+var _ERROR_MAP;
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -136,7 +138,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
 
 exports.sourceNodes = /*#__PURE__*/function () {
   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref5, configOptions) {
-    var cache, actions, getNode, getNodes, createNodeId, store, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _yield$fetchData, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes, nextSyncToken, newState;
+    var cache, actions, getNode, getNodes, createNodeId, store, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, contentstackData, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes, nextSyncToken, newState;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
@@ -172,17 +174,35 @@ exports.sourceNodes = /*#__PURE__*/function () {
             }
 
             configOptions.syncToken = syncToken || null;
-            _context2.next = 9;
+            _context2.prev = 7;
+            _context2.next = 10;
             return fetchData(configOptions, reporter);
 
-          case 9:
+          case 10:
             _yield$fetchData = _context2.sent;
-            contentstackData = _yield$fetchData.contentstackData;
-            _context2.next = 13;
+            _contentstackData = _yield$fetchData.contentstackData;
+            contentstackData = _contentstackData;
+            _context2.next = 15;
             return cache.get(typePrefix);
 
-          case 13:
+          case 15:
             contentstackData.contentTypes = _context2.sent;
+            _context2.next = 22;
+            break;
+
+          case 18:
+            _context2.prev = 18;
+            _context2.t0 = _context2["catch"](7);
+            reporter.panic({
+              id: CODES.SyncError,
+              context: {
+                sourceMessage: "Error occurred while fetching contentstack in [sourceNodes]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help."
+              },
+              error: _context2.t0
+            });
+            throw _context2.t0;
+
+          case 22:
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
                 merged[item.type] = [];
@@ -247,17 +267,17 @@ exports.sourceNodes = /*#__PURE__*/function () {
               assetsNodeIds.add(entryNodeId);
             }); // Cache the found count
 
-            _context2.t0 = configOptions.downloadImages;
+            _context2.t1 = configOptions.downloadImages;
 
-            if (!_context2.t0) {
-              _context2.next = 26;
+            if (!_context2.t1) {
+              _context2.next = 34;
               break;
             }
 
-            _context2.next = 26;
+            _context2.next = 34;
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
-          case 26:
+          case 34:
             // syncData.asset_published && syncData.asset_published.forEach((item) => {
             //   const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
             //   assetsNodeIds.add(entryNodeId);
@@ -284,12 +304,12 @@ exports.sourceNodes = /*#__PURE__*/function () {
             });
 
             if (!configOptions.downloadImages) {
-              _context2.next = 38;
+              _context2.next = 46;
               break;
             }
 
-            _context2.prev = 30;
-            _context2.next = 33;
+            _context2.prev = 38;
+            _context2.next = 41;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -299,16 +319,16 @@ exports.sourceNodes = /*#__PURE__*/function () {
               reporter: reporter
             }, typePrefix, configOptions);
 
-          case 33:
-            _context2.next = 38;
+          case 41:
+            _context2.next = 46;
             break;
 
-          case 35:
-            _context2.prev = 35;
-            _context2.t1 = _context2["catch"](30);
-            reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t1);
+          case 43:
+            _context2.prev = 43;
+            _context2.t2 = _context2["catch"](38);
+            reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t2);
 
-          case 38:
+          case 46:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               deleteContentstackNodes(item.data, 'entry');
@@ -338,12 +358,12 @@ exports.sourceNodes = /*#__PURE__*/function () {
             newState["".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key)] = nextSyncToken;
             setPluginStatus(newState);
 
-          case 47:
+          case 55:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[30, 35]]);
+    }, _callee2, null, [[7, 18], [38, 43]]);
   }));
 
   return function (_x3, _x4) {
@@ -428,24 +448,57 @@ exports.pluginOptionsSchema = function (_ref7) {
   }).external(validateContentstackAccess);
 };
 
-var ERROR_MAP = (0, _defineProperty2["default"])({}, CODES.SyncError, {
+var ERROR_MAP = (_ERROR_MAP = {}, (0, _defineProperty2["default"])(_ERROR_MAP, CODES.SyncError, {
   text: function text(context) {
     return context.sourceMessage;
   },
   level: "ERROR",
   type: "PLUGIN"
-});
+}), (0, _defineProperty2["default"])(_ERROR_MAP, CODES.APIError, {
+  text: function text(context) {
+    return context.sourceMessage;
+  },
+  level: "ERROR",
+  type: "PLUGIN"
+}), _ERROR_MAP);
+var coreSupportsOnPluginInit;
+
+try {
+  var _require4 = require('gatsby-plugin-utils'),
+      isGatsbyNodeLifecycleSupported = _require4.isGatsbyNodeLifecycleSupported;
+
+  if (isGatsbyNodeLifecycleSupported('onPluginInit')) {
+    coreSupportsOnPluginInit = 'stable';
+  } else if (isGatsbyNodeLifecycleSupported('unstable_onPluginInit')) {
+    coreSupportsOnPluginInit = 'unstable';
+  }
+} catch (error) {
+  console.error('Could not check if Gatsby supports onPluginInit lifecycle');
+}
 
 exports.onPreInit = function (_ref8) {
   var reporter = _ref8.reporter;
 
-  if (reporter.setErrorMap) {
+  if (!coreSupportsOnPluginInit && reporter.setErrorMap) {
     reporter.setErrorMap(ERROR_MAP);
   }
-};
+}; // need to conditionally export otherwise it throws error for older versions
+
+
+if (coreSupportsOnPluginInit === 'stable') {
+  exports.onPluginInit = function (_ref9) {
+    var reporter = _ref9.reporter;
+    reporter.setErrorMap(ERROR_MAP);
+  };
+} else if (coreSupportsOnPluginInit === 'unstable') {
+  exports.unstable_onPluginInit = function (_ref10) {
+    var reporter = _ref10.reporter;
+    reporter.setErrorMap(ERROR_MAP);
+  };
+}
 
 var validateContentstackAccess = /*#__PURE__*/function () {
-  var _ref9 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(pluginOptions) {
+  var _ref11 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(pluginOptions) {
     var host;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) {
@@ -484,6 +537,6 @@ var validateContentstackAccess = /*#__PURE__*/function () {
   }));
 
   return function validateContentstackAccess(_x5) {
-    return _ref9.apply(this, arguments);
+    return _ref11.apply(this, arguments);
   };
 }();
