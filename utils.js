@@ -7,12 +7,11 @@ exports.createProgress = function (message, reporter) {
     return reporter.createProgress(message);
   }
 
-  var bar = new ProgressBar(' [:bar] :current/:total :elapsed s :percent ' + message, {
+  var bar = new ProgressBar(" [:bar] :current/:total :elapsed s :percent ".concat(message), {
     total: 0,
     width: 30,
     clear: true
   });
-
   return {
     start: function start() {},
     tick: function tick() {
@@ -23,6 +22,7 @@ exports.createProgress = function (message, reporter) {
     set total(value) {
       bar.total = value;
     }
+
   };
 };
 
@@ -31,6 +31,7 @@ exports.checkIfUnsupportedFormat = function (data) {
   // eslint-disable-next-line
   var extenstionReg = /[^.]+$/,
       extName = '';
+
   try {
     extName = extenstionReg.exec(data);
     extName = extName && extName.length ? extName[0] : null;
@@ -38,6 +39,7 @@ exports.checkIfUnsupportedFormat = function (data) {
     console.log('errStr', errStr);
     throw new Error(err);
   }
+
   return extName === 'svg' || extName === 'gif' ? true : false;
 };
 
