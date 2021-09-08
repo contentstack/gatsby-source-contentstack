@@ -26,7 +26,8 @@ var _require = require('./normalize'),
 var _require2 = require('./utils'),
     checkIfUnsupportedFormat = _require2.checkIfUnsupportedFormat,
     SUPPORTED_FILES_COUNT = _require2.SUPPORTED_FILES_COUNT,
-    IMAGE_REGEXP = _require2.IMAGE_REGEXP;
+    IMAGE_REGEXP = _require2.IMAGE_REGEXP,
+    CODES = _require2.CODES;
 
 var _require3 = require('./fetch'),
     fetchData = _require3.fetchData,
@@ -427,8 +428,24 @@ exports.pluginOptionsSchema = function (_ref7) {
   }).external(validateContentstackAccess);
 };
 
+var ERROR_MAP = (0, _defineProperty2["default"])({}, CODES.SyncError, {
+  text: function text(context) {
+    return context.sourceMessage;
+  },
+  level: "ERROR",
+  type: "PLUGIN"
+});
+
+exports.onPreInit = function (_ref8) {
+  var reporter = _ref8.reporter;
+
+  if (reporter.setErrorMap) {
+    reporter.setErrorMap(ERROR_MAP);
+  }
+};
+
 var validateContentstackAccess = /*#__PURE__*/function () {
-  var _ref8 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(pluginOptions) {
+  var _ref9 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(pluginOptions) {
     var host;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) {
@@ -467,6 +484,6 @@ var validateContentstackAccess = /*#__PURE__*/function () {
   }));
 
   return function validateContentstackAccess(_x5) {
-    return _ref8.apply(this, arguments);
+    return _ref9.apply(this, arguments);
   };
 }();

@@ -9,7 +9,7 @@ const {
   buildCustomSchema,
   extendSchemaWithDefaultEntryFields,
 } = require('./normalize');
-const {checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT, IMAGE_REGEXP}=require('./utils');
+const {checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES}=require('./utils');
 
 const { fetchData, fetchContentTypes } = require('./fetch');
 
@@ -426,6 +426,20 @@ exports.pluginOptionsSchema = ({ Joi }) => {
     downloadImages: Joi.boolean().default(false).description(`Specify true if you want to download all your contentstack images locally`)
   }).external(validateContentstackAccess)
 }
+
+const ERROR_MAP = {
+  [CODES.SyncError]: {
+    text: context => context.sourceMessage,
+    level: `ERROR`,
+    type: `PLUGIN`
+  }
+};
+
+exports.onPreInit = ({ reporter }) => {
+  if (reporter.setErrorMap) {
+    reporter.setErrorMap(ERROR_MAP);
+  }
+};
 
 
 const validateContentstackAccess = async pluginOptions => {

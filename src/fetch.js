@@ -5,6 +5,7 @@ const {
   version,
   // eslint-disable-next-line import/no-unresolved
 } = require('./package.json');
+const {CODES} = require('./utils');
 
 
 exports.fetchData = async (configOptions, reporter) => {
@@ -35,7 +36,14 @@ exports.fetchData = async (configOptions, reporter) => {
       syncData.data = data;
       syncData.token = null;
     } catch (error) {
-      reporter.panic('Fetching contentstack data failed', error);
+      // reporter.panic('Fetching contentstack data failed', error);
+      reporter.panic({
+        id: CODES.SyncError,
+        context: {
+          sourceMessage: `Fetching contentstack data failed [expediteBuild]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
+        },
+        error
+      });
     }
   } else {
     const syncParams = configOptions.syncToken ? {
@@ -47,7 +55,14 @@ exports.fetchData = async (configOptions, reporter) => {
     try {
       syncData = await fetchSyncData(syncParams, configOptions);
     } catch (error) {
-      reporter.panic('Fetching contentstack data failed', error);
+      // reporter.panic('Fetching contentstack data failed', error);
+      reporter.panic({
+        id: CODES.SyncError,
+        context: {
+          sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
+        },
+        error
+      });
     }
   }
 
