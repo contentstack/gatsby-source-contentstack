@@ -36,7 +36,6 @@ exports.fetchData = async (configOptions, reporter) => {
       syncData.data = data;
       syncData.token = null;
     } catch (error) {
-      // reporter.panic('Fetching contentstack data failed', error);
       reporter.panic({
         id: CODES.SyncError,
         context: {
@@ -55,7 +54,6 @@ exports.fetchData = async (configOptions, reporter) => {
     try {
       syncData = await fetchSyncData(syncParams, configOptions);
     } catch (error) {
-      // reporter.panic('Fetching contentstack data failed', error);
       reporter.panic({
         id: CODES.SyncError,
         context: {
