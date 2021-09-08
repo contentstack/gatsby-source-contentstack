@@ -1,40 +1,30 @@
-'use strict';
+"use strict";
 
-var _regenerator = require('babel-runtime/regenerator');
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-var _regenerator2 = _interopRequireDefault(_regenerator);
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _promise = require('babel-runtime/core-js/promise');
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
-var _promise2 = _interopRequireDefault(_promise);
-
-var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
-
-var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
-
-var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
-
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var queryString = require('query-string');
+
 var fetch = require('node-fetch');
 
 var _require = require('./package.json'),
     version = _require.version;
 
-exports.fetchData = function () {
-  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(configOptions, reporter) {
-    var syncData, syncEntryParams, syncAssetParams, _ref2, _ref3, syncEntryData, syncAssetData, data, syncParams, contentstackData;
+exports.fetchData = /*#__PURE__*/function () {
+  var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(configOptions, reporter) {
+    var syncData, syncEntryParams, syncAssetParams, _yield$Promise$all, _yield$Promise$all2, syncEntryData, syncAssetData, data, syncParams, contentstackData;
 
-    return _regenerator2.default.wrap(function _callee$(_context) {
+    return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
             console.time('Fetch Contentstack data');
             console.log('Starting to fetch data from Contentstack');
-
             syncData = {};
 
             if (!configOptions.expediteBuild) {
@@ -52,22 +42,18 @@ exports.fetchData = function () {
             } : {
               init: true
             };
-
-
             syncEntryParams.type = 'entry_published';
             syncAssetParams.type = 'asset_published';
-
             _context.prev = 8;
             _context.next = 11;
-            return _promise2.default.all([fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
+            return Promise.all([fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
 
           case 11:
-            _ref2 = _context.sent;
-            _ref3 = (0, _slicedToArray3.default)(_ref2, 2);
-            syncEntryData = _ref3[0];
-            syncAssetData = _ref3[1];
+            _yield$Promise$all = _context.sent;
+            _yield$Promise$all2 = (0, _slicedToArray2["default"])(_yield$Promise$all, 2);
+            syncEntryData = _yield$Promise$all2[0];
+            syncAssetData = _yield$Promise$all2[1];
             data = syncEntryData.data.concat(syncAssetData.data);
-
             syncData.data = data;
             syncData.token = null;
             _context.next = 23;
@@ -75,8 +61,7 @@ exports.fetchData = function () {
 
           case 20:
             _context.prev = 20;
-            _context.t0 = _context['catch'](8);
-
+            _context.t0 = _context["catch"](8);
             reporter.panic('Fetching contentstack data failed', _context.t0);
 
           case 23:
@@ -100,8 +85,7 @@ exports.fetchData = function () {
 
           case 32:
             _context.prev = 32;
-            _context.t1 = _context['catch'](26);
-
+            _context.t1 = _context["catch"](26);
             reporter.panic('Fetching contentstack data failed', _context.t1);
 
           case 35:
@@ -109,20 +93,17 @@ exports.fetchData = function () {
               syncData: syncData.data,
               sync_token: syncData.sync_token
             };
-
-
             console.timeEnd('Fetch Contentstack data');
-
-            return _context.abrupt('return', {
+            return _context.abrupt("return", {
               contentstackData: contentstackData
             });
 
           case 38:
-          case 'end':
+          case "end":
             return _context.stop();
         }
       }
-    }, _callee, undefined, [[8, 20], [26, 32]]);
+    }, _callee, null, [[8, 20], [26, 32]]);
   }));
 
   return function (_x, _x2) {
@@ -130,15 +111,14 @@ exports.fetchData = function () {
   };
 }();
 
-exports.fetchContentTypes = function () {
-  var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(config) {
+exports.fetchContentTypes = /*#__PURE__*/function () {
+  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(config) {
     var url, responseKey, query, allContentTypes;
-    return _regenerator2.default.wrap(function _callee2$(_context2) {
+    return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
-
             url = 'content_types';
             responseKey = 'content_types';
             query = {
@@ -149,25 +129,25 @@ exports.fetchContentTypes = function () {
 
           case 6:
             allContentTypes = _context2.sent;
-            return _context2.abrupt('return', allContentTypes);
+            return _context2.abrupt("return", allContentTypes);
 
           case 8:
-          case 'end':
+          case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, undefined);
+    }, _callee2);
   }));
 
   return function (_x3) {
-    return _ref4.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
-var fetchSyncData = function () {
-  var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(query, config) {
+var fetchSyncData = /*#__PURE__*/function () {
+  var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(query, config) {
     var url, response;
-    return _regenerator2.default.wrap(function _callee3$(_context3) {
+    return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
@@ -177,43 +157,43 @@ var fetchSyncData = function () {
 
           case 3:
             response = _context3.sent;
-            return _context3.abrupt('return', response);
+            return _context3.abrupt("return", response);
 
           case 5:
-          case 'end':
+          case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, undefined);
+    }, _callee3);
   }));
 
   return function fetchSyncData(_x4, _x5) {
-    return _ref5.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }();
 
-var fetchCsData = function () {
-  var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(url, config, query) {
+var fetchCsData = /*#__PURE__*/function () {
+  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(url, config, query) {
     var queryParams, apiUrl, option;
-    return _regenerator2.default.wrap(function _callee4$(_context4) {
+    return _regenerator["default"].wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
             query = query || {};
-            query.include_count = true;
-            // query.api_key = config.api_key;
+            query.include_count = true; // query.api_key = config.api_key;
             // query.access_token = config.delivery_token;
+
             query.environment = config.environment;
             queryParams = queryString.stringify(query);
-            apiUrl = config.cdn + '/' + url + '?' + queryParams;
+            apiUrl = "".concat(config.cdn, "/").concat(url, "?").concat(queryParams);
             option = {
               headers: {
-                'X-User-Agent': 'contentstack-gatsby-source-plugin-' + version,
+                'X-User-Agent': "contentstack-gatsby-source-plugin-".concat(version),
                 api_key: config.api_key,
                 access_token: config.delivery_token
               }
             };
-            return _context4.abrupt('return', new _promise2.default(function (resolve, reject) {
+            return _context4.abrupt("return", new Promise(function (resolve, reject) {
               fetch(apiUrl, option).then(function (response) {
                 return response.json();
               }).then(function (data) {
@@ -223,43 +203,48 @@ var fetchCsData = function () {
                 } else {
                   resolve(data);
                 }
-              }).catch(function (err) {
+              })["catch"](function (err) {
                 console.error(err);
                 reject(err);
               });
             }));
 
           case 7:
-          case 'end':
+          case "end":
             return _context4.stop();
         }
       }
-    }, _callee4, undefined);
+    }, _callee4);
   }));
 
   return function fetchCsData(_x6, _x7, _x8) {
-    return _ref6.apply(this, arguments);
+    return _ref4.apply(this, arguments);
   };
 }();
 
-var getPagedData = function () {
-  var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(url, config, responseKey) {
-    var query = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-    var skip = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
-    var limit = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 100;
-    var aggregatedResponse = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
-    var response;
-    return _regenerator2.default.wrap(function _callee5$(_context5) {
+var getPagedData = /*#__PURE__*/function () {
+  var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(url, config, responseKey) {
+    var query,
+        skip,
+        limit,
+        aggregatedResponse,
+        response,
+        _args5 = arguments;
+    return _regenerator["default"].wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
+            query = _args5.length > 3 && _args5[3] !== undefined ? _args5[3] : {};
+            skip = _args5.length > 4 && _args5[4] !== undefined ? _args5[4] : 0;
+            limit = _args5.length > 5 && _args5[5] !== undefined ? _args5[5] : 100;
+            aggregatedResponse = _args5.length > 6 && _args5[6] !== undefined ? _args5[6] : null;
             query.skip = skip;
             query.limit = limit;
             query.include_global_field_schema = true;
-            _context5.next = 5;
+            _context5.next = 9;
             return fetchCsData(url, config, query);
 
-          case 5:
+          case 9:
             response = _context5.sent;
 
             if (!aggregatedResponse) {
@@ -269,40 +254,42 @@ var getPagedData = function () {
             }
 
             if (!(skip + limit <= response.count)) {
-              _context5.next = 9;
+              _context5.next = 13;
               break;
             }
 
-            return _context5.abrupt('return', getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse));
+            return _context5.abrupt("return", getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse));
 
-          case 9:
-            return _context5.abrupt('return', aggregatedResponse);
+          case 13:
+            return _context5.abrupt("return", aggregatedResponse);
 
-          case 10:
-          case 'end':
+          case 14:
+          case "end":
             return _context5.stop();
         }
       }
-    }, _callee5, undefined);
+    }, _callee5);
   }));
 
   return function getPagedData(_x9, _x10, _x11) {
-    return _ref7.apply(this, arguments);
+    return _ref5.apply(this, arguments);
   };
 }();
 
-var getSyncData = function () {
-  var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(url, config, query, responseKey) {
-    var aggregatedResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
-    var response;
-    return _regenerator2.default.wrap(function _callee6$(_context6) {
+var getSyncData = /*#__PURE__*/function () {
+  var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(url, config, query, responseKey) {
+    var aggregatedResponse,
+        response,
+        _args6 = arguments;
+    return _regenerator["default"].wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
-            _context6.next = 2;
+            aggregatedResponse = _args6.length > 4 && _args6[4] !== undefined ? _args6[4] : null;
+            _context6.next = 3;
             return fetchCsData(url, config, query);
 
-          case 2:
+          case 3:
             response = _context6.sent;
 
             if (!aggregatedResponse) {
@@ -317,26 +304,26 @@ var getSyncData = function () {
             }
 
             if (!response.pagination_token) {
-              _context6.next = 6;
+              _context6.next = 7;
               break;
             }
 
-            return _context6.abrupt('return', getSyncData(url, config, query = {
+            return _context6.abrupt("return", getSyncData(url, config, query = {
               pagination_token: response.pagination_token
             }, responseKey, aggregatedResponse));
 
-          case 6:
-            return _context6.abrupt('return', aggregatedResponse);
-
           case 7:
-          case 'end':
+            return _context6.abrupt("return", aggregatedResponse);
+
+          case 8:
+          case "end":
             return _context6.stop();
         }
       }
-    }, _callee6, undefined);
+    }, _callee6);
   }));
 
-  return function getSyncData(_x16, _x17, _x18, _x19) {
-    return _ref8.apply(this, arguments);
+  return function getSyncData(_x12, _x13, _x14, _x15) {
+    return _ref6.apply(this, arguments);
   };
 }();

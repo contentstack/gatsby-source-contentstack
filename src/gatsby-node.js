@@ -169,12 +169,12 @@ exports.sourceNodes = async ({
     if (n.internal.type === `${typePrefix}_assets`) {
       assetsNodeIds.add(n.id);
     }
-    touchNode({
-      nodeId: n.id,
-    });
+
+    touchNode(n);
     if (n.localAsset___NODE) {
       // Prevent GraphQL type inference from crashing on this property
-      touchNode({ nodeId: n.localAsset___NODE });
+      // touchNode({ nodeId: n.localAsset___NODE });
+      touchNode({ ...n, nodeId: n.localAsset___NODE });
     }
   });
 
@@ -289,9 +289,7 @@ exports.sourceNodes = async ({
     }
     node = getNode(nodeId);
     if (node) {
-      deleteNode({
-        node,
-      });
+      deleteNode(node);
     }
   }
 
@@ -324,9 +322,7 @@ exports.sourceNodes = async ({
         n => n.internal.type === `${typePrefix}_${item.content_type_uid}`
       );
       sameContentTypeNodes.forEach(node =>
-        deleteNode({
-          node,
-        })
+        deleteNode(node)
       );
     });
 
@@ -426,6 +422,8 @@ exports.pluginOptionsSchema = ({ Joi }) => {
     type_prefix:  Joi.string().default(`Contentstack`).description(`Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.`),
     expediteBuild: Joi.boolean().default(false).description(`expediteBuild set this to either true or false.`),
     enableSchemaGeneration: Joi.boolean().default(false).description(`Specify true if you want to generate custom schema.`),
+    disableMandatoryFields: Joi.boolean().default(false).description(`Specify true if you want to generate optional graphql fields for mandatory Contentstack fields`),
+    downloadImages: Joi.boolean().default(false).description(`Specify true if you want to download all your contentstack images locally`)
   }).external(validateContentstackAccess)
 }
 
