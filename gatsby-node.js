@@ -135,7 +135,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
 
 exports.sourceNodes = /*#__PURE__*/function () {
   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref5, configOptions) {
-    var cache, actions, getNode, getNodes, createNodeId, store, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, _yield$fetchData, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes, nextSyncToken, newState;
+    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, typePrefix, tokenKey, syncToken, _yield$fetchData, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
@@ -160,27 +160,27 @@ exports.sourceNodes = /*#__PURE__*/function () {
               }
             };
 
-            cache = _ref5.cache, actions = _ref5.actions, getNode = _ref5.getNode, getNodes = _ref5.getNodes, createNodeId = _ref5.createNodeId, store = _ref5.store, reporter = _ref5.reporter, createContentDigest = _ref5.createContentDigest, getNodesByType = _ref5.getNodesByType, getCache = _ref5.getCache;
-            createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus;
-            _store$getState = store.getState(), status = _store$getState.status; // use a custom type prefix if specified
+            cache = _ref5.cache, actions = _ref5.actions, getNode = _ref5.getNode, getNodes = _ref5.getNodes, createNodeId = _ref5.createNodeId, reporter = _ref5.reporter, createContentDigest = _ref5.createContentDigest, getNodesByType = _ref5.getNodesByType, getCache = _ref5.getCache;
+            createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode; // use a custom type prefix if specified
 
             typePrefix = configOptions.type_prefix || 'Contentstack';
+            tokenKey = "".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key);
+            _context2.next = 7;
+            return cache.get(tokenKey);
 
-            if (status && status.plugins && status.plugins['gatsby-source-contentstack']) {
-              syncToken = status.plugins['gatsby-source-contentstack']["".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key)];
-            }
-
+          case 7:
+            syncToken = _context2.sent;
             configOptions.syncToken = syncToken || null;
-            _context2.next = 9;
+            _context2.next = 11;
             return fetchData(configOptions, reporter);
 
-          case 9:
+          case 11:
             _yield$fetchData = _context2.sent;
             contentstackData = _yield$fetchData.contentstackData;
-            _context2.next = 13;
+            _context2.next = 15;
             return cache.get(typePrefix);
 
-          case 13:
+          case 15:
             contentstackData.contentTypes = _context2.sent;
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
@@ -249,18 +249,14 @@ exports.sourceNodes = /*#__PURE__*/function () {
             _context2.t0 = configOptions.downloadImages;
 
             if (!_context2.t0) {
-              _context2.next = 26;
+              _context2.next = 28;
               break;
             }
 
-            _context2.next = 26;
+            _context2.next = 28;
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
-          case 26:
-            // syncData.asset_published && syncData.asset_published.forEach((item) => {
-            //   const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
-            //   assetsNodeIds.add(entryNodeId);
-            // });
+          case 28:
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -283,12 +279,12 @@ exports.sourceNodes = /*#__PURE__*/function () {
             });
 
             if (!configOptions.downloadImages) {
-              _context2.next = 38;
+              _context2.next = 40;
               break;
             }
 
-            _context2.prev = 30;
-            _context2.next = 33;
+            _context2.prev = 32;
+            _context2.next = 35;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -298,28 +294,28 @@ exports.sourceNodes = /*#__PURE__*/function () {
               reporter: reporter
             }, typePrefix, configOptions);
 
-          case 33:
-            _context2.next = 38;
+          case 35:
+            _context2.next = 40;
             break;
 
-          case 35:
-            _context2.prev = 35;
-            _context2.t1 = _context2["catch"](30);
+          case 37:
+            _context2.prev = 37;
+            _context2.t1 = _context2["catch"](32);
             reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t1);
 
-          case 38:
+          case 40:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'entry');
+              return deleteContentstackNodes(item.data, 'entry');
             });
             syncData.asset_unpublished && syncData.asset_unpublished.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'asset');
+              return deleteContentstackNodes(item.data, 'asset');
             });
             syncData.entry_deleted && syncData.entry_deleted.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'entry');
+              return deleteContentstackNodes(item.data, 'entry');
             });
             syncData.asset_deleted && syncData.asset_deleted.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'asset');
+              return deleteContentstackNodes(item.data, 'asset');
             });
             syncData.content_type_deleted && syncData.content_type_deleted.forEach(function (item) {
               item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
@@ -329,20 +325,17 @@ exports.sourceNodes = /*#__PURE__*/function () {
               sameContentTypeNodes.forEach(function (node) {
                 return deleteNode(node);
               });
-            }); // Updating the syncToken
+            }); // Caching token for the next sync
 
-            nextSyncToken = contentstackData.sync_token; // Storing the sync state for the next sync
-
-            newState = {};
-            newState["".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key)] = nextSyncToken;
-            setPluginStatus(newState);
+            _context2.next = 47;
+            return cache.set(tokenKey, contentstackData.sync_token);
 
           case 47:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[30, 35]]);
+    }, _callee2, null, [[32, 37]]);
   }));
 
   return function (_x3, _x4) {

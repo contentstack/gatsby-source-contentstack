@@ -108,36 +108,17 @@ exports.sourceNodes = async ({
   getNode,
   getNodes,
   createNodeId,
-  store,
   reporter,
   createContentDigest,
   getNodesByType,
   getCache,
 }, configOptions) => {
-  const {
-    createNode,
-    deleteNode,
-    touchNode,
-    setPluginStatus,
-  } = actions;
-  let syncToken;
-  const {
-    status,
-  } = store.getState();
+  const { createNode, deleteNode, touchNode } = actions;
 
   // use a custom type prefix if specified
   const typePrefix = configOptions.type_prefix || 'Contentstack';
-
-  if (
-    status &&
-    status.plugins &&
-    status.plugins['gatsby-source-contentstack']
-  ) {
-    syncToken =
-      status.plugins['gatsby-source-contentstack'][
-        `${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`
-      ];
-  }
+  const tokenKey = `${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`;
+  const syncToken = await cache.get(tokenKey);
 
   configOptions.syncToken = syncToken || null;
 
@@ -213,10 +194,6 @@ exports.sourceNodes = async ({
   });
   // Cache the found count
  configOptions.downloadImages && await cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
-  // syncData.asset_published && syncData.asset_published.forEach((item) => {
-  //   const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
-  //   assetsNodeIds.add(entryNodeId);
-  // });
 
   // adding nodes
   contentstackData.contentTypes.forEach(contentType => {
@@ -294,26 +271,13 @@ exports.sourceNodes = async ({
   }
 
   // deleting nodes
+  syncData.entry_unpublished && syncData.entry_unpublished.forEach(item => deleteContentstackNodes(item.data, 'entry'));
 
-  syncData.entry_unpublished &&
-    syncData.entry_unpublished.forEach(item => {
-      deleteContentstackNodes(item.data, 'entry');
-    });
+  syncData.asset_unpublished && syncData.asset_unpublished.forEach(item => deleteContentstackNodes(item.data, 'asset'));
 
-  syncData.asset_unpublished &&
-    syncData.asset_unpublished.forEach(item => {
-      deleteContentstackNodes(item.data, 'asset');
-    });
+  syncData.entry_deleted && syncData.entry_deleted.forEach(item => deleteContentstackNodes(item.data, 'entry'));
 
-  syncData.entry_deleted &&
-    syncData.entry_deleted.forEach(item => {
-      deleteContentstackNodes(item.data, 'entry');
-    });
-
-  syncData.asset_deleted &&
-    syncData.asset_deleted.forEach(item => {
-      deleteContentstackNodes(item.data, 'asset');
-    });
+  syncData.asset_deleted && syncData.asset_deleted.forEach(item => deleteContentstackNodes(item.data, 'asset'));
 
   syncData.content_type_deleted &&
     syncData.content_type_deleted.forEach(item => {
@@ -326,15 +290,8 @@ exports.sourceNodes = async ({
       );
     });
 
-  // Updating the syncToken
-  const nextSyncToken = contentstackData.sync_token;
-
-  // Storing the sync state for the next sync
-  const newState = {};
-  newState[
-    `${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`
-  ] = nextSyncToken;
-  setPluginStatus(newState);
+  // Caching token for the next sync
+  await cache.set(tokenKey, contentstackData.sync_token);
 };
 
 
