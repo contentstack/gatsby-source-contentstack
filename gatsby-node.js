@@ -8,6 +8,8 @@ var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/de
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
+var _ERROR_MAP;
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -26,7 +28,8 @@ var _require = require('./normalize'),
 var _require2 = require('./utils'),
     checkIfUnsupportedFormat = _require2.checkIfUnsupportedFormat,
     SUPPORTED_FILES_COUNT = _require2.SUPPORTED_FILES_COUNT,
-    IMAGE_REGEXP = _require2.IMAGE_REGEXP;
+    IMAGE_REGEXP = _require2.IMAGE_REGEXP,
+    CODES = _require2.CODES;
 
 var _require3 = require('./fetch'),
     fetchData = _require3.fetchData,
@@ -135,7 +138,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
 
 exports.sourceNodes = /*#__PURE__*/function () {
   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref5, configOptions) {
-    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, typePrefix, tokenKey, syncToken, _yield$fetchData, contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes;
+    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, typePrefix, tokenKey, syncToken, contentstackData, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
@@ -171,17 +174,35 @@ exports.sourceNodes = /*#__PURE__*/function () {
           case 7:
             syncToken = _context2.sent;
             configOptions.syncToken = syncToken || null;
-            _context2.next = 11;
+            _context2.prev = 9;
+            _context2.next = 12;
             return fetchData(configOptions, reporter);
 
-          case 11:
+          case 12:
             _yield$fetchData = _context2.sent;
-            contentstackData = _yield$fetchData.contentstackData;
-            _context2.next = 15;
+            _contentstackData = _yield$fetchData.contentstackData;
+            contentstackData = _contentstackData;
+            _context2.next = 17;
             return cache.get(typePrefix);
 
-          case 15:
+          case 17:
             contentstackData.contentTypes = _context2.sent;
+            _context2.next = 24;
+            break;
+
+          case 20:
+            _context2.prev = 20;
+            _context2.t0 = _context2["catch"](9);
+            reporter.panic({
+              id: CODES.SyncError,
+              context: {
+                sourceMessage: "Error occurred while fetching contentstack in [sourceNodes]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help."
+              },
+              error: _context2.t0
+            });
+            throw _context2.t0;
+
+          case 24:
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
                 merged[item.type] = [];
@@ -246,17 +267,17 @@ exports.sourceNodes = /*#__PURE__*/function () {
               assetsNodeIds.add(entryNodeId);
             }); // Cache the found count
 
-            _context2.t0 = configOptions.downloadImages;
+            _context2.t1 = configOptions.downloadImages;
 
-            if (!_context2.t0) {
-              _context2.next = 28;
+            if (!_context2.t1) {
+              _context2.next = 36;
               break;
             }
 
-            _context2.next = 28;
+            _context2.next = 36;
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
-          case 28:
+          case 36:
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -279,12 +300,12 @@ exports.sourceNodes = /*#__PURE__*/function () {
             });
 
             if (!configOptions.downloadImages) {
-              _context2.next = 40;
+              _context2.next = 48;
               break;
             }
 
-            _context2.prev = 32;
-            _context2.next = 35;
+            _context2.prev = 40;
+            _context2.next = 43;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -294,16 +315,16 @@ exports.sourceNodes = /*#__PURE__*/function () {
               reporter: reporter
             }, typePrefix, configOptions);
 
-          case 35:
-            _context2.next = 40;
+          case 43:
+            _context2.next = 48;
             break;
 
-          case 37:
-            _context2.prev = 37;
-            _context2.t1 = _context2["catch"](32);
-            reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t1);
+          case 45:
+            _context2.prev = 45;
+            _context2.t2 = _context2["catch"](40);
+            reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t2);
 
-          case 40:
+          case 48:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'entry');
@@ -327,15 +348,15 @@ exports.sourceNodes = /*#__PURE__*/function () {
               });
             }); // Caching token for the next sync
 
-            _context2.next = 47;
+            _context2.next = 55;
             return cache.set(tokenKey, contentstackData.sync_token);
 
-          case 47:
+          case 55:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[32, 37]]);
+    }, _callee2, null, [[9, 20], [40, 45]]);
   }));
 
   return function (_x3, _x4) {
@@ -420,8 +441,57 @@ exports.pluginOptionsSchema = function (_ref7) {
   }).external(validateContentstackAccess);
 };
 
+var ERROR_MAP = (_ERROR_MAP = {}, (0, _defineProperty2["default"])(_ERROR_MAP, CODES.SyncError, {
+  text: function text(context) {
+    return context.sourceMessage;
+  },
+  level: "ERROR",
+  type: "PLUGIN"
+}), (0, _defineProperty2["default"])(_ERROR_MAP, CODES.APIError, {
+  text: function text(context) {
+    return context.sourceMessage;
+  },
+  level: "ERROR",
+  type: "PLUGIN"
+}), _ERROR_MAP);
+var coreSupportsOnPluginInit;
+
+try {
+  var _require4 = require('gatsby-plugin-utils'),
+      isGatsbyNodeLifecycleSupported = _require4.isGatsbyNodeLifecycleSupported;
+
+  if (isGatsbyNodeLifecycleSupported('onPluginInit')) {
+    coreSupportsOnPluginInit = 'stable';
+  } else if (isGatsbyNodeLifecycleSupported('unstable_onPluginInit')) {
+    coreSupportsOnPluginInit = 'unstable';
+  }
+} catch (error) {
+  console.error('Could not check if Gatsby supports onPluginInit lifecycle');
+}
+
+exports.onPreInit = function (_ref8) {
+  var reporter = _ref8.reporter;
+
+  if (!coreSupportsOnPluginInit && reporter.setErrorMap) {
+    reporter.setErrorMap(ERROR_MAP);
+  }
+}; // need to conditionally export otherwise it throws error for older versions
+
+
+if (coreSupportsOnPluginInit === 'stable') {
+  exports.onPluginInit = function (_ref9) {
+    var reporter = _ref9.reporter;
+    reporter.setErrorMap(ERROR_MAP);
+  };
+} else if (coreSupportsOnPluginInit === 'unstable') {
+  exports.unstable_onPluginInit = function (_ref10) {
+    var reporter = _ref10.reporter;
+    reporter.setErrorMap(ERROR_MAP);
+  };
+}
+
 var validateContentstackAccess = /*#__PURE__*/function () {
-  var _ref8 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(pluginOptions) {
+  var _ref11 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(pluginOptions) {
     var host;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) {
@@ -460,6 +530,6 @@ var validateContentstackAccess = /*#__PURE__*/function () {
   }));
 
   return function validateContentstackAccess(_x5) {
-    return _ref8.apply(this, arguments);
+    return _ref11.apply(this, arguments);
   };
 }();

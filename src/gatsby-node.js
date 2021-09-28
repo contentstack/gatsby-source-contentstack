@@ -9,7 +9,7 @@ const {
   buildCustomSchema,
   extendSchemaWithDefaultEntryFields,
 } = require('./normalize');
-const {checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT, IMAGE_REGEXP}=require('./utils');
+const {checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES}=require('./utils');
 
 const { fetchData, fetchContentTypes } = require('./fetch');
 
@@ -122,8 +122,22 @@ exports.sourceNodes = async ({
 
   configOptions.syncToken = syncToken || null;
 
-  const { contentstackData } = await fetchData(configOptions, reporter);
-  contentstackData.contentTypes = await cache.get(typePrefix);
+  let contentstackData;
+  try {
+    const { contentstackData: _contentstackData } = await fetchData(configOptions, reporter);
+    contentstackData = _contentstackData;
+    contentstackData.contentTypes = await cache.get(typePrefix);
+  } catch (error) {
+    reporter.panic({
+      id: CODES.SyncError,
+      context: {
+        sourceMessage: `Error occurred while fetching contentstack in [sourceNodes]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
+      },
+      error
+    });
+    throw error;
+  }
+  
   const syncData = contentstackData.syncData.reduce((merged, item) => {
     if (!merged[item.type]) {
       merged[item.type] = [];
@@ -384,6 +398,48 @@ exports.pluginOptionsSchema = ({ Joi }) => {
   }).external(validateContentstackAccess)
 }
 
+const ERROR_MAP = {
+  [CODES.SyncError]: {
+    text: context => context.sourceMessage,
+    level: `ERROR`,
+    type: `PLUGIN`
+  },
+  [CODES.APIError]: {
+    text: context => context.sourceMessage,
+    level: `ERROR`,
+    type: `PLUGIN`
+  }
+};
+
+let coreSupportsOnPluginInit;
+
+try {
+  const { isGatsbyNodeLifecycleSupported } = require('gatsby-plugin-utils');
+  if (isGatsbyNodeLifecycleSupported('onPluginInit')) {
+    coreSupportsOnPluginInit = 'stable';
+  } else if (isGatsbyNodeLifecycleSupported('unstable_onPluginInit')) {
+    coreSupportsOnPluginInit = 'unstable';
+  }
+} catch (error) {
+  console.error('Could not check if Gatsby supports onPluginInit lifecycle');
+}
+
+exports.onPreInit = ({ reporter }) => {
+  if (!coreSupportsOnPluginInit && reporter.setErrorMap) {
+    reporter.setErrorMap(ERROR_MAP);
+  }
+};
+
+// need to conditionally export otherwise it throws error for older versions
+if (coreSupportsOnPluginInit === 'stable') {
+  exports.onPluginInit = ({ reporter }) => {
+    reporter.setErrorMap(ERROR_MAP);
+  };
+} else if (coreSupportsOnPluginInit === 'unstable') {
+  exports.unstable_onPluginInit = ({ reporter }) => {
+    reporter.setErrorMap(ERROR_MAP);
+  };
+}
 
 const validateContentstackAccess = async pluginOptions => {
   if (process.env.NODE_ENV === `test`) return undefined
