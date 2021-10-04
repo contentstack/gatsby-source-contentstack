@@ -45,8 +45,8 @@ exports.fetchData = /*#__PURE__*/function () {
             } : {
               init: true
             };
-            syncEntryParams.type = 'entry_published';
-            syncAssetParams.type = 'asset_published';
+            syncEntryParams.type = 'entry_published, entry_unpublished, entry_deleted';
+            syncAssetParams.type = 'asset_published, asset_unpublished, asset_deleted';
             _context.prev = 8;
             _context.next = 11;
             return Promise.all([fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);

@@ -138,7 +138,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
 
 exports.sourceNodes = /*#__PURE__*/function () {
   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref5, configOptions) {
-    var cache, actions, getNode, getNodes, createNodeId, store, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, setPluginStatus, syncToken, _store$getState, status, typePrefix, contentstackData, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes, nextSyncToken, newState;
+    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, typePrefix, tokenKey, syncToken, contentstackData, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
@@ -163,36 +163,36 @@ exports.sourceNodes = /*#__PURE__*/function () {
               }
             };
 
-            cache = _ref5.cache, actions = _ref5.actions, getNode = _ref5.getNode, getNodes = _ref5.getNodes, createNodeId = _ref5.createNodeId, store = _ref5.store, reporter = _ref5.reporter, createContentDigest = _ref5.createContentDigest, getNodesByType = _ref5.getNodesByType, getCache = _ref5.getCache;
-            createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, setPluginStatus = actions.setPluginStatus;
-            _store$getState = store.getState(), status = _store$getState.status; // use a custom type prefix if specified
+            cache = _ref5.cache, actions = _ref5.actions, getNode = _ref5.getNode, getNodes = _ref5.getNodes, createNodeId = _ref5.createNodeId, reporter = _ref5.reporter, createContentDigest = _ref5.createContentDigest, getNodesByType = _ref5.getNodesByType, getCache = _ref5.getCache;
+            createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode; // use a custom type prefix if specified
 
             typePrefix = configOptions.type_prefix || 'Contentstack';
+            tokenKey = "".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key);
+            _context2.next = 7;
+            return cache.get(tokenKey);
 
-            if (status && status.plugins && status.plugins['gatsby-source-contentstack']) {
-              syncToken = status.plugins['gatsby-source-contentstack']["".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key)];
-            }
-
+          case 7:
+            syncToken = _context2.sent;
             configOptions.syncToken = syncToken || null;
-            _context2.prev = 7;
-            _context2.next = 10;
+            _context2.prev = 9;
+            _context2.next = 12;
             return fetchData(configOptions, reporter);
 
-          case 10:
+          case 12:
             _yield$fetchData = _context2.sent;
             _contentstackData = _yield$fetchData.contentstackData;
             contentstackData = _contentstackData;
-            _context2.next = 15;
+            _context2.next = 17;
             return cache.get(typePrefix);
 
-          case 15:
+          case 17:
             contentstackData.contentTypes = _context2.sent;
-            _context2.next = 22;
+            _context2.next = 24;
             break;
 
-          case 18:
-            _context2.prev = 18;
-            _context2.t0 = _context2["catch"](7);
+          case 20:
+            _context2.prev = 20;
+            _context2.t0 = _context2["catch"](9);
             reporter.panic({
               id: CODES.SyncError,
               context: {
@@ -202,7 +202,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
             });
             throw _context2.t0;
 
-          case 22:
+          case 24:
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
                 merged[item.type] = [];
@@ -270,18 +270,14 @@ exports.sourceNodes = /*#__PURE__*/function () {
             _context2.t1 = configOptions.downloadImages;
 
             if (!_context2.t1) {
-              _context2.next = 34;
+              _context2.next = 36;
               break;
             }
 
-            _context2.next = 34;
+            _context2.next = 36;
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
-          case 34:
-            // syncData.asset_published && syncData.asset_published.forEach((item) => {
-            //   const entryNodeId = makeAssetNodeUid(item.data, createNodeId, typePrefix);
-            //   assetsNodeIds.add(entryNodeId);
-            // });
+          case 36:
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -304,12 +300,12 @@ exports.sourceNodes = /*#__PURE__*/function () {
             });
 
             if (!configOptions.downloadImages) {
-              _context2.next = 46;
+              _context2.next = 48;
               break;
             }
 
-            _context2.prev = 38;
-            _context2.next = 41;
+            _context2.prev = 40;
+            _context2.next = 43;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -319,28 +315,28 @@ exports.sourceNodes = /*#__PURE__*/function () {
               reporter: reporter
             }, typePrefix, configOptions);
 
-          case 41:
-            _context2.next = 46;
+          case 43:
+            _context2.next = 48;
             break;
 
-          case 43:
-            _context2.prev = 43;
-            _context2.t2 = _context2["catch"](38);
+          case 45:
+            _context2.prev = 45;
+            _context2.t2 = _context2["catch"](40);
             reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t2);
 
-          case 46:
+          case 48:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'entry');
+              return deleteContentstackNodes(item.data, 'entry');
             });
             syncData.asset_unpublished && syncData.asset_unpublished.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'asset');
+              return deleteContentstackNodes(item.data, 'asset');
             });
             syncData.entry_deleted && syncData.entry_deleted.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'entry');
+              return deleteContentstackNodes(item.data, 'entry');
             });
             syncData.asset_deleted && syncData.asset_deleted.forEach(function (item) {
-              deleteContentstackNodes(item.data, 'asset');
+              return deleteContentstackNodes(item.data, 'asset');
             });
             syncData.content_type_deleted && syncData.content_type_deleted.forEach(function (item) {
               item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
@@ -350,20 +346,17 @@ exports.sourceNodes = /*#__PURE__*/function () {
               sameContentTypeNodes.forEach(function (node) {
                 return deleteNode(node);
               });
-            }); // Updating the syncToken
+            }); // Caching token for the next sync
 
-            nextSyncToken = contentstackData.sync_token; // Storing the sync state for the next sync
-
-            newState = {};
-            newState["".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key)] = nextSyncToken;
-            setPluginStatus(newState);
+            _context2.next = 55;
+            return cache.set(tokenKey, contentstackData.sync_token);
 
           case 55:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[7, 18], [38, 43]]);
+    }, _callee2, null, [[9, 20], [40, 45]]);
   }));
 
   return function (_x3, _x4) {
