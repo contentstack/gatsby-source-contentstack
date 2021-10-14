@@ -1,4 +1,5 @@
-"use strict";
+'use strict';
+/** NPM dependencies */
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
@@ -13,6 +14,8 @@ var _ERROR_MAP;
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+var fetch = require('node-fetch');
 
 var _require = require('./normalize'),
     normalizeEntry = _require.normalizeEntry,
@@ -37,11 +40,10 @@ var _require3 = require('./fetch'),
 
 var downloadAssets = require('./download-assets');
 
-var fetch = require('node-fetch');
-
 var references = [];
 var groups = [];
 var fileFields = [];
+var contentTypeOption = '';
 
 exports.onPreBootstrap = function (_ref) {
   var reporter = _ref.reporter;
@@ -54,7 +56,7 @@ exports.onPreBootstrap = function (_ref) {
 
 exports.createSchemaCustomization = /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref3, configOptions) {
-    var cache, actions, schema, contentTypes, typePrefix, disableMandatoryFields, createTypes, name, fields;
+    var cache, actions, schema, contentTypes, typePrefix, disableMandatoryFields, contentTypeOptions, configOptionKeys, i, configOptionKey, createTypes, name, fields;
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -63,24 +65,50 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             typePrefix = configOptions.type_prefix || 'Contentstack';
             disableMandatoryFields = configOptions.disableMandatoryFields || false;
             _context.prev = 3;
-            _context.next = 6;
-            return fetchContentTypes(configOptions);
+            contentTypeOptions = ['includeContentTypes', 'excludeContentTypes'];
+            configOptionKeys = Object.keys(configOptions);
+            i = 0;
 
-          case 6:
-            contentTypes = _context.sent;
-            _context.next = 9;
-            return cache.set(typePrefix, contentTypes);
+          case 7:
+            if (!(i < configOptionKeys.length)) {
+              _context.next = 15;
+              break;
+            }
 
-          case 9:
-            _context.next = 14;
+            configOptionKey = configOptionKeys[i];
+
+            if (!contentTypeOptions.includes(configOptionKey)) {
+              _context.next = 12;
+              break;
+            }
+
+            contentTypeOption = configOptionKey;
+            return _context.abrupt("break", 15);
+
+          case 12:
+            i++;
+            _context.next = 7;
             break;
 
-          case 11:
-            _context.prev = 11;
+          case 15:
+            _context.next = 17;
+            return fetchContentTypes(configOptions, contentTypeOption);
+
+          case 17:
+            contentTypes = _context.sent;
+            _context.next = 20;
+            return cache.set(typePrefix, contentTypes);
+
+          case 20:
+            _context.next = 25;
+            break;
+
+          case 22:
+            _context.prev = 22;
             _context.t0 = _context["catch"](3);
             console.error('Contentstack fetch content type failed!');
 
-          case 14:
+          case 25:
             if (configOptions.enableSchemaGeneration) {
               createTypes = actions.createTypes;
               contentTypes.forEach(function (contentType) {
@@ -123,12 +151,12 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               })]);
             }
 
-          case 15:
+          case 26:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 11]]);
+    }, _callee, null, [[3, 22]]);
   }));
 
   return function (_x, _x2) {
@@ -138,7 +166,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
 
 exports.sourceNodes = /*#__PURE__*/function () {
   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref5, configOptions) {
-    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, typePrefix, tokenKey, syncToken, contentstackData, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes;
+    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, typePrefix, contentstackData, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
@@ -167,32 +195,25 @@ exports.sourceNodes = /*#__PURE__*/function () {
             createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode; // use a custom type prefix if specified
 
             typePrefix = configOptions.type_prefix || 'Contentstack';
-            tokenKey = "".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key);
+            _context2.prev = 4;
             _context2.next = 7;
-            return cache.get(tokenKey);
+            return fetchData(configOptions, reporter, cache, contentTypeOption);
 
           case 7:
-            syncToken = _context2.sent;
-            configOptions.syncToken = syncToken || null;
-            _context2.prev = 9;
-            _context2.next = 12;
-            return fetchData(configOptions, reporter);
-
-          case 12:
             _yield$fetchData = _context2.sent;
             _contentstackData = _yield$fetchData.contentstackData;
             contentstackData = _contentstackData;
-            _context2.next = 17;
+            _context2.next = 12;
             return cache.get(typePrefix);
 
-          case 17:
+          case 12:
             contentstackData.contentTypes = _context2.sent;
-            _context2.next = 24;
+            _context2.next = 19;
             break;
 
-          case 20:
-            _context2.prev = 20;
-            _context2.t0 = _context2["catch"](9);
+          case 15:
+            _context2.prev = 15;
+            _context2.t0 = _context2["catch"](4);
             reporter.panic({
               id: CODES.SyncError,
               context: {
@@ -202,7 +223,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
             });
             throw _context2.t0;
 
-          case 24:
+          case 19:
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
                 merged[item.type] = [];
@@ -270,14 +291,14 @@ exports.sourceNodes = /*#__PURE__*/function () {
             _context2.t1 = configOptions.downloadImages;
 
             if (!_context2.t1) {
-              _context2.next = 36;
+              _context2.next = 31;
               break;
             }
 
-            _context2.next = 36;
+            _context2.next = 31;
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
-          case 36:
+          case 31:
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -300,12 +321,12 @@ exports.sourceNodes = /*#__PURE__*/function () {
             });
 
             if (!configOptions.downloadImages) {
-              _context2.next = 48;
+              _context2.next = 43;
               break;
             }
 
-            _context2.prev = 40;
-            _context2.next = 43;
+            _context2.prev = 35;
+            _context2.next = 38;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -315,16 +336,16 @@ exports.sourceNodes = /*#__PURE__*/function () {
               reporter: reporter
             }, typePrefix, configOptions);
 
-          case 43:
-            _context2.next = 48;
+          case 38:
+            _context2.next = 43;
             break;
 
-          case 45:
-            _context2.prev = 45;
-            _context2.t2 = _context2["catch"](40);
+          case 40:
+            _context2.prev = 40;
+            _context2.t2 = _context2["catch"](35);
             reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t2);
 
-          case 48:
+          case 43:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'entry');
@@ -346,17 +367,14 @@ exports.sourceNodes = /*#__PURE__*/function () {
               sameContentTypeNodes.forEach(function (node) {
                 return deleteNode(node);
               });
-            }); // Caching token for the next sync
+            });
 
-            _context2.next = 55;
-            return cache.set(tokenKey, contentstackData.sync_token);
-
-          case 55:
+          case 48:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[9, 20], [40, 45]]);
+    }, _callee2, null, [[4, 15], [35, 40]]);
   }));
 
   return function (_x3, _x4) {
