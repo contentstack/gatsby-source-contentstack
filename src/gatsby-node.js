@@ -27,15 +27,18 @@ exports.createSchemaCustomization = async ({ cache, actions, schema }, configOpt
   const typePrefix = configOptions.type_prefix || 'Contentstack';
   const disableMandatoryFields = configOptions.disableMandatoryFields || false;
   try {
-    const contentTypeOptions = ['includeContentTypes', 'excludeContentTypes'];
+    const contentTypeOptions = ['contentTypes', 'excludeContentTypes'];
     const configOptionKeys = Object.keys(configOptions);
-    
+
     for (let i = 0; i < configOptionKeys.length; i++) {
       const configOptionKey = configOptionKeys[i];
       if (contentTypeOptions.includes(configOptionKey)) {
         contentTypeOption = configOptionKey;
         break;
       }
+    }
+    if (configOptions.locales?.length) {
+      contentTypeOption += 'locales';
     }
   
     contentTypes = await fetchContentTypes(configOptions, contentTypeOption);

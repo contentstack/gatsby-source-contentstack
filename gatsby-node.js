@@ -56,7 +56,8 @@ exports.onPreBootstrap = function (_ref) {
 
 exports.createSchemaCustomization = /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref3, configOptions) {
-    var cache, actions, schema, contentTypes, typePrefix, disableMandatoryFields, contentTypeOptions, configOptionKeys, i, configOptionKey, createTypes, name, fields;
+    var cache, actions, schema, contentTypes, typePrefix, disableMandatoryFields, _configOptions$locale, contentTypeOptions, configOptionKeys, i, configOptionKey, createTypes, name, fields;
+
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -65,7 +66,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             typePrefix = configOptions.type_prefix || 'Contentstack';
             disableMandatoryFields = configOptions.disableMandatoryFields || false;
             _context.prev = 3;
-            contentTypeOptions = ['includeContentTypes', 'excludeContentTypes'];
+            contentTypeOptions = ['contentTypes', 'excludeContentTypes'];
             configOptionKeys = Object.keys(configOptions);
             i = 0;
 
@@ -91,24 +92,28 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             break;
 
           case 15:
-            _context.next = 17;
+            if ((_configOptions$locale = configOptions.locales) !== null && _configOptions$locale !== void 0 && _configOptions$locale.length) {
+              contentTypeOption += 'locales';
+            }
+
+            _context.next = 18;
             return fetchContentTypes(configOptions, contentTypeOption);
 
-          case 17:
+          case 18:
             contentTypes = _context.sent;
-            _context.next = 20;
+            _context.next = 21;
             return cache.set(typePrefix, contentTypes);
 
-          case 20:
-            _context.next = 25;
+          case 21:
+            _context.next = 26;
             break;
 
-          case 22:
-            _context.prev = 22;
+          case 23:
+            _context.prev = 23;
             _context.t0 = _context["catch"](3);
             console.error('Contentstack fetch content type failed!');
 
-          case 25:
+          case 26:
             if (configOptions.enableSchemaGeneration) {
               createTypes = actions.createTypes;
               contentTypes.forEach(function (contentType) {
@@ -151,12 +156,12 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               })]);
             }
 
-          case 26:
+          case 27:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 22]]);
+    }, _callee, null, [[3, 23]]);
   }));
 
   return function (_x, _x2) {

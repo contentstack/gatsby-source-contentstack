@@ -5,145 +5,25 @@ const fetch = require('node-fetch');
 
 // eslint-disable-next-line import/no-unresolved
 const { version } = require('./package.json');
-const { CODES } = require('./utils');
-
-class FetchContentTypes {
-  async getPagedData() {}
-}
-class FetchDefaultContentTypes extends FetchContentTypes {
-  async getPagedData(url, config, responseKey) {
-    const query = {
-      include_global_field_schema: true
-    };
-    const result = await getPagedData(url, config, responseKey, query);
-    return result;
-  }
-}
-
-class FetchSpecifiedContentTypes extends FetchContentTypes {
-  async getPagedData(url, config, responseKey) {
-    const query = {
-      query: JSON.stringify({
-        uid: { $in: config.includeContentTypes }
-      }),
-      include_global_field_schema: true
-    };
-    const result = await getPagedData(url, config, responseKey, query);
-    return result;
-  }
-}
-
-class FetchUnspecifiedContentTypes extends FetchContentTypes {
-  async getPagedData(url, config, responseKey) {
-    const query = {
-      query: JSON.stringify({
-        uid: { $nin: config.excludeContentTypes }
-      }),
-      include_global_field_schema: true
-    };
-    const result = await getPagedData(url, config, responseKey, query);
-    return result;
-  }
-}
+const { FetchDefaultContentTypes, FetchSpecifiedContentTypes, FetchUnspecifiedContentTypes } = require('./contenttype-data');
+const { FetchDefaultEntries, FetchSpecifiedContentTypesEntries, FetchSpecifiedLocalesEntries, FetchSpecifiedLocalesAndContentTypesEntries } = require('./entry-data');
 
 const OPTION_CLASS_MAPPING = {
   '': FetchDefaultContentTypes,
-  includeContentTypes: FetchSpecifiedContentTypes,
-  excludeContentTypes: FetchUnspecifiedContentTypes
+  contentTypes: FetchSpecifiedContentTypes,
+  excludeContentTypes: FetchUnspecifiedContentTypes,
+  locales: FetchDefaultContentTypes,
+  contentTypeslocales: FetchSpecifiedContentTypes,
+  excludeContentTypeslocales: FetchUnspecifiedContentTypes,
 };
-
-class FetchEntries {
-  async fetchSyncData() {}
-}
-
-class FetchDefaultEntries extends FetchEntries {
-  async fetchSyncData(configOptions, reporter, cache) {
-    const typePrefix = configOptions.type_prefix || 'Contentstack';
-    const tokenKey = `${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`;
-    const syncToken = await cache.get(tokenKey);
-
-    let syncData = {};
-    if (configOptions.expediteBuild) {
-      const syncEntryParams = syncToken ? { sync_token: syncToken } : { init: true };
-      // TODO: make a copy of syncEntryParams.
-      const syncAssetParams = syncToken ? { sync_token: syncToken } : { init: true };
-  
-      syncEntryParams.type = 'entry_published, entry_unpublished, entry_deleted';
-      syncAssetParams.type = 'asset_published, asset_unpublished, asset_deleted';
-  
-      try {
-        const [syncEntryData, syncAssetData] = await Promise.all([fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
-        const data = syncEntryData.data.concat(syncAssetData.data);
-        syncData.data = data;
-        syncData.sync_token = data.sync_token;
-      } catch (error) {
-        reporter.panic({
-          id: CODES.SyncError,
-          context: {
-            sourceMessage: `Fetching contentstack data failed [expediteBuild]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-          },
-          error
-        });
-      }
-    } else {
-      const syncParams = syncToken ? { sync_token: syncToken } : { init: true };
-  
-      try {
-        syncData = await fetchSyncData(syncParams, configOptions);
-      } catch (error) {
-        reporter.panic({
-          id: CODES.SyncError,
-          context: {
-            sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-          },
-          error
-        });
-      }
-    }
-    // Caching token for the next sync
-    await cache.set(tokenKey, syncData.sync_token);
-    return syncData;
-  }
-}
-
-class FetchSpecifiedContentTypesEntries extends FetchEntries {
-  async fetchSyncData(configOptions, reporter, cache) {
-    const typePrefix = configOptions.type_prefix || 'Contentstack';
-    const contentTypes = await cache.get(typePrefix);
-    let syncData = {};
-
-    for (let i = 0; i < contentTypes.length; i++) {
-      const contentType = contentTypes[i].uid;
-      const tokenKey = `${typePrefix.toLowerCase()}-sync-token-${contentType}-${configOptions.api_key}`;
-
-      try {
-        const syncToken = await cache.get(tokenKey);
-        const syncParams = syncToken ? { sync_token: syncToken } : { init: true };
-        !syncToken && (syncParams.content_type_uid = contentType);
-        const _syncData = await fetchSyncData(syncParams, configOptions);
-        syncData.data = syncData.data || [];
-        syncData.data = syncData.data.concat(_syncData.data);
-        // Caching token for the next sync.
-        await cache.set(tokenKey, _syncData.sync_token);
-      } catch (error) {
-        reporter.panic({
-          id: CODES.SyncError,
-          context: {
-            sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-          },
-          error
-        });
-      }
-    }
-
-    return syncData;
-  }
-}
 
 const OPTIONS_ENTRIES_CLASS_MAPPING = {
   '': FetchDefaultEntries,
-  includeContentTypes: FetchSpecifiedContentTypesEntries,
+  contentTypes: FetchSpecifiedContentTypesEntries,
   excludeContentTypes: FetchSpecifiedContentTypesEntries,
+  locales: FetchSpecifiedLocalesEntries,
+  contentTypeslocales: FetchSpecifiedLocalesAndContentTypesEntries,
+  excludeContentTypeslocales: FetchSpecifiedLocalesAndContentTypesEntries,
 };
 
 exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) => {
@@ -152,7 +32,7 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
 
   let syncData = {};
   const entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
-  const _syncData = await entryService.fetchSyncData(configOptions, reporter, cache);
+  const _syncData = await entryService.fetchSyncData(configOptions, reporter, cache, fetchSyncData);
   syncData.data = _syncData.data;
   const contentstackData = { syncData: syncData.data };
 
@@ -168,7 +48,7 @@ exports.fetchContentTypes = async (config, contentTypeOption) => {
   const url = 'content_types';
   const responseKey = 'content_types';
   const contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
-  const allContentTypes = await contentType.getPagedData(url, config, responseKey);
+  const allContentTypes = await contentType.getPagedData(url, config, responseKey, getPagedData);
   return allContentTypes;
 };
 
