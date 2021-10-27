@@ -7,6 +7,7 @@ const fetch = require('node-fetch');
 const { version } = require('./package.json');
 const { FetchDefaultContentTypes, FetchSpecifiedContentTypes, FetchUnspecifiedContentTypes } = require('./contenttype-data');
 const { FetchDefaultEntries, FetchSpecifiedContentTypesEntries, FetchSpecifiedLocalesEntries, FetchSpecifiedLocalesAndContentTypesEntries } = require('./entry-data');
+const { CODES } = require('./utils');
 
 const OPTION_CLASS_MAPPING = {
   '': FetchDefaultContentTypes,
@@ -30,26 +31,42 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
   console.time('Fetch Contentstack data');
   console.log('Starting to fetch data from Contentstack');
 
-  let syncData = {};
-  const entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
-  const _syncData = await entryService.fetchSyncData(configOptions, reporter, cache, fetchSyncData);
-  syncData.data = _syncData.data;
-  const contentstackData = { syncData: syncData.data };
-
-  console.timeEnd('Fetch Contentstack data');
-
-  return { contentstackData };
+  try {
+    let syncData = {};
+    const entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
+    const _syncData = await entryService.fetchSyncData(configOptions, cache, fetchSyncData);
+    syncData.data = _syncData.data;
+    const contentstackData = { syncData: syncData.data };
+  
+    console.timeEnd('Fetch Contentstack data');
+  
+    return { contentstackData };
+  } catch (error) {
+    reporter.panic({
+      id: CODES.SyncError,
+      context: { sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.` },
+      error
+    });
+  }
 };
 
 
 exports.fetchContentTypes = async (config, contentTypeOption) => {
-  config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
+  try {
+    config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
 
-  const url = 'content_types';
-  const responseKey = 'content_types';
-  const contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
-  const allContentTypes = await contentType.getPagedData(url, config, responseKey, getPagedData);
-  return allContentTypes;
+    const url = 'content_types';
+    const responseKey = 'content_types';
+    const contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
+    const allContentTypes = await contentType.getPagedData(url, config, responseKey, getPagedData);
+    return allContentTypes;
+  } catch (error) {
+    reporter.panic({
+      id: CODES.SyncError,
+      context: { sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.` },
+      error
+    });
+  }
 };
 
 const fetchSyncData = async (query, config) => {

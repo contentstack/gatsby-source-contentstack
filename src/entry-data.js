@@ -1,13 +1,11 @@
 'use strict';
 
-const { CODES } = require('./utils');
-
 class FetchEntries {
   async fetchSyncData() { }
 }
 
 class FetchDefaultEntries extends FetchEntries {
-  async fetchSyncData(configOptions, reporter, cache, fn) {
+  async fetchSyncData(configOptions, cache, fn) {
     const typePrefix = configOptions.type_prefix || 'Contentstack';
 
     let syncData = {};
@@ -36,25 +34,34 @@ class FetchDefaultEntries extends FetchEntries {
         await cache.set(tokenKey, syncData.sync_token);
       }
     } catch (error) {
-      reporter.panic({
-        id: CODES.SyncError,
-        context: {
-          sourceMessage: `Fetching contentstack data failed [expediteBuild]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-        },
-        error
-      });
+      throw error;
     }
     return syncData;
   }
 }
 
 class FetchSpecifiedContentTypesEntries extends FetchEntries {
-  async fetchSyncData(configOptions, reporter, cache, fn) {
-    const typePrefix = configOptions.type_prefix || 'Contentstack';
-    const contentTypes = await cache.get(typePrefix);
-    let syncData = {};
-
+  async fetchSyncData(configOptions, cache, fn) {
     try {
+      const [syncEntryData, syncAssetData] = await Promise.all([
+        this.fetchEntries(configOptions, cache, fn),
+        this.fetchAssets(configOptions, cache, fn)
+      ]);
+
+      const syncData = {};
+      syncData.data = syncEntryData.data.concat(syncAssetData.data);
+      return syncData;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async fetchEntries(configOptions, cache, fn) {
+    try {
+      let syncData = {};
+      const typePrefix = configOptions.type_prefix || 'Contentstack';
+      const contentTypes = await cache.get(typePrefix);
+
       for (let i = 0; i < contentTypes.length; i++) {
         const contentType = contentTypes[i].uid;
         const tokenKey = `${typePrefix.toLowerCase()}-sync-token-${contentType}-${configOptions.api_key}`;
@@ -68,26 +75,41 @@ class FetchSpecifiedContentTypesEntries extends FetchEntries {
         // Caching token for the next sync.
         await cache.set(tokenKey, _syncData.sync_token);
       }
+      return syncData;
     } catch (error) {
-      reporter.panic({
-        id: CODES.SyncError,
-        context: {
-          sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-        },
-        error
-      });
+      throw error;
     }
-    return syncData;
+  }
+
+  async fetchAssets(configOptions, cache, fn) {
+    try {
+      const fetchAssetService = new FetchAssets();
+      const syncData = await fetchAssetService.fetchAssets(configOptions, cache, fn);
+      return syncData;
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
 class FetchSpecifiedLocalesEntries extends FetchEntries {
-  async fetchSyncData(configOptions, reporter, cache, fn) {
-    const typePrefix = configOptions.type_prefix || 'Contentstack';
-    const locales = configOptions.locales;
-    let syncData = {};
+  async fetchSyncData(configOptions, cache, fn) {
+    const [syncEntryData, syncAssetData] = await Promise.all([
+      this.fetchEntries(configOptions, cache, fn),
+      this.fetchAssets(configOptions, cache, fn)
+    ]);
 
+    const syncData = {};
+    syncData.data = syncEntryData.data.concat(syncAssetData.data);
+    return syncData;
+  }
+
+  async fetchEntries(configOptions, cache, fn) {
     try {
+      let syncData = {};
+      const typePrefix = configOptions.type_prefix || 'Contentstack';
+      const locales = configOptions.locales;
+
       for (let i = 0; i < locales.length; i++) {
         const locale = locales[i];
         const tokenKey = `${typePrefix.toLowerCase()}-sync-token-${locale}-${configOptions.api_key}`;
@@ -101,27 +123,42 @@ class FetchSpecifiedLocalesEntries extends FetchEntries {
         // Caching token for next sync
         await cache.set(tokenKey, _syncData.sync_token);
       }
+      return syncData;
     } catch (error) {
-      reporter.panic({
-        id: CODES.SyncError,
-        context: {
-          sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-        },
-        error
-      });
+      throw error;
     }
-    return syncData;
+  }
+
+  async fetchAssets(configOptions, cache, fn) {
+    try {
+      const fetchAssetService = new FetchAssets();
+      const syncData = await fetchAssetService.fetchAssets(configOptions, cache, fn);
+      return syncData;
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
 class FetchSpecifiedLocalesAndContentTypesEntries extends FetchEntries {
-  async fetchSyncData(configOptions, reporter, cache, fn) {
-    const typePrefix = configOptions.type_prefix || 'Contentstack';
-    const contentTypes = await cache.get(typePrefix);
-    const locales = configOptions.locales;
-    let syncData = {};
+  async fetchSyncData(configOptions, cache, fn) {
+    const [syncEntryData, syncAssetData] = await Promise.all([
+      this.fetchEntries(configOptions, cache, fn),
+      this.fetchAssets(configOptions, cache, fn)
+    ]);
 
+    const syncData = {};
+    syncData.data = syncEntryData.data.concat(syncAssetData.data);
+    return syncData;
+  }
+
+  async fetchEntries(configOptions, cache, fn) {
     try {
+      let syncData = {};
+      const typePrefix = configOptions.type_prefix || 'Contentstack';
+      const contentTypes = await cache.get(typePrefix);
+      const locales = configOptions.locales;
+  
       for (let i = 0; i < contentTypes.length; i++) {
         const contentType = contentTypes[i].uid;
         for (let j = 0; j < locales.length; j++) {
@@ -139,16 +176,39 @@ class FetchSpecifiedLocalesAndContentTypesEntries extends FetchEntries {
           await cache.set(tokenKey, _syncData.sync_token);
         }
       }
+      return syncData;
     } catch (error) {
-      reporter.panic({
-        id: CODES.SyncError,
-        context: {
-          sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-        },
-        error
-      });
+      throw error;
     }
-    return syncData;
+  }
+
+  async fetchAssets(configOptions, cache, fn) {
+    try {
+      const fetchAssetService = new FetchAssets();
+      const syncData = await fetchAssetService.fetchAssets(configOptions, cache, fn);
+      return syncData;
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
+class FetchAssets {
+  async fetchAssets(configOptions, cache, fn) {
+    const typePrefix = configOptions.type_prefix || 'Contentstack';
+    try {
+      let syncData = {};
+      const assetTokenKey = `${typePrefix.toLowerCase()}-sync-token-asset-${configOptions.api_key}`;
+      const syncAssetToken = await cache.get(assetTokenKey);
+      const syncAssetParams = syncAssetToken ? { sync_token: syncAssetToken } : { init: true };
+      syncAssetParams.type = 'asset_published,asset_unpublished,asset_deleted';
+      const syncAssetData = await fn.apply(null, [syncAssetParams, configOptions]);
+      syncData.data = syncAssetData.data;
+      await cache.set(assetTokenKey, syncAssetData.sync_token);
+      return syncData;
+    } catch (error) {
+      throw error;
+    }
   }
 }
 

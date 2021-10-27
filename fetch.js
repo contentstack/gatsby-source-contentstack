@@ -26,6 +26,9 @@ var _require3 = require('./entry-data'),
     FetchSpecifiedLocalesEntries = _require3.FetchSpecifiedLocalesEntries,
     FetchSpecifiedLocalesAndContentTypesEntries = _require3.FetchSpecifiedLocalesAndContentTypesEntries;
 
+var _require4 = require('./utils'),
+    CODES = _require4.CODES;
+
 var OPTION_CLASS_MAPPING = {
   '': FetchDefaultContentTypes,
   contentTypes: FetchSpecifiedContentTypes,
@@ -53,12 +56,13 @@ exports.fetchData = /*#__PURE__*/function () {
           case 0:
             console.time('Fetch Contentstack data');
             console.log('Starting to fetch data from Contentstack');
+            _context.prev = 2;
             syncData = {};
             entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
-            _context.next = 6;
-            return entryService.fetchSyncData(configOptions, reporter, cache, fetchSyncData);
+            _context.next = 7;
+            return entryService.fetchSyncData(configOptions, cache, fetchSyncData);
 
-          case 6:
+          case 7:
             _syncData = _context.sent;
             syncData.data = _syncData.data;
             contentstackData = {
@@ -69,12 +73,23 @@ exports.fetchData = /*#__PURE__*/function () {
               contentstackData: contentstackData
             });
 
-          case 11:
+          case 14:
+            _context.prev = 14;
+            _context.t0 = _context["catch"](2);
+            reporter.panic({
+              id: CODES.SyncError,
+              context: {
+                sourceMessage: "Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help."
+              },
+              error: _context.t0
+            });
+
+          case 17:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee);
+    }, _callee, null, [[2, 14]]);
   }));
 
   return function (_x, _x2, _x3, _x4) {
@@ -89,23 +104,35 @@ exports.fetchContentTypes = /*#__PURE__*/function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
+            _context2.prev = 0;
             config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
             url = 'content_types';
             responseKey = 'content_types';
             contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
-            _context2.next = 6;
+            _context2.next = 7;
             return contentType.getPagedData(url, config, responseKey, getPagedData);
 
-          case 6:
+          case 7:
             allContentTypes = _context2.sent;
             return _context2.abrupt("return", allContentTypes);
 
-          case 8:
+          case 11:
+            _context2.prev = 11;
+            _context2.t0 = _context2["catch"](0);
+            reporter.panic({
+              id: CODES.SyncError,
+              context: {
+                sourceMessage: "Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help."
+              },
+              error: _context2.t0
+            });
+
+          case 14:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2);
+    }, _callee2, null, [[0, 11]]);
   }));
 
   return function (_x5, _x6) {
