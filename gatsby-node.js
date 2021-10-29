@@ -460,7 +460,10 @@ exports.pluginOptionsSchema = function (_ref7) {
     expediteBuild: Joi["boolean"]()["default"](false).description("expediteBuild set this to either true or false."),
     enableSchemaGeneration: Joi["boolean"]()["default"](false).description("Specify true if you want to generate custom schema."),
     disableMandatoryFields: Joi["boolean"]()["default"](false).description("Specify true if you want to generate optional graphql fields for mandatory Contentstack fields"),
-    downloadImages: Joi["boolean"]()["default"](false).description("Specify true if you want to download all your contentstack images locally")
+    downloadImages: Joi["boolean"]()["default"](false).description("Specify true if you want to download all your contentstack images locally"),
+    contentTypes: Joi.array().items(Joi.string().required()).description("Specify list of content-types to be fetched from contentstack"),
+    excludeContentTypes: Joi.array().items(Joi.string().required()).description("Specify list of content-types to be excluded while fetching data from contentstack"),
+    locales: Joi.array().items(Joi.string().required()).description("Specify list of locales to be fetched from contentstack")
   }).external(validateContentstackAccess);
 };
 
