@@ -111,7 +111,7 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
     key: "getPagedData",
     value: function () {
       var _getPagedData3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(url, config, responseKey, fn) {
-        var query, result;
+        var query, contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
         return _regenerator["default"].wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -128,10 +128,32 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
                 return fn.apply(null, [url, config, responseKey, query]);
 
               case 3:
-                result = _context3.sent;
+                contentTypes = _context3.sent;
+                referredContentTypes = new ReferredContentTypes();
+                referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes);
+                referredContentTypesData = [];
+
+                if (!referredContentTypesList.length) {
+                  _context3.next = 12;
+                  break;
+                }
+
+                query.query = JSON.stringify({
+                  uid: {
+                    $in: referredContentTypesList
+                  }
+                });
+                _context3.next = 11;
+                return fn.apply(null, [url, config, responseKey, query]);
+
+              case 11:
+                referredContentTypesData = _context3.sent;
+
+              case 12:
+                result = contentTypes.concat(referredContentTypesData);
                 return _context3.abrupt("return", result);
 
-              case 5:
+              case 14:
               case "end":
                 return _context3.stop();
             }
@@ -163,7 +185,7 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
     key: "getPagedData",
     value: function () {
       var _getPagedData4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(url, config, responseKey, fn) {
-        var query, result;
+        var query, contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
         return _regenerator["default"].wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -180,10 +202,32 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
                 return fn.apply(null, [url, config, responseKey, query]);
 
               case 3:
-                result = _context4.sent;
+                contentTypes = _context4.sent;
+                referredContentTypes = new ReferredContentTypes();
+                referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes);
+                referredContentTypesData = [];
+
+                if (!referredContentTypesList.length) {
+                  _context4.next = 12;
+                  break;
+                }
+
+                query.query = JSON.stringify({
+                  uid: {
+                    $in: referredContentTypesList
+                  }
+                });
+                _context4.next = 11;
+                return fn.apply(null, [url, config, responseKey, query]);
+
+              case 11:
+                referredContentTypesData = _context4.sent;
+
+              case 12:
+                result = contentTypes.concat(referredContentTypesData);
                 return _context4.abrupt("return", result);
 
-              case 5:
+              case 14:
               case "end":
                 return _context4.stop();
             }
@@ -200,6 +244,47 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
   }]);
   return FetchUnspecifiedContentTypes;
 }(FetchContentTypes);
+
+var ReferredContentTypes = /*#__PURE__*/function () {
+  function ReferredContentTypes() {
+    (0, _classCallCheck2["default"])(this, ReferredContentTypes);
+  }
+
+  (0, _createClass2["default"])(ReferredContentTypes, [{
+    key: "getReferredContentTypes",
+    value: function getReferredContentTypes(contentTypes) {
+      var referredContentTypes = {};
+
+      for (var i = 0; i < contentTypes.length; i++) {
+        var contentType = contentTypes[i];
+
+        for (var j = 0; j < contentType.schema.length; j++) {
+          var schema = contentType.schema[j];
+
+          if (schema.data_type === 'reference') {
+            for (var k = 0; k < schema.reference_to.length; k++) {
+              // Keep unique values only.
+              referredContentTypes[schema.reference_to[k]] = null;
+            }
+          }
+        }
+      } // Remove the content-types if they were already fetched.
+
+
+      for (var _i = 0; _i < contentTypes.length; _i++) {
+        var _contentType = contentTypes[_i].uid;
+        var keys = Object.keys(referredContentTypes);
+
+        if (keys.includes(_contentType)) {
+          delete referredContentTypes[_contentType];
+        }
+      }
+
+      return Object.keys(referredContentTypes);
+    }
+  }]);
+  return ReferredContentTypes;
+}();
 
 exports.FetchContentTypes = FetchContentTypes;
 exports.FetchDefaultContentTypes = FetchDefaultContentTypes;
