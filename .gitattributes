@@ -1,0 +1,8 @@
+# Mark the following as generated to avoid rendering them in reviews
+# We only want to review support files and those in src/*.js
+
+download-assets.js linguist-generated=true
+fetch.js linguist-generated=true
+gatsby-node.js linguist-generated=true
+normalize.js linguist-generated=true
+utils.js linguist-generated=true
