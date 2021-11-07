@@ -5,14 +5,13 @@ const fetch = require('node-fetch');
 const { normalizeEntry, sanitizeEntry, processContentType, processEntry, processAsset,
   makeEntryNodeUid, makeAssetNodeUid, buildCustomSchema, extendSchemaWithDefaultEntryFields,
 } = require('./normalize');
-const { checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES }=require('./utils');
+const { checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES, getContentTypeOption }=require('./utils');
 const { fetchData, fetchContentTypes } = require('./fetch');
 const downloadAssets = require('./download-assets');
 
 let references = [];
 let groups = [];
 let fileFields = [];
-let contentTypeOption = '';
 
 exports.onPreBootstrap = ({ reporter }) => {
   const args = process.argv;
@@ -27,20 +26,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema }, configOpt
   const typePrefix = configOptions.type_prefix || 'Contentstack';
   const disableMandatoryFields = configOptions.disableMandatoryFields || false;
   try {
-    const contentTypeOptions = ['contentTypes', 'excludeContentTypes'];
-    const configOptionKeys = Object.keys(configOptions);
-
-    for (let i = 0; i < configOptionKeys.length; i++) {
-      const configOptionKey = configOptionKeys[i];
-      if (contentTypeOptions.includes(configOptionKey)) {
-        contentTypeOption = configOptionKey;
-        break;
-      }
-    }
-    if (configOptions.locales?.length) {
-      contentTypeOption += 'locales';
-    }
-  
+    const contentTypeOption = getContentTypeOption(configOptions);
     contentTypes = await fetchContentTypes(configOptions, contentTypeOption);
     // Caching content-types because we need to be able to support multiple stacks.
     await cache.set(typePrefix, contentTypes);
@@ -101,6 +87,7 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
 
   let contentstackData;
   try {
+    const contentTypeOption = getContentTypeOption(configOptions);
     const { contentstackData: _contentstackData } = await fetchData(configOptions, reporter, cache, contentTypeOption);
     contentstackData = _contentstackData;
     contentstackData.contentTypes = await cache.get(typePrefix);
