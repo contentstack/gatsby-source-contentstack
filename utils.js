@@ -48,3 +48,26 @@ exports.CODES = {
   SyncError: '10001',
   APIError: '10002'
 };
+
+exports.getContentTypeOption = function (configOptions) {
+  var _configOptions$locale;
+
+  var contentTypeOptions = ['contentTypes', 'excludeContentTypes'];
+  var configOptionKeys = Object.keys(configOptions);
+  var contentTypeOption = '';
+
+  for (var i = 0; i < configOptionKeys.length; i++) {
+    var configOptionKey = configOptionKeys[i];
+
+    if (contentTypeOptions.includes(configOptionKey)) {
+      contentTypeOption = configOptionKey;
+      break;
+    }
+  }
+
+  if ((_configOptions$locale = configOptions.locales) !== null && _configOptions$locale !== void 0 && _configOptions$locale.length) {
+    contentTypeOption += 'locales';
+  }
+
+  return contentTypeOption;
+};

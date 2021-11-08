@@ -46,3 +46,22 @@ exports.CODES = {
   SyncError: '10001',
   APIError: '10002'
 };
+
+exports.getContentTypeOption = configOptions => {
+  const contentTypeOptions = ['contentTypes', 'excludeContentTypes'];
+  const configOptionKeys = Object.keys(configOptions);
+
+  let contentTypeOption = '';
+
+  for (let i = 0; i < configOptionKeys.length; i++) {
+    const configOptionKey = configOptionKeys[i];
+    if (contentTypeOptions.includes(configOptionKey)) {
+      contentTypeOption = configOptionKey;
+      break;
+    }
+  }
+  if (configOptions.locales?.length) {
+    contentTypeOption += 'locales';
+  }
+  return contentTypeOption;
+};

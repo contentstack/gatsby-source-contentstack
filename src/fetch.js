@@ -1,92 +1,72 @@
+'use strict';
+/**NPM dependencies */
 const queryString = require('query-string');
 const fetch = require('node-fetch');
 
-const {
-  version,
-  // eslint-disable-next-line import/no-unresolved
-} = require('./package.json');
-const {CODES} = require('./utils');
+// eslint-disable-next-line import/no-unresolved
+const { version } = require('./package.json');
+const { FetchDefaultContentTypes, FetchSpecifiedContentTypes, FetchUnspecifiedContentTypes } = require('./contenttype-data');
+const { FetchDefaultEntries, FetchSpecifiedContentTypesEntries, FetchSpecifiedLocalesEntries, FetchSpecifiedLocalesAndContentTypesEntries } = require('./entry-data');
+const { CODES } = require('./utils');
 
+const OPTION_CLASS_MAPPING = {
+  '': FetchDefaultContentTypes,
+  contentTypes: FetchSpecifiedContentTypes,
+  excludeContentTypes: FetchUnspecifiedContentTypes,
+  locales: FetchDefaultContentTypes,
+  contentTypeslocales: FetchSpecifiedContentTypes,
+  excludeContentTypeslocales: FetchUnspecifiedContentTypes,
+};
 
-exports.fetchData = async (configOptions, reporter) => {
+const OPTIONS_ENTRIES_CLASS_MAPPING = {
+  '': FetchDefaultEntries,
+  contentTypes: FetchSpecifiedContentTypesEntries,
+  excludeContentTypes: FetchSpecifiedContentTypesEntries,
+  locales: FetchSpecifiedLocalesEntries,
+  contentTypeslocales: FetchSpecifiedLocalesAndContentTypesEntries,
+  excludeContentTypeslocales: FetchSpecifiedLocalesAndContentTypesEntries,
+};
+
+exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) => {
   console.time('Fetch Contentstack data');
   console.log('Starting to fetch data from Contentstack');
 
-  let syncData = {};
-
-  if (configOptions.expediteBuild) {
-    const syncEntryParams = configOptions.syncToken ? {
-      sync_token: configOptions.syncToken,
-    } : {
-        init: true,
-      };
-
-    const syncAssetParams = configOptions.syncToken ? {
-      sync_token: configOptions.syncToken,
-    } : {
-        init: true,
-      };
-
-    syncEntryParams.type = 'entry_published, entry_unpublished, entry_deleted';
-    syncAssetParams.type = 'asset_published, asset_unpublished, asset_deleted';
-
-    try {
-      const [syncEntryData, syncAssetData] = await Promise.all([fetchSyncData(syncEntryParams, configOptions), fetchSyncData(syncAssetParams, configOptions)]);
-      const data = syncEntryData.data.concat(syncAssetData.data);
-      syncData.data = data;
-      syncData.token = null;
-    } catch (error) {
-      reporter.panic({
-        id: CODES.SyncError,
-        context: {
-          sourceMessage: `Fetching contentstack data failed [expediteBuild]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-        },
-        error
-      });
-    }
-  } else {
-    const syncParams = configOptions.syncToken ? {
-      sync_token: configOptions.syncToken,
-    } : {
-        init: true,
-      };
-
-    try {
-      syncData = await fetchSyncData(syncParams, configOptions);
-    } catch (error) {
-      reporter.panic({
-        id: CODES.SyncError,
-        context: {
-          sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-        },
-        error
-      });
-    }
+  try {
+    let syncData = {};
+    const entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
+    const _syncData = await entryService.fetchSyncData(configOptions, cache, fetchSyncData);
+    syncData.data = _syncData.data;
+    const contentstackData = { syncData: syncData.data };
+  
+    console.timeEnd('Fetch Contentstack data');
+  
+    return { contentstackData };
+  } catch (error) {
+    reporter.panic({
+      id: CODES.SyncError,
+      context: { sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.` },
+      error
+    });
   }
-
-  const contentstackData = {
-    syncData: syncData.data,
-    sync_token: syncData.sync_token,
-  };
-
-  console.timeEnd('Fetch Contentstack data');
-
-  return {
-    contentstackData,
-  };
 };
 
 
-exports.fetchContentTypes = async (config) => {
-  config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
+exports.fetchContentTypes = async (config, contentTypeOption) => {
+  try {
+    config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
 
-  const url = 'content_types';
-  const responseKey = 'content_types';
-  const query = {
-    include_global_field_schema: true,
-  };
-  const allContentTypes = await getPagedData(url, config, responseKey, query);
-  return allContentTypes;
+    const url = 'content_types';
+    const responseKey = 'content_types';
+    const contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
+    const allContentTypes = await contentType.getPagedData(url, config, responseKey, getPagedData);
+    return allContentTypes;
+  } catch (error) {
+    reporter.panic({
+      id: CODES.SyncError,
+      context: { sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.` },
+      error
+    });
+  }
 };
 
 const fetchSyncData = async (query, config) => {
@@ -98,8 +78,6 @@ const fetchSyncData = async (query, config) => {
 const fetchCsData = async (url, config, query) => {
   query = query || {};
   query.include_count = true;
-  // query.api_key = config.api_key;
-  // query.access_token = config.delivery_token;
   query.environment = config.environment;
   const queryParams = queryString.stringify(query);
   const apiUrl = `${config.cdn}/${url}?${queryParams}`;
@@ -128,15 +106,7 @@ const fetchCsData = async (url, config, query) => {
   });
 };
 
-const getPagedData = async (
-  url,
-  config,
-  responseKey,
-  query = {},
-  skip = 0,
-  limit = 100,
-  aggregatedResponse = null,
-) => {
+const getPagedData = async (url, config, responseKey, query = {}, skip = 0, limit = 100, aggregatedResponse = null) => {
   query.skip = skip;
   query.limit = limit;
   query.include_global_field_schema = true;
@@ -147,26 +117,12 @@ const getPagedData = async (
     aggregatedResponse = aggregatedResponse.concat(response[responseKey]);
   }
   if (skip + limit <= response.count) {
-    return getPagedData(
-      url,
-      config,
-      responseKey,
-      query = {},
-      skip + limit,
-      limit,
-      aggregatedResponse,
-    );
+    return getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse);
   }
   return aggregatedResponse;
 };
 
-const getSyncData = async (
-  url,
-  config,
-  query,
-  responseKey,
-  aggregatedResponse = null,
-) => {
+const getSyncData = async (url, config, query, responseKey, aggregatedResponse = null) => {
   const response = await fetchCsData(url, config, query);
   if (!aggregatedResponse) {
     aggregatedResponse = {};
@@ -179,15 +135,7 @@ const getSyncData = async (
     aggregatedResponse.sync_token = response.sync_token ? response.sync_token : aggregatedResponse.sync_token;
   }
   if (response.pagination_token) {
-    return getSyncData(
-      url,
-      config,
-      query = {
-        pagination_token: response.pagination_token,
-      },
-      responseKey,
-      aggregatedResponse,
-    );
+    return getSyncData(url, config, query = { pagination_token: response.pagination_token }, responseKey, aggregatedResponse);
   }
   return aggregatedResponse;
 };

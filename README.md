@@ -43,7 +43,23 @@ plugins: [
       type_prefix: `Contentstack`, // (default)
 
       // Optional: Specify true if you want to download all your contentstack images locally
-      downloadImages: `boolean_value`
+      downloadImages: `boolean_value`,
+
+      // Optional: Specify the content types from which you want the plugin to retrieve data.
+      contentTypes: [‘blog’,’author’]
+      // This will fetch the data of the ‘blog’ and ‘author’ content types only.
+
+      // Optional: Specify the content types that the plugin should exclude while fetching data of all content types.
+      excludeContentTypes: [‘home’,’about’]
+      // This will fetch the data of all the available content types excluding the ‘home’ and ‘about’ content types.
+
+      // Note: Only one of the above options should be used to fetch data. If you add both options to fetch all contentTypes and excludeContentTypes, than only one of the query gets executed.
+
+      // Optional: Include the locales that you want the plugin to fetch data from.
+      locales: [‘en-us’,’fr-fr’]
+      // In this case, the plugin will fetch only English (United States) and French (France) language data.
+
+      // Optional: Specify the content types and locales of which you want the plugin to retrieve data.
     },
   },
 ]
