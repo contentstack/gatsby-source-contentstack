@@ -1,4 +1,5 @@
-"use strict";
+'use strict';
+/** NPM dependencies */
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
@@ -13,6 +14,8 @@ var _ERROR_MAP;
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+var fetch = require('node-fetch');
 
 var _require = require('./normalize'),
     normalizeEntry = _require.normalizeEntry,
@@ -29,15 +32,14 @@ var _require2 = require('./utils'),
     checkIfUnsupportedFormat = _require2.checkIfUnsupportedFormat,
     SUPPORTED_FILES_COUNT = _require2.SUPPORTED_FILES_COUNT,
     IMAGE_REGEXP = _require2.IMAGE_REGEXP,
-    CODES = _require2.CODES;
+    CODES = _require2.CODES,
+    getContentTypeOption = _require2.getContentTypeOption;
 
 var _require3 = require('./fetch'),
     fetchData = _require3.fetchData,
     fetchContentTypes = _require3.fetchContentTypes;
 
 var downloadAssets = require('./download-assets');
-
-var fetch = require('node-fetch');
 
 var references = [];
 var groups = [];
@@ -54,7 +56,7 @@ exports.onPreBootstrap = function (_ref) {
 
 exports.createSchemaCustomization = /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref3, configOptions) {
-    var cache, actions, schema, contentTypes, typePrefix, disableMandatoryFields, createTypes, name, fields;
+    var cache, actions, schema, contentTypes, typePrefix, disableMandatoryFields, contentTypeOption, createTypes, name, fields;
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -63,24 +65,25 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             typePrefix = configOptions.type_prefix || 'Contentstack';
             disableMandatoryFields = configOptions.disableMandatoryFields || false;
             _context.prev = 3;
-            _context.next = 6;
-            return fetchContentTypes(configOptions);
+            contentTypeOption = getContentTypeOption(configOptions);
+            _context.next = 7;
+            return fetchContentTypes(configOptions, contentTypeOption);
 
-          case 6:
+          case 7:
             contentTypes = _context.sent;
-            _context.next = 9;
+            _context.next = 10;
             return cache.set(typePrefix, contentTypes);
 
-          case 9:
-            _context.next = 14;
+          case 10:
+            _context.next = 15;
             break;
 
-          case 11:
-            _context.prev = 11;
+          case 12:
+            _context.prev = 12;
             _context.t0 = _context["catch"](3);
             console.error('Contentstack fetch content type failed!');
 
-          case 14:
+          case 15:
             if (configOptions.enableSchemaGeneration) {
               createTypes = actions.createTypes;
               contentTypes.forEach(function (contentType) {
@@ -123,12 +126,12 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               })]);
             }
 
-          case 15:
+          case 16:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 11]]);
+    }, _callee, null, [[3, 12]]);
   }));
 
   return function (_x, _x2) {
@@ -138,7 +141,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
 
 exports.sourceNodes = /*#__PURE__*/function () {
   var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref5, configOptions) {
-    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, typePrefix, tokenKey, syncToken, contentstackData, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes;
+    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, typePrefix, contentstackData, contentTypeOption, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, deleteContentstackNodes;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
@@ -167,32 +170,26 @@ exports.sourceNodes = /*#__PURE__*/function () {
             createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode; // use a custom type prefix if specified
 
             typePrefix = configOptions.type_prefix || 'Contentstack';
-            tokenKey = "".concat(typePrefix.toLowerCase(), "-sync-token-").concat(configOptions.api_key);
-            _context2.next = 7;
-            return cache.get(tokenKey);
+            _context2.prev = 4;
+            contentTypeOption = getContentTypeOption(configOptions);
+            _context2.next = 8;
+            return fetchData(configOptions, reporter, cache, contentTypeOption);
 
-          case 7:
-            syncToken = _context2.sent;
-            configOptions.syncToken = syncToken || null;
-            _context2.prev = 9;
-            _context2.next = 12;
-            return fetchData(configOptions, reporter);
-
-          case 12:
+          case 8:
             _yield$fetchData = _context2.sent;
             _contentstackData = _yield$fetchData.contentstackData;
             contentstackData = _contentstackData;
-            _context2.next = 17;
+            _context2.next = 13;
             return cache.get(typePrefix);
 
-          case 17:
+          case 13:
             contentstackData.contentTypes = _context2.sent;
-            _context2.next = 24;
+            _context2.next = 20;
             break;
 
-          case 20:
-            _context2.prev = 20;
-            _context2.t0 = _context2["catch"](9);
+          case 16:
+            _context2.prev = 16;
+            _context2.t0 = _context2["catch"](4);
             reporter.panic({
               id: CODES.SyncError,
               context: {
@@ -202,7 +199,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
             });
             throw _context2.t0;
 
-          case 24:
+          case 20:
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
                 merged[item.type] = [];
@@ -270,14 +267,14 @@ exports.sourceNodes = /*#__PURE__*/function () {
             _context2.t1 = configOptions.downloadImages;
 
             if (!_context2.t1) {
-              _context2.next = 36;
+              _context2.next = 32;
               break;
             }
 
-            _context2.next = 36;
+            _context2.next = 32;
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
-          case 36:
+          case 32:
             // adding nodes
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -300,12 +297,12 @@ exports.sourceNodes = /*#__PURE__*/function () {
             });
 
             if (!configOptions.downloadImages) {
-              _context2.next = 48;
+              _context2.next = 44;
               break;
             }
 
-            _context2.prev = 40;
-            _context2.next = 43;
+            _context2.prev = 36;
+            _context2.next = 39;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -315,16 +312,16 @@ exports.sourceNodes = /*#__PURE__*/function () {
               reporter: reporter
             }, typePrefix, configOptions);
 
-          case 43:
-            _context2.next = 48;
+          case 39:
+            _context2.next = 44;
             break;
 
-          case 45:
-            _context2.prev = 45;
-            _context2.t2 = _context2["catch"](40);
+          case 41:
+            _context2.prev = 41;
+            _context2.t2 = _context2["catch"](36);
             reporter.info('Something went wrong while downloading assets. Details: ' + _context2.t2);
 
-          case 48:
+          case 44:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'entry');
@@ -346,17 +343,14 @@ exports.sourceNodes = /*#__PURE__*/function () {
               sameContentTypeNodes.forEach(function (node) {
                 return deleteNode(node);
               });
-            }); // Caching token for the next sync
+            });
 
-            _context2.next = 55;
-            return cache.set(tokenKey, contentstackData.sync_token);
-
-          case 55:
+          case 49:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[9, 20], [40, 45]]);
+    }, _callee2, null, [[4, 16], [36, 41]]);
   }));
 
   return function (_x3, _x4) {
@@ -437,7 +431,10 @@ exports.pluginOptionsSchema = function (_ref7) {
     expediteBuild: Joi["boolean"]()["default"](false).description("expediteBuild set this to either true or false."),
     enableSchemaGeneration: Joi["boolean"]()["default"](false).description("Specify true if you want to generate custom schema."),
     disableMandatoryFields: Joi["boolean"]()["default"](false).description("Specify true if you want to generate optional graphql fields for mandatory Contentstack fields"),
-    downloadImages: Joi["boolean"]()["default"](false).description("Specify true if you want to download all your contentstack images locally")
+    downloadImages: Joi["boolean"]()["default"](false).description("Specify true if you want to download all your contentstack images locally"),
+    contentTypes: Joi.array().items(Joi.string().required()).description("Specify list of content-types to be fetched from contentstack"),
+    excludeContentTypes: Joi.array().items(Joi.string().required()).description("Specify list of content-types to be excluded while fetching data from contentstack"),
+    locales: Joi.array().items(Joi.string().required()).description("Specify list of locales to be fetched from contentstack")
   }).external(validateContentstackAccess);
 };
 

@@ -1,21 +1,13 @@
-const {
-  normalizeEntry,
-  sanitizeEntry,
-  processContentType,
-  processEntry,
-  processAsset,
-  makeEntryNodeUid,
-  makeAssetNodeUid,
-  buildCustomSchema,
-  extendSchemaWithDefaultEntryFields,
-} = require('./normalize');
-const {checkIfUnsupportedFormat,SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES}=require('./utils');
-
-const { fetchData, fetchContentTypes } = require('./fetch');
-
-const downloadAssets = require('./download-assets');
-
+'use strict';
+/** NPM dependencies */
 const fetch = require('node-fetch');
+
+const { normalizeEntry, sanitizeEntry, processContentType, processEntry, processAsset,
+  makeEntryNodeUid, makeAssetNodeUid, buildCustomSchema, extendSchemaWithDefaultEntryFields,
+} = require('./normalize');
+const { checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES, getContentTypeOption }=require('./utils');
+const { fetchData, fetchContentTypes } = require('./fetch');
+const downloadAssets = require('./download-assets');
 
 let references = [];
 let groups = [];
@@ -28,18 +20,15 @@ exports.onPreBootstrap = ({ reporter }) => {
   }
 };
 
-exports.createSchemaCustomization = async ({
-  cache,
-  actions,
-  schema,
-}, configOptions) => {
-
+exports.createSchemaCustomization = async ({ cache, actions, schema }, configOptions) => {
   let contentTypes;
 
   const typePrefix = configOptions.type_prefix || 'Contentstack';
   const disableMandatoryFields = configOptions.disableMandatoryFields || false;
   try {
-    contentTypes = await fetchContentTypes(configOptions);
+    const contentTypeOption = getContentTypeOption(configOptions);
+    contentTypes = await fetchContentTypes(configOptions, contentTypeOption);
+    // Caching content-types because we need to be able to support multiple stacks.
     await cache.set(typePrefix, contentTypes);
   } catch (error) {
     console.error('Contentstack fetch content type failed!');
@@ -49,19 +38,8 @@ exports.createSchemaCustomization = async ({
     contentTypes.forEach(contentType => {
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
       const name = `${typePrefix}_${contentTypeUid}`;
-      const extendedSchema = extendSchemaWithDefaultEntryFields(
-        contentType.schema
-      );
-      let result = buildCustomSchema(
-        extendedSchema,
-        [],
-        [],
-        [],
-        [],
-        name,
-        typePrefix,
-        disableMandatoryFields
-      );
+      const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
+      let result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields);
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
       fileFields = fileFields.concat(result.fileFields);
@@ -102,29 +80,15 @@ exports.createSchemaCustomization = async ({
   }
 };
 
-exports.sourceNodes = async ({
-  cache,
-  actions,
-  getNode,
-  getNodes,
-  createNodeId,
-  reporter,
-  createContentDigest,
-  getNodesByType,
-  getCache,
-}, configOptions) => {
+exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache }, configOptions) => {
   const { createNode, deleteNode, touchNode } = actions;
-
   // use a custom type prefix if specified
   const typePrefix = configOptions.type_prefix || 'Contentstack';
-  const tokenKey = `${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`;
-  const syncToken = await cache.get(tokenKey);
-
-  configOptions.syncToken = syncToken || null;
 
   let contentstackData;
   try {
-    const { contentstackData: _contentstackData } = await fetchData(configOptions, reporter);
+    const contentTypeOption = getContentTypeOption(configOptions);
+    const { contentstackData: _contentstackData } = await fetchData(configOptions, reporter, cache, contentTypeOption);
     contentstackData = _contentstackData;
     contentstackData.contentTypes = await cache.get(typePrefix);
   } catch (error) {
@@ -150,15 +114,10 @@ exports.sourceNodes = async ({
   const entriesNodeIds = new Set();
   const assetsNodeIds = new Set();
 
-  const existingNodes = getNodes().filter(
-    n => n.internal.owner === 'gatsby-source-contentstack'
-  );
+  const existingNodes = getNodes().filter(n => n.internal.owner === 'gatsby-source-contentstack');
 
   existingNodes.forEach(n => {
-    if (
-      n.internal.type !== `${typePrefix}ContentTypes` &&
-      n.internal.type !== `${typePrefix}_assets`
-    ) {
+    if (n.internal.type !== `${typePrefix}ContentTypes` && n.internal.type !== `${typePrefix}_assets`) {
       entriesNodeIds.add(n.id);
     }
     if (n.internal.type === `${typePrefix}_assets`) {
@@ -299,13 +258,8 @@ exports.sourceNodes = async ({
       const sameContentTypeNodes = getNodes().filter(
         n => n.internal.type === `${typePrefix}_${item.content_type_uid}`
       );
-      sameContentTypeNodes.forEach(node =>
-        deleteNode(node)
-      );
+      sameContentTypeNodes.forEach(node => deleteNode(node));
     });
-
-  // Caching token for the next sync
-  await cache.set(tokenKey, contentstackData.sync_token);
 };
 
 
@@ -394,7 +348,10 @@ exports.pluginOptionsSchema = ({ Joi }) => {
     expediteBuild: Joi.boolean().default(false).description(`expediteBuild set this to either true or false.`),
     enableSchemaGeneration: Joi.boolean().default(false).description(`Specify true if you want to generate custom schema.`),
     disableMandatoryFields: Joi.boolean().default(false).description(`Specify true if you want to generate optional graphql fields for mandatory Contentstack fields`),
-    downloadImages: Joi.boolean().default(false).description(`Specify true if you want to download all your contentstack images locally`)
+    downloadImages: Joi.boolean().default(false).description(`Specify true if you want to download all your contentstack images locally`),
+    contentTypes: Joi.array().items(Joi.string().required()).description(`Specify list of content-types to be fetched from contentstack`),
+    excludeContentTypes: Joi.array().items(Joi.string().required()).description(`Specify list of content-types to be excluded while fetching data from contentstack`),
+    locales: Joi.array().items(Joi.string().required()).description(`Specify list of locales to be fetched from contentstack`),
   }).external(validateContentstackAccess)
 }
 
