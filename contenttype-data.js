@@ -122,14 +122,7 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
               case 0:
                 query.query.uid = {
                   $in: config.contentTypes
-                }; // const queryParams = {
-                //   query: JSON.stringify({
-                //     uid: { $in: config.contentTypes },
-                //     ...query.query,
-                //   }),
-                //   include_global_field_schema: true
-                // };
-
+                };
                 _context3.next = 3;
                 return fn.apply(null, [url, config, responseKey, _objectSpread(_objectSpread({}, query), {}, {
                   query: JSON.stringify(query.query)
@@ -146,7 +139,6 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
                   break;
                 }
 
-                // query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
                 query.query.uid = {
                   $in: referredContentTypesList
                 };
@@ -201,14 +193,7 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
               case 0:
                 query.query.uid = {
                   $nin: config.excludeContentTypes
-                }; // const queryParams = {
-                //   query: JSON.stringify({
-                //     uid: { $nin: config.excludeContentTypes },
-                //     ...query.query,
-                //   }),
-                //   include_global_field_schema: true
-                // };
-
+                };
                 _context4.next = 3;
                 return fn.apply(null, [url, config, responseKey, _objectSpread(_objectSpread({}, query), {}, {
                   query: JSON.stringify(query.query)
@@ -225,7 +210,6 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
                   break;
                 }
 
-                // query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
                 query.query.uid = {
                   $in: referredContentTypesList
                 };
