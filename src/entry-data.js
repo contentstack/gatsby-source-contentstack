@@ -58,7 +58,7 @@ class FetchSpecifiedContentTypesEntries extends FetchEntries {
 
   async fetchEntries(configOptions, cache, fn) {
     try {
-      let syncData = {};
+      let syncData = { data: [] };
       const typePrefix = configOptions.type_prefix || 'Contentstack';
       const contentTypes = await cache.get(typePrefix);
 
@@ -106,7 +106,7 @@ class FetchSpecifiedLocalesEntries extends FetchEntries {
 
   async fetchEntries(configOptions, cache, fn) {
     try {
-      let syncData = {};
+      let syncData = { data: [] };
       const typePrefix = configOptions.type_prefix || 'Contentstack';
       const locales = configOptions.locales;
 
@@ -154,7 +154,7 @@ class FetchSpecifiedLocalesAndContentTypesEntries extends FetchEntries {
 
   async fetchEntries(configOptions, cache, fn) {
     try {
-      let syncData = {};
+      let syncData = { data: [] };
       const typePrefix = configOptions.type_prefix || 'Contentstack';
       const contentTypes = await cache.get(typePrefix);
       const locales = configOptions.locales;

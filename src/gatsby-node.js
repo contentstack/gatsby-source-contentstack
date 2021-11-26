@@ -27,7 +27,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema }, configOpt
   const disableMandatoryFields = configOptions.disableMandatoryFields || false;
   try {
     const contentTypeOption = getContentTypeOption(configOptions);
-    contentTypes = await fetchContentTypes(configOptions, contentTypeOption);
+    contentTypes = await fetchContentTypes(configOptions, contentTypeOption, cache);
     // Caching content-types because we need to be able to support multiple stacks.
     await cache.set(typePrefix, contentTypes);
   } catch (error) {

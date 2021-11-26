@@ -51,14 +51,28 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
 };
 
 
-exports.fetchContentTypes = async (config, contentTypeOption) => {
+exports.fetchContentTypes = async (config, contentTypeOption, cache) => {
   try {
     config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
+    const typePrefix = config.type_prefix || 'Contentstack';
+  
+    const lastFetchedTimeCacheKey = `${typePrefix.toLowerCase()}-content-type-fetch-time-${config.api_key}`;
 
+    let lastFetchedTime = await cache.get(lastFetchedTimeCacheKey);
+    if (!lastFetchedTime) {
+      lastFetchedTime = (new Date(null)).toISOString();
+    }
+
+    const query = { query: { updated_at: { $gt: lastFetchedTime } } };
+
+    // Any changes here after in the content-types will be re-fetched.
+    const currentFetchedTime = (new Date()).toISOString();
+    await cache.set(lastFetchedTimeCacheKey, currentFetchedTime);
+    
     const url = 'content_types';
     const responseKey = 'content_types';
     const contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
-    const allContentTypes = await contentType.getPagedData(url, config, responseKey, getPagedData);
+    const allContentTypes = await contentType.getPagedData(url, config, responseKey, getPagedData, query);
     return allContentTypes;
   } catch (error) {
     reporter.panic({

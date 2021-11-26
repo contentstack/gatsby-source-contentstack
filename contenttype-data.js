@@ -4,6 +4,8 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
@@ -15,6 +17,10 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -63,15 +69,13 @@ var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
   (0, _createClass2["default"])(FetchDefaultContentTypes, [{
     key: "getPagedData",
     value: function () {
-      var _getPagedData2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(url, config, responseKey, fn) {
-        var query, result;
+      var _getPagedData2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(url, config, responseKey, fn, query) {
+        var result;
         return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                query = {
-                  include_global_field_schema: true
-                };
+                query.query = JSON.stringify(query.query);
                 _context2.next = 3;
                 return fn.apply(null, [url, config, responseKey, query]);
 
@@ -87,7 +91,7 @@ var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
         }, _callee2);
       }));
 
-      function getPagedData(_x, _x2, _x3, _x4) {
+      function getPagedData(_x, _x2, _x3, _x4, _x5) {
         return _getPagedData2.apply(this, arguments);
       }
 
@@ -110,22 +114,26 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
   (0, _createClass2["default"])(FetchSpecifiedContentTypes, [{
     key: "getPagedData",
     value: function () {
-      var _getPagedData3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(url, config, responseKey, fn) {
-        var query, contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
+      var _getPagedData3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(url, config, responseKey, fn, query) {
+        var contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
         return _regenerator["default"].wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                query = {
-                  query: JSON.stringify({
-                    uid: {
-                      $in: config.contentTypes
-                    }
-                  }),
-                  include_global_field_schema: true
-                };
+                query.query.uid = {
+                  $in: config.contentTypes
+                }; // const queryParams = {
+                //   query: JSON.stringify({
+                //     uid: { $in: config.contentTypes },
+                //     ...query.query,
+                //   }),
+                //   include_global_field_schema: true
+                // };
+
                 _context3.next = 3;
-                return fn.apply(null, [url, config, responseKey, query]);
+                return fn.apply(null, [url, config, responseKey, _objectSpread(_objectSpread({}, query), {}, {
+                  query: JSON.stringify(query.query)
+                })]);
 
               case 3:
                 contentTypes = _context3.sent;
@@ -138,13 +146,14 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
                   break;
                 }
 
-                query.query = JSON.stringify({
-                  uid: {
-                    $in: referredContentTypesList
-                  }
-                });
+                // query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
+                query.query.uid = {
+                  $in: referredContentTypesList
+                };
                 _context3.next = 11;
-                return fn.apply(null, [url, config, responseKey, query]);
+                return fn.apply(null, [url, config, responseKey, _objectSpread(_objectSpread({}, query), {}, {
+                  query: JSON.stringify(query.query)
+                })]);
 
               case 11:
                 referredContentTypesData = _context3.sent;
@@ -161,7 +170,7 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
         }, _callee3);
       }));
 
-      function getPagedData(_x5, _x6, _x7, _x8) {
+      function getPagedData(_x6, _x7, _x8, _x9, _x10) {
         return _getPagedData3.apply(this, arguments);
       }
 
@@ -184,22 +193,26 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
   (0, _createClass2["default"])(FetchUnspecifiedContentTypes, [{
     key: "getPagedData",
     value: function () {
-      var _getPagedData4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(url, config, responseKey, fn) {
-        var query, contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
+      var _getPagedData4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(url, config, responseKey, fn, query) {
+        var contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
         return _regenerator["default"].wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                query = {
-                  query: JSON.stringify({
-                    uid: {
-                      $nin: config.excludeContentTypes
-                    }
-                  }),
-                  include_global_field_schema: true
-                };
+                query.query.uid = {
+                  $nin: config.excludeContentTypes
+                }; // const queryParams = {
+                //   query: JSON.stringify({
+                //     uid: { $nin: config.excludeContentTypes },
+                //     ...query.query,
+                //   }),
+                //   include_global_field_schema: true
+                // };
+
                 _context4.next = 3;
-                return fn.apply(null, [url, config, responseKey, query]);
+                return fn.apply(null, [url, config, responseKey, _objectSpread(_objectSpread({}, query), {}, {
+                  query: JSON.stringify(query.query)
+                })]);
 
               case 3:
                 contentTypes = _context4.sent;
@@ -212,13 +225,14 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
                   break;
                 }
 
-                query.query = JSON.stringify({
-                  uid: {
-                    $in: referredContentTypesList
-                  }
-                });
+                // query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
+                query.query.uid = {
+                  $in: referredContentTypesList
+                };
                 _context4.next = 11;
-                return fn.apply(null, [url, config, responseKey, query]);
+                return fn.apply(null, [url, config, responseKey, _objectSpread(_objectSpread({}, query), {}, {
+                  query: JSON.stringify(query.query)
+                })]);
 
               case 11:
                 referredContentTypesData = _context4.sent;
@@ -235,7 +249,7 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
         }, _callee4);
       }));
 
-      function getPagedData(_x9, _x10, _x11, _x12) {
+      function getPagedData(_x11, _x12, _x13, _x14, _x15) {
         return _getPagedData4.apply(this, arguments);
       }
 

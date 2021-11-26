@@ -5,32 +5,25 @@ class FetchContentTypes {
 }
 
 class FetchDefaultContentTypes extends FetchContentTypes {
-  async getPagedData(url, config, responseKey, fn) {
-    const query = {
-      include_global_field_schema: true
-    };
+  async getPagedData(url, config, responseKey, fn, query) {
+    query.query = JSON.stringify(query.query);
     const result = await fn.apply(null, [url, config, responseKey, query]);
     return result;
   }
 }
 
 class FetchSpecifiedContentTypes extends FetchContentTypes {
-  async getPagedData(url, config, responseKey, fn) {
-    const query = {
-      query: JSON.stringify({
-        uid: { $in: config.contentTypes }
-      }),
-      include_global_field_schema: true
-    };
-    const contentTypes = await fn.apply(null, [url, config, responseKey, query]);
+  async getPagedData(url, config, responseKey, fn, query) {
+    query.query.uid = { $in: config.contentTypes };
+    const contentTypes = await fn.apply(null, [url, config, responseKey, { ...query, query: JSON.stringify(query.query) }]);
 
     const referredContentTypes = new ReferredContentTypes();
     const referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes); 
 
     let referredContentTypesData = [];
     if (referredContentTypesList.length) {
-      query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
-      referredContentTypesData = await fn.apply(null, [url, config, responseKey, query]);
+      query.query.uid = { $in: referredContentTypesList };
+      referredContentTypesData = await fn.apply(null, [url, config, responseKey, { ...query, query: JSON.stringify(query.query) }]);
     }
 
     const result = contentTypes.concat(referredContentTypesData);
@@ -39,22 +32,17 @@ class FetchSpecifiedContentTypes extends FetchContentTypes {
 }
 
 class FetchUnspecifiedContentTypes extends FetchContentTypes {
-  async getPagedData(url, config, responseKey, fn) {
-    const query = {
-      query: JSON.stringify({
-        uid: { $nin: config.excludeContentTypes }
-      }),
-      include_global_field_schema: true
-    };
-    const contentTypes = await fn.apply(null, [url, config, responseKey, query]);
+  async getPagedData(url, config, responseKey, fn, query) {
+    query.query.uid = { $nin: config.excludeContentTypes };
+    const contentTypes = await fn.apply(null, [url, config, responseKey, { ...query, query: JSON.stringify(query.query) }]);
 
     const referredContentTypes = new ReferredContentTypes();
     const referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes); 
 
     let referredContentTypesData = [];
     if (referredContentTypesList.length) {
-      query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
-      referredContentTypesData = await fn.apply(null, [url, config, responseKey, query]);
+      query.query.uid = { $in: referredContentTypesList };
+      referredContentTypesData = await fn.apply(null, [url, config, responseKey, { ...query, query: JSON.stringify(query.query) }]);
     }
 
     const result = contentTypes.concat(referredContentTypesData);
