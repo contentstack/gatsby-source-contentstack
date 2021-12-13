@@ -89,25 +89,26 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                           return function () {
                             return _ref4.apply(this, arguments);
                           };
-                        }(), {// jpegProgressive: {
-                          //   type: GraphQLBoolean,
-                          //   defaultValue: true,
-                          // },
-                          // resizingBehavior: {
-                          //   type: ImageResizingBehavior,
-                          // },
-                          // cropFocus: {
-                          //   type: ImageCropFocusType,
-                          // },
-                          // cornerRadius: {
-                          //   type: GraphQLInt,
-                          //   defaultValue: 0,
-                          //   // description: ''
-                          // },
-                          // quality: {
-                          //   type: GraphQLInt,
-                          //   defaultValue: 50,
-                          // }
+                        }(), {
+                          jpegProgressive: {
+                            type: GraphQLBoolean,
+                            defaultValue: true
+                          },
+                          resizingBehavior: {
+                            type: ImageResizingBehavior
+                          },
+                          cropFocus: {
+                            type: ImageCropFocusType
+                          },
+                          cornerRadius: {
+                            type: GraphQLInt,
+                            defaultValue: 0 // description: ''
+
+                          },
+                          quality: {
+                            type: GraphQLInt,
+                            defaultValue: 50
+                          }
                         });
                         fieldConfig.type = GraphQLJSON;
                         return _context2.abrupt("return", fieldConfig);

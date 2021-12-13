@@ -111,15 +111,15 @@ function getBasicImageProps(image, args) {
   if (args.width && args.height) {
     aspectRatio = args.width / args.height;
   } else {
-    aspectRatio = image.file.details.image.width / image.file.details.image.height;
+    aspectRatio = image.dimension.width / image.dimension.height;
   }
 
   return {
-    baseUrl: image.file.url,
-    contentType: image.file.contentType,
+    baseUrl: image.url,
+    contentType: image.content_type,
     aspectRatio: aspectRatio,
-    width: image.file.details.image.width,
-    height: image.file.details.image.height
+    width: image.dimension.width,
+    height: image.dimension.height
   };
 } // Generate image source data for gatsby-plugin-image
 

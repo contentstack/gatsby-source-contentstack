@@ -18,25 +18,25 @@ exports.setFieldsOnGraphQLNodeType = async ({ type, cache }, configOptions) => {
     const fieldConfig = getGatsbyImageFieldConfig(
       async (...args) => resolveGatsbyImageData(...args, { cache }),
       {
-        // jpegProgressive: {
-        //   type: GraphQLBoolean,
-        //   defaultValue: true,
-        // },
-        // resizingBehavior: {
-        //   type: ImageResizingBehavior,
-        // },
-        // cropFocus: {
-        //   type: ImageCropFocusType,
-        // },
-        // cornerRadius: {
-        //   type: GraphQLInt,
-        //   defaultValue: 0,
-        //   // description: ''
-        // },
-        // quality: {
-        //   type: GraphQLInt,
-        //   defaultValue: 50,
-        // }
+        jpegProgressive: {
+          type: GraphQLBoolean,
+          defaultValue: true,
+        },
+        resizingBehavior: {
+          type: ImageResizingBehavior,
+        },
+        cropFocus: {
+          type: ImageCropFocusType,
+        },
+        cornerRadius: {
+          type: GraphQLInt,
+          defaultValue: 0,
+          // description: ''
+        },
+        quality: {
+          type: GraphQLInt,
+          defaultValue: 50,
+        }
       }
     );
 

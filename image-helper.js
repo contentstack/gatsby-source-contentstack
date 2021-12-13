@@ -15,9 +15,7 @@ var mimeTypeExtensions = {
 var validImageFormats = ['jpg', 'png', 'webp', 'gif'];
 
 var isImage = function isImage(image) {
-  var _image$file;
-
-  return !!mimeTypeExtensions[image === null || image === void 0 ? void 0 : (_image$file = image.file) === null || _image$file === void 0 ? void 0 : _image$file.contentType];
+  return !!mimeTypeExtensions[image === null || image === void 0 ? void 0 : image.content_type];
 }; // Creates a Contentstack image url
 
 

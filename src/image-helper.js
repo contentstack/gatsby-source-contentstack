@@ -14,7 +14,7 @@ const mimeTypeExtensions = {
 // Supported image formats by contentstack image API
 const validImageFormats = ['jpg', 'png', 'webp', 'gif'];
 
-const isImage = image => !!mimeTypeExtensions[image?.file?.contentType];
+const isImage = image => !!mimeTypeExtensions[image?.content_type];
 
 // Creates a Contentstack image url
 const createUrl = (imgUrl, options = {}) => {
