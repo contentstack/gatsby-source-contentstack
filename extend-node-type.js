@@ -96,6 +96,12 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                           pad: {
                             type: GraphQLString
                           },
+                          trim: {
+                            type: GraphQLString
+                          },
+                          pad: {
+                            type: GraphQLString
+                          },
                           quality: {
                             type: GraphQLInt,
                             defaultValue: 50

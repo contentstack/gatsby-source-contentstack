@@ -40,7 +40,8 @@ var createUrl = function createUrl(imgUrl) {
 
       searchParams.append(key, (_queryParams$key = queryParams[key]) !== null && _queryParams$key !== void 0 ? _queryParams$key : '');
     }
-  }
+  } // {base_url}/v3/assets/{stack_api_key}/{asset_uid}/{version_uid}/filename
+  // https://images.contentstack.io/v3/assets/blteae40eb499811073/bltc5064f36b5855343/59e0c41ac0eddd140d5a8e3e/owl.jpg?format={format}
 
   return "".concat(imgUrl, "?").concat(searchParams.toString());
 };
