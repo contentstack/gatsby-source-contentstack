@@ -15,7 +15,8 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
 var _require = require('gatsby/graphql'),
     GraphQLBoolean = _require.GraphQLBoolean,
     GraphQLInt = _require.GraphQLInt,
-    GraphQLJSON = _require.GraphQLJSON;
+    GraphQLJSON = _require.GraphQLJSON,
+    GraphQLString = _require.GraphQLString;
 
 var _require2 = require('./gatsby-plugin-image'),
     resolveGatsbyImageData = _require2.resolveGatsbyImageData;
@@ -95,15 +96,21 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                             defaultValue: true
                           },
                           resizingBehavior: {
-                            type: ImageResizingBehavior
+                            type: GraphQLString
                           },
-                          cropFocus: {
-                            type: ImageCropFocusType
+                          crop: {
+                            type: GraphQLString
                           },
                           cornerRadius: {
                             type: GraphQLInt,
                             defaultValue: 0 // description: ''
 
+                          },
+                          trim: {
+                            type: GraphQLString
+                          },
+                          pad: {
+                            type: GraphQLString
                           },
                           quality: {
                             type: GraphQLInt,

@@ -18,30 +18,25 @@ const isImage = image => !!mimeTypeExtensions[image?.content_type];
 
 // Creates a Contentstack image url
 const createUrl = (imgUrl, options = {}) => {
-  // If radius is -1, we need to pass max to the API.
-  const cornerRadius = options.cornerRadius === -1 ? 'max' : options.cornerRadius;
-
-  // Convert to Contentstack names and filter out undefined/null values.
-  const urlArgs = {
-    w: options.width || undefined,
-    h: options.height || undefined,
-    fl: options.toFormat === 'jpg' && options.jpegProgressive ? 'progressive' : undefined,
-    q: options.quality || undefined,
-    fm: options.toFormat || undefined,
+  const queryParams = {
+    width: options.width || undefined,
+    height: options.height || undefined,
+    format: options.toFormat,
+    quality: options.quality || undefined,
+    crop: options.crop || undefined,
     fit: options.resizingBehavior || undefined,
-    f: options.background || undefined,
-    bg: options.background || undefined,
-    r: cornerRadius || undefined,
+    'bg-color': options.background || undefined,
   };
 
   const searchParams = new URLSearchParams();
-  for (const key in urlArgs) {
-    if (typeof urlArgs[key] !== 'undefined') {
-      searchParams.append(key, urlArgs[key] ?? '');
+  for (const key in queryParams) {
+    if (typeof queryParams[key] !== 'undefined') {
+      searchParams.append(key, queryParams[key] ?? '');
     }
   }
-
-  return `https://${imgUrl}?${searchParams.toString()}`;
+  // {base_url}/v3/assets/{stack_api_key}/{asset_uid}/{version_uid}/filename
+  // https://images.contentstack.io/v3/assets/blteae40eb499811073/bltc5064f36b5855343/59e0c41ac0eddd140d5a8e3e/owl.jpg?format={format}
+  return `${imgUrl}?${searchParams.toString()}`;
 };
 
 exports.mimeTypeExtensions = mimeTypeExtensions;

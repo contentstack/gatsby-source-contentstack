@@ -124,7 +124,7 @@ function getBasicImageProps(image, args) {
 } // Generate image source data for gatsby-plugin-image
 
 
-function generateImageSource(filename, width, height, toFormat, imageTransformOptions) {
+function generateImageSource(filename, width, height, toFormat, _fit, imageTransformOptions) {
   var jpegProgressive = imageTransformOptions.jpegProgressive,
       quality = imageTransformOptions.quality,
       cropFocus = imageTransformOptions.cropFocus,

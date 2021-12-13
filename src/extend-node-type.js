@@ -1,6 +1,6 @@
 'use strict';
 
-const { GraphQLBoolean, GraphQLInt, GraphQLJSON } = require('gatsby/graphql');
+const { GraphQLBoolean, GraphQLInt, GraphQLJSON, GraphQLString } = require('gatsby/graphql');
 
 const { resolveGatsbyImageData } = require('./gatsby-plugin-image');
 const { ImageResizingBehavior, ImageCropFocusType } = require('./schemes');
@@ -23,15 +23,21 @@ exports.setFieldsOnGraphQLNodeType = async ({ type, cache }, configOptions) => {
           defaultValue: true,
         },
         resizingBehavior: {
-          type: ImageResizingBehavior,
+          type: GraphQLString,
         },
-        cropFocus: {
-          type: ImageCropFocusType,
+        crop: {
+          type: GraphQLString,
         },
         cornerRadius: {
           type: GraphQLInt,
           defaultValue: 0,
           // description: ''
+        },
+        trim: {
+          type: GraphQLString,
+        },
+        pad: {
+          type: GraphQLString,
         },
         quality: {
           type: GraphQLInt,
