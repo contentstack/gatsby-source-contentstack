@@ -37,7 +37,7 @@ var resolvedBase64Cache = {};
 
 var getBase64Image = exports.getBase64Image = function (props, cache) {
   var aspectRatio = props.aspectRatio;
-  var originalFormat = props.image.file.contentType.split('/')[1];
+  var originalFormat = props.image.content_type.split('/')[1];
   var toFormat = props.options.toFormat;
 
   var imageOptions = _objectSpread(_objectSpread({}, props.options), {}, {
@@ -61,13 +61,13 @@ var getBase64Image = exports.getBase64Image = function (props, cache) {
 
   var loadImage = /*#__PURE__*/function () {
     var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
-      var contentType, extension, absolutePath, base64;
+      var content_type, extension, absolutePath, base64;
       return _regenerator["default"].wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              contentType = props.image.file.contentType;
-              extension = mimeTypeExtensions[contentType];
+              content_type = props.image.content_type;
+              extension = mimeTypeExtensions[content_type];
               _context.next = 4;
               return fetchRemoteFile({
                 url: csImageUrl,
@@ -78,10 +78,10 @@ var getBase64Image = exports.getBase64Image = function (props, cache) {
             case 4:
               absolutePath = _context.sent;
               _context.next = 7;
-              return readFile(absolutePath).toString('base64');
+              return readFile(absolutePath);
 
             case 7:
-              base64 = _context.sent;
+              base64 = _context.sent.toString('base64');
               return _context.abrupt("return", "data:image/".concat(toFormat || originalFormat, ";base64,").concat(base64));
 
             case 9:
@@ -102,6 +102,8 @@ var getBase64Image = exports.getBase64Image = function (props, cache) {
   return promise.then(function (body) {
     delete unresolvedBase64Cache[csImageUrl];
     resolvedBase64Cache[csImageUrl] = body;
+  })["catch"](function (error) {
+    console.log('error--->', error);
   });
 };
 

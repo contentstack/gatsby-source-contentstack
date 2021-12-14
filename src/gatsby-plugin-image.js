@@ -10,7 +10,7 @@ const resolvedBase64Cache = {};
 
 const getBase64Image = exports.getBase64Image = (props, cache) => {
   const { aspectRatio } = props;
-  const originalFormat = props.image.file.contentType.split('/')[1];
+  const originalFormat = props.image.content_type.split('/')[1];
   const toFormat = props.options.toFormat;
   const imageOptions = {
     ...props.options,
@@ -32,14 +32,14 @@ const getBase64Image = exports.getBase64Image = (props, cache) => {
   }
 
   const loadImage = async () => {
-    const { file: { contentType } } = props.image;
-    const extension = mimeTypeExtensions[contentType];
+    const { content_type } = props.image;
+    const extension = mimeTypeExtensions[content_type];
     const absolutePath = await fetchRemoteFile({
       url: csImageUrl,
       cache,
       ext: extension,
     });
-    const base64 = (await readFile(absolutePath).toString('base64'));
+    const base64 = (await readFile(absolutePath)).toString('base64');
     return `data:image/${toFormat || originalFormat};base64,${base64}`;
   };
 
@@ -49,6 +49,8 @@ const getBase64Image = exports.getBase64Image = (props, cache) => {
   return promise.then(body => {
     delete unresolvedBase64Cache[csImageUrl];
     resolvedBase64Cache[csImageUrl] = body;
+  }).catch(error => {
+    console.log('error--->', error);
   });
 };
 
