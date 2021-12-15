@@ -31,10 +31,13 @@ var _require2 = require('./image-helper'),
     validImageFormats = _require2.validImageFormats,
     isImage = _require2.isImage;
 
+var _require3 = require('./utils'),
+    CODES = _require3.CODES;
+
 var unresolvedBase64Cache = {};
 var resolvedBase64Cache = {};
 
-var getBase64Image = exports.getBase64Image = function (props, cache) {
+var getBase64Image = exports.getBase64Image = function (props, cache, reporter) {
   var aspectRatio = props.aspectRatio;
   var originalFormat = props.image.content_type.split('/')[1];
   var toFormat = props.options.toFormat;
@@ -101,7 +104,14 @@ var getBase64Image = exports.getBase64Image = function (props, cache) {
   return promise.then(function (body) {
     delete unresolvedBase64Cache[csImageUrl];
     resolvedBase64Cache[csImageUrl] = body;
-  })["catch"](function (error) {// TODO: add a logger here.
+  })["catch"](function (error) {
+    reporter.panic({
+      id: CODES.ImageAPIError,
+      context: {
+        sourceMessage: "Error occurred while fetching image. Please find the image url here: ".concat(props.baseUrl)
+      },
+      error: error
+    });
   });
 };
 
@@ -128,7 +138,9 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
   var quality = imageTransformOptions.quality,
       crop = imageTransformOptions.crop,
       backgroundColor = imageTransformOptions.backgroundColor,
-      fit = imageTransformOptions.fit;
+      fit = imageTransformOptions.fit,
+      trim = imageTransformOptions.trim,
+      pad = imageTransformOptions.pad;
 
   if (!validImageFormats.includes(toFormat)) {
     console.warn("[gatsby-source-contentstack] Invalid image format \"".concat(toFormat, "\". Supported types are ").concat(validImageFormats.join(', ')));
@@ -156,13 +168,13 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
 
 exports.resolveGatsbyImageData = /*#__PURE__*/function () {
   var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(image, options, context, info, _ref3) {
-    var cache, _yield$import, generateImageData, _getBasicImageProps, baseUrl, contentType, width, height, _contentType$split, _contentType$split2, format, imageProps, placeholderDataURI;
+    var cache, reporter, _yield$import, generateImageData, _getBasicImageProps, baseUrl, contentType, width, height, _contentType$split, _contentType$split2, format, imageProps, placeholderDataURI;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            cache = _ref3.cache;
+            cache = _ref3.cache, reporter = _ref3.reporter;
 
             if (isImage(image)) {
               _context2.next = 3;
@@ -210,7 +222,7 @@ exports.resolveGatsbyImageData = /*#__PURE__*/function () {
               baseUrl: baseUrl,
               image: image,
               options: options
-            }, cache);
+            }, cache, reporter);
 
           case 15:
             placeholderDataURI = _context2.sent;

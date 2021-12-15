@@ -13,7 +13,6 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 var _require = require('gatsby/graphql'),
-    GraphQLBoolean = _require.GraphQLBoolean,
     GraphQLInt = _require.GraphQLInt,
     GraphQLJSON = _require.GraphQLJSON,
     GraphQLString = _require.GraphQLString;
@@ -23,12 +22,12 @@ var _require2 = require('./gatsby-plugin-image'),
 
 exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(_ref2, configOptions) {
-    var type, cache, typePrefix, getGatsbyImageData, gatsbyImageData;
+    var type, cache, reporter, typePrefix, getGatsbyImageData, gatsbyImageData;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            type = _ref2.type, cache = _ref2.cache;
+            type = _ref2.type, cache = _ref2.cache, reporter = _ref2.reporter;
             typePrefix = configOptions.type_prefix || 'Contentstack';
 
             if (!(type.name !== "".concat(typePrefix, "_assets"))) {
@@ -72,7 +71,8 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                                     }
 
                                     return _context.abrupt("return", resolveGatsbyImageData.apply(void 0, args.concat([{
-                                      cache: cache
+                                      cache: cache,
+                                      reporter: reporter
                                     }])));
 
                                   case 2:
