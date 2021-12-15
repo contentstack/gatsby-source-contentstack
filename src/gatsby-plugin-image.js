@@ -50,7 +50,7 @@ const getBase64Image = exports.getBase64Image = (props, cache) => {
     delete unresolvedBase64Cache[csImageUrl];
     resolvedBase64Cache[csImageUrl] = body;
   }).catch(error => {
-    console.log('error--->', error);
+    // TODO: add a logger here.
   });
 };
 
@@ -74,7 +74,6 @@ function getBasicImageProps(image, args) {
 // Generate image source data for gatsby-plugin-image
 function generateImageSource(filename, width, height, toFormat, _fit, imageTransformOptions) {
   const {
-    jpegProgressive,
     quality,
     crop,
     backgroundColor,
@@ -87,14 +86,9 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
   }
 
   const src = createUrl(filename, {
-    width,
-    height,
-    toFormat,
-    fit,
+    width, height, toFormat, fit,
     background: backgroundColor?.replace('#', 'rgb:'),
-    quality,
-    jpegProgressive,
-    crop,
+    quality, crop, trim, pad,
   });
 
   return { width, height, format: toFormat, src };

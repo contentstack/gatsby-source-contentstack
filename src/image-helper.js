@@ -25,6 +25,8 @@ const createUrl = (imgUrl, options = {}) => {
     quality: options.quality,
     crop: options.crop,
     fit: options.fit,
+    trim: options.trim,
+    pad: options.pad,
     'bg-color': options.background,
   };
 

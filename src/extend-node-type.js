@@ -17,11 +17,7 @@ exports.setFieldsOnGraphQLNodeType = async ({ type, cache }, configOptions) => {
     const fieldConfig = getGatsbyImageFieldConfig(
       async (...args) => resolveGatsbyImageData(...args, { cache }),
       {
-        jpegProgressive: {
-          type: GraphQLBoolean,
-          defaultValue: true,
-        },
-        resizingBehavior: {
+        fit: {
           type: GraphQLString,
         },
         crop: {
