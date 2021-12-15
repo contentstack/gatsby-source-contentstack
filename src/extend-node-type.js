@@ -3,7 +3,6 @@
 const { GraphQLBoolean, GraphQLInt, GraphQLJSON, GraphQLString } = require('gatsby/graphql');
 
 const { resolveGatsbyImageData } = require('./gatsby-plugin-image');
-const { ImageResizingBehavior, ImageCropFocusType } = require('./schemes');
 
 exports.setFieldsOnGraphQLNodeType = async ({ type, cache }, configOptions) => {
   const typePrefix = configOptions.type_prefix || 'Contentstack';
@@ -27,11 +26,6 @@ exports.setFieldsOnGraphQLNodeType = async ({ type, cache }, configOptions) => {
         },
         crop: {
           type: GraphQLString,
-        },
-        cornerRadius: {
-          type: GraphQLInt,
-          defaultValue: 0,
-          // description: ''
         },
         trim: {
           type: GraphQLString,

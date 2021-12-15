@@ -1,7 +1,7 @@
 'use strict';
 
 const { fetchRemoteFile } = require('gatsby-core-utils');
-const { readFile } = require('fs');
+const { readFile } = require('fs').promises;
 
 const { createUrl, mimeTypeExtensions, validImageFormats, isImage } = require('./image-helper');
 
@@ -76,10 +76,9 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
   const {
     jpegProgressive,
     quality,
-    cropFocus,
+    crop,
     backgroundColor,
-    resizingBehavior,
-    cornerRadius,
+    fit,
   } = imageTransformOptions;
 
   if (!validImageFormats.includes(toFormat)) {
@@ -91,12 +90,11 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
     width,
     height,
     toFormat,
-    resizingBehavior,
+    fit,
     background: backgroundColor?.replace('#', 'rgb:'),
     quality,
     jpegProgressive,
-    cropFocus,
-    cornerRadius,
+    crop,
   });
 
   return { width, height, format: toFormat, src };

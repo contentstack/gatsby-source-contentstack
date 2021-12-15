@@ -19,13 +19,13 @@ const isImage = image => !!mimeTypeExtensions[image?.content_type];
 // Creates a Contentstack image url
 const createUrl = (imgUrl, options = {}) => {
   const queryParams = {
-    width: options.width || undefined,
-    height: options.height || undefined,
+    width: options.width,
+    height: options.height,
     format: options.toFormat,
-    quality: options.quality || undefined,
-    crop: options.crop || undefined,
-    fit: options.resizingBehavior || undefined,
-    'bg-color': options.background || undefined,
+    quality: options.quality,
+    crop: options.crop,
+    fit: options.fit,
+    'bg-color': options.background,
   };
 
   const searchParams = new URLSearchParams();
@@ -34,8 +34,6 @@ const createUrl = (imgUrl, options = {}) => {
       searchParams.append(key, queryParams[key] ?? '');
     }
   }
-  // {base_url}/v3/assets/{stack_api_key}/{asset_uid}/{version_uid}/filename
-  // https://images.contentstack.io/v3/assets/blteae40eb499811073/bltc5064f36b5855343/59e0c41ac0eddd140d5a8e3e/owl.jpg?format={format}
   return `${imgUrl}?${searchParams.toString()}`;
 };
 
