@@ -21,10 +21,6 @@ var _require = require('gatsby/graphql'),
 var _require2 = require('./gatsby-plugin-image'),
     resolveGatsbyImageData = _require2.resolveGatsbyImageData;
 
-var _require3 = require('./schemes'),
-    ImageResizingBehavior = _require3.ImageResizingBehavior,
-    ImageCropFocusType = _require3.ImageCropFocusType;
-
 exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(_ref2, configOptions) {
     var type, cache, typePrefix, getGatsbyImageData, gatsbyImageData;
@@ -100,11 +96,6 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                           },
                           crop: {
                             type: GraphQLString
-                          },
-                          cornerRadius: {
-                            type: GraphQLInt,
-                            defaultValue: 0 // description: ''
-
                           },
                           trim: {
                             type: GraphQLString

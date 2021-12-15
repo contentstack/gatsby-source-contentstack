@@ -23,14 +23,13 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 var _require = require('gatsby-core-utils'),
     fetchRemoteFile = _require.fetchRemoteFile;
 
-var _require2 = require('fs'),
-    readFile = _require2.readFile;
+var readFile = require('fs').promises.readFile;
 
-var _require3 = require('./image-helper'),
-    createUrl = _require3.createUrl,
-    mimeTypeExtensions = _require3.mimeTypeExtensions,
-    validImageFormats = _require3.validImageFormats,
-    isImage = _require3.isImage;
+var _require2 = require('./image-helper'),
+    createUrl = _require2.createUrl,
+    mimeTypeExtensions = _require2.mimeTypeExtensions,
+    validImageFormats = _require2.validImageFormats,
+    isImage = _require2.isImage;
 
 var unresolvedBase64Cache = {};
 var resolvedBase64Cache = {};
@@ -129,10 +128,9 @@ function getBasicImageProps(image, args) {
 function generateImageSource(filename, width, height, toFormat, _fit, imageTransformOptions) {
   var jpegProgressive = imageTransformOptions.jpegProgressive,
       quality = imageTransformOptions.quality,
-      cropFocus = imageTransformOptions.cropFocus,
+      crop = imageTransformOptions.crop,
       backgroundColor = imageTransformOptions.backgroundColor,
-      resizingBehavior = imageTransformOptions.resizingBehavior,
-      cornerRadius = imageTransformOptions.cornerRadius;
+      fit = imageTransformOptions.fit;
 
   if (!validImageFormats.includes(toFormat)) {
     console.warn("[gatsby-source-contentstack] Invalid image format \"".concat(toFormat, "\". Supported types are ").concat(validImageFormats.join(', ')));
@@ -143,12 +141,11 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
     width: width,
     height: height,
     toFormat: toFormat,
-    resizingBehavior: resizingBehavior,
+    fit: fit,
     background: backgroundColor === null || backgroundColor === void 0 ? void 0 : backgroundColor.replace('#', 'rgb:'),
     quality: quality,
     jpegProgressive: jpegProgressive,
-    cropFocus: cropFocus,
-    cornerRadius: cornerRadius
+    crop: crop
   });
   return {
     width: width,

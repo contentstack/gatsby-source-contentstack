@@ -22,13 +22,13 @@ var isImage = function isImage(image) {
 var createUrl = function createUrl(imgUrl) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   var queryParams = {
-    width: options.width || undefined,
-    height: options.height || undefined,
+    width: options.width,
+    height: options.height,
     format: options.toFormat,
-    quality: options.quality || undefined,
-    crop: options.crop || undefined,
-    fit: options.resizingBehavior || undefined,
-    'bg-color': options.background || undefined
+    quality: options.quality,
+    crop: options.crop,
+    fit: options.fit,
+    'bg-color': options.background
   };
   var searchParams = new URLSearchParams();
 
@@ -38,9 +38,7 @@ var createUrl = function createUrl(imgUrl) {
 
       searchParams.append(key, (_queryParams$key = queryParams[key]) !== null && _queryParams$key !== void 0 ? _queryParams$key : '');
     }
-  } // {base_url}/v3/assets/{stack_api_key}/{asset_uid}/{version_uid}/filename
-  // https://images.contentstack.io/v3/assets/blteae40eb499811073/bltc5064f36b5855343/59e0c41ac0eddd140d5a8e3e/owl.jpg?format={format}
-
+  }
 
   return "".concat(imgUrl, "?").concat(searchParams.toString());
 };
