@@ -101,8 +101,7 @@ var getBase64Image = exports.getBase64Image = function (props, cache) {
   return promise.then(function (body) {
     delete unresolvedBase64Cache[csImageUrl];
     resolvedBase64Cache[csImageUrl] = body;
-  })["catch"](function (error) {
-    console.log('error--->', error);
+  })["catch"](function (error) {// TODO: add a logger here.
   });
 };
 
@@ -126,8 +125,7 @@ function getBasicImageProps(image, args) {
 
 
 function generateImageSource(filename, width, height, toFormat, _fit, imageTransformOptions) {
-  var jpegProgressive = imageTransformOptions.jpegProgressive,
-      quality = imageTransformOptions.quality,
+  var quality = imageTransformOptions.quality,
       crop = imageTransformOptions.crop,
       backgroundColor = imageTransformOptions.backgroundColor,
       fit = imageTransformOptions.fit;
@@ -144,8 +142,9 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
     fit: fit,
     background: backgroundColor === null || backgroundColor === void 0 ? void 0 : backgroundColor.replace('#', 'rgb:'),
     quality: quality,
-    jpegProgressive: jpegProgressive,
-    crop: crop
+    crop: crop,
+    trim: trim,
+    pad: pad
   });
   return {
     width: width,

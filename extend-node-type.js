@@ -87,11 +87,7 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                             return _ref4.apply(this, arguments);
                           };
                         }(), {
-                          jpegProgressive: {
-                            type: GraphQLBoolean,
-                            defaultValue: true
-                          },
-                          resizingBehavior: {
+                          fit: {
                             type: GraphQLString
                           },
                           crop: {

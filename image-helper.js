@@ -28,6 +28,8 @@ var createUrl = function createUrl(imgUrl) {
     quality: options.quality,
     crop: options.crop,
     fit: options.fit,
+    trim: options.trim,
+    pad: options.pad,
     'bg-color': options.background
   };
   var searchParams = new URLSearchParams();
