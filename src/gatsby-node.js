@@ -367,7 +367,12 @@ const ERROR_MAP = {
     text: context => context.sourceMessage,
     level: `ERROR`,
     type: `PLUGIN`
-  }
+  },
+  [CODES.ImageAPIError]: {
+    text: context => context.sourceMessage,
+    level: `ERROR`,
+    type: `PLUGIN`
+  },
 };
 
 let coreSupportsOnPluginInit;

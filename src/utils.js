@@ -44,7 +44,8 @@ exports.IMAGE_REGEXP = new RegExp('https://(stag-images|(eu-)?images).(blz-)?con
 
 exports.CODES = {
   SyncError: '10001',
-  APIError: '10002'
+  APIError: '10002',
+  ImageAPIError: '10003',
 };
 
 exports.getContentTypeOption = configOptions => {

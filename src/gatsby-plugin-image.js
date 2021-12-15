@@ -4,11 +4,12 @@ const { fetchRemoteFile } = require('gatsby-core-utils');
 const { readFile } = require('fs').promises;
 
 const { createUrl, mimeTypeExtensions, validImageFormats, isImage } = require('./image-helper');
+const { CODES } = require('./utils');
 
 const unresolvedBase64Cache = {};
 const resolvedBase64Cache = {};
 
-const getBase64Image = exports.getBase64Image = (props, cache) => {
+const getBase64Image = exports.getBase64Image = (props, cache, reporter) => {
   const { aspectRatio } = props;
   const originalFormat = props.image.content_type.split('/')[1];
   const toFormat = props.options.toFormat;
@@ -50,7 +51,13 @@ const getBase64Image = exports.getBase64Image = (props, cache) => {
     delete unresolvedBase64Cache[csImageUrl];
     resolvedBase64Cache[csImageUrl] = body;
   }).catch(error => {
-    // TODO: add a logger here.
+    reporter.panic({
+      id: CODES.ImageAPIError,
+      context: {
+        sourceMessage: `Error occurred while fetching image. Please find the image url here: ${props.baseUrl}`,
+      },
+      error,
+    });
   });
 };
 
@@ -73,12 +80,7 @@ function getBasicImageProps(image, args) {
 
 // Generate image source data for gatsby-plugin-image
 function generateImageSource(filename, width, height, toFormat, _fit, imageTransformOptions) {
-  const {
-    quality,
-    crop,
-    backgroundColor,
-    fit,
-  } = imageTransformOptions;
+  const { quality, crop, backgroundColor, fit, trim, pad } = imageTransformOptions;
 
   if (!validImageFormats.includes(toFormat)) {
     console.warn(`[gatsby-source-contentstack] Invalid image format "${toFormat}". Supported types are ${validImageFormats.join(', ')}`);
@@ -94,7 +96,7 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
   return { width, height, format: toFormat, src };
 }
 
-exports.resolveGatsbyImageData = async (image, options, context, info, { cache }) => {
+exports.resolveGatsbyImageData = async (image, options, context, info, { cache, reporter }) => {
   if (!isImage(image)) return null;
 
   const { generateImageData } = await import('gatsby-plugin-image');
@@ -118,7 +120,7 @@ exports.resolveGatsbyImageData = async (image, options, context, info, { cache }
   let placeholderDataURI = null;
 
   if (options.placeholder === 'blurred') {
-    placeholderDataURI = await getBase64Image({ baseUrl, image, options }, cache);
+    placeholderDataURI = await getBase64Image({ baseUrl, image, options }, cache, reporter);
   }
 
   if (placeholderDataURI) {

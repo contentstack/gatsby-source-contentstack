@@ -1,10 +1,10 @@
 'use strict';
 
-const { GraphQLBoolean, GraphQLInt, GraphQLJSON, GraphQLString } = require('gatsby/graphql');
+const { GraphQLInt, GraphQLJSON, GraphQLString } = require('gatsby/graphql');
 
 const { resolveGatsbyImageData } = require('./gatsby-plugin-image');
 
-exports.setFieldsOnGraphQLNodeType = async ({ type, cache }, configOptions) => {
+exports.setFieldsOnGraphQLNodeType = async ({ type, cache, reporter }, configOptions) => {
   const typePrefix = configOptions.type_prefix || 'Contentstack';
   if (type.name !== `${typePrefix}_assets`) {
     return {};
@@ -15,7 +15,7 @@ exports.setFieldsOnGraphQLNodeType = async ({ type, cache }, configOptions) => {
     const { getGatsbyImageFieldConfig } = await import('gatsby-plugin-image/graphql-utils');
 
     const fieldConfig = getGatsbyImageFieldConfig(
-      async (...args) => resolveGatsbyImageData(...args, { cache }),
+      async (...args) => resolveGatsbyImageData(...args, { cache, reporter }),
       {
         fit: {
           type: GraphQLString,
@@ -32,7 +32,7 @@ exports.setFieldsOnGraphQLNodeType = async ({ type, cache }, configOptions) => {
         quality: {
           type: GraphQLInt,
           defaultValue: 50,
-        }
+        },
       }
     );
 
