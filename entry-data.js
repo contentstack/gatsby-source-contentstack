@@ -233,7 +233,9 @@ var FetchSpecifiedContentTypesEntries = /*#__PURE__*/function (_FetchEntries2) {
             switch (_context4.prev = _context4.next) {
               case 0:
                 _context4.prev = 0;
-                syncData = {};
+                syncData = {
+                  data: []
+                };
                 typePrefix = configOptions.type_prefix || 'Contentstack';
                 _context4.next = 5;
                 return cache.get(typePrefix);
@@ -397,7 +399,9 @@ var FetchSpecifiedLocalesEntries = /*#__PURE__*/function (_FetchEntries3) {
             switch (_context7.prev = _context7.next) {
               case 0:
                 _context7.prev = 0;
-                syncData = {};
+                syncData = {
+                  data: []
+                };
                 typePrefix = configOptions.type_prefix || 'Contentstack';
                 locales = configOptions.locales;
                 i = 0;
@@ -557,7 +561,9 @@ var FetchSpecifiedLocalesAndContentTypesEntries = /*#__PURE__*/function (_FetchE
             switch (_context10.prev = _context10.next) {
               case 0:
                 _context10.prev = 0;
-                syncData = {};
+                syncData = {
+                  data: []
+                };
                 typePrefix = configOptions.type_prefix || 'Contentstack';
                 _context10.next = 5;
                 return cache.get(typePrefix);

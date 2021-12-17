@@ -70,7 +70,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             _context.prev = 3;
             contentTypeOption = getContentTypeOption(configOptions);
             _context.next = 7;
-            return fetchContentTypes(configOptions, contentTypeOption);
+            return fetchContentTypes(configOptions, contentTypeOption, cache);
 
           case 7:
             contentTypes = _context.sent;

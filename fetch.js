@@ -98,26 +98,51 @@ exports.fetchData = /*#__PURE__*/function () {
 }();
 
 exports.fetchContentTypes = /*#__PURE__*/function () {
-  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(config, contentTypeOption) {
-    var url, responseKey, contentType, allContentTypes;
+  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(config, contentTypeOption, cache) {
+    var typePrefix, lastFetchedTimeCacheKey, lastFetchedTime, query, currentFetchedTime, url, responseKey, contentType, allContentTypes;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             _context2.prev = 0;
             config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
+            typePrefix = config.type_prefix || 'Contentstack';
+            lastFetchedTimeCacheKey = "".concat(typePrefix.toLowerCase(), "-content-type-fetch-time-").concat(config.api_key);
+            _context2.next = 6;
+            return cache.get(lastFetchedTimeCacheKey);
+
+          case 6:
+            lastFetchedTime = _context2.sent;
+
+            if (!lastFetchedTime) {
+              lastFetchedTime = new Date(null).toISOString();
+            }
+
+            query = {
+              query: {
+                updated_at: {
+                  $gt: lastFetchedTime
+                }
+              }
+            }; // Any changes here after in the content-types will be re-fetched.
+
+            currentFetchedTime = new Date().toISOString();
+            _context2.next = 12;
+            return cache.set(lastFetchedTimeCacheKey, currentFetchedTime);
+
+          case 12:
             url = 'content_types';
             responseKey = 'content_types';
             contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
-            _context2.next = 7;
-            return contentType.getPagedData(url, config, responseKey, getPagedData);
+            _context2.next = 17;
+            return contentType.getPagedData(url, config, responseKey, getPagedData, query);
 
-          case 7:
+          case 17:
             allContentTypes = _context2.sent;
             return _context2.abrupt("return", allContentTypes);
 
-          case 11:
-            _context2.prev = 11;
+          case 21:
+            _context2.prev = 21;
             _context2.t0 = _context2["catch"](0);
             reporter.panic({
               id: CODES.SyncError,
@@ -127,15 +152,15 @@ exports.fetchContentTypes = /*#__PURE__*/function () {
               error: _context2.t0
             });
 
-          case 14:
+          case 24:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[0, 11]]);
+    }, _callee2, null, [[0, 21]]);
   }));
 
-  return function (_x5, _x6) {
+  return function (_x5, _x6, _x7) {
     return _ref2.apply(this, arguments);
   };
 }();
@@ -163,7 +188,7 @@ var fetchSyncData = /*#__PURE__*/function () {
     }, _callee3);
   }));
 
-  return function fetchSyncData(_x7, _x8) {
+  return function fetchSyncData(_x8, _x9) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -211,7 +236,7 @@ var fetchCsData = /*#__PURE__*/function () {
     }, _callee4);
   }));
 
-  return function fetchCsData(_x9, _x10, _x11) {
+  return function fetchCsData(_x10, _x11, _x12) {
     return _ref4.apply(this, arguments);
   };
 }();
@@ -265,7 +290,7 @@ var getPagedData = /*#__PURE__*/function () {
     }, _callee5);
   }));
 
-  return function getPagedData(_x12, _x13, _x14) {
+  return function getPagedData(_x13, _x14, _x15) {
     return _ref5.apply(this, arguments);
   };
 }();
@@ -317,7 +342,7 @@ var getSyncData = /*#__PURE__*/function () {
     }, _callee6);
   }));
 
-  return function getSyncData(_x15, _x16, _x17, _x18) {
+  return function getSyncData(_x16, _x17, _x18, _x19) {
     return _ref6.apply(this, arguments);
   };
 }();
