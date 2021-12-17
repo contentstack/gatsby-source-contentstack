@@ -8,6 +8,7 @@ const { normalizeEntry, sanitizeEntry, processContentType, processEntry, process
 const { checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES, getContentTypeOption }=require('./utils');
 const { fetchData, fetchContentTypes } = require('./fetch');
 const downloadAssets = require('./download-assets');
+const { setFieldsOnGraphQLNodeType } = require('./extend-node-type');
 
 let references = [];
 let groups = [];
@@ -262,6 +263,7 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
     });
 };
 
+exports.setFieldsOnGraphQLNodeType = setFieldsOnGraphQLNodeType;
 
 exports.createResolvers = ({ createResolvers }) => {
   const resolvers = {};
@@ -365,7 +367,12 @@ const ERROR_MAP = {
     text: context => context.sourceMessage,
     level: `ERROR`,
     type: `PLUGIN`
-  }
+  },
+  [CODES.ImageAPIError]: {
+    text: context => context.sourceMessage,
+    level: `ERROR`,
+    type: `PLUGIN`
+  },
 };
 
 let coreSupportsOnPluginInit;
