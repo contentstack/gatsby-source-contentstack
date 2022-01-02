@@ -165,8 +165,10 @@ var normalizeFileField = function normalizeFileField(value, locale, assetsNodeId
   if (Array.isArray(value)) {
     reference = [];
     value.forEach(function (assetUid) {
-      if (assetsNodeIds.has(createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(assetUid, "-").concat(locale)))) {
-        reference.push(createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(assetUid, "-").concat(locale)));
+      var nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(assetUid, "-").concat(locale));
+
+      if (assetsNodeIds.has(nodeId)) {
+        reference.push(nodeId);
       }
     });
   } else if (assetsNodeIds.has(createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(value, "-").concat(locale)))) {
@@ -189,13 +191,12 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 
     switch (field.data_type) {
       case 'reference':
-        entryObj["".concat(field.uid, "___NODE")] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
 
       case 'file':
-        // Issue #60. Graphql does not treat empty string as null.
         if (!value) value = null;
-        entryObj["".concat(field.uid, "___NODE")] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
 
       case 'group':
@@ -419,14 +420,14 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid] = "[".concat(prefix, "_assets]!");
+            fields[field.uid] = "[".concat(prefix, "_assets]! @link");
           } else {
-            fields[field.uid] = "".concat(prefix, "_assets!");
+            fields[field.uid] = "".concat(prefix, "_assets! @link");
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[".concat(prefix, "_assets]");
+          fields[field.uid] = "[".concat(prefix, "_assets] @link");
         } else {
-          fields[field.uid] = "".concat(prefix, "_assets");
+          fields[field.uid] = "".concat(prefix, "_assets @link");
         }
 
         break;
@@ -500,9 +501,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           });
 
           if (field.mandatory && !disableMandatoryFields) {
-            fields[field.uid] = "[".concat(prefix, "_").concat(field.reference_to, "]!");
+            fields[field.uid] = "[".concat(prefix, "_").concat(field.reference_to, "]! @link");
           } else {
-            fields[field.uid] = "[".concat(prefix, "_").concat(field.reference_to, "]");
+            fields[field.uid] = "[".concat(prefix, "_").concat(field.reference_to, "] @link");
           }
         } else {
           var unions = [];
@@ -523,9 +524,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           });
 
           if (field.mandatory && !disableMandatoryFields) {
-            fields[field.uid] = "[".concat(name, "]!");
+            fields[field.uid] = "[".concat(name, "]! @link");
           } else {
-            fields[field.uid] = "[".concat(name, "]");
+            fields[field.uid] = "[".concat(name, "] @link");
           }
         }
 

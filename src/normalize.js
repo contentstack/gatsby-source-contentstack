@@ -1,13 +1,5 @@
-exports.processContentType = (
-  contentType,
-  createNodeId,
-  createContentDigest,
-  typePrefix
-) => {
-
-  const nodeId = createNodeId(
-    `${typePrefix.toLowerCase()}-contentType-${contentType.uid}`
-  );
+exports.processContentType = (contentType, createNodeId, createContentDigest, typePrefix) => {
+  const nodeId = createNodeId(`${typePrefix.toLowerCase()}-contentType-${contentType.uid}`);
   const type = `${typePrefix}ContentTypes`;
 
   const nodeContent = JSON.stringify(contentType);
@@ -25,12 +17,7 @@ exports.processContentType = (
   return nodeData;
 };
 
-exports.processAsset = (
-  asset,
-  createNodeId,
-  createContentDigest,
-  typePrefix
-) => {
+exports.processAsset = (asset, createNodeId, createContentDigest, typePrefix) => {
   const nodeId = makeAssetNodeUid(asset, createNodeId, typePrefix);
   const nodeContent = JSON.stringify(asset);
   const nodeData = {
@@ -47,13 +34,7 @@ exports.processAsset = (
   return nodeData;
 };
 
-exports.processEntry = (
-  contentType,
-  entry,
-  createNodeId,
-  createContentDigest,
-  typePrefix
-) => {
+exports.processEntry = (contentType, entry, createNodeId, createContentDigest, typePrefix) => {
   const nodeId = makeEntryNodeUid(entry, createNodeId, typePrefix);
   const nodeContent = JSON.stringify(entry);
   const nodeData = {
@@ -82,76 +63,31 @@ exports.sanitizeEntry = (schema, entry) => {
   return entry;
 }
 
-exports.normalizeEntry = (
-  contentType,
-  entry,
-  entriesNodeIds,
-  assetsNodeIds,
-  createNodeId,
-  typePrefix
-) => {
+exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   const resolveEntry = {
     ...entry,
-    ...builtEntry(
-      contentType.schema,
-      entry,
-      entry.publish_details.locale,
-      entriesNodeIds,
-      assetsNodeIds,
-      createNodeId,
-      typePrefix
-    ),
+    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix),
   };
   return resolveEntry;
 };
 
-const makeAssetNodeUid = (exports.makeAssetNodeUid = (
-  asset,
-  createNodeId,
-  typePrefix
-) => {
+const makeAssetNodeUid = (exports.makeAssetNodeUid = (asset, createNodeId, typePrefix) => {
   const publishedLocale = asset.publish_details.locale;
-  return createNodeId(
-    `${typePrefix.toLowerCase()}-assets-${asset.uid}-${publishedLocale}`
-  );
+  return createNodeId(`${typePrefix.toLowerCase()}-assets-${asset.uid}-${publishedLocale}`);
 });
 
-const makeEntryNodeUid = (exports.makeEntryNodeUid = (
-  entry,
-  createNodeId,
-  typePrefix
-) => {
+const makeEntryNodeUid = (exports.makeEntryNodeUid = (entry, createNodeId, typePrefix) => {
   const publishedLocale = entry.publish_details.locale;
-  return createNodeId(
-    `${typePrefix.toLowerCase()}-entry-${entry.uid}-${publishedLocale}`
-  );
+  return createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${publishedLocale}`);
 });
 
-const normalizeGroup = (
-  field,
-  value,
-  locale,
-  entriesNodeIds,
-  assetsNodeIds,
-  createNodeId,
-  typePrefix
-) => {
+const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   let groupObj = null;
   if (field.multiple) {
     groupObj = [];
     if (value instanceof Array) {
       value.forEach(groupValue => {
-        groupObj.push(
-          builtEntry(
-            field.schema,
-            groupValue,
-            locale,
-            entriesNodeIds,
-            assetsNodeIds,
-            createNodeId,
-            typePrefix
-          )
-        );
+        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
       });
     } else {
       // In some cases value is null, this makes graphql treat all the objects as null
@@ -159,42 +95,16 @@ const normalizeGroup = (
       // This also helps to handle when a user changes a group to multiple after initially
       // setting a group to single.. the server passes an object and the previous condition
       // again makes groupObj null
-      groupObj.push(
-        builtEntry(
-          field.schema,
-          value,
-          locale,
-          entriesNodeIds,
-          assetsNodeIds,
-          createNodeId,
-          typePrefix
-        )
-      );
+      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
     }
   } else {
     groupObj = {};
-    groupObj = builtEntry(
-      field.schema,
-      value,
-      locale,
-      entriesNodeIds,
-      assetsNodeIds,
-      createNodeId,
-      typePrefix
-    );
+    groupObj = builtEntry( field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
   }
   return groupObj;
 };
 
-const normalizeModularBlock = (
-  blocks,
-  value,
-  locale,
-  entriesNodeIds,
-  assetsNodeIds,
-  createNodeId,
-  typePrefix
-) => {
+const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   const modularBlocksObj = [];
   if (value) {
     value.map(block => {
@@ -205,15 +115,7 @@ const normalizeModularBlock = (
           return;
         }
         const blockObj = {};
-        blockObj[key] = builtEntry(
-          blockSchema[0].schema,
-          block[key],
-          locale,
-          entriesNodeIds,
-          assetsNodeIds,
-          createNodeId,
-          typePrefix
-        );
+        blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
         modularBlocksObj.push(blockObj);
       });
     });
@@ -221,76 +123,33 @@ const normalizeModularBlock = (
   return modularBlocksObj;
 };
 
-const normalizeReferenceField = (
-  value,
-  locale,
-  entriesNodeIds,
-  createNodeId,
-  typePrefix
-) => {
+const normalizeReferenceField = (value, locale, entriesNodeIds, createNodeId, typePrefix) => {
   const reference = [];
   if (value && !Array.isArray(value)) return;
   value.forEach(entry => {
     if (typeof entry === 'object' && entry.uid) {
-      if (
-        entriesNodeIds.has(
-          createNodeId(
-            `${typePrefix.toLowerCase()}-entry-${entry.uid}-${locale}`
-          )
-        )
-      ) {
-        reference.push(
-          createNodeId(
-            `${typePrefix.toLowerCase()}-entry-${entry.uid}-${locale}`
-          )
-        );
+      if (entriesNodeIds.has(createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${locale}`))) {
+        reference.push(createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${locale}`));
       }
-    } else if (
-      entriesNodeIds.has(
-        createNodeId(`${typePrefix.toLowerCase()}-entry-${entry}-${locale}`)
-      )
-    ) {
-      reference.push(
-        createNodeId(`${typePrefix.toLowerCase()}-entry-${entry}-${locale}`)
-      );
+    } else if (entriesNodeIds.has(createNodeId(`${typePrefix.toLowerCase()}-entry-${entry}-${locale}`))) {
+      reference.push(createNodeId(`${typePrefix.toLowerCase()}-entry-${entry}-${locale}`));
     }
   });
   return reference;
 };
 
-const normalizeFileField = (
-  value,
-  locale,
-  assetsNodeIds,
-  createNodeId,
-  typePrefix
-) => {
+const normalizeFileField = (value, locale, assetsNodeIds, createNodeId, typePrefix) => {
   let reference = {};
   if (Array.isArray(value)) {
     reference = [];
     value.forEach(assetUid => {
-      if (
-        assetsNodeIds.has(
-          createNodeId(
-            `${typePrefix.toLowerCase()}-assets-${assetUid}-${locale}`
-          )
-        )
-      ) {
-        reference.push(
-          createNodeId(
-            `${typePrefix.toLowerCase()}-assets-${assetUid}-${locale}`
-          )
-        );
+      const nodeId = createNodeId(`${typePrefix.toLowerCase()}-assets-${assetUid}-${locale}`);
+      if (assetsNodeIds.has(nodeId)) {
+        reference.push(nodeId);
       }
     });
-  } else if (
-    assetsNodeIds.has(
-      createNodeId(`${typePrefix.toLowerCase()}-assets-${value}-${locale}`)
-    )
-  ) {
-    reference = createNodeId(
-      `${typePrefix.toLowerCase()}-assets-${value}-${locale}`
-    );
+  } else if (assetsNodeIds.has(createNodeId(`${typePrefix.toLowerCase()}-assets-${value}-${locale}`))) {
+    reference = createNodeId(`${typePrefix.toLowerCase()}-assets-${value}-${locale}`);
   }
   return reference;
 };
@@ -303,65 +162,24 @@ const getSchemaValue = (obj, key) => {
     : null;
 };
 
-const builtEntry = (
-  schema,
-  entry,
-  locale,
-  entriesNodeIds,
-  assetsNodeIds,
-  createNodeId,
-  typePrefix
-) => {
+const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   const entryObj = {};
   schema.forEach(field => {
     let value = getSchemaValue(entry, field);
     switch (field.data_type) {
       case 'reference':
-        entryObj[`${field.uid}___NODE`] =
-          value &&
-          normalizeReferenceField(
-            value,
-            locale,
-            entriesNodeIds,
-            createNodeId,
-            typePrefix
-          );
+        entryObj[field.uid] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
       case 'file':
-        // Issue #60. Graphql does not treat empty string as null.
         if (!value) value = null;
-        entryObj[`${field.uid}___NODE`] =
-          value &&
-          normalizeFileField(
-            value,
-            locale,
-            assetsNodeIds,
-            createNodeId,
-            typePrefix
-          );
+        entryObj[field.uid] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
       case 'group':
       case 'global_field':
-        entryObj[field.uid] = normalizeGroup(
-          field,
-          value,
-          locale,
-          entriesNodeIds,
-          assetsNodeIds,
-          createNodeId,
-          typePrefix
-        );
+        entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
         break;
       case 'blocks':
-        entryObj[field.uid] = normalizeModularBlock(
-          field.blocks,
-          value,
-          locale,
-          entriesNodeIds,
-          assetsNodeIds,
-          createNodeId,
-          typePrefix
-        );
+        entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
         break;
       default:
         entryObj[field.uid] = value;
@@ -370,32 +188,14 @@ const builtEntry = (
   return entryObj;
 };
 
-const buildBlockCustomSchema = (
-  blocks,
-  types,
-  references,
-  groups,
-  fileFields,
-  parent,
-  prefix,
-  disableMandatoryFields
-) => {
+const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) => {
   const blockFields = {};
   let blockType = `type ${parent} @infer {`;
 
   blocks.forEach(block => {
     const newparent = parent.concat(block.uid);
     blockType = blockType.concat(`${block.uid} : ${newparent} `);
-    const { fields } = buildCustomSchema(
-      block.schema,
-      types,
-      references,
-      groups,
-      fileFields,
-      newparent,
-      prefix,
-      disableMandatoryFields
-    );
+    const { fields } = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
 
     for (const key in fields) {
       if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
@@ -466,16 +266,8 @@ exports.extendSchemaWithDefaultEntryFields = schema => {
   return schema;
 };
 
-const buildCustomSchema = (exports.buildCustomSchema = (
-  schema,
-  types,
-  references,
-  groups,
-  fileFields,
-  parent,
-  prefix,
-  disableMandatoryFields
-) => {
+const buildCustomSchema = (exports.buildCustomSchema = (schema, types, references, groups,
+  fileFields, parent, prefix, disableMandatoryFields) => {
   const fields = {};
   groups = groups || [];
   references = references || [];
@@ -574,56 +366,37 @@ const buildCustomSchema = (exports.buildCustomSchema = (
       case 'file':
         const type = `type ${prefix}_assets implements Node @infer { url: String }`;
         types.push(type);
-        fileFields.push({
-          parent,
-          field
-        })
+        fileFields.push({ parent, field });
         
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid] = `[${prefix}_assets]!`;
+            fields[field.uid] = `[${prefix}_assets]! @link`;
           } else {
-            fields[field.uid] = `${prefix}_assets!`;
+            fields[field.uid] = `${prefix}_assets! @link`;
           }
         } else if (field.multiple) {
-          fields[field.uid] = `[${prefix}_assets]`;
+          fields[field.uid] = `[${prefix}_assets] @link`;
         } else {
-          fields[field.uid] = `${prefix}_assets`;
+          fields[field.uid] = `${prefix}_assets @link`;
         }
         break;
       case 'group':
       case 'global_field':
         let newparent = parent.concat('_', field.uid);
 
-        const result = buildCustomSchema(
-          field.schema,
-          types,
-          references,
-          groups,
-          fileFields,
-          newparent,
-          prefix,
-          disableMandatoryFields
-        );
+        const result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
 
         for (const key in result.fields) {
-          if (
-            Object.prototype.hasOwnProperty.call(result.fields[key], 'type')
-          ) {
+          if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
             result.fields[key] = result.fields[key].type;
           }
         }
 
         if (Object.keys(result.fields).length > 0) {
-
           let type = `type ${newparent} @infer ${JSON.stringify(result.fields).replace(/"/g, '')}`;
-
           types.push(type);
 
-          groups.push({
-            parent,
-            field,
-          });
+          groups.push({ parent, field });
 
           if (field.mandatory && !disableMandatoryFields) {
             if (field.multiple) {
@@ -642,18 +415,9 @@ const buildCustomSchema = (exports.buildCustomSchema = (
       case 'blocks':
         let blockparent = parent.concat('_', field.uid);
 
-        const blockType = buildBlockCustomSchema(
-          field.blocks,
-          types,
-          references,
-          groups,
-          fileFields,
-          blockparent,
-          prefix,
-          disableMandatoryFields
-        );
-
+        const blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields);
         types.push(blockType);
+
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = `[${blockparent}]!`;
@@ -674,15 +438,12 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           const type = `type ${prefix}_${field.reference_to} implements Node @infer { title: String${disableMandatoryFields ? '' : '!'} }`;
           types.push(type);
 
-          references.push({
-            parent,
-            uid: field.uid,
-          });
+          references.push({ parent, uid: field.uid });
 
           if (field.mandatory && !disableMandatoryFields) {
-            fields[field.uid] = `[${prefix}_${field.reference_to}]!`;
+            fields[field.uid] = `[${prefix}_${field.reference_to}]! @link`;
           } else {
-            fields[field.uid] = `[${prefix}_${field.reference_to}]`;
+            fields[field.uid] = `[${prefix}_${field.reference_to}] @link`;
           }
         } else {
           const unions = [];
@@ -698,25 +459,16 @@ const buildCustomSchema = (exports.buildCustomSchema = (
           unionType = unionType.concat('_Union = ', unions.join(' | '));
           types.push(unionType);
 
-          references.push({
-            parent,
-            uid: field.uid,
-          });
+          references.push({ parent, uid: field.uid });
 
           if (field.mandatory && !disableMandatoryFields) {
-            fields[field.uid] = `[${name}]!`;
+            fields[field.uid] = `[${name}]! @link`;
           } else {
-            fields[field.uid] = `[${name}]`;
+            fields[field.uid] = `[${name}] @link`;
           }
         }
         break;
     }
   });
-  return {
-    fields,
-    types,
-    references,
-    groups,
-    fileFields
-  };
+  return { fields, types, references, groups, fileFields };
 });

@@ -44,6 +44,7 @@ exports.checkIfUnsupportedFormat = function (data) {
 
 exports.SUPPORTED_FILES_COUNT = 'SUPPORTED_FILES_COUNT';
 exports.IMAGE_REGEXP = new RegExp('https://(stag-images|(eu-)?images).(blz-)?contentstack.(io|com)/v3/assets/');
+exports.ASSET_NODE_UIDS = 'ASSET_NODE_UIDS';
 exports.CODES = {
   SyncError: '10001',
   APIError: '10002',
