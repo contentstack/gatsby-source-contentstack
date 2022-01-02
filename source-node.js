@@ -4,20 +4,15 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 var _require = require('./utils'),
     checkIfUnsupportedFormat = _require.checkIfUnsupportedFormat,
     SUPPORTED_FILES_COUNT = _require.SUPPORTED_FILES_COUNT,
     IMAGE_REGEXP = _require.IMAGE_REGEXP,
     CODES = _require.CODES,
-    getContentTypeOption = _require.getContentTypeOption;
+    getContentTypeOption = _require.getContentTypeOption,
+    ASSET_NODE_UIDS = _require.ASSET_NODE_UIDS;
 
 var downloadAssets = require('./download-assets');
 
@@ -38,7 +33,7 @@ var _require4 = require('./normalize'),
 
 exports.sourceNodes = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref2, configOptions) {
-    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, createNodeField, typePrefix, contentstackData, contentTypeOption, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, assetUids;
+    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, createNodeField, typePrefix, contentstackData, contentTypeOption, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, assetUids, contentTypesMap;
 
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
@@ -101,15 +96,11 @@ exports.sourceNodes = /*#__PURE__*/function () {
                 assetsNodeIds.add(n.id);
               }
 
-              touchNode(n);
-
-              if (n.localAsset___NODE) {
-                // Prevent GraphQL type inference from crashing on this property
-                // touchNode({ nodeId: n.localAsset___NODE });
-                touchNode(_objectSpread(_objectSpread({}, n), {}, {
-                  nodeId: n.localAsset___NODE
-                }));
-              }
+              touchNode(n); // if (n.localAsset___NODE) {
+              //   // Prevent GraphQL type inference from crashing on this property
+              //   // touchNode({ nodeId: n.localAsset___NODE });
+              //   touchNode({ ...n, nodeId: n.localAsset___NODE });
+              // }
             });
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
               var entryNodeId = makeEntryNodeUid(item.data, createNodeId, typePrefix);
@@ -118,19 +109,14 @@ exports.sourceNodes = /*#__PURE__*/function () {
             countOfSupportedFormatFiles = 0, assetUids = [];
             syncData.asset_published && syncData.asset_published.forEach(function (item) {
               /**
-               * Get the count of assets (images), filtering out svg and gif format,
-               * as these formats are not supported by gatsby-image.
-               * We need the right count to render in progress bar,
-               * which will show progress for downloading remote files.
+               * Get the count of assets (images), filtering out svg and gif format, as these formats are not supported by gatsby-image.
+               * We need the right count to render in progress bar, which will show progress for downloading remote files.
                */
               if (configOptions.downloadImages) {
-                // Filter the images from the assets
-                var regexp = IMAGE_REGEXP;
-                var matches;
-                var isUnsupportedExt;
+                var matches, isUnsupportedExt;
 
                 try {
-                  matches = regexp.exec(item.data.url);
+                  matches = IMAGE_REGEXP.exec(item.data.url);
                   isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
                   if (matches && !isUnsupportedExt) countOfSupportedFormatFiles++;
                 } catch (error) {
@@ -158,17 +144,16 @@ exports.sourceNodes = /*#__PURE__*/function () {
 
           case 33:
             // adding nodes
+            contentTypesMap = {};
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
               var contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
+              contentTypesMap[contentType.uid] = contentType;
               createNode(contentTypeNode);
             });
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
-              item.content_type_uid = item.content_type_uid.replace(/-/g, '_'); // TODO: Create content-types hashmap to avoid looping. ********
-
-              var contentType = contentstackData.contentTypes.find(function (contentType) {
-                return item.content_type_uid === contentType.uid;
-              });
+              item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
+              var contentType = contentTypesMap[item.content_type_uid];
               var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
               var sanitizedEntry = sanitizeEntry(contentType.schema, normalizedEntry);
               var entryNode = processEntry(contentType, sanitizedEntry, createNodeId, createContentDigest, typePrefix);
@@ -191,11 +176,11 @@ exports.sourceNodes = /*#__PURE__*/function () {
             // await Promise.all(assetNodePromises);
 
             if (!configOptions.downloadImages) {
-              _context.next = 39;
+              _context.next = 40;
               break;
             }
 
-            _context.next = 39;
+            _context.next = 40;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -207,7 +192,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
               getNode: getNode
             }, typePrefix, configOptions);
 
-          case 39:
+          case 40:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'entry');
@@ -231,7 +216,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
               });
             });
 
-          case 44:
+          case 45:
           case "end":
             return _context.stop();
         }

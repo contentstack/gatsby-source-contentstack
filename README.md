@@ -46,7 +46,7 @@ plugins: [
       downloadImages: `boolean_value`,
 
       // Optional: Specify the content types from which you want the plugin to retrieve data.
-      contentTypes: [‘blog’,’author’]
+      contentTypes: [‘blog’,’author’],
       // This will fetch the data of the ‘blog’ and ‘author’ content types only.
 
       // Optional: Specify the content types that the plugin should exclude while fetching data of all content types.

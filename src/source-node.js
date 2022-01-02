@@ -1,6 +1,6 @@
 'use strict';
 
-const { checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES, getContentTypeOption } = require('./utils');
+const { checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES, getContentTypeOption, ASSET_NODE_UIDS } = require('./utils');
 const downloadAssets = require('./download-assets');
 const { deleteContentstackNodes } = require('./node-helper');
 const { fetchData } = require('./fetch');
@@ -51,11 +51,11 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
     }
 
     touchNode(n);
-    if (n.localAsset___NODE) {
-      // Prevent GraphQL type inference from crashing on this property
-      // touchNode({ nodeId: n.localAsset___NODE });
-      touchNode({ ...n, nodeId: n.localAsset___NODE });
-    }
+    // if (n.localAsset___NODE) {
+    //   // Prevent GraphQL type inference from crashing on this property
+    //   // touchNode({ nodeId: n.localAsset___NODE });
+    //   touchNode({ ...n, nodeId: n.localAsset___NODE });
+    // }
   });
 
   syncData.entry_published &&
@@ -67,23 +67,16 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
   let countOfSupportedFormatFiles = 0, assetUids = [];
   syncData.asset_published && syncData.asset_published.forEach(function (item) {
     /**
-     * Get the count of assets (images), filtering out svg and gif format,
-     * as these formats are not supported by gatsby-image.
-     * We need the right count to render in progress bar,
-     * which will show progress for downloading remote files.
+     * Get the count of assets (images), filtering out svg and gif format, as these formats are not supported by gatsby-image.
+     * We need the right count to render in progress bar, which will show progress for downloading remote files.
      */
     if (configOptions.downloadImages) {
-      // Filter the images from the assets
-      const regexp = IMAGE_REGEXP;
-      let matches;
-      let isUnsupportedExt;
+      let matches, isUnsupportedExt;
       try {
-        matches = regexp.exec(item.data.url);
+        matches = IMAGE_REGEXP.exec(item.data.url);
         isUnsupportedExt = checkIfUnsupportedFormat(item.data.url);
 
-        if (matches && !isUnsupportedExt)
-          countOfSupportedFormatFiles++;
-
+        if (matches && !isUnsupportedExt) countOfSupportedFormatFiles++;
       } catch (error) {
         reporter.panic('Something went wrong. Details: ', error);
       }
@@ -97,18 +90,17 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
   configOptions.downloadImages && await cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
   // adding nodes
+  const contentTypesMap = {};
   contentstackData.contentTypes.forEach(contentType => {
     contentType.uid = contentType.uid.replace(/-/g, '_');
     const contentTypeNode = processContentType(contentType, createNodeId, createContentDigest, typePrefix);
+    contentTypesMap[contentType.uid] = contentType;
     createNode(contentTypeNode);
   });
 
   syncData.entry_published && syncData.entry_published.forEach(item => {
     item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
-    // TODO: Create content-types hashmap to avoid looping. ********
-    const contentType = contentstackData.contentTypes.find(
-      contentType => item.content_type_uid === contentType.uid
-    );
+    const contentType = contentTypesMap[item.content_type_uid];
     const normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
     const sanitizedEntry = sanitizeEntry(contentType.schema, normalizedEntry);
     const entryNode = processEntry(contentType, sanitizedEntry, createNodeId, createContentDigest, typePrefix);
