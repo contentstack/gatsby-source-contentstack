@@ -51,18 +51,6 @@ exports.processEntry = (contentType, entry, createNodeId, createContentDigest, t
   return nodeData;
 };
 
-exports.sanitizeEntry = (schema, entry) => {
-  // Field data types that has ___NODE prefix to field.uid needs sanitization
-  const typesToBeSanitized = ['reference', 'file'];
-  schema.forEach(field => {
-    if (typesToBeSanitized.includes(field.data_type)) {
-      // Deleting entry[field.uid] because entry[`${field.uid}___NODE`] already exists
-      delete entry[field.uid];
-    }
-  })
-  return entry;
-}
-
 exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
   const resolveEntry = {
     ...entry,
@@ -370,14 +358,14 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
         
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid] = `[${prefix}_assets]! @link`;
+            fields[field.uid] = `[${prefix}_assets]!`;
           } else {
-            fields[field.uid] = `${prefix}_assets! @link`;
+            fields[field.uid] = `${prefix}_assets!`;
           }
         } else if (field.multiple) {
-          fields[field.uid] = `[${prefix}_assets] @link`;
+          fields[field.uid] = `[${prefix}_assets]`;
         } else {
-          fields[field.uid] = `${prefix}_assets @link`;
+          fields[field.uid] = `${prefix}_assets`;
         }
         break;
       case 'group':
@@ -441,9 +429,9 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
           references.push({ parent, uid: field.uid });
 
           if (field.mandatory && !disableMandatoryFields) {
-            fields[field.uid] = `[${prefix}_${field.reference_to}]! @link`;
+            fields[field.uid] = `[${prefix}_${field.reference_to}]!`;
           } else {
-            fields[field.uid] = `[${prefix}_${field.reference_to}] @link`;
+            fields[field.uid] = `[${prefix}_${field.reference_to}]`;
           }
         } else {
           const unions = [];
@@ -462,9 +450,9 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
           references.push({ parent, uid: field.uid });
 
           if (field.mandatory && !disableMandatoryFields) {
-            fields[field.uid] = `[${name}]! @link`;
+            fields[field.uid] = `[${name}]!`;
           } else {
-            fields[field.uid] = `[${name}] @link`;
+            fields[field.uid] = `[${name}]`;
           }
         }
         break;

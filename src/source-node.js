@@ -102,8 +102,7 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
     item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
     const contentType = contentTypesMap[item.content_type_uid];
     const normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
-    const sanitizedEntry = sanitizeEntry(contentType.schema, normalizedEntry);
-    const entryNode = processEntry(contentType, sanitizedEntry, createNodeId, createContentDigest, typePrefix);
+    const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
     createNode(entryNode);
   });
 
@@ -111,18 +110,6 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
     const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
     createNode(assetNode);
   });
-  // const assetNodePromises = [];
-  // syncData.asset_published &&
-  //   syncData.asset_published.forEach(item => {
-  //     const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
-  //     const promise = new Promise(async (resolve) => {
-  //       await createNode(assetNode);
-  //       resolve();
-  //     });
-  //     assetNodePromises.push(promise);
-  //   });
-  // Wait for createNode call to finish. Delays creation of node in v4 when compared with v3.
-  // await Promise.all(assetNodePromises);
 
   if (configOptions.downloadImages) {
     await downloadAssets({ cache, getCache, createNode, createNodeId, getNodesByType, reporter, createNodeField, getNode, }, typePrefix, configOptions);

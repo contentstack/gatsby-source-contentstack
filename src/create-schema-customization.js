@@ -2,6 +2,7 @@
 
 const { buildCustomSchema, extendSchemaWithDefaultEntryFields } = require('./normalize');
 const { fetchContentTypes } = require('./fetch');
+const { getContentTypeOption } = require('./utils');
 
 exports.createSchemaCustomization = async ({ cache, actions, schema }, configOptions) => {
   let contentTypes;
