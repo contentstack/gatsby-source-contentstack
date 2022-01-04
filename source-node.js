@@ -155,25 +155,13 @@ exports.sourceNodes = /*#__PURE__*/function () {
               item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var contentType = contentTypesMap[item.content_type_uid];
               var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
-              var sanitizedEntry = sanitizeEntry(contentType.schema, normalizedEntry);
-              var entryNode = processEntry(contentType, sanitizedEntry, createNodeId, createContentDigest, typePrefix);
+              var entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
               createNode(entryNode);
             });
             syncData.asset_published && syncData.asset_published.forEach(function (item) {
               var assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
               createNode(assetNode);
-            }); // const assetNodePromises = [];
-            // syncData.asset_published &&
-            //   syncData.asset_published.forEach(item => {
-            //     const assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
-            //     const promise = new Promise(async (resolve) => {
-            //       await createNode(assetNode);
-            //       resolve();
-            //     });
-            //     assetNodePromises.push(promise);
-            //   });
-            // Wait for createNode call to finish. Delays creation of node in v4 when compared with v3.
-            // await Promise.all(assetNodePromises);
+            });
 
             if (!configOptions.downloadImages) {
               _context.next = 40;

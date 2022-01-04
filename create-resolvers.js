@@ -36,10 +36,10 @@ exports.createResolvers = /*#__PURE__*/function () {
             groups = _yield$Promise$all2[2];
             fileFields.forEach(function (fileField) {
               resolvers[fileField.parent] = _objectSpread(_objectSpread({}, resolvers[fileField.parent]), (0, _defineProperty2["default"])({}, fileField.field.uid, {
-                resolve: function resolve(source, args, context, info) {
-                  if (fileField.field.multiple && source["".concat(fileField.field.uid, "___NODE")]) {
+                resolve: function resolve(source, args, context) {
+                  if (fileField.field.multiple && source[fileField.field.uid]) {
                     var nodesData = [];
-                    source["".concat(fileField.field.uid, "___NODE")].forEach(function (id) {
+                    source[fileField.field.uid].forEach(function (id) {
                       var existingNode = context.nodeModel.getNodeById({
                         id: id
                       });
@@ -50,7 +50,7 @@ exports.createResolvers = /*#__PURE__*/function () {
                     });
                     return nodesData;
                   } else {
-                    var id = source["".concat(fileField.field.uid, "___NODE")];
+                    var id = source[fileField.field.uid];
                     return context.nodeModel.getNodeById({
                       id: id
                     });
@@ -60,10 +60,10 @@ exports.createResolvers = /*#__PURE__*/function () {
             });
             references.forEach(function (reference) {
               resolvers[reference.parent] = _objectSpread(_objectSpread({}, resolvers[reference.parent]), {}, (0, _defineProperty2["default"])({}, reference.uid, {
-                resolve: function resolve(source, args, context, info) {
-                  if (source["".concat(reference.uid, "___NODE")]) {
+                resolve: function resolve(source, args, context) {
+                  if (source[reference.uid]) {
                     var nodesData = [];
-                    source["".concat(reference.uid, "___NODE")].forEach(function (id) {
+                    source[reference.uid].forEach(function (id) {
                       var existingNode = context.nodeModel.getNodeById({
                         id: id
                       });

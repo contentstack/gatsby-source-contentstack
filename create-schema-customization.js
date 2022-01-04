@@ -13,6 +13,9 @@ var _require = require('./normalize'),
 var _require2 = require('./fetch'),
     fetchContentTypes = _require2.fetchContentTypes;
 
+var _require3 = require('./utils'),
+    getContentTypeOption = _require3.getContentTypeOption;
+
 exports.createSchemaCustomization = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref2, configOptions) {
     var cache, actions, schema, contentTypes, typePrefix, disableMandatoryFields, contentTypeOption, references, groups, fileFields, createTypes, name, fields;
