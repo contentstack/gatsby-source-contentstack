@@ -203,14 +203,14 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   return entryObj;
 };
 
-var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) {
+var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, configOptions) {
   var blockFields = {};
   var blockType = "type ".concat(parent, " @infer {");
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
     blockType = blockType.concat("".concat(block.uid, " : ").concat(newparent, " "));
 
-    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields),
+    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, configOptions),
         fields = _buildCustomSchema.fields;
 
     for (var key in fields) {
@@ -281,7 +281,7 @@ exports.extendSchemaWithDefaultEntryFields = function (schema) {
   return schema;
 };
 
-var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) {
+var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, configOptions) {
   var fields = {};
   groups = groups || [];
   references = references || [];
@@ -413,7 +413,19 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
             fields[field.uid] = "".concat(prefix, "_assets!");
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[".concat(prefix, "_assets]");
+          // fields[field.uid] = `[${prefix}_assets]`;
+          fields[field.uid] = _objectSpread({
+            type: "[".concat(prefix, "_assets]")
+          }, configOptions.downloadImages ? {
+            localAsset: {
+              type: "File",
+              extensions: {
+                link: {
+                  from: "fields.localAsset"
+                }
+              }
+            }
+          } : {});
         } else {
           fields[field.uid] = "".concat(prefix, "_assets");
         }
@@ -423,7 +435,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
       case 'group':
       case 'global_field':
         var newparent = parent.concat('_', field.uid);
-        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
+        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, configOptions);
 
         for (var key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
@@ -457,7 +469,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
       case 'blocks':
         var blockparent = parent.concat('_', field.uid);
-        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields);
+        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields, configOptions);
         types.push(blockType);
 
         if (field.mandatory && !disableMandatoryFields) {
