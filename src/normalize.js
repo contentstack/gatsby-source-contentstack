@@ -176,14 +176,14 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
   return entryObj;
 };
 
-const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, configOptions) => {
+const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) => {
   const blockFields = {};
   let blockType = `type ${parent} @infer {`;
 
   blocks.forEach(block => {
     const newparent = parent.concat(block.uid);
     blockType = blockType.concat(`${block.uid} : ${newparent} `);
-    const { fields } = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, configOptions);
+    const { fields } = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
 
     for (const key in fields) {
       if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
@@ -255,7 +255,7 @@ exports.extendSchemaWithDefaultEntryFields = schema => {
 };
 
 const buildCustomSchema = (exports.buildCustomSchema = (schema, types, references, groups,
-  fileFields, parent, prefix, disableMandatoryFields, configOptions) => {
+  fileFields, parent, prefix, disableMandatoryFields) => {
   const fields = {};
   groups = groups || [];
   references = references || [];
@@ -352,7 +352,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
         }
         break;
       case 'file':
-        const type = `type ${prefix}_assets implements Node @infer { url: String }`;
+        const type = `type ${prefix}_assets implements Node @infer { url: String localAsset: File @link(from: "fields.localAsset") }`;
         types.push(type);
         fileFields.push({ parent, field });
         
@@ -363,23 +363,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
             fields[field.uid] = `${prefix}_assets!`;
           }
         } else if (field.multiple) {
-          // fields[field.uid] = `[${prefix}_assets]`;
-          fields[field.uid] = {
-            type: `[${prefix}_assets]`,
-            ...(
-              configOptions.downloadImages
-              ? {
-                localAsset: {
-                  type: `File`,
-                  extensions: {
-                    link: {
-                      from: `fields.localAsset`,
-                    }
-                  }
-                }
-              } : {}
-            )
-          };
+          fields[field.uid] = `[${prefix}_assets]`;
         } else {
           fields[field.uid] = `${prefix}_assets`;
         }
@@ -388,7 +372,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
       case 'global_field':
         let newparent = parent.concat('_', field.uid);
 
-        const result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, configOptions);
+        const result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
 
         for (const key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
@@ -419,7 +403,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
       case 'blocks':
         let blockparent = parent.concat('_', field.uid);
 
-        const blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields, configOptions);
+        const blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields);
         types.push(blockType);
 
         if (field.mandatory && !disableMandatoryFields) {
