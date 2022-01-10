@@ -4,7 +4,7 @@ const { checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES, ge
 const downloadAssets = require('./download-assets');
 const { deleteContentstackNodes } = require('./node-helper');
 const { fetchData } = require('./fetch');
-const { normalizeEntry, sanitizeEntry, processContentType, processEntry, processAsset, makeEntryNodeUid, makeAssetNodeUid } = require('./normalize');
+const { normalizeEntry, processContentType, processEntry, processAsset, makeEntryNodeUid, makeAssetNodeUid } = require('./normalize');
 
 exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache }, configOptions) => {
   const { createNode, deleteNode, touchNode, createNodeField } = actions;
@@ -51,11 +51,6 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
     }
 
     touchNode(n);
-    // if (n.localAsset___NODE) {
-    //   // Prevent GraphQL type inference from crashing on this property
-    //   // touchNode({ nodeId: n.localAsset___NODE });
-    //   touchNode({ ...n, nodeId: n.localAsset___NODE });
-    // }
   });
 
   syncData.entry_published &&
@@ -116,13 +111,13 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
   }
 
   // deleting nodes
-  syncData.entry_unpublished && syncData.entry_unpublished.forEach(item => deleteContentstackNodes(item.data, 'entry'));
+  syncData.entry_unpublished && syncData.entry_unpublished.forEach(item => deleteContentstackNodes(item.data, 'entry', createNodeId, getNode, deleteNode, typePrefix));
 
-  syncData.asset_unpublished && syncData.asset_unpublished.forEach(item => deleteContentstackNodes(item.data, 'asset'));
+  syncData.asset_unpublished && syncData.asset_unpublished.forEach(item => deleteContentstackNodes(item.data, 'asset', createNodeId, getNode, deleteNode, typePrefix));
 
-  syncData.entry_deleted && syncData.entry_deleted.forEach(item => deleteContentstackNodes(item.data, 'entry'));
+  syncData.entry_deleted && syncData.entry_deleted.forEach(item => deleteContentstackNodes(item.data, 'entry', createNodeId, getNode, deleteNode, typePrefix));
 
-  syncData.asset_deleted && syncData.asset_deleted.forEach(item => deleteContentstackNodes(item.data, 'asset'));
+  syncData.asset_deleted && syncData.asset_deleted.forEach(item => deleteContentstackNodes(item.data, 'asset', createNodeId, getNode, deleteNode, typePrefix));
 
   syncData.content_type_deleted &&
     syncData.content_type_deleted.forEach(item => {

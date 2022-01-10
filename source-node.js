@@ -24,7 +24,6 @@ var _require3 = require('./fetch'),
 
 var _require4 = require('./normalize'),
     normalizeEntry = _require4.normalizeEntry,
-    sanitizeEntry = _require4.sanitizeEntry,
     processContentType = _require4.processContentType,
     processEntry = _require4.processEntry,
     processAsset = _require4.processAsset,
@@ -96,11 +95,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
                 assetsNodeIds.add(n.id);
               }
 
-              touchNode(n); // if (n.localAsset___NODE) {
-              //   // Prevent GraphQL type inference from crashing on this property
-              //   // touchNode({ nodeId: n.localAsset___NODE });
-              //   touchNode({ ...n, nodeId: n.localAsset___NODE });
-              // }
+              touchNode(n);
             });
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
               var entryNodeId = makeEntryNodeUid(item.data, createNodeId, typePrefix);
@@ -183,16 +178,16 @@ exports.sourceNodes = /*#__PURE__*/function () {
           case 40:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
-              return deleteContentstackNodes(item.data, 'entry');
+              return deleteContentstackNodes(item.data, 'entry', createNodeId, getNode, deleteNode, typePrefix);
             });
             syncData.asset_unpublished && syncData.asset_unpublished.forEach(function (item) {
-              return deleteContentstackNodes(item.data, 'asset');
+              return deleteContentstackNodes(item.data, 'asset', createNodeId, getNode, deleteNode, typePrefix);
             });
             syncData.entry_deleted && syncData.entry_deleted.forEach(function (item) {
-              return deleteContentstackNodes(item.data, 'entry');
+              return deleteContentstackNodes(item.data, 'entry', createNodeId, getNode, deleteNode, typePrefix);
             });
             syncData.asset_deleted && syncData.asset_deleted.forEach(function (item) {
-              return deleteContentstackNodes(item.data, 'asset');
+              return deleteContentstackNodes(item.data, 'asset', createNodeId, getNode, deleteNode, typePrefix);
             });
             syncData.content_type_deleted && syncData.content_type_deleted.forEach(function (item) {
               item.content_type_uid = item.content_type_uid.replace(/-/g, '_');

@@ -13,11 +13,9 @@ let totalSize = 0;
 module.exports = async ({ cache, getCache, createNode, createNodeId, getNodesByType, reporter, createNodeField, getNode }, typePrefix, configOptions) => {
   try {
     const assetUids = await cache.get(ASSET_NODE_UIDS);
-    // const assets = getNodesByType(`${typePrefix}_assets`);
 
     configOptions.MAX_CONCURRENCY_LIMIT = process.env.GATSBY_CONCURRENT_DOWNLOAD || 20;
 
-    // const batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
     const batches = getBatches(assetUids.length, configOptions.MAX_CONCURRENCY_LIMIT);
 
     // Get total count of files that will be downloaded, excluding unsupported formats
@@ -38,7 +36,6 @@ module.exports = async ({ cache, getCache, createNode, createNodeId, getNodesByT
 
       let shouldBreak = false;
       for (let j = skip; j < lastCount; j++) {
-        // const asset = assets[j];
         const asset = assetUids[j] ? getNode(assetUids[j]) : null;
         // Last batch will contain null references when accessed, can be handled in a better way
         if (!asset && (i + 1) === batches.length) {
@@ -80,7 +77,6 @@ module.exports = async ({ cache, getCache, createNode, createNodeId, getNodesByT
 
   } catch (error) {
     reporter.info('Something went wrong while downloading assets. Details: ' + error);
-    // throw error;
   }
 
 };
@@ -121,14 +117,12 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
 
     bar.tick();
     if (fileNode) {
-      // node.localAsset___NODE = fileNode.id;
       params.createNodeField({ node, name: 'localAsset', value: fileNode.id });
     }
 
     return fileNode;
   } catch (error) {
     reporter.info('Something went wrong while creating file nodes, Details: ' + error);
-    // throw error;
   }
 };
 

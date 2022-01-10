@@ -2,7 +2,7 @@
 /** NPM dependencies */
 const fetch = require('node-fetch');
 
-const deleteContentstackNodes = (item, type, createNodeId, getNode, deleteNode) => {
+const deleteContentstackNodes = (item, type, createNodeId, getNode, deleteNode, typePrefix) => {
   let nodeId = '';
   let node = null;
   if (type === 'entry') {

@@ -9,7 +9,7 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 
 var fetch = require('node-fetch');
 
-var deleteContentstackNodes = function deleteContentstackNodes(item, type, createNodeId, getNode, deleteNode) {
+var deleteContentstackNodes = function deleteContentstackNodes(item, type, createNodeId, getNode, deleteNode, typePrefix) {
   var nodeId = '';
   var node = null;
 

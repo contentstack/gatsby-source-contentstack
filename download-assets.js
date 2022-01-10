@@ -45,9 +45,7 @@ module.exports = /*#__PURE__*/function () {
 
           case 4:
             assetUids = _context.sent;
-            // const assets = getNodesByType(`${typePrefix}_assets`);
-            configOptions.MAX_CONCURRENCY_LIMIT = process.env.GATSBY_CONCURRENT_DOWNLOAD || 20; // const batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
-
+            configOptions.MAX_CONCURRENCY_LIMIT = process.env.GATSBY_CONCURRENT_DOWNLOAD || 20;
             batches = getBatches(assetUids.length, configOptions.MAX_CONCURRENCY_LIMIT); // Get total count of files that will be downloaded, excluding unsupported formats
 
             _context.next = 9;
@@ -80,7 +78,6 @@ module.exports = /*#__PURE__*/function () {
               break;
             }
 
-            // const asset = assets[j];
             asset = assetUids[j] ? getNode(assetUids[j]) : null; // Last batch will contain null references when accessed, can be handled in a better way
 
             if (!(!asset && i + 1 === batches.length)) {
@@ -157,7 +154,7 @@ module.exports = /*#__PURE__*/function () {
           case 51:
             _context.prev = 51;
             _context.t2 = _context["catch"](1);
-            reporter.info('Something went wrong while downloading assets. Details: ' + _context.t2); // throw error;
+            reporter.info('Something went wrong while downloading assets. Details: ' + _context.t2);
 
           case 54:
           case "end":
@@ -230,7 +227,6 @@ var createRemoteFileNodePromise = /*#__PURE__*/function () {
             bar.tick();
 
             if (fileNode) {
-              // node.localAsset___NODE = fileNode.id;
               params.createNodeField({
                 node: node,
                 name: 'localAsset',
@@ -243,7 +239,7 @@ var createRemoteFileNodePromise = /*#__PURE__*/function () {
           case 24:
             _context2.prev = 24;
             _context2.t0 = _context2["catch"](0);
-            reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0); // throw error;
+            reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0);
 
           case 27:
           case "end":
