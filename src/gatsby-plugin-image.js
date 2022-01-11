@@ -96,36 +96,43 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
   return { width, height, format: toFormat, src };
 }
 
-exports.resolveGatsbyImageData = async (image, options, context, info, { cache, reporter }) => {
+exports.resolveGatsbyImageData = async ({ image, options, cache, reporter }) => {
   if (!isImage(image)) return null;
 
-  const { generateImageData } = await import('gatsby-plugin-image');
+  try {
+    const { generateImageData } = await import('gatsby-plugin-image');
+    const { baseUrl, contentType, width, height } = getBasicImageProps(image, options);
 
-  const { baseUrl, contentType, width, height } = getBasicImageProps(image, options);
+    let [, format] = contentType.split('/');
+    if (format === 'jpeg') {
+      format = 'jpg';
+    }
 
-  let [, format] = contentType.split('/');
-  if (format === 'jpeg') {
-    format = 'jpg';
+    const imageProps = generateImageData({
+      ...options,
+      pluginName: 'gatsby-source-contentstack',
+      sourceMetadata: { width, height, format },
+      filename: baseUrl,
+      generateImageSource,
+      options,
+    });
+
+    let placeholderDataURI = null;
+
+    if (options.placeholder === 'blurred') {
+      placeholderDataURI = await getBase64Image({ baseUrl, image, options }, cache, reporter);
+    }
+
+    if (placeholderDataURI) {
+      imageProps.placeholder = { fallback: placeholderDataURI };
+    }
+
+    return imageProps;
+  } catch (error) {
+    reporter.panic({
+      id: CODES.MissingDependencyError,
+      context: { sourceMessage: `Gatsby plugin image is required. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.` },
+      error
+    });
   }
-
-  const imageProps = generateImageData({
-    ...options,
-    pluginName: 'gatsby-source-contentstack',
-    sourceMetadata: { width, height, format },
-    filename: baseUrl,
-    generateImageSource,
-    options,
-  });
-
-  let placeholderDataURI = null;
-
-  if (options.placeholder === 'blurred') {
-    placeholderDataURI = await getBase64Image({ baseUrl, image, options }, cache, reporter);
-  }
-
-  if (placeholderDataURI) {
-    imageProps.placeholder = { fallback: placeholderDataURI };
-  }
-
-  return imageProps;
 }

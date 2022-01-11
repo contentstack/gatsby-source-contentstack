@@ -167,14 +167,14 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
 }
 
 exports.resolveGatsbyImageData = /*#__PURE__*/function () {
-  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(image, options, context, info, _ref3) {
-    var cache, reporter, _yield$import, generateImageData, _getBasicImageProps, baseUrl, contentType, width, height, _contentType$split, _contentType$split2, format, imageProps, placeholderDataURI;
+  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref3) {
+    var image, options, cache, reporter, _yield$import, generateImageData, _getBasicImageProps, baseUrl, contentType, width, height, _contentType$split, _contentType$split2, format, imageProps, placeholderDataURI;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            cache = _ref3.cache, reporter = _ref3.reporter;
+            image = _ref3.image, options = _ref3.options, cache = _ref3.cache, reporter = _ref3.reporter;
 
             if (isImage(image)) {
               _context2.next = 3;
@@ -184,12 +184,13 @@ exports.resolveGatsbyImageData = /*#__PURE__*/function () {
             return _context2.abrupt("return", null);
 
           case 3:
-            _context2.next = 5;
+            _context2.prev = 3;
+            _context2.next = 6;
             return Promise.resolve().then(function () {
               return _interopRequireWildcard(require('gatsby-plugin-image'));
             });
 
-          case 5:
+          case 6:
             _yield$import = _context2.sent;
             generateImageData = _yield$import.generateImageData;
             _getBasicImageProps = getBasicImageProps(image, options), baseUrl = _getBasicImageProps.baseUrl, contentType = _getBasicImageProps.contentType, width = _getBasicImageProps.width, height = _getBasicImageProps.height;
@@ -213,21 +214,21 @@ exports.resolveGatsbyImageData = /*#__PURE__*/function () {
             placeholderDataURI = null;
 
             if (!(options.placeholder === 'blurred')) {
-              _context2.next = 16;
+              _context2.next = 17;
               break;
             }
 
-            _context2.next = 15;
+            _context2.next = 16;
             return getBase64Image({
               baseUrl: baseUrl,
               image: image,
               options: options
             }, cache, reporter);
 
-          case 15:
+          case 16:
             placeholderDataURI = _context2.sent;
 
-          case 16:
+          case 17:
             if (placeholderDataURI) {
               imageProps.placeholder = {
                 fallback: placeholderDataURI
@@ -236,15 +237,26 @@ exports.resolveGatsbyImageData = /*#__PURE__*/function () {
 
             return _context2.abrupt("return", imageProps);
 
-          case 18:
+          case 21:
+            _context2.prev = 21;
+            _context2.t0 = _context2["catch"](3);
+            reporter.panic({
+              id: CODES.MissingDependencyError,
+              context: {
+                sourceMessage: "Gatsby plugin image is required. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help."
+              },
+              error: _context2.t0
+            });
+
+          case 24:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2);
+    }, _callee2, null, [[3, 21]]);
   }));
 
-  return function (_x, _x2, _x3, _x4, _x5) {
+  return function (_x) {
     return _ref2.apply(this, arguments);
   };
 }();
