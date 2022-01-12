@@ -107,16 +107,13 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                       case 10:
                         _context2.prev = 10;
                         _context2.t0 = _context2["catch"](0);
-
-                        if (_context2.t0.code === 'ERR_MODULE_NOT_FOUND') {
-                          reporter.panic({
-                            id: CODES.MissingDependencyError,
-                            context: {
-                              sourceMessage: "Gatsby plugin image is required. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help."
-                            },
-                            error: _context2.t0
-                          });
-                        }
+                        reporter.panic({
+                          id: CODES.MissingDependencyError,
+                          context: {
+                            sourceMessage: "Gatsby plugin image is required. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help."
+                          },
+                          error: _context2.t0
+                        });
 
                       case 13:
                       case "end":
