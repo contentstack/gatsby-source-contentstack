@@ -46,7 +46,9 @@ exports.SUPPORTED_FILES_COUNT = 'SUPPORTED_FILES_COUNT';
 exports.IMAGE_REGEXP = new RegExp('https://(stag-images|(eu-)?images).(blz-)?contentstack.(io|com)/v3/assets/');
 exports.CODES = {
   SyncError: '10001',
-  APIError: '10002'
+  APIError: '10002',
+  ImageAPIError: '10003',
+  MissingDependencyError: '10004'
 };
 
 exports.getContentTypeOption = function (configOptions) {

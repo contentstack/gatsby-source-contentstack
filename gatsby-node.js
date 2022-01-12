@@ -41,6 +41,9 @@ var _require3 = require('./fetch'),
 
 var downloadAssets = require('./download-assets');
 
+var _require4 = require('./extend-node-type'),
+    setFieldsOnGraphQLNodeType = _require4.setFieldsOnGraphQLNodeType;
+
 var references = [];
 var groups = [];
 var fileFields = [];
@@ -358,6 +361,8 @@ exports.sourceNodes = /*#__PURE__*/function () {
   };
 }();
 
+exports.setFieldsOnGraphQLNodeType = setFieldsOnGraphQLNodeType;
+
 exports.createResolvers = function (_ref6) {
   var createResolvers = _ref6.createResolvers;
   var resolvers = {};
@@ -450,12 +455,24 @@ var ERROR_MAP = (_ERROR_MAP = {}, (0, _defineProperty2["default"])(_ERROR_MAP, C
   },
   level: "ERROR",
   type: "PLUGIN"
+}), (0, _defineProperty2["default"])(_ERROR_MAP, CODES.ImageAPIError, {
+  text: function text(context) {
+    return context.sourceMessage;
+  },
+  level: "ERROR",
+  type: "PLUGIN"
+}), (0, _defineProperty2["default"])(_ERROR_MAP, CODES.MissingDependencyError, {
+  text: function text(context) {
+    return context.sourceMessage;
+  },
+  level: "ERROR",
+  type: "PLUGIN"
 }), _ERROR_MAP);
 var coreSupportsOnPluginInit;
 
 try {
-  var _require4 = require('gatsby-plugin-utils'),
-      isGatsbyNodeLifecycleSupported = _require4.isGatsbyNodeLifecycleSupported;
+  var _require5 = require('gatsby-plugin-utils'),
+      isGatsbyNodeLifecycleSupported = _require5.isGatsbyNodeLifecycleSupported;
 
   if (isGatsbyNodeLifecycleSupported('onPluginInit')) {
     coreSupportsOnPluginInit = 'stable';
