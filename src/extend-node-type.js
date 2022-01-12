@@ -42,11 +42,13 @@ exports.setFieldsOnGraphQLNodeType = async ({ type, cache, reporter }, configOpt
 
       return fieldConfig;
     } catch (error) {
-      reporter.panic({
-        id: CODES.MissingDependencyError,
-        context: { sourceMessage: `Gatsby plugin image is required. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.` },
-        error
-      });
+      if (error.code === 'ERR_MODULE_NOT_FOUND') {
+        reporter.panic({
+          id: CODES.MissingDependencyError,
+          context: { sourceMessage: `Gatsby plugin image is required. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.` },
+          error
+        });
+      }
     }
   };
 
