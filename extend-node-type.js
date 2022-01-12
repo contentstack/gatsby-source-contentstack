@@ -20,6 +20,9 @@ var _require = require('gatsby/graphql'),
 var _require2 = require('./gatsby-plugin-image'),
     resolveGatsbyImageData = _require2.resolveGatsbyImageData;
 
+var _require3 = require('./utils'),
+    CODES = _require3.CODES;
+
 exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(_ref2, configOptions) {
     var type, cache, reporter, typePrefix, getGatsbyImageData, gatsbyImageData;
@@ -47,35 +50,29 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                   while (1) {
                     switch (_context2.prev = _context2.next) {
                       case 0:
-                        _context2.next = 2;
+                        _context2.prev = 0;
+                        _context2.next = 3;
                         return Promise.resolve().then(function () {
                           return _interopRequireWildcard(require('gatsby-plugin-image/graphql-utils'));
                         });
 
-                      case 2:
+                      case 3:
                         _yield$import = _context2.sent;
                         getGatsbyImageFieldConfig = _yield$import.getGatsbyImageFieldConfig;
                         fieldConfig = getGatsbyImageFieldConfig( /*#__PURE__*/function () {
-                          var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
-                            var _len,
-                                args,
-                                _key,
-                                _args = arguments;
-
+                          var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(image, options) {
                             return _regenerator["default"].wrap(function _callee$(_context) {
                               while (1) {
                                 switch (_context.prev = _context.next) {
                                   case 0:
-                                    for (_len = _args.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-                                      args[_key] = _args[_key];
-                                    }
-
-                                    return _context.abrupt("return", resolveGatsbyImageData.apply(void 0, args.concat([{
+                                    return _context.abrupt("return", resolveGatsbyImageData({
+                                      image: image,
+                                      options: options,
                                       cache: cache,
                                       reporter: reporter
-                                    }])));
+                                    }));
 
-                                  case 2:
+                                  case 1:
                                   case "end":
                                     return _context.stop();
                                 }
@@ -83,7 +80,7 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                             }, _callee);
                           }));
 
-                          return function () {
+                          return function (_x3, _x4) {
                             return _ref4.apply(this, arguments);
                           };
                         }(), {
@@ -107,12 +104,23 @@ exports.setFieldsOnGraphQLNodeType = /*#__PURE__*/function () {
                         fieldConfig.type = GraphQLJSON;
                         return _context2.abrupt("return", fieldConfig);
 
-                      case 7:
+                      case 10:
+                        _context2.prev = 10;
+                        _context2.t0 = _context2["catch"](0);
+                        reporter.panic({
+                          id: CODES.MissingDependencyError,
+                          context: {
+                            sourceMessage: "Gatsby plugin image is required. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help."
+                          },
+                          error: _context2.t0
+                        });
+
+                      case 13:
                       case "end":
                         return _context2.stop();
                     }
                   }
-                }, _callee2);
+                }, _callee2, null, [[0, 10]]);
               }));
 
               return function getGatsbyImageData() {
