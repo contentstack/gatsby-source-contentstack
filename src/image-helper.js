@@ -36,6 +36,7 @@ const createUrl = (imgUrl, options = {}) => {
       searchParams.append(key, queryParams[key] ?? '');
     }
   }
+  // 
   return `${imgUrl}?${searchParams.toString()}`;
 };
 
