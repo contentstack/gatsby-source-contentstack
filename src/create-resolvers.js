@@ -10,7 +10,7 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
     cache.get(`${typePrefix}_${configOptions.api_key}_groups`),
   ]);
 
-  fileFields.forEach(fileField => {
+  fileFields && fileFields.forEach(fileField => {
     resolvers[fileField.parent] = {
       ...resolvers[fileField.parent],
       ... {
@@ -37,7 +37,7 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
       }
     };
   })
-  references.forEach(reference => {
+  references && references.forEach(reference => {
     resolvers[reference.parent] = {
       ...resolvers[reference.parent],
       [reference.uid]: {
@@ -60,7 +60,7 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
       },
     };
   });
-  groups.forEach(group => {
+  groups && groups.forEach(group => {
     resolvers[group.parent] = {
       ...resolvers[group.parent],
       ...{

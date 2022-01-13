@@ -34,7 +34,7 @@ exports.createResolvers = /*#__PURE__*/function () {
             fileFields = _yield$Promise$all2[0];
             references = _yield$Promise$all2[1];
             groups = _yield$Promise$all2[2];
-            fileFields.forEach(function (fileField) {
+            fileFields && fileFields.forEach(function (fileField) {
               resolvers[fileField.parent] = _objectSpread(_objectSpread({}, resolvers[fileField.parent]), (0, _defineProperty2["default"])({}, fileField.field.uid, {
                 resolve: function resolve(source, args, context) {
                   if (fileField.field.multiple && source[fileField.field.uid]) {
@@ -58,7 +58,7 @@ exports.createResolvers = /*#__PURE__*/function () {
                 }
               }));
             });
-            references.forEach(function (reference) {
+            references && references.forEach(function (reference) {
               resolvers[reference.parent] = _objectSpread(_objectSpread({}, resolvers[reference.parent]), {}, (0, _defineProperty2["default"])({}, reference.uid, {
                 resolve: function resolve(source, args, context) {
                   if (source[reference.uid]) {
@@ -79,7 +79,7 @@ exports.createResolvers = /*#__PURE__*/function () {
                 }
               }));
             });
-            groups.forEach(function (group) {
+            groups && groups.forEach(function (group) {
               resolvers[group.parent] = _objectSpread(_objectSpread({}, resolvers[group.parent]), (0, _defineProperty2["default"])({}, group.field.uid, {
                 resolve: function resolve(source) {
                   if (group.field.multiple && !Array.isArray(source[group.field.uid])) {
