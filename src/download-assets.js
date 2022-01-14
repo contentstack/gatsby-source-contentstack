@@ -122,7 +122,7 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
 
     return fileNode;
   } catch (error) {
-    reporter.info('Something went wrong while creating file nodes, Details: ' + error);
+    reporter.info('Something went wrong while creating file nodes. Details: ' + error);
   }
 };
 
