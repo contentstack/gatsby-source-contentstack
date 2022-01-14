@@ -65,18 +65,6 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
   return nodeData;
 };
 
-exports.sanitizeEntry = function (schema, entry) {
-  // Field data types that has ___NODE prefix to field.uid needs sanitization
-  var typesToBeSanitized = ['reference', 'file'];
-  schema.forEach(function (field) {
-    if (typesToBeSanitized.includes(field.data_type)) {
-      // Deleting entry[field.uid] because entry[`${field.uid}___NODE`] already exists
-      delete entry[field.uid];
-    }
-  });
-  return entry;
-};
-
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
   var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
 
@@ -165,8 +153,10 @@ var normalizeFileField = function normalizeFileField(value, locale, assetsNodeId
   if (Array.isArray(value)) {
     reference = [];
     value.forEach(function (assetUid) {
-      if (assetsNodeIds.has(createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(assetUid, "-").concat(locale)))) {
-        reference.push(createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(assetUid, "-").concat(locale)));
+      var nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(assetUid, "-").concat(locale));
+
+      if (assetsNodeIds.has(nodeId)) {
+        reference.push(nodeId);
       }
     });
   } else if (assetsNodeIds.has(createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(value, "-").concat(locale)))) {
@@ -189,13 +179,12 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 
     switch (field.data_type) {
       case 'reference':
-        entryObj["".concat(field.uid, "___NODE")] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
 
       case 'file':
-        // Issue #60. Graphql does not treat empty string as null.
         if (!value) value = null;
-        entryObj["".concat(field.uid, "___NODE")] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
 
       case 'group':
@@ -410,7 +399,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         break;
 
       case 'file':
-        var type = "type ".concat(prefix, "_assets implements Node @infer { url: String }");
+        var type = "type ".concat(prefix, "_assets implements Node @infer { url: String localAsset: File @link(from: \"fields.localAsset\") }");
         types.push(type);
         fileFields.push({
           parent: parent,

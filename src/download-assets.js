@@ -3,28 +3,20 @@
 const { createRemoteFileNode } = require('gatsby-source-filesystem');
 
 const { makeAssetNodeUid } = require('./normalize');
-const { createProgress, checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP } = require('./utils');
+const { createProgress, checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP, ASSET_NODE_UIDS } = require('./utils');
 
 let bar; // Keep track of the total number of jobs we push in the queue
 let sizeBar;
 let totalJobs = 0;
 let totalSize = 0;
 
-module.exports = async ({
-  cache,
-  getCache,
-  createNode,
-  createNodeId,
-  getNodesByType,
-  reporter
-}, typePrefix, configOptions) => {
-
+module.exports = async ({ cache, getCache, createNode, createNodeId, getNodesByType, reporter, createNodeField, getNode }, typePrefix, configOptions) => {
   try {
-    const assets = getNodesByType(`${typePrefix}_assets`);
+    const assetUids = await cache.get(ASSET_NODE_UIDS);
 
     configOptions.MAX_CONCURRENCY_LIMIT = process.env.GATSBY_CONCURRENT_DOWNLOAD || 20;
 
-    const batches = getBatches(assets.length, configOptions.MAX_CONCURRENCY_LIMIT);
+    const batches = getBatches(assetUids.length, configOptions.MAX_CONCURRENCY_LIMIT);
 
     // Get total count of files that will be downloaded, excluding unsupported formats
     totalJobs = await cache.get(SUPPORTED_FILES_COUNT);
@@ -44,8 +36,9 @@ module.exports = async ({
 
       let shouldBreak = false;
       for (let j = skip; j < lastCount; j++) {
+        const asset = assetUids[j] ? getNode(assetUids[j]) : null;
         // Last batch will contain null references when accessed, can be handled in a better way
-        if (!assets[j] && (i + 1) === batches.length) {
+        if (!asset && (i + 1) === batches.length) {
           shouldBreak = true;
           break;
         }
@@ -57,21 +50,17 @@ module.exports = async ({
         // SVG is not supported by gatsby-source-filesystem. Reference: https://github.com/gatsbyjs/gatsby/issues/10297
         let isUnsupportedExt = false;
         try {
-          if (assets[j]) {
-            matches = regexp.exec(assets[j].url);
-            isUnsupportedExt = checkIfUnsupportedFormat(assets[j].url);
-          }
+          matches = regexp.exec(asset.url);
+          isUnsupportedExt = checkIfUnsupportedFormat(asset.url);
         } catch (error) {
           reporter.panic('Something went wrong. Details: ' + JSON.stringify(error));
         }
 
-        // Only download images
         if (matches && !isUnsupportedExt) {
-
           batchPromises.push(
             await createRemoteFileNodePromise({
-              cache, getCache, createNode, createNodeId,
-            }, assets[j], typePrefix, reporter)
+              cache, getCache, createNode, createNodeId, createNodeField,
+            }, asset, typePrefix, reporter)
           );
         }
       }
@@ -88,14 +77,12 @@ module.exports = async ({
 
   } catch (error) {
     reporter.info('Something went wrong while downloading assets. Details: ' + error);
-    // throw error;
   }
 
 };
 
 const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) => {
   try {
-
     if (!sizeBar) {
       sizeBar = createProgress(`Total KBs downloaded`, reporter);
       sizeBar.start();
@@ -129,15 +116,13 @@ const createRemoteFileNodePromise = async (params, node, typePrefix, reporter) =
     }
 
     bar.tick();
-
-    if (fileNode)
-      node.localAsset___NODE = fileNode.id;
+    if (fileNode) {
+      params.createNodeField({ node, name: 'localAsset', value: fileNode.id });
+    }
 
     return fileNode;
-
   } catch (error) {
-    reporter.info('Something went wrong while creating file nodes, Details: ' + error);
-    // throw error;
+    reporter.info('Something went wrong while creating file nodes. Details: ' + error);
   }
 };
 
