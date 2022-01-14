@@ -205,13 +205,13 @@ Using the Contentstack Image delivery APIs you can perform various operations on
 Lets understand this with an example.
 In the below example we have added several parameters to format the image. 
 
-```query MyQuery {
+```graphql
+{
   allContentstackBlog {
     edges {
       node {
         title
         image {
-          title
           gatsbyImageData(
             layout: CONSTRAINED
             crop: "100,100"
@@ -236,15 +236,13 @@ This query below returns the URL for a 20px-wide image, to use as a blurred plac
 The image is downloaded and converted to a base64-encoded data URI.
 
 Here’s an example of the same:
-```query MyQuery {
+```graphql
+{
   allContentstackBlog {
     edges {
       node {
         title
         image {
-          title
-          filename
-          url
           gatsbyImageData(
             layout: CONSTRAINED
             placeholder: BLURRED
