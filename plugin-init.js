@@ -27,6 +27,12 @@ var ERROR_MAP = (_ERROR_MAP = {}, (0, _defineProperty2["default"])(_ERROR_MAP, C
   },
   level: "ERROR",
   type: "PLUGIN"
+}), (0, _defineProperty2["default"])(_ERROR_MAP, CODES.MissingDependencyError, {
+  text: function text(context) {
+    return context.sourceMessage;
+  },
+  level: "ERROR",
+  type: "PLUGIN"
 }), _ERROR_MAP);
 
 exports.onPluginInit = function (_ref) {

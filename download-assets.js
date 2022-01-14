@@ -239,7 +239,7 @@ var createRemoteFileNodePromise = /*#__PURE__*/function () {
           case 24:
             _context2.prev = 24;
             _context2.t0 = _context2["catch"](0);
-            reporter.info('Something went wrong while creating file nodes, Details: ' + _context2.t0);
+            reporter.info('Something went wrong while creating file nodes. Details: ' + _context2.t0);
 
           case 27:
           case "end":
