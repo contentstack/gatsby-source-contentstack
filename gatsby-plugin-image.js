@@ -167,14 +167,14 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
 }
 
 exports.resolveGatsbyImageData = /*#__PURE__*/function () {
-  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(image, options, context, info, _ref3) {
-    var cache, reporter, _yield$import, generateImageData, _getBasicImageProps, baseUrl, contentType, width, height, _contentType$split, _contentType$split2, format, imageProps, placeholderDataURI;
+  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref3) {
+    var image, options, cache, reporter, _yield$import, generateImageData, _getBasicImageProps, baseUrl, contentType, width, height, _contentType$split, _contentType$split2, format, imageProps, placeholderDataURI;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            cache = _ref3.cache, reporter = _ref3.reporter;
+            image = _ref3.image, options = _ref3.options, cache = _ref3.cache, reporter = _ref3.reporter;
 
             if (isImage(image)) {
               _context2.next = 3;
@@ -244,7 +244,7 @@ exports.resolveGatsbyImageData = /*#__PURE__*/function () {
     }, _callee2);
   }));
 
-  return function (_x, _x2, _x3, _x4, _x5) {
+  return function (_x) {
     return _ref2.apply(this, arguments);
   };
 }();

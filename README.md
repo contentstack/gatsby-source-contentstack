@@ -80,7 +80,7 @@ All content types and the corresponding entries are pulled from your stack. They
 <http://localhost:8000/___graphql> to discover the types and properties of your
 GraphQL model.
 
-### Querying entries
+## Querying entries
 
 If, for example, you have `Blogs` as one of your content types, you will be able to query its entries in the following manner:
 
@@ -115,7 +115,7 @@ If, for example, you have `Blogs` as one of your content types, you will be able
 }
 ```
 
-### Query Reference fields
+## Query Reference fields
 
 Reference fields provide references to entries of another content type(s). Since fields from
 referred entry are often needed, the referred entry data is provided at the `reference` field.
@@ -141,7 +141,7 @@ referred entry are often needed, the referred entry data is provided at the `ref
 }
 ```
 
-### Querying downloaded images
+## Querying downloaded images
 
 ## Prerequisites
 
@@ -183,6 +183,84 @@ Remember that gatbsy-image doesn’t support GIF and SVG images.
 
 To use GIF image, Gatsby recommends to import the image directly. In SVG, creating multiple variants of the image doesn’t make sense because it is vector-based graphics that you can freely scale without losing quality.
 
+## The new gatsby image plugin
+
+The gatsby-image plugin lets you add responsive images to your site. By using this plugin, you can format and produce images of various qualities and sizes.
+
+## Prerequisites
+
+To use this, you need to have the following plugins installed:
+
+- gatsby-plugin-image
+- gatsby-plugin-sharp
+- gatsby-transformer-sharp
+
+# Description
+
+Next step is to add an image to your page query and use the gatsbyImageData resolver to pass arguments that will configure your image.
+
+The gatsbyImageData resolver allows you to pass arguments to format and configure your images. 
+Using the Contentstack Image delivery APIs you can perform various operations on the images by passing the necessary parameters.
+
+Lets understand this with an example.
+In the below example we have added several parameters to format the image. 
+
+```query MyQuery {
+  allContentstackBlog {
+    edges {
+      node {
+        title
+        image {
+          title
+          gatsbyImageData(
+            layout: CONSTRAINED
+            crop: "100,100"
+            trim: "25,25,100,100"
+            backgroundColor:"cccccc"
+            pad: "25,25,25,25"
+          )
+        }
+      }
+    }
+  }
+}
+```
+
+Lets understand some parameters that we defined:
+layout: This defines the layout of the image, it can be CONSTRAINED, FIXED or FULL_WIDTH.
+The crop, trim, backgroundColor and pad parameters configure the image according to the values inserted by the user. 
+
+Note: To learn more about these parameters and other available options, read our detailed documentation on [Contentstack Image delivery APIs](https://www.contentstack.com/docs/developers/apis/image-delivery-api/).
+
+This query below returns the URL for a 20px-wide image, to use as a blurred placeholder.
+The image is downloaded and converted to a base64-encoded data URI.
+
+Here’s an example of the same:
+```query MyQuery {
+  allContentstackBlog {
+    edges {
+      node {
+        title
+        image {
+          title
+          filename
+          url
+          gatsbyImageData(
+            layout: CONSTRAINED
+            placeholder: BLURRED
+            crop: "100,100"
+            trim: "25,25,100,100"
+            backgroundColor:"cccccc"
+            pad: "25,25,25,25"
+          )
+        }
+      }
+    }
+  }
+}
+```
+
+For more information checkout gatsby's documentation on usage of the [new image plugin](https://www.gatsbyjs.com/docs/how-to/plugins-and-themes/adding-gatsby-image-support/).
 
 [gatsby]: https://www.gatsbyjs.org/
 [contentstack]: https://www.contentstack.com/

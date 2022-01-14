@@ -96,11 +96,10 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
   return { width, height, format: toFormat, src };
 }
 
-exports.resolveGatsbyImageData = async (image, options, context, info, { cache, reporter }) => {
+exports.resolveGatsbyImageData = async ({ image, options, cache, reporter }) => {
   if (!isImage(image)) return null;
 
   const { generateImageData } = await import('gatsby-plugin-image');
-
   const { baseUrl, contentType, width, height } = getBasicImageProps(image, options);
 
   let [, format] = contentType.split('/');

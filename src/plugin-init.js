@@ -18,6 +18,11 @@ const ERROR_MAP = {
     level: `ERROR`,
     type: `PLUGIN`
   },
+  [CODES.MissingDependencyError]: {
+    text: context => context.sourceMessage,
+    level: `ERROR`,
+    type: `PLUGIN`,
+  },
 };
 
 exports.onPluginInit = ({ reporter }) => {
