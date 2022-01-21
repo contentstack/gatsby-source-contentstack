@@ -22,6 +22,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
   let references = [], groups = [], fileFields = [];
 
   if (configOptions.enableSchemaGeneration) {
+    const { createTypes } = actions;
     /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
     createTypes([
       schema.buildObjectType({
@@ -50,7 +51,6 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
       }),
     ]);
 
-    const { createTypes } = actions;
     contentTypes.forEach(contentType => {
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
       const name = `${typePrefix}_${contentTypeUid}`;

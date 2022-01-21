@@ -62,7 +62,9 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               break;
             }
 
+            createTypes = actions.createTypes;
             /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
+
             createTypes([schema.buildObjectType({
               name: "".concat(typePrefix, "ContentTypes"),
               fields: {
@@ -100,7 +102,6 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
                 infer: true
               }
             })]);
-            createTypes = actions.createTypes;
             contentTypes.forEach(function (contentType) {
               var contentTypeUid = contentType.uid.replace(/-/g, '_');
               var name = "".concat(typePrefix, "_").concat(contentTypeUid);

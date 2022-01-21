@@ -20,9 +20,6 @@ var _require = require('gatsby/graphql'),
 var _require2 = require('./gatsby-plugin-image'),
     resolveGatsbyImageData = _require2.resolveGatsbyImageData;
 
-var _require3 = require('./utils'),
-    CODES = _require3.CODES;
-
 exports.getGatsbyImageData = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref2) {
     var cache, reporter, fieldConfig, _yield$import, getGatsbyImageFieldConfig, gatsbyImageData;
@@ -91,12 +88,7 @@ exports.getGatsbyImageData = /*#__PURE__*/function () {
           case 11:
             _context2.prev = 11;
             _context2.t0 = _context2["catch"](2);
-            reporter.info({
-              id: CODES.MissingDependencyError,
-              context: {
-                sourceMessage: "Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help."
-              }
-            });
+            reporter.info("Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.");
 
           case 14:
             gatsbyImageData = fieldConfig;
