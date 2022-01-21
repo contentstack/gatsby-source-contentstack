@@ -3,8 +3,9 @@
 const { buildCustomSchema, extendSchemaWithDefaultEntryFields } = require('./normalize');
 const { fetchContentTypes } = require('./fetch');
 const { getContentTypeOption } = require('./utils');
+const { getGatsbyImageData } = require('./image-data');
 
-exports.createSchemaCustomization = async ({ cache, actions, schema }, configOptions) => {
+exports.createSchemaCustomization = async ({ cache, actions, schema, reporter }, configOptions) => {
   let contentTypes;
 
   const typePrefix = configOptions.type_prefix || 'Contentstack';
@@ -21,6 +22,34 @@ exports.createSchemaCustomization = async ({ cache, actions, schema }, configOpt
   let references = [], groups = [], fileFields = [];
 
   if (configOptions.enableSchemaGeneration) {
+    /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
+    createTypes([
+      schema.buildObjectType({
+        name: `${typePrefix}ContentTypes`,
+        fields: {
+          title: 'String!', uid: 'String!', created_at: 'Date',
+          updated_at: 'Date', schema: 'JSON!', description: 'String',
+        },
+        interfaces: ['Node'],
+        extensions: { infer: false },
+      }),
+      schema.buildObjectType({
+        name: `${typePrefix}_assets`,
+        fields: {
+          url: 'String',
+          gatsbyImageData: getGatsbyImageData({ cache, reporter }),
+          ...(configOptions.downloadImages ? {
+            localAsset: {
+              type: 'File',
+              extensions: { link: { from: `fields.localAsset` } }
+            }
+          } : {}),
+        },
+        interfaces: ['Node'],
+        extensions: { infer: true, },
+      }),
+    ]);
+
     const { createTypes } = actions;
     contentTypes.forEach(contentType => {
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
@@ -50,25 +79,6 @@ exports.createSchemaCustomization = async ({ cache, actions, schema }, configOpt
       await cache.set(`${typePrefix}_${configOptions.api_key}_references`, references),
       await cache.set(`${typePrefix}_${configOptions.api_key}_groups`, groups),
       await cache.set(`${typePrefix}_${configOptions.api_key}_file_fields`, fileFields),
-    ]);
-
-    /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
-    const name = `${typePrefix}ContentTypes`;
-    const fields = {
-      title: 'String!',
-      uid: 'String!',
-      created_at: 'Date',
-      updated_at: 'Date',
-      schema: 'JSON!',
-      description: 'String',
-    };
-    createTypes([
-      schema.buildObjectType({
-        name,
-        fields,
-        interfaces: ['Node'],
-        extensions: { infer: false },
-      }),
     ]);
   }
 };

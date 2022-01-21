@@ -399,8 +399,6 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         break;
 
       case 'file':
-        var type = "type ".concat(prefix, "_assets implements Node @infer { url: String localAsset: File @link(from: \"fields.localAsset\") }");
-        types.push(type);
         fileFields.push({
           parent: parent,
           field: field
@@ -432,9 +430,8 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         }
 
         if (Object.keys(result.fields).length > 0) {
-          var _type = "type ".concat(newparent, " @infer ").concat(JSON.stringify(result.fields).replace(/"/g, ''));
-
-          types.push(_type);
+          var type = "type ".concat(newparent, " @infer ").concat(JSON.stringify(result.fields).replace(/"/g, ''));
+          types.push(type);
           groups.push({
             parent: parent,
             field: field
@@ -480,9 +477,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
 
-          var _type2 = "type ".concat(prefix, "_").concat(field.reference_to, " implements Node @infer { title: String").concat(disableMandatoryFields ? '' : '!', " }");
+          var _type = "type ".concat(prefix, "_").concat(field.reference_to, " implements Node @infer { title: String").concat(disableMandatoryFields ? '' : '!', " }");
 
-          types.push(_type2);
+          types.push(_type);
           references.push({
             parent: parent,
             uid: field.uid
