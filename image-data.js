@@ -30,13 +30,12 @@ exports.getGatsbyImageData = /*#__PURE__*/function () {
           case 0:
             cache = _ref2.cache, reporter = _ref2.reporter;
             fieldConfig = {};
-            _context2.prev = 2;
-            _context2.next = 5;
+            _context2.next = 4;
             return Promise.resolve().then(function () {
               return _interopRequireWildcard(require('gatsby-plugin-image/graphql-utils'));
             });
 
-          case 5:
+          case 4:
             _yield$import = _context2.sent;
             getGatsbyImageFieldConfig = _yield$import.getGatsbyImageFieldConfig;
             fieldConfig = getGatsbyImageFieldConfig( /*#__PURE__*/function () {
@@ -82,26 +81,17 @@ exports.getGatsbyImageData = /*#__PURE__*/function () {
               }
             });
             fieldConfig.type = GraphQLJSON;
-            _context2.next = 14;
-            break;
-
-          case 11:
-            _context2.prev = 11;
-            _context2.t0 = _context2["catch"](2);
-            reporter.info("Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.");
-
-          case 14:
             gatsbyImageData = fieldConfig;
             return _context2.abrupt("return", {
               gatsbyImageData: gatsbyImageData
             });
 
-          case 16:
+          case 10:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[2, 11]]);
+    }, _callee2);
   }));
 
   return function (_x) {

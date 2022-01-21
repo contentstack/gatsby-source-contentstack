@@ -6,22 +6,18 @@ const { resolveGatsbyImageData } = require('./gatsby-plugin-image');
 
 exports.getGatsbyImageData = async ({ cache, reporter }) => {
   let fieldConfig = {};
-  try {
-    const { getGatsbyImageFieldConfig } = await import('gatsby-plugin-image/graphql-utils');
+  const { getGatsbyImageFieldConfig } = await import('gatsby-plugin-image/graphql-utils');
 
-    fieldConfig = getGatsbyImageFieldConfig(
-      async (image, options) => resolveGatsbyImageData({ image, options, cache, reporter }), {
-      fit: { type: GraphQLString, },
-      crop: { type: GraphQLString, },
-      trim: { type: GraphQLString, },
-      pad: { type: GraphQLString, },
-      quality: { type: GraphQLInt, defaultValue: 50, },
-    });
+  fieldConfig = getGatsbyImageFieldConfig(
+    async (image, options) => resolveGatsbyImageData({ image, options, cache, reporter }), {
+    fit: { type: GraphQLString, },
+    crop: { type: GraphQLString, },
+    trim: { type: GraphQLString, },
+    pad: { type: GraphQLString, },
+    quality: { type: GraphQLInt, defaultValue: 50, },
+  });
 
-    fieldConfig.type = GraphQLJSON;
-  } catch (error) {
-    reporter.info(`Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.`);
-  }
+  fieldConfig.type = GraphQLJSON;
 
   const gatsbyImageData = fieldConfig;
   return { gatsbyImageData };

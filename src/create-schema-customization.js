@@ -19,6 +19,17 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
     console.error('Contentstack fetch content type failed!');
   }
 
+  // Checks if gatsby-plugin-image is installed.
+  let isGatsbyPluginImageInstalled = false;
+  try {
+    await import('gatsby-plugin-image');
+    isGatsbyPluginImageInstalled = true;
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      reporter.info(`Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.`);
+    }
+  }
+
   let references = [], groups = [], fileFields = [];
 
   if (configOptions.enableSchemaGeneration) {
@@ -38,7 +49,9 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
         name: `${typePrefix}_assets`,
         fields: {
           url: 'String',
-          gatsbyImageData: getGatsbyImageData({ cache, reporter }),
+          ...(isGatsbyPluginImageInstalled ? {
+            gatsbyImageData: getGatsbyImageData({ cache, reporter }),
+          } : {}),
           ...(configOptions.downloadImages ? {
             localAsset: {
               type: 'File',
@@ -51,7 +64,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
       }),
     ]);
 
-    contentTypes.forEach(contentType => {
+    contentTypes && contentTypes.forEach(contentType => {
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
       const name = `${typePrefix}_${contentTypeUid}`;
       const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
@@ -59,11 +72,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
       fileFields = fileFields.concat(result.fileFields);
-      const typeDefs = [
-        `type linktype {
-              title: String
-              href: String
-        }`,
+      const typeDefs = [`type linktype { title: String href: String }`,
         schema.buildObjectType({
           name,
           fields: result.fields,
