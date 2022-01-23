@@ -75,7 +75,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             }
 
             createTypes = actions.createTypes;
-            /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
+            /** Type definition for content-type schema */
 
             contentTypeSchema = {
               name: "".concat(typePrefix, "ContentTypes"),
@@ -92,6 +92,8 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
                 infer: false
               }
             };
+            /** Type definition for asset schema */
+
             assetTypeSchema = {
               name: "".concat(typePrefix, "_assets"),
               fields: _objectSpread({
@@ -165,15 +167,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               }
             });
             fieldConfig.type = GraphQLJSON;
-            assetTypeSchema.fields.gatsbyImageData = fieldConfig; // getGatsbyImageFieldConfig(
-            //   async (image, options) => resolveGatsbyImageData({ image, options, cache, reporter }), {
-            //   fit: { type: GraphQLString, },
-            //   crop: { type: GraphQLString, },
-            //   trim: { type: GraphQLString, },
-            //   pad: { type: GraphQLString, },
-            //   quality: { type: GraphQLInt, defaultValue: 50, },
-            // });
-
+            assetTypeSchema.fields.gatsbyImageData = fieldConfig;
             _context2.next = 34;
             break;
 

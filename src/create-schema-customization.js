@@ -25,7 +25,8 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
 
   if (configOptions.enableSchemaGeneration) {
     const { createTypes } = actions;
-    /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
+
+    /** Type definition for content-type schema */
     const contentTypeSchema = {
       name: `${typePrefix}ContentTypes`,
       fields: {
@@ -35,6 +36,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
       interfaces: ['Node'],
       extensions: { infer: false },
     };
+    /** Type definition for asset schema */
     const assetTypeSchema = {
       name: `${typePrefix}_assets`,
       fields: {
@@ -63,14 +65,6 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
       });
       fieldConfig.type = GraphQLJSON;
       assetTypeSchema.fields.gatsbyImageData = fieldConfig;
-      // getGatsbyImageFieldConfig(
-      //   async (image, options) => resolveGatsbyImageData({ image, options, cache, reporter }), {
-      //   fit: { type: GraphQLString, },
-      //   crop: { type: GraphQLString, },
-      //   trim: { type: GraphQLString, },
-      //   pad: { type: GraphQLString, },
-      //   quality: { type: GraphQLInt, defaultValue: 50, },
-      // });
     } catch (error) {
       if (error.code === 'MODULE_NOT_FOUND') {
         reporter.info(`Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.`);
