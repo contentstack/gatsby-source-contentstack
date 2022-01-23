@@ -18,22 +18,27 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-var _require = require('./normalize'),
-    buildCustomSchema = _require.buildCustomSchema,
-    extendSchemaWithDefaultEntryFields = _require.extendSchemaWithDefaultEntryFields;
+var _require = require('gatsby/graphql'),
+    GraphQLInt = _require.GraphQLInt,
+    GraphQLJSON = _require.GraphQLJSON,
+    GraphQLString = _require.GraphQLString;
 
-var _require2 = require('./fetch'),
-    fetchContentTypes = _require2.fetchContentTypes;
+var _require2 = require('./normalize'),
+    buildCustomSchema = _require2.buildCustomSchema,
+    extendSchemaWithDefaultEntryFields = _require2.extendSchemaWithDefaultEntryFields;
 
-var _require3 = require('./utils'),
-    getContentTypeOption = _require3.getContentTypeOption;
+var _require3 = require('./fetch'),
+    fetchContentTypes = _require3.fetchContentTypes;
 
-var _require4 = require('./gatsby-plugin-image'),
-    resolveGatsbyImageData = _require4.resolveGatsbyImageData;
+var _require4 = require('./utils'),
+    getContentTypeOption = _require4.getContentTypeOption;
+
+var _require5 = require('./gatsby-plugin-image'),
+    resolveGatsbyImageData = _require5.resolveGatsbyImageData;
 
 exports.createSchemaCustomization = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref2, configOptions) {
-    var cache, actions, schema, reporter, contentTypes, typePrefix, disableMandatoryFields, contentTypeOption, references, groups, fileFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig;
+    var cache, actions, schema, reporter, contentTypes, typePrefix, disableMandatoryFields, contentTypeOption, references, groups, fileFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
@@ -65,7 +70,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             references = [], groups = [], fileFields = [];
 
             if (!configOptions.enableSchemaGeneration) {
-              _context2.next = 46;
+              _context2.next = 49;
               break;
             }
 
@@ -116,7 +121,8 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
           case 23:
             _yield$import = _context2.sent;
             getGatsbyImageFieldConfig = _yield$import.getGatsbyImageFieldConfig;
-            assetTypeSchema.fields.gatsbyImageData = getGatsbyImageFieldConfig( /*#__PURE__*/function () {
+            fieldConfig = {};
+            fieldConfig = getGatsbyImageFieldConfig( /*#__PURE__*/function () {
               var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(image, options) {
                 return _regenerator["default"].wrap(function _callee$(_context) {
                   while (1) {
@@ -158,18 +164,28 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
                 defaultValue: 50
               }
             });
-            _context2.next = 31;
+            fieldConfig.type = GraphQLJSON;
+            assetTypeSchema.fields.gatsbyImageData = fieldConfig; // getGatsbyImageFieldConfig(
+            //   async (image, options) => resolveGatsbyImageData({ image, options, cache, reporter }), {
+            //   fit: { type: GraphQLString, },
+            //   crop: { type: GraphQLString, },
+            //   trim: { type: GraphQLString, },
+            //   pad: { type: GraphQLString, },
+            //   quality: { type: GraphQLInt, defaultValue: 50, },
+            // });
+
+            _context2.next = 34;
             break;
 
-          case 28:
-            _context2.prev = 28;
+          case 31:
+            _context2.prev = 31;
             _context2.t1 = _context2["catch"](20);
 
             if (_context2.t1.code === 'MODULE_NOT_FOUND') {
               reporter.info("Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.");
             }
 
-          case 31:
+          case 34:
             createTypes([schema.buildObjectType(contentTypeSchema), schema.buildObjectType(assetTypeSchema)]);
             contentTypes && contentTypes.forEach(function (contentType) {
               var contentTypeUid = contentType.uid.replace(/-/g, '_');
@@ -191,31 +207,31 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               createTypes(result.types);
             });
             _context2.t2 = Promise;
-            _context2.next = 36;
+            _context2.next = 39;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_references"), references);
 
-          case 36:
+          case 39:
             _context2.t3 = _context2.sent;
-            _context2.next = 39;
+            _context2.next = 42;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_groups"), groups);
 
-          case 39:
+          case 42:
             _context2.t4 = _context2.sent;
-            _context2.next = 42;
+            _context2.next = 45;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_file_fields"), fileFields);
 
-          case 42:
+          case 45:
             _context2.t5 = _context2.sent;
             _context2.t6 = [_context2.t3, _context2.t4, _context2.t5];
-            _context2.next = 46;
+            _context2.next = 49;
             return _context2.t2.all.call(_context2.t2, _context2.t6);
 
-          case 46:
+          case 49:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[3, 12], [20, 28]]);
+    }, _callee2, null, [[3, 12], [20, 31]]);
   }));
 
   return function (_x, _x2) {

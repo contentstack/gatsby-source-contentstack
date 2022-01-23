@@ -1,5 +1,7 @@
 'use strict';
 
+const { GraphQLInt, GraphQLJSON, GraphQLString } = require('gatsby/graphql');
+
 const { buildCustomSchema, extendSchemaWithDefaultEntryFields } = require('./normalize');
 const { fetchContentTypes } = require('./fetch');
 const { getContentTypeOption } = require('./utils');
@@ -51,14 +53,24 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
     // Checks if gatsby-plugin-image is installed.
     try {
       const { getGatsbyImageFieldConfig } = await import('gatsby-plugin-image/graphql-utils');
-      assetTypeSchema.fields.gatsbyImageData = getGatsbyImageFieldConfig(
-        async (image, options) => resolveGatsbyImageData({ image, options, cache, reporter }), {
+      let fieldConfig = {};
+      fieldConfig = getGatsbyImageFieldConfig(async (image, options) => resolveGatsbyImageData({ image, options, cache, reporter }), {
         fit: { type: GraphQLString, },
         crop: { type: GraphQLString, },
         trim: { type: GraphQLString, },
         pad: { type: GraphQLString, },
         quality: { type: GraphQLInt, defaultValue: 50, },
       });
+      fieldConfig.type = GraphQLJSON;
+      assetTypeSchema.fields.gatsbyImageData = fieldConfig;
+      // getGatsbyImageFieldConfig(
+      //   async (image, options) => resolveGatsbyImageData({ image, options, cache, reporter }), {
+      //   fit: { type: GraphQLString, },
+      //   crop: { type: GraphQLString, },
+      //   trim: { type: GraphQLString, },
+      //   pad: { type: GraphQLString, },
+      //   quality: { type: GraphQLInt, defaultValue: 50, },
+      // });
     } catch (error) {
       if (error.code === 'MODULE_NOT_FOUND') {
         reporter.info(`Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.`);
