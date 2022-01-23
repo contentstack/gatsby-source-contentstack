@@ -3,7 +3,7 @@
 const { buildCustomSchema, extendSchemaWithDefaultEntryFields } = require('./normalize');
 const { fetchContentTypes } = require('./fetch');
 const { getContentTypeOption } = require('./utils');
-const { getGatsbyImageData } = require('./image-data');
+const { resolveGatsbyImageData } = require('./gatsby-plugin-image');
 
 exports.createSchemaCustomization = async ({ cache, actions, schema, reporter }, configOptions) => {
   let contentTypes;
@@ -19,50 +19,53 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
     console.error('Contentstack fetch content type failed!');
   }
 
-  // Checks if gatsby-plugin-image is installed.
-  let isGatsbyPluginImageInstalled = false;
-  try {
-    await import('gatsby-plugin-image');
-    isGatsbyPluginImageInstalled = true;
-  } catch (error) {
-    if (error.code === 'MODULE_NOT_FOUND') {
-      reporter.info(`Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.`);
-    }
-  }
-
   let references = [], groups = [], fileFields = [];
 
   if (configOptions.enableSchemaGeneration) {
     const { createTypes } = actions;
     /**CREATE TYPE DEFINITION FOR CONTENTTYPE OBJECT */
-    createTypes([
-      schema.buildObjectType({
-        name: `${typePrefix}ContentTypes`,
-        fields: {
-          title: 'String!', uid: 'String!', created_at: 'Date',
-          updated_at: 'Date', schema: 'JSON!', description: 'String',
-        },
-        interfaces: ['Node'],
-        extensions: { infer: false },
-      }),
-      schema.buildObjectType({
-        name: `${typePrefix}_assets`,
-        fields: {
-          url: 'String',
-          ...(isGatsbyPluginImageInstalled ? {
-            gatsbyImageData: getGatsbyImageData({ cache, reporter }),
-          } : {}),
-          ...(configOptions.downloadImages ? {
-            localAsset: {
-              type: 'File',
-              extensions: { link: { from: `fields.localAsset` } }
-            }
-          } : {}),
-        },
-        interfaces: ['Node'],
-        extensions: { infer: true, },
-      }),
-    ]);
+    const contentTypeSchema = {
+      name: `${typePrefix}ContentTypes`,
+      fields: {
+        title: 'String!', uid: 'String!', created_at: 'Date',
+        updated_at: 'Date', schema: 'JSON!', description: 'String',
+      },
+      interfaces: ['Node'],
+      extensions: { infer: false },
+    };
+    const assetTypeSchema = {
+      name: `${typePrefix}_assets`,
+      fields: {
+        url: 'String',
+        ...(configOptions.downloadImages ? {
+          localAsset: {
+            type: 'File',
+            extensions: { link: { from: `fields.localAsset` } }
+          }
+        } : {}),
+      },
+      interfaces: ['Node'],
+      extensions: { infer: true, },
+    };
+
+    // Checks if gatsby-plugin-image is installed.
+    try {
+      const { getGatsbyImageFieldConfig } = await import('gatsby-plugin-image/graphql-utils');
+      assetTypeSchema.fields.gatsbyImageData = getGatsbyImageFieldConfig(
+        async (image, options) => resolveGatsbyImageData({ image, options, cache, reporter }), {
+        fit: { type: GraphQLString, },
+        crop: { type: GraphQLString, },
+        trim: { type: GraphQLString, },
+        pad: { type: GraphQLString, },
+        quality: { type: GraphQLInt, defaultValue: 50, },
+      });
+    } catch (error) {
+      if (error.code === 'MODULE_NOT_FOUND') {
+        reporter.info(`Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.`);
+      }
+    }
+
+    createTypes([schema.buildObjectType(contentTypeSchema), schema.buildObjectType(assetTypeSchema)]);
 
     contentTypes && contentTypes.forEach(contentType => {
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
