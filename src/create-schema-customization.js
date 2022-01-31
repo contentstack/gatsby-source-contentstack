@@ -30,8 +30,16 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
     const contentTypeSchema = {
       name: `${typePrefix}ContentTypes`,
       fields: {
-        title: 'String!', uid: 'String!', created_at: 'Date',
-        updated_at: 'Date', schema: 'JSON!', description: 'String',
+        title: 'String!', uid: 'String!',
+        created_at: {
+          type: 'Date',
+          extensions: { dateformat: {}, },
+        },
+        updated_at: {
+          type: 'Date',
+          extensions: {  dateformat: {} },
+        },
+        schema: 'JSON!', description: 'String',
       },
       interfaces: ['Node'],
       extensions: { infer: false },
