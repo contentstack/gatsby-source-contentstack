@@ -282,15 +282,16 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
       case 'isodate':
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid] = '[Date]!';
+            fields[field.uid] = { type: '[Date]!' };
           } else {
-            fields[field.uid] = 'Date!';
+            fields[field.uid] = { type: 'Date!' };
           }
         } else if (field.multiple) {
-          fields[field.uid] = '[Date]';
+          fields[field.uid] = { type: '[Date]' };
         } else {
-          fields[field.uid] = 'Date';
+          fields[field.uid] = { type: 'Date' };
         }
+        fields[field.uid].extensions = { dateformat: {} };
         break;
       case 'boolean':
         if (field.mandatory && !disableMandatoryFields) {
@@ -352,8 +353,6 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
         }
         break;
       case 'file':
-        const type = `type ${prefix}_assets implements Node @infer { url: String localAsset: File @link(from: "fields.localAsset") }`;
-        types.push(type);
         fileFields.push({ parent, field });
         
         if (field.mandatory && !disableMandatoryFields) {
