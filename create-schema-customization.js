@@ -82,8 +82,18 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               fields: {
                 title: 'String!',
                 uid: 'String!',
-                created_at: 'Date',
-                updated_at: 'Date',
+                created_at: {
+                  type: 'Date',
+                  extensions: {
+                    dateformat: {}
+                  }
+                },
+                updated_at: {
+                  type: 'Date',
+                  extensions: {
+                    dateformat: {}
+                  }
+                },
                 schema: 'JSON!',
                 description: 'String'
               },
