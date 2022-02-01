@@ -175,9 +175,9 @@ To use this, you need to have the following plugins installed:
 }
 ```
 
-Note: By default, 20 images can be downloaded concurrently. However, if you want to download more you can set GATSBY_CONCURRENT_DOWNLOAD=100.
+Note: By default, 20 images can be downloaded concurrently. However, if you want to download more you can set `GATSBY_CONCURRENT_DOWNLOAD=100`.
 
-For ex:- GATSBY_CONCURRENT_DOWNLOAD=100 gatsby develop
+For ex:- `GATSBY_CONCURRENT_DOWNLOAD=100 gatsby develop`
 
 Remember that gatbsy-image doesn’t support GIF and SVG images.
 
@@ -194,6 +194,9 @@ To use this, you need to have the following plugins installed:
 - gatsby-plugin-image
 - gatsby-plugin-sharp
 - gatsby-transformer-sharp
+
+
+`npm install --save gatsby-plugin-image gatsby-plugin-sharp gatsby-transformer-sharp`
 
 # Description
 
