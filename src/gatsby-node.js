@@ -1,6 +1,5 @@
 'use strict';
 
-const { setFieldsOnGraphQLNodeType } = require('./extend-node-type');
 const { sourceNodes } = require('./source-node');
 const { onPreBootstrap } = require('./pre-bootstrap');
 const { pluginOptionsSchema } = require('./plugin-options-schema');
@@ -13,8 +12,6 @@ exports.onPreBootstrap = onPreBootstrap;
 exports.createSchemaCustomization = createSchemaCustomization;
 
 exports.sourceNodes = sourceNodes;
-
-exports.setFieldsOnGraphQLNodeType = setFieldsOnGraphQLNodeType;
 
 exports.createResolvers = createResolvers;
 
