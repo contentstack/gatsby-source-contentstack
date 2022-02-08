@@ -7,7 +7,7 @@ const fetch = require('node-fetch');
 const { version } = require('./package.json');
 const { FetchDefaultContentTypes, FetchSpecifiedContentTypes, FetchUnspecifiedContentTypes } = require('./contenttype-data');
 const { FetchDefaultEntries, FetchSpecifiedContentTypesEntries, FetchSpecifiedLocalesEntries, FetchSpecifiedLocalesAndContentTypesEntries } = require('./entry-data');
-const { CODES } = require('./utils');
+const { CODES, LAST_CONTENT_TYPE_FETCH_TIME, DEFAULT_CONTENT_TYPE_FETCH_TIME } = require('./utils');
 
 const OPTION_CLASS_MAPPING = {
   '': FetchDefaultContentTypes,
@@ -33,12 +33,25 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
 
   try {
     let syncData = {};
-    const entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
+    const typePrefix = configOptions.type_prefix || 'Contentstack';
+    const lastFetchTimeKey = `${typePrefix}_${configOptions.api_key}_${LAST_CONTENT_TYPE_FETCH_TIME}`;
+    const contentTypeFetchTimeQuery = getLastContentTypeFetchTime(lastFetchTimeKey, cache);
+    // Cache the current time from when the changes in content-types changed will be detected.
+    let currentTime = new Date();
+    currentTime = currentTime.toISOString();
+    const query = {
+      include_global_field_schema: true,
+      query: { ...contentTypeFetchTimeQuery },
+    };
+
+    const entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption](query);
     const _syncData = await entryService.fetchSyncData(configOptions, cache, fetchSyncData);
     syncData.data = _syncData.data;
     const contentstackData = { syncData: syncData.data };
   
     console.timeEnd('Fetch Contentstack data');
+    // Set last fetch time here.
+    await cache.set(lastFetchTimeKey, currentTime);
   
     return { contentstackData };
   } catch (error) {
@@ -50,6 +63,16 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
   }
 };
 
+const getLastContentTypeFetchTime = async (lastFetchTimeKey, cache) => {
+  const lastFetch = await cache.get(lastFetchTimeKey);
+  const fetchTimeQuery = {};
+  if (lastFetch) {
+    fetchTimeQuery.updated_at = lastFetch;
+  } else {
+    fetchTimeQuery.created_at = DEFAULT_CONTENT_TYPE_FETCH_TIME;
+  }
+  return fetchTimeQuery;
+};
 
 exports.fetchContentTypes = async (config, contentTypeOption) => {
   try {

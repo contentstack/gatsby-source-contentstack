@@ -55,23 +55,27 @@ var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
 
   var _super = _createSuper(FetchDefaultContentTypes);
 
-  function FetchDefaultContentTypes() {
+  function FetchDefaultContentTypes(query) {
+    var _this;
+
     (0, _classCallCheck2["default"])(this, FetchDefaultContentTypes);
-    return _super.apply(this, arguments);
+    _this.query = query;
+    return (0, _possibleConstructorReturn2["default"])(_this);
   }
 
   (0, _createClass2["default"])(FetchDefaultContentTypes, [{
     key: "getPagedData",
     value: function () {
       var _getPagedData2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(url, config, responseKey, fn) {
-        var query, result;
+        var result;
         return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                query = {
-                  include_global_field_schema: true
-                };
+                // const query = {
+                //   include_global_field_schema: true
+                // };
+                this.query.query = JSON.stringify(this.query.query);
                 _context2.next = 3;
                 return fn.apply(null, [url, config, responseKey, query]);
 
@@ -84,7 +88,7 @@ var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
                 return _context2.stop();
             }
           }
-        }, _callee2);
+        }, _callee2, this);
       }));
 
       function getPagedData(_x, _x2, _x3, _x4) {
@@ -102,39 +106,44 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
 
   var _super2 = _createSuper(FetchSpecifiedContentTypes);
 
-  function FetchSpecifiedContentTypes() {
+  function FetchSpecifiedContentTypes(query) {
+    var _this2;
+
     (0, _classCallCheck2["default"])(this, FetchSpecifiedContentTypes);
-    return _super2.apply(this, arguments);
+    _this2.query = query;
+    return (0, _possibleConstructorReturn2["default"])(_this2);
   }
 
   (0, _createClass2["default"])(FetchSpecifiedContentTypes, [{
     key: "getPagedData",
     value: function () {
       var _getPagedData3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(url, config, responseKey, fn) {
-        var query, contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
+        var contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
         return _regenerator["default"].wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                query = {
-                  query: JSON.stringify({
-                    uid: {
-                      $in: config.contentTypes
-                    }
-                  }),
-                  include_global_field_schema: true
+                this.query.query.uid = {
+                  $in: config.contentTypes
                 };
-                _context3.next = 3;
+                this.query.query = JSON.stringify(this.query.query); // const query = {
+                //   query: JSON.stringify({
+                //     uid: { $in: config.contentTypes }
+                //   }),
+                //   include_global_field_schema: true
+                // };
+
+                _context3.next = 4;
                 return fn.apply(null, [url, config, responseKey, query]);
 
-              case 3:
+              case 4:
                 contentTypes = _context3.sent;
                 referredContentTypes = new ReferredContentTypes();
                 referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes);
                 referredContentTypesData = [];
 
                 if (!referredContentTypesList.length) {
-                  _context3.next = 12;
+                  _context3.next = 13;
                   break;
                 }
 
@@ -143,22 +152,22 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
                     $in: referredContentTypesList
                   }
                 });
-                _context3.next = 11;
+                _context3.next = 12;
                 return fn.apply(null, [url, config, responseKey, query]);
 
-              case 11:
+              case 12:
                 referredContentTypesData = _context3.sent;
 
-              case 12:
+              case 13:
                 result = contentTypes.concat(referredContentTypesData);
                 return _context3.abrupt("return", result);
 
-              case 14:
+              case 15:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3);
+        }, _callee3, this);
       }));
 
       function getPagedData(_x5, _x6, _x7, _x8) {
@@ -176,39 +185,44 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
 
   var _super3 = _createSuper(FetchUnspecifiedContentTypes);
 
-  function FetchUnspecifiedContentTypes() {
+  function FetchUnspecifiedContentTypes(query) {
+    var _this3;
+
     (0, _classCallCheck2["default"])(this, FetchUnspecifiedContentTypes);
-    return _super3.apply(this, arguments);
+    _this3.query = query;
+    return (0, _possibleConstructorReturn2["default"])(_this3);
   }
 
   (0, _createClass2["default"])(FetchUnspecifiedContentTypes, [{
     key: "getPagedData",
     value: function () {
       var _getPagedData4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(url, config, responseKey, fn) {
-        var query, contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
+        var contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
         return _regenerator["default"].wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                query = {
-                  query: JSON.stringify({
-                    uid: {
-                      $nin: config.excludeContentTypes
-                    }
-                  }),
-                  include_global_field_schema: true
+                this.query.query.uid = {
+                  $nin: config.excludeContentTypes
                 };
-                _context4.next = 3;
+                this.query.query = JSON.stringify(this.query.query); // const query = {
+                //   query: JSON.stringify({
+                //     uid: { $nin: config.excludeContentTypes }
+                //   }),
+                //   include_global_field_schema: true
+                // };
+
+                _context4.next = 4;
                 return fn.apply(null, [url, config, responseKey, query]);
 
-              case 3:
+              case 4:
                 contentTypes = _context4.sent;
                 referredContentTypes = new ReferredContentTypes();
                 referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes);
                 referredContentTypesData = [];
 
                 if (!referredContentTypesList.length) {
-                  _context4.next = 12;
+                  _context4.next = 13;
                   break;
                 }
 
@@ -217,22 +231,22 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
                     $in: referredContentTypesList
                   }
                 });
-                _context4.next = 11;
+                _context4.next = 12;
                 return fn.apply(null, [url, config, responseKey, query]);
 
-              case 11:
+              case 12:
                 referredContentTypesData = _context4.sent;
 
-              case 12:
+              case 13:
                 result = contentTypes.concat(referredContentTypesData);
                 return _context4.abrupt("return", result);
 
-              case 14:
+              case 15:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4);
+        }, _callee4, this);
       }));
 
       function getPagedData(_x9, _x10, _x11, _x12) {

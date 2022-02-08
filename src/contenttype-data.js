@@ -5,23 +5,34 @@ class FetchContentTypes {
 }
 
 class FetchDefaultContentTypes extends FetchContentTypes {
+  constructor(query) {
+    this.query = query;
+  }
+
   async getPagedData(url, config, responseKey, fn) {
-    const query = {
-      include_global_field_schema: true
-    };
+    // const query = {
+    //   include_global_field_schema: true
+    // };
+    this.query.query = JSON.stringify(this.query.query);
     const result = await fn.apply(null, [url, config, responseKey, query]);
     return result;
   }
 }
 
 class FetchSpecifiedContentTypes extends FetchContentTypes {
+  constructor(query) {
+    this.query = query;
+  }
+
   async getPagedData(url, config, responseKey, fn) {
-    const query = {
-      query: JSON.stringify({
-        uid: { $in: config.contentTypes }
-      }),
-      include_global_field_schema: true
-    };
+    this.query.query.uid = { $in: config.contentTypes };
+    this.query.query = JSON.stringify(this.query.query);
+    // const query = {
+    //   query: JSON.stringify({
+    //     uid: { $in: config.contentTypes }
+    //   }),
+    //   include_global_field_schema: true
+    // };
     const contentTypes = await fn.apply(null, [url, config, responseKey, query]);
 
     const referredContentTypes = new ReferredContentTypes();
@@ -39,13 +50,19 @@ class FetchSpecifiedContentTypes extends FetchContentTypes {
 }
 
 class FetchUnspecifiedContentTypes extends FetchContentTypes {
+  constructor(query) {
+    this.query = query;
+  }
+
   async getPagedData(url, config, responseKey, fn) {
-    const query = {
-      query: JSON.stringify({
-        uid: { $nin: config.excludeContentTypes }
-      }),
-      include_global_field_schema: true
-    };
+    this.query.query.uid = { $nin: config.excludeContentTypes };
+    this.query.query = JSON.stringify(this.query.query);
+    // const query = {
+    //   query: JSON.stringify({
+    //     uid: { $nin: config.excludeContentTypes }
+    //   }),
+    //   include_global_field_schema: true
+    // };
     const contentTypes = await fn.apply(null, [url, config, responseKey, query]);
 
     const referredContentTypes = new ReferredContentTypes();
