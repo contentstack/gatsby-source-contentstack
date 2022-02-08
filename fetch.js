@@ -68,8 +68,12 @@ exports.fetchData = /*#__PURE__*/function () {
             syncData = {};
             typePrefix = configOptions.type_prefix || 'Contentstack';
             lastFetchTimeKey = "".concat(typePrefix, "_").concat(configOptions.api_key, "_").concat(LAST_CONTENT_TYPE_FETCH_TIME);
-            contentTypeFetchTimeQuery = getLastContentTypeFetchTime(lastFetchTimeKey, cache); // Cache the current time from when the changes in content-types changed will be detected.
+            _context.next = 8;
+            return getLastContentTypeFetchTime(lastFetchTimeKey, cache);
 
+          case 8:
+            contentTypeFetchTimeQuery = _context.sent;
+            // Cache the current time from when the changes in content-types changed will be detected.
             currentTime = new Date();
             currentTime = currentTime.toISOString();
             query = {
@@ -77,10 +81,10 @@ exports.fetchData = /*#__PURE__*/function () {
               query: _objectSpread({}, contentTypeFetchTimeQuery)
             };
             entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption](query);
-            _context.next = 13;
+            _context.next = 15;
             return entryService.fetchSyncData(configOptions, cache, fetchSyncData);
 
-          case 13:
+          case 15:
             _syncData = _context.sent;
             syncData.data = _syncData.data;
             contentstackData = {
@@ -88,16 +92,16 @@ exports.fetchData = /*#__PURE__*/function () {
             };
             console.timeEnd('Fetch Contentstack data'); // Set last fetch time here.
 
-            _context.next = 19;
+            _context.next = 21;
             return cache.set(lastFetchTimeKey, currentTime);
 
-          case 19:
+          case 21:
             return _context.abrupt("return", {
               contentstackData: contentstackData
             });
 
-          case 22:
-            _context.prev = 22;
+          case 24:
+            _context.prev = 24;
             _context.t0 = _context["catch"](2);
             reporter.panic({
               id: CODES.SyncError,
@@ -107,12 +111,12 @@ exports.fetchData = /*#__PURE__*/function () {
               error: _context.t0
             });
 
-          case 25:
+          case 27:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 22]]);
+    }, _callee, null, [[2, 24]]);
   }));
 
   return function (_x, _x2, _x3, _x4) {

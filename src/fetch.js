@@ -35,7 +35,7 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
     let syncData = {};
     const typePrefix = configOptions.type_prefix || 'Contentstack';
     const lastFetchTimeKey = `${typePrefix}_${configOptions.api_key}_${LAST_CONTENT_TYPE_FETCH_TIME}`;
-    const contentTypeFetchTimeQuery = getLastContentTypeFetchTime(lastFetchTimeKey, cache);
+    const contentTypeFetchTimeQuery = await getLastContentTypeFetchTime(lastFetchTimeKey, cache);
     // Cache the current time from when the changes in content-types changed will be detected.
     let currentTime = new Date();
     currentTime = currentTime.toISOString();

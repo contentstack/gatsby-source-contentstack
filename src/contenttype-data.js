@@ -1,11 +1,13 @@
 'use strict';
 
 class FetchContentTypes {
+  query;
   async getPagedData() { }
 }
 
 class FetchDefaultContentTypes extends FetchContentTypes {
   constructor(query) {
+    super();
     this.query = query;
   }
 
@@ -21,6 +23,7 @@ class FetchDefaultContentTypes extends FetchContentTypes {
 
 class FetchSpecifiedContentTypes extends FetchContentTypes {
   constructor(query) {
+    super();
     this.query = query;
   }
 
@@ -51,6 +54,7 @@ class FetchSpecifiedContentTypes extends FetchContentTypes {
 
 class FetchUnspecifiedContentTypes extends FetchContentTypes {
   constructor(query) {
+    super();
     this.query = query;
   }
 

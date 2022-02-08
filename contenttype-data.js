@@ -16,6 +16,8 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -23,6 +25,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 var FetchContentTypes = /*#__PURE__*/function () {
   function FetchContentTypes() {
     (0, _classCallCheck2["default"])(this, FetchContentTypes);
+    (0, _defineProperty2["default"])(this, "query", void 0);
   }
 
   (0, _createClass2["default"])(FetchContentTypes, [{
@@ -59,8 +62,9 @@ var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, FetchDefaultContentTypes);
+    _this = _super.call(this);
     _this.query = query;
-    return (0, _possibleConstructorReturn2["default"])(_this);
+    return _this;
   }
 
   (0, _createClass2["default"])(FetchDefaultContentTypes, [{
@@ -110,8 +114,9 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
     var _this2;
 
     (0, _classCallCheck2["default"])(this, FetchSpecifiedContentTypes);
+    _this2 = _super2.call(this);
     _this2.query = query;
-    return (0, _possibleConstructorReturn2["default"])(_this2);
+    return _this2;
   }
 
   (0, _createClass2["default"])(FetchSpecifiedContentTypes, [{
@@ -189,8 +194,9 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
     var _this3;
 
     (0, _classCallCheck2["default"])(this, FetchUnspecifiedContentTypes);
+    _this3 = _super3.call(this);
     _this3.query = query;
-    return (0, _possibleConstructorReturn2["default"])(_this3);
+    return _this3;
   }
 
   (0, _createClass2["default"])(FetchUnspecifiedContentTypes, [{
