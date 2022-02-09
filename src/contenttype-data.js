@@ -1,36 +1,46 @@
 'use strict';
 
 class FetchContentTypes {
+  query;
+  constructor(query) {
+    this.query = query;
+  }
   async getPagedData() { }
 }
 
 class FetchDefaultContentTypes extends FetchContentTypes {
+  constructor(query) {
+    super(query);
+    this.query = query;
+  }
+
   async getPagedData(url, config, responseKey, fn) {
-    const query = {
-      include_global_field_schema: true
-    };
-    const result = await fn.apply(null, [url, config, responseKey, query]);
+    this.query.query = JSON.stringify(this.query.query);
+    const result = await fn.apply(null, [url, config, responseKey, this.query]);
     return result;
   }
 }
 
 class FetchSpecifiedContentTypes extends FetchContentTypes {
+  constructor(query) {
+    super(query);
+    // We don't want to restrict the specified content-types download by last fetch time, as it can ignore updates from referred content-types.
+    delete query.query;
+    this.query = query;
+  }
+
   async getPagedData(url, config, responseKey, fn) {
-    const query = {
-      query: JSON.stringify({
-        uid: { $in: config.contentTypes }
-      }),
-      include_global_field_schema: true
-    };
-    const contentTypes = await fn.apply(null, [url, config, responseKey, query]);
+    this.query.query.uid = { $in: config.contentTypes };
+    this.query.query = JSON.stringify(this.query.query);
+    const contentTypes = await fn.apply(null, [url, config, responseKey, this.query]);
 
     const referredContentTypes = new ReferredContentTypes();
     const referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes); 
 
     let referredContentTypesData = [];
     if (referredContentTypesList.length) {
-      query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
-      referredContentTypesData = await fn.apply(null, [url, config, responseKey, query]);
+      this.query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
+      referredContentTypesData = await fn.apply(null, [url, config, responseKey, this.query]);
     }
 
     const result = contentTypes.concat(referredContentTypesData);
@@ -39,22 +49,25 @@ class FetchSpecifiedContentTypes extends FetchContentTypes {
 }
 
 class FetchUnspecifiedContentTypes extends FetchContentTypes {
+  constructor(query) {
+    super(query);
+    // We don't want to restrict the specified content-types download by last fetch time, as it can ignore updates from referred content-types.
+    delete query.query;
+    this.query = query;
+  }
+
   async getPagedData(url, config, responseKey, fn) {
-    const query = {
-      query: JSON.stringify({
-        uid: { $nin: config.excludeContentTypes }
-      }),
-      include_global_field_schema: true
-    };
-    const contentTypes = await fn.apply(null, [url, config, responseKey, query]);
+    this.query.query.uid = { $nin: config.excludeContentTypes };
+    this.query.query = JSON.stringify(this.query.query);
+    const contentTypes = await fn.apply(null, [url, config, responseKey, this.query]);
 
     const referredContentTypes = new ReferredContentTypes();
     const referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes); 
 
     let referredContentTypesData = [];
     if (referredContentTypesList.length) {
-      query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
-      referredContentTypesData = await fn.apply(null, [url, config, responseKey, query]);
+      this.query.query = JSON.stringify({ uid: { $in: referredContentTypesList } });
+      referredContentTypesData = await fn.apply(null, [url, config, responseKey, this.query]);
     }
 
     const result = contentTypes.concat(referredContentTypesData);
