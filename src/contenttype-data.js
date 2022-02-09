@@ -10,6 +10,7 @@ class FetchContentTypes {
 
 class FetchDefaultContentTypes extends FetchContentTypes {
   constructor(query) {
+    super(query);
     this.query = query;
   }
 

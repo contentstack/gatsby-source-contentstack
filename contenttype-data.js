@@ -63,8 +63,9 @@ var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, FetchDefaultContentTypes);
+    _this = _super.call(this, query);
     _this.query = query;
-    return (0, _possibleConstructorReturn2["default"])(_this);
+    return _this;
   }
 
   (0, _createClass2["default"])(FetchDefaultContentTypes, [{
