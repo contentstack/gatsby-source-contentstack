@@ -2,9 +2,9 @@
 
 class FetchContentTypes {
   query;
-  // constructor(query) {
-  //   this.query = query;
-  // }
+  constructor(query) {
+    this.query = query;
+  }
   async getPagedData() { }
 }
 
@@ -23,6 +23,7 @@ class FetchDefaultContentTypes extends FetchContentTypes {
 class FetchSpecifiedContentTypes extends FetchContentTypes {
   constructor(query) {
     super(query);
+    // We don't want to restrict the specified content-types download by last fetch time, as it can ignore updates from referred content-types.
     delete query.query;
     this.query = query;
   }
@@ -49,6 +50,7 @@ class FetchSpecifiedContentTypes extends FetchContentTypes {
 class FetchUnspecifiedContentTypes extends FetchContentTypes {
   constructor(query) {
     super(query);
+    // We don't want to restrict the specified content-types download by last fetch time, as it can ignore updates from referred content-types.
     delete query.query;
     this.query = query;
   }

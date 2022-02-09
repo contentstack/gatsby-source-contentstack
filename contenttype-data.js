@@ -23,17 +23,15 @@ function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflec
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 var FetchContentTypes = /*#__PURE__*/function () {
-  function FetchContentTypes() {
+  function FetchContentTypes(query) {
     (0, _classCallCheck2["default"])(this, FetchContentTypes);
     (0, _defineProperty2["default"])(this, "query", void 0);
+    this.query = query;
   }
 
   (0, _createClass2["default"])(FetchContentTypes, [{
     key: "getPagedData",
-    value: // constructor(query) {
-    //   this.query = query;
-    // }
-    function () {
+    value: function () {
       var _getPagedData = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
         return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
@@ -113,7 +111,8 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
     var _this2;
 
     (0, _classCallCheck2["default"])(this, FetchSpecifiedContentTypes);
-    _this2 = _super2.call(this, query);
+    _this2 = _super2.call(this, query); // We don't want to restrict the specified content-types download by last fetch time, as it can ignore updates from referred content-types.
+
     delete query.query;
     _this2.query = query;
     return _this2;
@@ -188,7 +187,8 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
     var _this3;
 
     (0, _classCallCheck2["default"])(this, FetchUnspecifiedContentTypes);
-    _this3 = _super3.call(this, query);
+    _this3 = _super3.call(this, query); // We don't want to restrict the specified content-types download by last fetch time, as it can ignore updates from referred content-types.
+
     delete query.query;
     _this3.query = query;
     return _this3;
