@@ -63,7 +63,7 @@ var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, FetchDefaultContentTypes);
-    _this = _super.call(this);
+    _this = _super.call(this, query);
     _this.query = query;
     return _this;
   }
@@ -115,7 +115,7 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
     var _this2;
 
     (0, _classCallCheck2["default"])(this, FetchSpecifiedContentTypes);
-    _this2 = _super2.call(this);
+    _this2 = _super2.call(this, query);
     _this2.query = query;
     return _this2;
   }
@@ -195,7 +195,7 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
     var _this3;
 
     (0, _classCallCheck2["default"])(this, FetchUnspecifiedContentTypes);
-    _this3 = _super3.call(this);
+    _this3 = _super3.call(this, query);
     _this3.query = query;
     return _this3;
   }
