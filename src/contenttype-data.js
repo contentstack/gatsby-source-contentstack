@@ -9,10 +9,10 @@ class FetchContentTypes {
 }
 
 class FetchDefaultContentTypes extends FetchContentTypes {
-  constructor(query) {
-    super(query);
-    this.query = query;
-  }
+  // constructor(query) {
+  //   super(query);
+  //   this.query = query;
+  // }
 
   async getPagedData(url, config, responseKey, fn) {
     // const query = {
