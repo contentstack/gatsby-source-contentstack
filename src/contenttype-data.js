@@ -2,6 +2,9 @@
 
 class FetchContentTypes {
   query;
+  constructor(query) {
+    this.query = query;
+  }
   async getPagedData() { }
 }
 

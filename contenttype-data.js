@@ -23,9 +23,10 @@ function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflec
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 var FetchContentTypes = /*#__PURE__*/function () {
-  function FetchContentTypes() {
+  function FetchContentTypes(query) {
     (0, _classCallCheck2["default"])(this, FetchContentTypes);
     (0, _defineProperty2["default"])(this, "query", void 0);
+    this.query = query;
   }
 
   (0, _createClass2["default"])(FetchContentTypes, [{
