@@ -362,9 +362,13 @@ var getLastContentTypeFetchTime = /*#__PURE__*/function () {
             fetchTimeQuery = {};
 
             if (lastFetch) {
-              fetchTimeQuery.updated_at = lastFetch;
+              fetchTimeQuery.updated_at = {
+                $gte: lastFetch
+              };
             } else {
-              fetchTimeQuery.created_at = DEFAULT_CONTENT_TYPE_FETCH_TIME;
+              fetchTimeQuery.created_at = {
+                $gte: DEFAULT_CONTENT_TYPE_FETCH_TIME
+              };
             }
 
             return _context7.abrupt("return", fetchTimeQuery);

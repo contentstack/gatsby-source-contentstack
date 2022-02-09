@@ -158,9 +158,9 @@ const getLastContentTypeFetchTime = async (lastFetchTimeKey, cache) => {
   const lastFetch = await cache.get(lastFetchTimeKey);
   const fetchTimeQuery = {};
   if (lastFetch) {
-    fetchTimeQuery.updated_at = lastFetch;
+    fetchTimeQuery.updated_at = { $gte: lastFetch };
   } else {
-    fetchTimeQuery.created_at = DEFAULT_CONTENT_TYPE_FETCH_TIME;
+    fetchTimeQuery.created_at = { $gte: DEFAULT_CONTENT_TYPE_FETCH_TIME };
   }
   return fetchTimeQuery;
 };
