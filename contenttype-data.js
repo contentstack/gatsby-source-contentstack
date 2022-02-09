@@ -23,15 +23,17 @@ function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflec
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 var FetchContentTypes = /*#__PURE__*/function () {
-  function FetchContentTypes(query) {
+  function FetchContentTypes() {
     (0, _classCallCheck2["default"])(this, FetchContentTypes);
     (0, _defineProperty2["default"])(this, "query", void 0);
-    this.query = query;
   }
 
   (0, _createClass2["default"])(FetchContentTypes, [{
     key: "getPagedData",
-    value: function () {
+    value: // constructor(query) {
+    //   this.query = query;
+    // }
+    function () {
       var _getPagedData = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
         return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
@@ -59,30 +61,26 @@ var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
 
   var _super = _createSuper(FetchDefaultContentTypes);
 
-  function FetchDefaultContentTypes() {
+  function FetchDefaultContentTypes(query) {
+    var _this;
+
     (0, _classCallCheck2["default"])(this, FetchDefaultContentTypes);
-    return _super.apply(this, arguments);
+    _this.query = query;
+    return (0, _possibleConstructorReturn2["default"])(_this);
   }
 
   (0, _createClass2["default"])(FetchDefaultContentTypes, [{
     key: "getPagedData",
-    value: // constructor(query) {
-    //   super(query);
-    //   this.query = query;
-    // }
-    function () {
+    value: function () {
       var _getPagedData2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(url, config, responseKey, fn) {
         var result;
         return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                // const query = {
-                //   include_global_field_schema: true
-                // };
                 this.query.query = JSON.stringify(this.query.query);
                 _context2.next = 3;
-                return fn.apply(null, [url, config, responseKey, query]);
+                return fn.apply(null, [url, config, responseKey, this.query]);
 
               case 3:
                 result = _context2.sent;
@@ -112,12 +110,13 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
   var _super2 = _createSuper(FetchSpecifiedContentTypes);
 
   function FetchSpecifiedContentTypes(query) {
-    var _this;
+    var _this2;
 
     (0, _classCallCheck2["default"])(this, FetchSpecifiedContentTypes);
-    _this = _super2.call(this, query);
-    _this.query = query;
-    return _this;
+    _this2 = _super2.call(this, query);
+    delete query.query;
+    _this2.query = query;
+    return _this2;
   }
 
   (0, _createClass2["default"])(FetchSpecifiedContentTypes, [{
@@ -132,15 +131,9 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
                 this.query.query.uid = {
                   $in: config.contentTypes
                 };
-                this.query.query = JSON.stringify(this.query.query); // const query = {
-                //   query: JSON.stringify({
-                //     uid: { $in: config.contentTypes }
-                //   }),
-                //   include_global_field_schema: true
-                // };
-
+                this.query.query = JSON.stringify(this.query.query);
                 _context3.next = 4;
-                return fn.apply(null, [url, config, responseKey, query]);
+                return fn.apply(null, [url, config, responseKey, this.query]);
 
               case 4:
                 contentTypes = _context3.sent;
@@ -153,13 +146,13 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
                   break;
                 }
 
-                query.query = JSON.stringify({
+                this.query.query = JSON.stringify({
                   uid: {
                     $in: referredContentTypesList
                   }
                 });
                 _context3.next = 12;
-                return fn.apply(null, [url, config, responseKey, query]);
+                return fn.apply(null, [url, config, responseKey, this.query]);
 
               case 12:
                 referredContentTypesData = _context3.sent;
@@ -192,12 +185,13 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
   var _super3 = _createSuper(FetchUnspecifiedContentTypes);
 
   function FetchUnspecifiedContentTypes(query) {
-    var _this2;
+    var _this3;
 
     (0, _classCallCheck2["default"])(this, FetchUnspecifiedContentTypes);
-    _this2 = _super3.call(this, query);
-    _this2.query = query;
-    return _this2;
+    _this3 = _super3.call(this, query);
+    delete query.query;
+    _this3.query = query;
+    return _this3;
   }
 
   (0, _createClass2["default"])(FetchUnspecifiedContentTypes, [{
@@ -212,15 +206,9 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
                 this.query.query.uid = {
                   $nin: config.excludeContentTypes
                 };
-                this.query.query = JSON.stringify(this.query.query); // const query = {
-                //   query: JSON.stringify({
-                //     uid: { $nin: config.excludeContentTypes }
-                //   }),
-                //   include_global_field_schema: true
-                // };
-
+                this.query.query = JSON.stringify(this.query.query);
                 _context4.next = 4;
-                return fn.apply(null, [url, config, responseKey, query]);
+                return fn.apply(null, [url, config, responseKey, this.query]);
 
               case 4:
                 contentTypes = _context4.sent;
@@ -233,13 +221,13 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
                   break;
                 }
 
-                query.query = JSON.stringify({
+                this.query.query = JSON.stringify({
                   uid: {
                     $in: referredContentTypesList
                   }
                 });
                 _context4.next = 12;
-                return fn.apply(null, [url, config, responseKey, query]);
+                return fn.apply(null, [url, config, responseKey, this.query]);
 
               case 12:
                 referredContentTypesData = _context4.sent;
