@@ -7,7 +7,7 @@ const fetch = require('node-fetch');
 const { version } = require('./package.json');
 const { FetchDefaultContentTypes, FetchSpecifiedContentTypes, FetchUnspecifiedContentTypes } = require('./contenttype-data');
 const { FetchDefaultEntries, FetchSpecifiedContentTypesEntries, FetchSpecifiedLocalesEntries, FetchSpecifiedLocalesAndContentTypesEntries } = require('./entry-data');
-const { CODES } = require('./utils');
+const { CODES, LAST_CONTENT_TYPE_FETCH_TIME, DEFAULT_CONTENT_TYPE_FETCH_TIME } = require('./utils');
 
 const OPTION_CLASS_MAPPING = {
   '': FetchDefaultContentTypes,
@@ -50,15 +50,29 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
   }
 };
 
-
-exports.fetchContentTypes = async (config, contentTypeOption) => {
+exports.fetchContentTypes = async (config, contentTypeOption, cache) => {
   try {
     config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
 
+    const typePrefix = config.type_prefix || 'Contentstack';
+    const lastFetchTimeKey = `${typePrefix}_${config.api_key}_${LAST_CONTENT_TYPE_FETCH_TIME}`;
+    const contentTypeFetchTimeQuery = await getLastContentTypeFetchTime(lastFetchTimeKey, cache);
+
+    let currentTime = new Date();
+    currentTime = currentTime.toISOString();
+    const query = {
+      include_global_field_schema: true,
+      query: { ...contentTypeFetchTimeQuery },
+    };
+
     const url = 'content_types';
     const responseKey = 'content_types';
-    const contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
+    const contentType = new OPTION_CLASS_MAPPING[contentTypeOption](query);
     const allContentTypes = await contentType.getPagedData(url, config, responseKey, getPagedData);
+
+    // Set last fetch time here.
+    await cache.set(lastFetchTimeKey, currentTime);
+
     return allContentTypes;
   } catch (error) {
     reporter.panic({
@@ -138,4 +152,15 @@ const getSyncData = async (url, config, query, responseKey, aggregatedResponse =
     return getSyncData(url, config, query = { pagination_token: response.pagination_token }, responseKey, aggregatedResponse);
   }
   return aggregatedResponse;
+};
+
+const getLastContentTypeFetchTime = async (lastFetchTimeKey, cache) => {
+  const lastFetch = await cache.get(lastFetchTimeKey);
+  const fetchTimeQuery = {};
+  if (lastFetch) {
+    fetchTimeQuery.updated_at = { $gte: lastFetch };
+  } else {
+    fetchTimeQuery.created_at = { $gte: DEFAULT_CONTENT_TYPE_FETCH_TIME };
+  }
+  return fetchTimeQuery;
 };

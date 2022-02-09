@@ -5,7 +5,13 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 var queryString = require('query-string');
 
@@ -27,7 +33,9 @@ var _require3 = require('./entry-data'),
     FetchSpecifiedLocalesAndContentTypesEntries = _require3.FetchSpecifiedLocalesAndContentTypesEntries;
 
 var _require4 = require('./utils'),
-    CODES = _require4.CODES;
+    CODES = _require4.CODES,
+    LAST_CONTENT_TYPE_FETCH_TIME = _require4.LAST_CONTENT_TYPE_FETCH_TIME,
+    DEFAULT_CONTENT_TYPE_FETCH_TIME = _require4.DEFAULT_CONTENT_TYPE_FETCH_TIME;
 
 var OPTION_CLASS_MAPPING = {
   '': FetchDefaultContentTypes,
@@ -98,26 +106,43 @@ exports.fetchData = /*#__PURE__*/function () {
 }();
 
 exports.fetchContentTypes = /*#__PURE__*/function () {
-  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(config, contentTypeOption) {
-    var url, responseKey, contentType, allContentTypes;
+  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(config, contentTypeOption, cache) {
+    var typePrefix, lastFetchTimeKey, contentTypeFetchTimeQuery, currentTime, query, url, responseKey, contentType, allContentTypes;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             _context2.prev = 0;
             config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
+            typePrefix = config.type_prefix || 'Contentstack';
+            lastFetchTimeKey = "".concat(typePrefix, "_").concat(config.api_key, "_").concat(LAST_CONTENT_TYPE_FETCH_TIME);
+            _context2.next = 6;
+            return getLastContentTypeFetchTime(lastFetchTimeKey, cache);
+
+          case 6:
+            contentTypeFetchTimeQuery = _context2.sent;
+            currentTime = new Date();
+            currentTime = currentTime.toISOString();
+            query = {
+              include_global_field_schema: true,
+              query: _objectSpread({}, contentTypeFetchTimeQuery)
+            };
             url = 'content_types';
             responseKey = 'content_types';
-            contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
-            _context2.next = 7;
+            contentType = new OPTION_CLASS_MAPPING[contentTypeOption](query);
+            _context2.next = 15;
             return contentType.getPagedData(url, config, responseKey, getPagedData);
 
-          case 7:
+          case 15:
             allContentTypes = _context2.sent;
+            _context2.next = 18;
+            return cache.set(lastFetchTimeKey, currentTime);
+
+          case 18:
             return _context2.abrupt("return", allContentTypes);
 
-          case 11:
-            _context2.prev = 11;
+          case 21:
+            _context2.prev = 21;
             _context2.t0 = _context2["catch"](0);
             reporter.panic({
               id: CODES.SyncError,
@@ -127,15 +152,15 @@ exports.fetchContentTypes = /*#__PURE__*/function () {
               error: _context2.t0
             });
 
-          case 14:
+          case 24:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[0, 11]]);
+    }, _callee2, null, [[0, 21]]);
   }));
 
-  return function (_x5, _x6) {
+  return function (_x5, _x6, _x7) {
     return _ref2.apply(this, arguments);
   };
 }();
@@ -163,7 +188,7 @@ var fetchSyncData = /*#__PURE__*/function () {
     }, _callee3);
   }));
 
-  return function fetchSyncData(_x7, _x8) {
+  return function fetchSyncData(_x8, _x9) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -211,7 +236,7 @@ var fetchCsData = /*#__PURE__*/function () {
     }, _callee4);
   }));
 
-  return function fetchCsData(_x9, _x10, _x11) {
+  return function fetchCsData(_x10, _x11, _x12) {
     return _ref4.apply(this, arguments);
   };
 }();
@@ -265,7 +290,7 @@ var getPagedData = /*#__PURE__*/function () {
     }, _callee5);
   }));
 
-  return function getPagedData(_x12, _x13, _x14) {
+  return function getPagedData(_x13, _x14, _x15) {
     return _ref5.apply(this, arguments);
   };
 }();
@@ -317,7 +342,46 @@ var getSyncData = /*#__PURE__*/function () {
     }, _callee6);
   }));
 
-  return function getSyncData(_x15, _x16, _x17, _x18) {
+  return function getSyncData(_x16, _x17, _x18, _x19) {
     return _ref6.apply(this, arguments);
+  };
+}();
+
+var getLastContentTypeFetchTime = /*#__PURE__*/function () {
+  var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(lastFetchTimeKey, cache) {
+    var lastFetch, fetchTimeQuery;
+    return _regenerator["default"].wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            _context7.next = 2;
+            return cache.get(lastFetchTimeKey);
+
+          case 2:
+            lastFetch = _context7.sent;
+            fetchTimeQuery = {};
+
+            if (lastFetch) {
+              fetchTimeQuery.updated_at = {
+                $gte: lastFetch
+              };
+            } else {
+              fetchTimeQuery.created_at = {
+                $gte: DEFAULT_CONTENT_TYPE_FETCH_TIME
+              };
+            }
+
+            return _context7.abrupt("return", fetchTimeQuery);
+
+          case 6:
+          case "end":
+            return _context7.stop();
+        }
+      }
+    }, _callee7);
+  }));
+
+  return function getLastContentTypeFetchTime(_x20, _x21) {
+    return _ref7.apply(this, arguments);
   };
 }();
