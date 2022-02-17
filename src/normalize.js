@@ -156,11 +156,11 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
     let value = getSchemaValue(entry, field);
     switch (field.data_type) {
       case 'reference':
-        entryObj[field.uid] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
+        entryObj[`${field.uid}___NODE`] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
       case 'file':
         if (!value) value = null;
-        entryObj[field.uid] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[`${field.uid}___NODE`] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
       case 'group':
       case 'global_field':
