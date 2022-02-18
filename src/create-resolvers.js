@@ -16,10 +16,10 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
       ... {
         [fileField.field.uid]: {
           resolve(source, args, context) {
-            if (fileField.field.multiple && source[fileField.field.uid]) {
+            if (fileField.field.multiple && source[`${fileField.field.uid}___NODE`]) {
               const nodesData = [];
 
-              source[fileField.field.uid].forEach(id => {
+              source[`${fileField.field.uid}___NODE`].forEach(id => {
                 const existingNode = context.nodeModel.getNodeById({ id });
 
                 if (existingNode) {
@@ -29,7 +29,7 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
 
               return nodesData;
             } else {
-              const id = source[fileField.field.uid];
+              const id = source[`${fileField.field.uid}___NODE`];
               return context.nodeModel.getNodeById({ id });
             }
           },
@@ -42,10 +42,10 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
       ...resolvers[reference.parent],
       [reference.uid]: {
         resolve(source, args, context) {
-          if (source[reference.uid]) {
+          if (source[`${reference.uid}___NODE`]) {
             const nodesData = [];
 
-            source[reference.uid].forEach(id => {
+            source[`${reference.uid}___NODE`].forEach(id => {
               const existingNode = context.nodeModel.getNodeById({ id });
 
               if (existingNode) {
