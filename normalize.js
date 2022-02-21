@@ -179,12 +179,12 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 
     switch (field.data_type) {
       case 'reference':
-        entryObj[field.uid] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
+        entryObj["".concat(field.uid, "___NODE")] = value && normalizeReferenceField(value, locale, entriesNodeIds, createNodeId, typePrefix);
         break;
 
       case 'file':
         if (!value) value = null;
-        entryObj[field.uid] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
+        entryObj["".concat(field.uid, "___NODE")] = value && normalizeFileField(value, locale, assetsNodeIds, createNodeId, typePrefix);
         break;
 
       case 'group':
