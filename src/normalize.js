@@ -138,6 +138,9 @@ const normalizeFileField = (value, locale, assetsNodeIds, createNodeId, typePref
     });
   } else if (assetsNodeIds.has(createNodeId(`${typePrefix.toLowerCase()}-assets-${value}-${locale}`))) {
     reference = createNodeId(`${typePrefix.toLowerCase()}-assets-${value}-${locale}`);
+  } else {
+    // when the asset is not published
+    reference = null;
   }
   return reference;
 };
