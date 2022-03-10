@@ -1,3 +1,7 @@
+'use strict';
+
+const Contentstack = require('@contentstack/utils');
+
 exports.processContentType = (contentType, createNodeId, createContentDigest, typePrefix) => {
   const nodeId = createNodeId(`${typePrefix.toLowerCase()}-contentType-${contentType.uid}`);
   const type = `${typePrefix}ContentTypes`;
@@ -51,10 +55,10 @@ exports.processEntry = (contentType, entry, createNodeId, createContentDigest, t
   return nodeData;
 };
 
-exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
+exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) => {
   const resolveEntry = {
     ...entry,
-    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix),
+    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions),
   };
   return resolveEntry;
 };
@@ -75,7 +79,7 @@ const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, cre
     groupObj = [];
     if (value instanceof Array) {
       value.forEach(groupValue => {
-        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
       });
     } else {
       // In some cases value is null, this makes graphql treat all the objects as null
@@ -83,11 +87,11 @@ const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, cre
       // This also helps to handle when a user changes a group to multiple after initially
       // setting a group to single.. the server passes an object and the previous condition
       // again makes groupObj null
-      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
     }
   } else {
     groupObj = {};
-    groupObj = builtEntry( field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+    groupObj = builtEntry( field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
   }
   return groupObj;
 };
@@ -103,7 +107,7 @@ const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNode
           return;
         }
         const blockObj = {};
-        blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
         modularBlocksObj.push(blockObj);
       });
     });
@@ -153,7 +157,7 @@ const getSchemaValue = (obj, key) => {
     : null;
 };
 
-const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
+const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) => {
   const entryObj = {};
   schema.forEach(field => {
     let value = getSchemaValue(entry, field);
@@ -171,6 +175,18 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
         break;
       case 'blocks':
         entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        break;
+      case 'json':
+        if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, field)) {
+          const valueClone = { value };
+          Contentstack.jsonToHTML({
+            entry: valueClone,
+            paths: ['value'],
+          });
+          entryObj[field.uid] = valueClone.value;
+        } else {
+          entryObj[field.uid] = value;
+        }
         break;
       default:
         entryObj[field.uid] = value;
@@ -258,7 +274,7 @@ exports.extendSchemaWithDefaultEntryFields = schema => {
 };
 
 const buildCustomSchema = (exports.buildCustomSchema = (schema, types, references, groups,
-  fileFields, parent, prefix, disableMandatoryFields) => {
+  fileFields, parent, prefix, disableMandatoryFields, jsonRteToHtml) => {
   const fields = {};
   groups = groups || [];
   references = references || [];
@@ -332,14 +348,14 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
         };
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid].type = '[JSON]!';
+            fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? '[String]!' : '[JSON]!';
           } else {
-            fields[field.uid].type = 'JSON!';
+            fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? 'String!' : 'JSON!';
           }
         } else if (field.multiple){
-          fields[field.uid].type = '[JSON]';
+          fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? '[String]' : '[JSON]';
         } else {
-          fields[field.uid].type = 'JSON';
+          fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? 'String' : 'JSON';
         }
         break;
       case 'link':
@@ -462,3 +478,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
   });
   return { fields, types, references, groups, fileFields };
 });
+
+const getJSONToHtmlRequired = (jsonRteToHtml, field) => {
+  return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
+};

@@ -12,6 +12,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
 
   const typePrefix = configOptions.type_prefix || 'Contentstack';
   const disableMandatoryFields = configOptions.disableMandatoryFields || false;
+  const jsonRteToHtml = configOptions.jsonRteToHtml || false;
   try {
     const contentTypeOption = getContentTypeOption(configOptions);
     contentTypes = await fetchContentTypes(configOptions, contentTypeOption);
@@ -85,7 +86,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
       const name = `${typePrefix}_${contentTypeUid}`;
       const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-      let result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields);
+      let result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml);
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
       fileFields = fileFields.concat(result.fileFields);

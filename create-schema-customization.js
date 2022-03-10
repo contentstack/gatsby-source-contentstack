@@ -14,9 +14,9 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 var _require = require('gatsby/graphql'),
     GraphQLInt = _require.GraphQLInt,
@@ -38,7 +38,7 @@ var _require5 = require('./gatsby-plugin-image'),
 
 exports.createSchemaCustomization = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref2, configOptions) {
-    var cache, actions, schema, reporter, contentTypes, typePrefix, disableMandatoryFields, contentTypeOption, references, groups, fileFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
+    var cache, actions, schema, reporter, contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
@@ -47,30 +47,31 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             cache = _ref2.cache, actions = _ref2.actions, schema = _ref2.schema, reporter = _ref2.reporter;
             typePrefix = configOptions.type_prefix || 'Contentstack';
             disableMandatoryFields = configOptions.disableMandatoryFields || false;
-            _context2.prev = 3;
+            jsonRteToHtml = configOptions.jsonRteToHtml || false;
+            _context2.prev = 4;
             contentTypeOption = getContentTypeOption(configOptions);
-            _context2.next = 7;
+            _context2.next = 8;
             return fetchContentTypes(configOptions, contentTypeOption);
 
-          case 7:
+          case 8:
             contentTypes = _context2.sent;
-            _context2.next = 10;
+            _context2.next = 11;
             return cache.set(typePrefix, contentTypes);
 
-          case 10:
-            _context2.next = 15;
+          case 11:
+            _context2.next = 16;
             break;
 
-          case 12:
-            _context2.prev = 12;
-            _context2.t0 = _context2["catch"](3);
+          case 13:
+            _context2.prev = 13;
+            _context2.t0 = _context2["catch"](4);
             console.error('Contentstack fetch content type failed!');
 
-          case 15:
+          case 16:
             references = [], groups = [], fileFields = [];
 
             if (!configOptions.enableSchemaGeneration) {
-              _context2.next = 49;
+              _context2.next = 50;
               break;
             }
 
@@ -124,13 +125,13 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               }
             }; // Checks if gatsby-plugin-image is installed.
 
-            _context2.prev = 20;
-            _context2.next = 23;
+            _context2.prev = 21;
+            _context2.next = 24;
             return Promise.resolve().then(function () {
               return _interopRequireWildcard(require('gatsby-plugin-image/graphql-utils'));
             });
 
-          case 23:
+          case 24:
             _yield$import = _context2.sent;
             getGatsbyImageFieldConfig = _yield$import.getGatsbyImageFieldConfig;
             fieldConfig = {};
@@ -178,24 +179,24 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             });
             fieldConfig.type = GraphQLJSON;
             assetTypeSchema.fields.gatsbyImageData = fieldConfig;
-            _context2.next = 34;
+            _context2.next = 35;
             break;
 
-          case 31:
-            _context2.prev = 31;
-            _context2.t1 = _context2["catch"](20);
+          case 32:
+            _context2.prev = 32;
+            _context2.t1 = _context2["catch"](21);
 
             if (_context2.t1.code === 'MODULE_NOT_FOUND') {
               reporter.info("Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.");
             }
 
-          case 34:
+          case 35:
             createTypes([schema.buildObjectType(contentTypeSchema), schema.buildObjectType(assetTypeSchema)]);
             contentTypes && contentTypes.forEach(function (contentType) {
               var contentTypeUid = contentType.uid.replace(/-/g, '_');
               var name = "".concat(typePrefix, "_").concat(contentTypeUid);
               var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-              var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields);
+              var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml);
               references = references.concat(result.references);
               groups = groups.concat(result.groups);
               fileFields = fileFields.concat(result.fileFields);
@@ -211,31 +212,31 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               createTypes(result.types);
             });
             _context2.t2 = Promise;
-            _context2.next = 39;
+            _context2.next = 40;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_references"), references);
 
-          case 39:
+          case 40:
             _context2.t3 = _context2.sent;
-            _context2.next = 42;
+            _context2.next = 43;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_groups"), groups);
 
-          case 42:
+          case 43:
             _context2.t4 = _context2.sent;
-            _context2.next = 45;
+            _context2.next = 46;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_file_fields"), fileFields);
 
-          case 45:
+          case 46:
             _context2.t5 = _context2.sent;
             _context2.t6 = [_context2.t3, _context2.t4, _context2.t5];
-            _context2.next = 49;
+            _context2.next = 50;
             return _context2.t2.all.call(_context2.t2, _context2.t6);
 
-          case 49:
+          case 50:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[3, 12], [20, 31]]);
+    }, _callee2, null, [[4, 13], [21, 32]]);
   }));
 
   return function (_x, _x2) {

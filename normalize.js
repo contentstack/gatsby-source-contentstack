@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
@@ -6,9 +6,11 @@ var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+var Contentstack = require('@contentstack/utils');
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
   var nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-contentType-").concat(contentType.uid));
@@ -65,8 +67,8 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
   return nodeData;
 };
 
-exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
-  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
+  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
 
   return resolveEntry;
 };
@@ -89,7 +91,7 @@ var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeId
 
     if (value instanceof Array) {
       value.forEach(function (groupValue) {
-        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
       });
     } else {
       // In some cases value is null, this makes graphql treat all the objects as null
@@ -97,11 +99,11 @@ var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeId
       // This also helps to handle when a user changes a group to multiple after initially
       // setting a group to single.. the server passes an object and the previous condition
       // again makes groupObj null
-      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
     }
   } else {
     groupObj = {};
-    groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+    groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
   }
 
   return groupObj;
@@ -123,7 +125,7 @@ var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale
         }
 
         var blockObj = {};
-        blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
         modularBlocksObj.push(blockObj);
       });
     });
@@ -175,7 +177,7 @@ var getSchemaValue = function getSchemaValue(obj, key) {
   return Object.prototype.hasOwnProperty.call(obj, key.uid) ? obj[key.uid] : null;
 };
 
-var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
+var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
   var entryObj = {};
   schema.forEach(function (field) {
     var value = getSchemaValue(entry, field);
@@ -197,6 +199,22 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 
       case 'blocks':
         entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        break;
+
+      case 'json':
+        if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, field)) {
+          var valueClone = {
+            value: value
+          };
+          Contentstack.jsonToHTML({
+            entry: valueClone,
+            paths: ['value']
+          });
+          entryObj[field.uid] = valueClone.value;
+        } else {
+          entryObj[field.uid] = value;
+        }
+
         break;
 
       default:
@@ -284,7 +302,7 @@ exports.extendSchemaWithDefaultEntryFields = function (schema) {
   return schema;
 };
 
-var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) {
+var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, jsonRteToHtml) {
   var fields = {};
   groups = groups || [];
   references = references || [];
@@ -385,14 +403,14 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid].type = '[JSON]!';
+            fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? '[String]!' : '[JSON]!';
           } else {
-            fields[field.uid].type = 'JSON!';
+            fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? 'String!' : 'JSON!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = '[JSON]';
+          fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? '[String]' : '[JSON]';
         } else {
-          fields[field.uid].type = 'JSON';
+          fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? 'String' : 'JSON';
         }
 
         break;
@@ -539,4 +557,8 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
     groups: groups,
     fileFields: fileFields
   };
+};
+
+var getJSONToHtmlRequired = function getJSONToHtmlRequired(jsonRteToHtml, field) {
+  return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
 };
