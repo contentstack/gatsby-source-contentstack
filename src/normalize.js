@@ -73,7 +73,7 @@ const makeEntryNodeUid = (exports.makeEntryNodeUid = (entry, createNodeId, typeP
   return createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${publishedLocale}`);
 });
 
-const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
+const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) => {
   let groupObj = null;
   if (field.multiple) {
     groupObj = [];
@@ -96,7 +96,7 @@ const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, cre
   return groupObj;
 };
 
-const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) => {
+const normalizeModularBlock = (blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) => {
   const modularBlocksObj = [];
   if (value) {
     value.map(block => {
@@ -171,10 +171,10 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
         break;
       case 'group':
       case 'global_field':
-        entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
         break;
       case 'blocks':
-        entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
         break;
       case 'json':
         if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, field)) {
@@ -195,14 +195,14 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
   return entryObj;
 };
 
-const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) => {
+const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, jsonRteToHtml) => {
   const blockFields = {};
   let blockType = `type ${parent} @infer {`;
 
   blocks.forEach(block => {
     const newparent = parent.concat(block.uid);
     blockType = blockType.concat(`${block.uid} : ${newparent} `);
-    const { fields } = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
+    const { fields } = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml);
 
     for (const key in fields) {
       if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
@@ -390,7 +390,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
       case 'global_field':
         let newparent = parent.concat('_', field.uid);
 
-        const result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
+        const result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml);
 
         for (const key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
@@ -421,7 +421,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
       case 'blocks':
         let blockparent = parent.concat('_', field.uid);
 
-        const blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields);
+        const blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields, jsonRteToHtml);
         types.push(blockType);
 
         if (field.mandatory && !disableMandatoryFields) {
