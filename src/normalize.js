@@ -91,7 +91,7 @@ const normalizeGroup = (field, value, locale, entriesNodeIds, assetsNodeIds, cre
     }
   } else {
     groupObj = {};
-    groupObj = builtEntry( field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
+    groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
   }
   return groupObj;
 };
@@ -149,6 +149,25 @@ const normalizeFileField = (value, locale, assetsNodeIds, createNodeId, typePref
   return reference;
 };
 
+const normalizeJSONRteToHtml = (value) => {
+  let jsonRteToHtml = {};
+  if (Array.isArray(value)) {
+    jsonRteToHtml = [];
+    value.forEach(jsonRte => {
+      const valueClone = { value: jsonRte };
+      Contentstack.jsonToHTML({ entry: valueClone, paths: ['value'] });
+      jsonRteToHtml.push(valueClone.value);
+    });
+  } else if (value) {
+    const valueClone = { value };
+    Contentstack.jsonToHTML({ entry: valueClone, paths: ['value'] });
+    jsonRteToHtml = valueClone.value;
+  } else {
+    jsonRteToHtml = null;
+  }
+  return jsonRteToHtml;
+};
+
 const getSchemaValue = (obj, key) => {
   if (obj === null) return null;
   if (typeof obj !== 'object') return null;
@@ -178,12 +197,7 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
         break;
       case 'json':
         if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, field)) {
-          const valueClone = { value };
-          Contentstack.jsonToHTML({
-            entry: valueClone,
-            paths: ['value'],
-          });
-          entryObj[field.uid] = valueClone.value;
+          entryObj[field.uid] = normalizeJSONRteToHtml(value);
         } else {
           entryObj[field.uid] = value;
         }
@@ -352,7 +366,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
           } else {
             fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? 'String!' : 'JSON!';
           }
-        } else if (field.multiple){
+        } else if (field.multiple) {
           fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? '[String]' : '[JSON]';
         } else {
           fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? 'String' : 'JSON';
@@ -373,7 +387,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
         break;
       case 'file':
         fileFields.push({ parent, field });
-        
+
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
             fields[field.uid] = `[${prefix}_assets]!`;

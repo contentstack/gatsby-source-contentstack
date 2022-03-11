@@ -171,6 +171,37 @@ var normalizeFileField = function normalizeFileField(value, locale, assetsNodeId
   return reference;
 };
 
+var normalizeJSONRteToHtml = function normalizeJSONRteToHtml(value) {
+  var jsonRteToHtml = {};
+
+  if (Array.isArray(value)) {
+    jsonRteToHtml = [];
+    value.forEach(function (jsonRte) {
+      var valueClone = {
+        value: jsonRte
+      };
+      Contentstack.jsonToHTML({
+        entry: valueClone,
+        paths: ['value']
+      });
+      jsonRteToHtml.push(valueClone.value);
+    });
+  } else if (value) {
+    var valueClone = {
+      value: value
+    };
+    Contentstack.jsonToHTML({
+      entry: valueClone,
+      paths: ['value']
+    });
+    jsonRteToHtml = valueClone.value;
+  } else {
+    jsonRteToHtml = null;
+  }
+
+  return jsonRteToHtml;
+};
+
 var getSchemaValue = function getSchemaValue(obj, key) {
   if (obj === null) return null;
   if ((0, _typeof2["default"])(obj) !== 'object') return null;
@@ -203,14 +234,7 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 
       case 'json':
         if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, field)) {
-          var valueClone = {
-            value: value
-          };
-          Contentstack.jsonToHTML({
-            entry: valueClone,
-            paths: ['value']
-          });
-          entryObj[field.uid] = valueClone.value;
+          entryObj[field.uid] = normalizeJSONRteToHtml(value);
         } else {
           entryObj[field.uid] = value;
         }
