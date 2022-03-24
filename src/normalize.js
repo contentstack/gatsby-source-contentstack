@@ -149,7 +149,7 @@ const normalizeFileField = (value, locale, assetsNodeIds, createNodeId, typePref
   return reference;
 };
 
-const normalizeJSONRteToHtml = (value) => {
+const normalizeJSONRteToHtml = (value, path) => {
   let jsonRteToHtml = {};
   if (value) {
     Contentstack.jsonToHTML({
@@ -361,19 +361,11 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
                 if (Array.isArray(source[key])) {
                   for (let j = 0; j < source[key].length; j++) {
                     if (source[key][j].type === 'doc') {
-                      // embeddedItems[key] = embeddedItems[key] || [];
-                      // getChildren(source[key][j].children, embeddedItems, key, source, context, createNodeId, prefix);
-                      // source._embedded_items = { ...source._embedded_items, ...embeddedItems };
-                      // source[key] = normalizeJSONRteToHtml(source, key);
                       source[key] = parseJSONRTEToHtml(source[key][j].children, embeddedItems, key, source, context, createNodeId, prefix);
                     }
                   }
                 } else {
                   if (source[key].type === 'doc') {
-                    // embeddedItems[key] = embeddedItems[key] || [];
-                    // getChildren(source[key].children, embeddedItems, key, source, context, createNodeId, prefix);
-                    // source._embedded_items = { ...source._embedded_items, ...embeddedItems };
-                    // source[key] = normalizeJSONRteToHtml(source, key);
                     source[key] = parseJSONRTEToHtml(source[key].children, embeddedItems, key, source, context, createNodeId, prefix);
                   }
                 }
@@ -542,5 +534,5 @@ function parseJSONRTEToHtml(children, embeddedItems, key, source, context, creat
   embeddedItems[key] = embeddedItems[key] || [];
   getChildren(children, embeddedItems, key, source, context, createNodeId, prefix);
   source._embedded_items = { ...source._embedded_items, ...embeddedItems };
-  return normalizeFileField(source, key);
+  return normalizeJSONRteToHtml(source, key);
 }
