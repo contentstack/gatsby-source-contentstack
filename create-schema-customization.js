@@ -38,13 +38,13 @@ var _require5 = require('./gatsby-plugin-image'),
 
 exports.createSchemaCustomization = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref2, configOptions) {
-    var cache, actions, schema, reporter, contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
+    var cache, actions, schema, reporter, createNodeId, contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            cache = _ref2.cache, actions = _ref2.actions, schema = _ref2.schema, reporter = _ref2.reporter;
+            cache = _ref2.cache, actions = _ref2.actions, schema = _ref2.schema, reporter = _ref2.reporter, createNodeId = _ref2.createNodeId;
             typePrefix = configOptions.type_prefix || 'Contentstack';
             disableMandatoryFields = configOptions.disableMandatoryFields || false;
             jsonRteToHtml = configOptions.jsonRteToHtml || false;
@@ -196,7 +196,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               var contentTypeUid = contentType.uid.replace(/-/g, '_');
               var name = "".concat(typePrefix, "_").concat(contentTypeUid);
               var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-              var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml);
+              var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
               references = references.concat(result.references);
               groups = groups.concat(result.groups);
               fileFields = fileFields.concat(result.fileFields);

@@ -174,27 +174,12 @@ var normalizeFileField = function normalizeFileField(value, locale, assetsNodeId
 var normalizeJSONRteToHtml = function normalizeJSONRteToHtml(value) {
   var jsonRteToHtml = {};
 
-  if (Array.isArray(value)) {
-    jsonRteToHtml = [];
-    value.forEach(function (jsonRte) {
-      var valueClone = {
-        value: jsonRte
-      };
-      Contentstack.jsonToHTML({
-        entry: valueClone,
-        paths: ['value']
-      });
-      jsonRteToHtml.push(valueClone.value);
-    });
-  } else if (value) {
-    var valueClone = {
-      value: value
-    };
+  if (value) {
     Contentstack.jsonToHTML({
-      entry: valueClone,
-      paths: ['value']
+      entry: value,
+      paths: [path]
     });
-    jsonRteToHtml = valueClone.value;
+    jsonRteToHtml = value[path];
   } else {
     jsonRteToHtml = null;
   }
@@ -233,12 +218,7 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
         break;
 
       case 'json':
-        if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, field)) {
-          entryObj[field.uid] = normalizeJSONRteToHtml(value);
-        } else {
-          entryObj[field.uid] = value;
-        }
-
+        entryObj[field.uid] = value;
         break;
 
       default:
@@ -248,14 +228,14 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   return entryObj;
 };
 
-var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, jsonRteToHtml) {
+var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId) {
   var blockFields = {};
   var blockType = "type ".concat(parent, " @infer {");
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
     blockType = blockType.concat("".concat(block.uid, " : ").concat(newparent, " "));
 
-    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml),
+    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId),
         fields = _buildCustomSchema.fields;
 
     for (var key in fields) {
@@ -326,7 +306,7 @@ exports.extendSchemaWithDefaultEntryFields = function (schema) {
   return schema;
 };
 
-var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, jsonRteToHtml) {
+var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId) {
   var fields = {};
   groups = groups || [];
   references = references || [];
@@ -420,7 +400,40 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
       case 'json':
         fields[field.uid] = {
-          resolve: function resolve(source) {
+          resolve: function resolve(source, args, context) {
+            if (getJSONToHtmlRequired(jsonRteToHtml, field)) {
+              var keys = Object.keys(source);
+              var embeddedItems = {};
+
+              for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+
+                if (!source[key]) {
+                  continue;
+                }
+
+                if (Array.isArray(source[key])) {
+                  for (var j = 0; j < source[key].length; j++) {
+                    if (source[key][j].type === 'doc') {
+                      // embeddedItems[key] = embeddedItems[key] || [];
+                      // getChildren(source[key][j].children, embeddedItems, key, source, context, createNodeId, prefix);
+                      // source._embedded_items = { ...source._embedded_items, ...embeddedItems };
+                      // source[key] = normalizeJSONRteToHtml(source, key);
+                      source[key] = parseJSONRTEToHtml(source[key][j].children, embeddedItems, key, source, context, createNodeId, prefix);
+                    }
+                  }
+                } else {
+                  if (source[key].type === 'doc') {
+                    // embeddedItems[key] = embeddedItems[key] || [];
+                    // getChildren(source[key].children, embeddedItems, key, source, context, createNodeId, prefix);
+                    // source._embedded_items = { ...source._embedded_items, ...embeddedItems };
+                    // source[key] = normalizeJSONRteToHtml(source, key);
+                    source[key] = parseJSONRTEToHtml(source[key].children, embeddedItems, key, source, context, createNodeId, prefix);
+                  }
+                }
+              }
+            }
+
             return source[field.uid] || null;
           }
         };
@@ -477,7 +490,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
       case 'group':
       case 'global_field':
         var newparent = parent.concat('_', field.uid);
-        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml);
+        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
 
         for (var key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
@@ -510,7 +523,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
       case 'blocks':
         var blockparent = parent.concat('_', field.uid);
-        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields, jsonRteToHtml);
+        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
         types.push(blockType);
 
         if (field.mandatory && !disableMandatoryFields) {
@@ -586,3 +599,35 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 var getJSONToHtmlRequired = function getJSONToHtmlRequired(jsonRteToHtml, field) {
   return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
 };
+
+function getChildren(children, embeddedItems, key, source, context, createNodeId, prefix) {
+  for (var j = 0; j < children.length; j++) {
+    var child = children[j];
+
+    if (child.type === 'reference') {
+      var id = makeEntryNodeUid({
+        publish_details: {
+          locale: source.publish_details.locale
+        },
+        uid: child.attrs['entry-uid']
+      }, createNodeId, prefix);
+      var entry = context.nodeModel.getNodeById({
+        id: id
+      }); // The following line is required by contentstack utils package to parse value from json to html.
+
+      entry._content_type_uid = child.attrs['content-type-uid'];
+      embeddedItems[key].push(entry);
+    }
+
+    if (child.children) {
+      getChildren(child.children, embeddedItems, key, source, context, createNodeId, prefix);
+    }
+  }
+}
+
+function parseJSONRTEToHtml(children, embeddedItems, key, source, context, createNodeId, prefix) {
+  embeddedItems[key] = embeddedItems[key] || [];
+  getChildren(children, embeddedItems, key, source, context, createNodeId, prefix);
+  source._embedded_items = _objectSpread(_objectSpread({}, source._embedded_items), embeddedItems);
+  return normalizeFileField(source, key);
+}

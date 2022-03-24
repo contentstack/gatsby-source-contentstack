@@ -138,7 +138,6 @@ exports.sourceNodes = /*#__PURE__*/function () {
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
           case 33:
-            // adding nodes
             contentTypesMap = {};
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
