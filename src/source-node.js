@@ -81,7 +81,6 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
   // Cache the found count
   configOptions.downloadImages && await cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
-  // adding nodes
   const contentTypesMap = {};
   contentstackData.contentTypes.forEach(contentType => {
     contentType.uid = contentType.uid.replace(/-/g, '_');
