@@ -10,7 +10,8 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-var Contentstack = require('@contentstack/utils');
+var _require = require('./utils'),
+    getJSONToHtmlRequired = _require.getJSONToHtmlRequired;
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
   var nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-contentType-").concat(contentType.uid));
@@ -169,22 +170,6 @@ var normalizeFileField = function normalizeFileField(value, locale, assetsNodeId
   }
 
   return reference;
-};
-
-var normalizeJSONRteToHtml = function normalizeJSONRteToHtml(value, path) {
-  var jsonRteToHtml = {};
-
-  if (value) {
-    Contentstack.jsonToHTML({
-      entry: value,
-      paths: [path]
-    });
-    jsonRteToHtml = value[path];
-  } else {
-    jsonRteToHtml = null;
-  }
-
-  return jsonRteToHtml;
 };
 
 var getSchemaValue = function getSchemaValue(obj, key) {
@@ -445,7 +430,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
           }
         } else {
           fields[field.uid] = {
-            resolve: function resolve(source, args, context) {
+            resolve: function resolve(source) {
               return source[field.uid] || null;
             }
           };
@@ -609,39 +594,3 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
     jsonRteFields: jsonRteFields
   };
 };
-
-var getJSONToHtmlRequired = function getJSONToHtmlRequired(jsonRteToHtml, field) {
-  return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
-};
-
-function getChildren(children, embeddedItems, key, source, context, createNodeId, prefix) {
-  for (var j = 0; j < children.length; j++) {
-    var child = children[j];
-
-    if (child.type === 'reference') {
-      var id = makeEntryNodeUid({
-        publish_details: {
-          locale: source.publish_details.locale
-        },
-        uid: child.attrs['entry-uid']
-      }, createNodeId, prefix);
-      var entry = context.nodeModel.getNodeById({
-        id: id
-      }); // The following line is required by contentstack utils package to parse value from json to html.
-
-      entry._content_type_uid = child.attrs['content-type-uid'];
-      embeddedItems[key].push(entry);
-    }
-
-    if (child.children) {
-      getChildren(child.children, embeddedItems, key, source, context, createNodeId, prefix);
-    }
-  }
-}
-
-function parseJSONRTEToHtml(children, embeddedItems, key, source, context, createNodeId, prefix) {
-  embeddedItems[key] = embeddedItems[key] || [];
-  getChildren(children, embeddedItems, key, source, context, createNodeId, prefix);
-  source._embedded_items = _objectSpread(_objectSpread({}, source._embedded_items), embeddedItems);
-  return normalizeJSONRteToHtml(source, key);
-}

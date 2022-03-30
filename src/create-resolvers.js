@@ -1,6 +1,10 @@
 'use strict';
 
-exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
+const Contentstack = require('@contentstack/utils');
+
+const { getJSONToHtmlRequired } = require('./utils');
+
+exports.createResolvers = async ({ createResolvers, cache, createNodeId }, configOptions) => {
   const resolvers = {};
 
   const typePrefix = configOptions.type_prefix || 'Contentstack';
@@ -82,6 +86,27 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
       ...{
         [jsonRteField.field.uid]: {
           resolve: source => {
+            if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, jsonRteField.field)) {
+              const keys = Object.keys(source);
+              const embeddedItems = {};
+              for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                if (!source[key]) {
+                  continue;
+                }
+                if (Array.isArray(source[key])) {
+                  for (let j = 0; j < source[key].length; j++) {
+                    if (source[key][j].type === 'doc') {
+                      source[key] = parseJSONRTEToHtml(source[key][j].children, embeddedItems, key, source, context, createNodeId, typePrefix);
+                    }
+                  }
+                } else {
+                  if (source[key].type === 'doc') {
+                    source[key] = parseJSONRTEToHtml(source[key].children, embeddedItems, key, source, context, createNodeId, typePrefix);
+                  }
+                }
+              }
+            }
             return source[jsonRteField.field.uid] || null;
           }
         }
@@ -89,4 +114,44 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
     };
   });
   createResolvers(resolvers);
+};
+
+function parseJSONRTEToHtml(children, embeddedItems, key, source, context, createNodeId, prefix) {
+  embeddedItems[key] = embeddedItems[key] || [];
+  getChildren(children, embeddedItems, key, source, context, createNodeId, prefix);
+  source._embedded_items = { ...source._embedded_items, ...embeddedItems };
+  return parseJSONRteToHtmlHelper(source, key);
+}
+
+function getChildren(children, embeddedItems, key, source, context, createNodeId, prefix) {
+  for (let j = 0; j < children.length; j++) {
+    const child = children[j];
+    if (child.type === 'reference') {
+      const id = makeEntryNodeUid({
+        publish_details: { locale: source.publish_details.locale },
+        uid: child.attrs['entry-uid'],
+      }, createNodeId, prefix);
+      const entry = context.nodeModel.getNodeById({ id });
+      // The following line is required by contentstack utils package to parse value from json to html.
+      entry._content_type_uid = child.attrs['content-type-uid'];
+      embeddedItems[key].push(entry);
+    }
+    if (child.children) {
+      getChildren(child.children, embeddedItems, key, source, context, createNodeId, prefix);
+    }
+  }
+}
+
+function parseJSONRteToHtmlHelper(value, path) {
+  let jsonRteToHtml = {};
+  if (value) {
+    Contentstack.jsonToHTML({
+      entry: value,
+      paths: [path]
+    });
+    jsonRteToHtml = value[path];
+  } else {
+    jsonRteToHtml = null;
+  }
+  return jsonRteToHtml;
 };

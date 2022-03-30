@@ -68,3 +68,7 @@ exports.getContentTypeOption = configOptions => {
   }
   return contentTypeOption;
 };
+
+exports.getJSONToHtmlRequired = (jsonRteToHtml, field) => {
+  return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
+};

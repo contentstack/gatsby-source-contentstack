@@ -1,6 +1,6 @@
 'use strict';
 
-const Contentstack = require('@contentstack/utils');
+const { getJSONToHtmlRequired } = require('./utils');
 
 exports.processContentType = (contentType, createNodeId, createContentDigest, typePrefix) => {
   const nodeId = createNodeId(`${typePrefix.toLowerCase()}-contentType-${contentType.uid}`);
@@ -147,20 +147,6 @@ const normalizeFileField = (value, locale, assetsNodeIds, createNodeId, typePref
     reference = null;
   }
   return reference;
-};
-
-const normalizeJSONRteToHtml = (value, path) => {
-  let jsonRteToHtml = {};
-  if (value) {
-    Contentstack.jsonToHTML({
-      entry: value,
-      paths: [path]
-    });
-    jsonRteToHtml = value[path];
-  } else {
-    jsonRteToHtml = null;
-  }
-  return jsonRteToHtml;
 };
 
 const getSchemaValue = (obj, key) => {
@@ -391,7 +377,7 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
           }
         } else {
           fields[field.uid] = {
-            resolve: function resolve(source, args, context) {
+            resolve: function resolve(source) {
               return source[field.uid] || null;
             }
           }
@@ -529,33 +515,3 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
   });
   return { fields, types, references, groups, fileFields, jsonRteFields };
 });
-
-const getJSONToHtmlRequired = (jsonRteToHtml, field) => {
-  return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
-};
-
-function getChildren(children, embeddedItems, key, source, context, createNodeId, prefix) {
-  for (let j = 0; j < children.length; j++) {
-    const child = children[j];
-    if (child.type === 'reference') {
-      const id = makeEntryNodeUid({
-        publish_details: { locale: source.publish_details.locale },
-        uid: child.attrs['entry-uid'],
-      }, createNodeId, prefix);
-      const entry = context.nodeModel.getNodeById({ id });
-      // The following line is required by contentstack utils package to parse value from json to html.
-      entry._content_type_uid = child.attrs['content-type-uid'];
-      embeddedItems[key].push(entry);
-    }
-    if (child.children) {
-      getChildren(child.children, embeddedItems, key, source, context, createNodeId, prefix);
-    }
-  }
-}
-
-function parseJSONRTEToHtml(children, embeddedItems, key, source, context, createNodeId, prefix) {
-  embeddedItems[key] = embeddedItems[key] || [];
-  getChildren(children, embeddedItems, key, source, context, createNodeId, prefix);
-  source._embedded_items = { ...source._embedded_items, ...embeddedItems };
-  return normalizeJSONRteToHtml(source, key);
-}
