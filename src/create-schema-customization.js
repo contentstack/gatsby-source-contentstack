@@ -22,7 +22,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter, c
     console.error('Contentstack fetch content type failed!');
   }
 
-  let references = [], groups = [], fileFields = [];
+  let references = [], groups = [], fileFields = [], jsonRteFields = [];
 
   if (configOptions.enableSchemaGeneration) {
     const { createTypes } = actions;
@@ -86,10 +86,11 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter, c
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
       const name = `${typePrefix}_${contentTypeUid}`;
       const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-      let result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
+      let result = buildCustomSchema(extendedSchema, [], [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
       fileFields = fileFields.concat(result.fileFields);
+      jsonRteFields = jsonRteFields.concat(result.jsonRteFields);
       const typeDefs = [`type linktype { title: String href: String }`,
         schema.buildObjectType({
           name,
@@ -106,6 +107,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter, c
       await cache.set(`${typePrefix}_${configOptions.api_key}_references`, references),
       await cache.set(`${typePrefix}_${configOptions.api_key}_groups`, groups),
       await cache.set(`${typePrefix}_${configOptions.api_key}_file_fields`, fileFields),
+      await cache.set(`${typePrefix}_${configOptions.api_key}_json_rte_fields`, jsonRteFields),
     ]);
   }
 };

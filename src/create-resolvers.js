@@ -4,10 +4,11 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
   const resolvers = {};
 
   const typePrefix = configOptions.type_prefix || 'Contentstack';
-  const [fileFields, references, groups] = await Promise.all([
+  const [fileFields, references, groups, jsonRteFields] = await Promise.all([
     cache.get(`${typePrefix}_${configOptions.api_key}_file_fields`),
     cache.get(`${typePrefix}_${configOptions.api_key}_references`),
     cache.get(`${typePrefix}_${configOptions.api_key}_groups`),
+    cache.get(`${typePrefix}_${configOptions.api_key}_json_rte_fields`),
   ]);
 
   fileFields && fileFields.forEach(fileField => {
@@ -73,6 +74,18 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
           },
         },
       },
+    };
+  });
+  jsonRteFields && jsonRteFields.forEach(jsonRteField => {
+    resolvers[jsonRteField.parent] = {
+      ...resolvers[jsonRteField.parent],
+      ...{
+        [jsonRteField.field.uid]: {
+          resolve: source => {
+            return source[jsonRteField.field.uid] || null;
+          }
+        }
+      }
     };
   });
   createResolvers(resolvers);

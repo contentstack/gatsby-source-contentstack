@@ -16,7 +16,7 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 exports.createResolvers = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref2, configOptions) {
-    var createResolvers, cache, resolvers, typePrefix, _yield$Promise$all, _yield$Promise$all2, fileFields, references, groups;
+    var createResolvers, cache, resolvers, typePrefix, _yield$Promise$all, _yield$Promise$all2, fileFields, references, groups, jsonRteFields;
 
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
@@ -26,14 +26,15 @@ exports.createResolvers = /*#__PURE__*/function () {
             resolvers = {};
             typePrefix = configOptions.type_prefix || 'Contentstack';
             _context.next = 5;
-            return Promise.all([cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_file_fields")), cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_references")), cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_groups"))]);
+            return Promise.all([cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_file_fields")), cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_references")), cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_groups")), cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_json_rte_fields"))]);
 
           case 5:
             _yield$Promise$all = _context.sent;
-            _yield$Promise$all2 = (0, _slicedToArray2["default"])(_yield$Promise$all, 3);
+            _yield$Promise$all2 = (0, _slicedToArray2["default"])(_yield$Promise$all, 4);
             fileFields = _yield$Promise$all2[0];
             references = _yield$Promise$all2[1];
             groups = _yield$Promise$all2[2];
+            jsonRteFields = _yield$Promise$all2[3];
             fileFields && fileFields.forEach(function (fileField) {
               resolvers[fileField.parent] = _objectSpread(_objectSpread({}, resolvers[fileField.parent]), (0, _defineProperty2["default"])({}, fileField.field.uid, {
                 resolve: function resolve(source, args, context) {
@@ -90,9 +91,16 @@ exports.createResolvers = /*#__PURE__*/function () {
                 }
               }));
             });
+            jsonRteFields && jsonRteFields.forEach(function (jsonRteField) {
+              resolvers[jsonRteField.parent] = _objectSpread(_objectSpread({}, resolvers[jsonRteField.parent]), (0, _defineProperty2["default"])({}, jsonRteField.field.uid, {
+                resolve: function resolve(source) {
+                  return source[jsonRteField.field.uid] || null;
+                }
+              }));
+            });
             createResolvers(resolvers);
 
-          case 14:
+          case 16:
           case "end":
             return _context.stop();
         }

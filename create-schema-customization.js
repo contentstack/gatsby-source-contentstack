@@ -38,7 +38,7 @@ var _require5 = require('./gatsby-plugin-image'),
 
 exports.createSchemaCustomization = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref2, configOptions) {
-    var cache, actions, schema, reporter, createNodeId, contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
+    var cache, actions, schema, reporter, createNodeId, contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, jsonRteFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
@@ -68,10 +68,10 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             console.error('Contentstack fetch content type failed!');
 
           case 16:
-            references = [], groups = [], fileFields = [];
+            references = [], groups = [], fileFields = [], jsonRteFields = [];
 
             if (!configOptions.enableSchemaGeneration) {
-              _context2.next = 50;
+              _context2.next = 53;
               break;
             }
 
@@ -196,10 +196,11 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               var contentTypeUid = contentType.uid.replace(/-/g, '_');
               var name = "".concat(typePrefix, "_").concat(contentTypeUid);
               var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-              var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
+              var result = buildCustomSchema(extendedSchema, [], [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
               references = references.concat(result.references);
               groups = groups.concat(result.groups);
               fileFields = fileFields.concat(result.fileFields);
+              jsonRteFields = jsonRteFields.concat(result.jsonRteFields);
               var typeDefs = ["type linktype { title: String href: String }", schema.buildObjectType({
                 name: name,
                 fields: result.fields,
@@ -227,11 +228,16 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
 
           case 46:
             _context2.t5 = _context2.sent;
-            _context2.t6 = [_context2.t3, _context2.t4, _context2.t5];
-            _context2.next = 50;
-            return _context2.t2.all.call(_context2.t2, _context2.t6);
+            _context2.next = 49;
+            return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_json_rte_fields"), jsonRteFields);
 
-          case 50:
+          case 49:
+            _context2.t6 = _context2.sent;
+            _context2.t7 = [_context2.t3, _context2.t4, _context2.t5, _context2.t6];
+            _context2.next = 53;
+            return _context2.t2.all.call(_context2.t2, _context2.t7);
+
+          case 53:
           case "end":
             return _context2.stop();
         }
