@@ -19,6 +19,10 @@ var Contentstack = require('@contentstack/utils');
 var _require = require('./utils'),
     getJSONToHtmlRequired = _require.getJSONToHtmlRequired;
 
+var _require2 = require('./normalize'),
+    makeEntryNodeUid = _require2.makeEntryNodeUid,
+    makeAssetNodeUid = _require2.makeAssetNodeUid;
+
 exports.createResolvers = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref2, configOptions) {
     var createResolvers, cache, createNodeId, resolvers, typePrefix, _yield$Promise$all, _yield$Promise$all2, fileFields, references, groups, jsonRteFields;
@@ -155,18 +159,30 @@ function getChildren(children, embeddedItems, key, source, context, createNodeId
     var child = children[j];
 
     if (child.type === 'reference') {
-      var id = makeEntryNodeUid({
-        publish_details: {
-          locale: source.publish_details.locale
-        },
-        uid: child.attrs['entry-uid']
-      }, createNodeId, prefix);
-      var entry = context.nodeModel.getNodeById({
+      var id = void 0;
+
+      if (child.attrs && child.attrs.type === 'asset') {
+        id = makeAssetNodeUid({
+          publish_details: {
+            locale: source.publish_details.locale
+          },
+          uid: child.attrs['asset-uid']
+        }, createNodeId, prefix);
+      } else {
+        id = makeEntryNodeUid({
+          publish_details: {
+            locale: source.publish_details.locale
+          },
+          uid: child.attrs['entry-uid']
+        }, createNodeId, prefix);
+      }
+
+      var node = context.nodeModel.getNodeById({
         id: id
       }); // The following line is required by contentstack utils package to parse value from json to html.
 
-      entry._content_type_uid = child.attrs['content-type-uid'];
-      embeddedItems[key].push(entry);
+      node._content_type_uid = child.attrs['content-type-uid'];
+      embeddedItems[key].push(node);
     }
 
     if (child.children) {

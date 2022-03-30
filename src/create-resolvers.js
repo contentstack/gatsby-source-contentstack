@@ -3,6 +3,7 @@
 const Contentstack = require('@contentstack/utils');
 
 const { getJSONToHtmlRequired } = require('./utils');
+const { makeEntryNodeUid, makeAssetNodeUid } = require('./normalize');
 
 exports.createResolvers = async ({ createResolvers, cache, createNodeId }, configOptions) => {
   const resolvers = {};
@@ -127,14 +128,24 @@ function getChildren(children, embeddedItems, key, source, context, createNodeId
   for (let j = 0; j < children.length; j++) {
     const child = children[j];
     if (child.type === 'reference') {
-      const id = makeEntryNodeUid({
-        publish_details: { locale: source.publish_details.locale },
-        uid: child.attrs['entry-uid'],
-      }, createNodeId, prefix);
-      const entry = context.nodeModel.getNodeById({ id });
+
+      let id;
+      if (child.attrs && child.attrs.type === 'asset') {
+        id = makeAssetNodeUid({
+          publish_details: { locale: source.publish_details.locale },
+          uid: child.attrs['asset-uid'],
+        }, createNodeId, prefix);
+      } else {
+        id = makeEntryNodeUid({
+          publish_details: { locale: source.publish_details.locale },
+          uid: child.attrs['entry-uid']
+        }, createNodeId, prefix);
+      }
+
+      const node = context.nodeModel.getNodeById({ id });
       // The following line is required by contentstack utils package to parse value from json to html.
-      entry._content_type_uid = child.attrs['content-type-uid'];
-      embeddedItems[key].push(entry);
+      node._content_type_uid = child.attrs['content-type-uid'];
+      embeddedItems[key].push(node);
     }
     if (child.children) {
       getChildren(child.children, embeddedItems, key, source, context, createNodeId, prefix);
