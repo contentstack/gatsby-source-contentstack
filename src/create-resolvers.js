@@ -86,7 +86,7 @@ exports.createResolvers = async ({ createResolvers, cache, createNodeId }, confi
       ...resolvers[jsonRteField.parent],
       ...{
         [jsonRteField.field.uid]: {
-          resolve: source => {
+          resolve: (source, args, context) => {
             if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, jsonRteField.field)) {
               const keys = Object.keys(source);
               const embeddedItems = {};

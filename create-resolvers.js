@@ -102,7 +102,7 @@ exports.createResolvers = /*#__PURE__*/function () {
             });
             jsonRteFields && jsonRteFields.forEach(function (jsonRteField) {
               resolvers[jsonRteField.parent] = _objectSpread(_objectSpread({}, resolvers[jsonRteField.parent]), (0, _defineProperty2["default"])({}, jsonRteField.field.uid, {
-                resolve: function resolve(source) {
+                resolve: function resolve(source, args, context) {
                   if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, jsonRteField.field)) {
                     var keys = Object.keys(source);
                     var embeddedItems = {};
