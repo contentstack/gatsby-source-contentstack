@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
@@ -6,9 +6,12 @@ var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+var _require = require('./utils'),
+    getJSONToHtmlRequired = _require.getJSONToHtmlRequired;
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
   var nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-contentType-").concat(contentType.uid));
@@ -65,8 +68,8 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
   return nodeData;
 };
 
-exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
-  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
+  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
 
   return resolveEntry;
 };
@@ -81,7 +84,7 @@ var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId,
   return createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(publishedLocale));
 };
 
-var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
+var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
   var groupObj = null;
 
   if (field.multiple) {
@@ -89,7 +92,7 @@ var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeId
 
     if (value instanceof Array) {
       value.forEach(function (groupValue) {
-        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+        groupObj.push(builtEntry(field.schema, groupValue, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
       });
     } else {
       // In some cases value is null, this makes graphql treat all the objects as null
@@ -97,17 +100,17 @@ var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeId
       // This also helps to handle when a user changes a group to multiple after initially
       // setting a group to single.. the server passes an object and the previous condition
       // again makes groupObj null
-      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix));
+      groupObj.push(builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
     }
   } else {
     groupObj = {};
-    groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+    groupObj = builtEntry(field.schema, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
   }
 
   return groupObj;
 };
 
-var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
+var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
   var modularBlocksObj = [];
 
   if (value) {
@@ -123,7 +126,7 @@ var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale
         }
 
         var blockObj = {};
-        blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        blockObj[key] = builtEntry(blockSchema[0].schema, block[key], locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
         modularBlocksObj.push(blockObj);
       });
     });
@@ -175,7 +178,7 @@ var getSchemaValue = function getSchemaValue(obj, key) {
   return Object.prototype.hasOwnProperty.call(obj, key.uid) ? obj[key.uid] : null;
 };
 
-var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
+var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
   var entryObj = {};
   schema.forEach(function (field) {
     var value = getSchemaValue(entry, field);
@@ -192,11 +195,15 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 
       case 'group':
       case 'global_field':
-        entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
         break;
 
       case 'blocks':
-        entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
+        break;
+
+      case 'json':
+        entryObj[field.uid] = value;
         break;
 
       default:
@@ -206,14 +213,14 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   return entryObj;
 };
 
-var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) {
+var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId) {
   var blockFields = {};
   var blockType = "type ".concat(parent, " @infer {");
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
     blockType = blockType.concat("".concat(block.uid, " : ").concat(newparent, " "));
 
-    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields),
+    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, jsonRteFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId),
         fields = _buildCustomSchema.fields;
 
     for (var key in fields) {
@@ -284,12 +291,13 @@ exports.extendSchemaWithDefaultEntryFields = function (schema) {
   return schema;
 };
 
-var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) {
+var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId) {
   var fields = {};
   groups = groups || [];
   references = references || [];
   fileFields = fileFields || [];
   types = types || [];
+  jsonRteFields = jsonRteFields || [];
   schema.forEach(function (field) {
     switch (field.data_type) {
       case 'text':
@@ -377,22 +385,67 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
       // This is to support custom field types nested inside groups, global_fields & modular_blocks
 
       case 'json':
-        fields[field.uid] = {
-          resolve: function resolve(source) {
-            return source[field.uid] || null;
-          }
-        };
+        // fields[field.uid] = {
+        //   resolve: function resolve(source, args, context) {
+        //     if (getJSONToHtmlRequired(jsonRteToHtml, field)) {
+        //       const keys = Object.keys(source);
+        //       const embeddedItems = {};
+        //       for (let i = 0; i < keys.length; i++) {
+        //         const key = keys[i];
+        //         if (!source[key]) {
+        //           continue;
+        //         }
+        //         if (Array.isArray(source[key])) {
+        //           for (let j = 0; j < source[key].length; j++) {
+        //             if (source[key][j].type === 'doc') {
+        //               source[key] = parseJSONRTEToHtml(source[key][j].children, embeddedItems, key, source, context, createNodeId, prefix);
+        //             }
+        //           }
+        //         } else {
+        //           if (source[key].type === 'doc') {
+        //             source[key] = parseJSONRTEToHtml(source[key].children, embeddedItems, key, source, context, createNodeId, prefix);
+        //           }
+        //         }
+        //       }
+        //     }
+        //     return source[field.uid] || null;
+        //   }
+        // };
+        if (getJSONToHtmlRequired(jsonRteToHtml, field)) {
+          jsonRteFields.push({
+            parent: parent,
+            field: field
+          });
 
-        if (field.mandatory && !disableMandatoryFields) {
-          if (field.multiple) {
-            fields[field.uid].type = '[JSON]!';
+          if (field.mandatory && !disableMandatoryFields) {
+            if (field.multiple) {
+              fields[field.uid] = '[String]!';
+            } else {
+              fields[field.uid] = 'String!';
+            }
+          } else if (field.multiple) {
+            fields[field.uid] = '[String]';
           } else {
-            fields[field.uid].type = 'JSON!';
+            fields[field.uid] = 'String';
           }
-        } else if (field.multiple) {
-          fields[field.uid].type = '[JSON]';
         } else {
-          fields[field.uid].type = 'JSON';
+          fields[field.uid] = {
+            resolve: function resolve(source) {
+              return source[field.uid] || null;
+            }
+          };
+
+          if (field.mandatory && !disableMandatoryFields) {
+            if (field.multiple) {
+              fields[field.uid].type = '[JSON]!';
+            } else {
+              fields[field.uid].type = 'JSON!';
+            }
+          } else if (field.multiple) {
+            fields[field.uid].type = '[JSON]';
+          } else {
+            fields[field.uid].type = 'JSON';
+          }
         }
 
         break;
@@ -435,7 +488,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
       case 'group':
       case 'global_field':
         var newparent = parent.concat('_', field.uid);
-        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
+        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, jsonRteFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
 
         for (var key in result.fields) {
           if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
@@ -468,7 +521,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
       case 'blocks':
         var blockparent = parent.concat('_', field.uid);
-        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields);
+        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, jsonRteFields, blockparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
         types.push(blockType);
 
         if (field.mandatory && !disableMandatoryFields) {
@@ -537,6 +590,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
     types: types,
     references: references,
     groups: groups,
-    fileFields: fileFields
+    fileFields: fileFields,
+    jsonRteFields: jsonRteFields
   };
 };
