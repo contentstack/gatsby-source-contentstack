@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-contentstack",
-  "version": "3.1.4",
+  "version": "4.0.3",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
@@ -8,7 +8,7 @@
     "watch": "babel -w src --out-dir ."
   },
   "engines": {
-    "node": ">=12.13.0"
+    "node": ">=14.15.0"
   },
   "main": "gatsby-node.js",
   "repository": {
@@ -57,7 +57,7 @@
     "semantic-release": "^17.4.4"
   },
   "peerDependencies": {
-    "gatsby": "^3.0.0",
+    "gatsby": "^4.0.0",
     "gatsby-plugin-image": "^2.0.0-next"
   },
   "husky": {
