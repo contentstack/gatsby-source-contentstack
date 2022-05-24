@@ -363,14 +363,14 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid].type = '[Int]!';
+            fields[field.uid].type = '[Float]!';
           } else {
-            fields[field.uid].type = 'Int!';
+            fields[field.uid].type = 'Float!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = '[Int]';
+          fields[field.uid].type = '[Float]';
         } else {
-          fields[field.uid].type = 'Int';
+          fields[field.uid].type = 'Float';
         }
 
         break;
