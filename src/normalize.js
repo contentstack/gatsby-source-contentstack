@@ -315,14 +315,14 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
         };
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid].type = '[Int]!';
+            fields[field.uid].type = '[Float]!';
           } else {
-            fields[field.uid].type = 'Int!';
+            fields[field.uid].type = 'Float!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = '[Int]';
+          fields[field.uid].type = '[Float]';
         } else {
-          fields[field.uid].type = 'Int';
+          fields[field.uid].type = 'Float';
         }
         break;
       // This is to support custom field types nested inside groups, global_fields & modular_blocks
