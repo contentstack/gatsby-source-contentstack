@@ -12,59 +12,42 @@ Here’s an example site built using this source plugin: https://xenodochial-hod
 
 Open the gatsby-config.js file from the root directory of your Gatsby project and configure it with below parameters
 
+
 ```javascript
 // In your gatsby-config.js
-plugins: [
-  {
-    resolve: `gatsby-source-contentstack`,
-    options: {
-      // Required: API Key is a unique key assigned to each stack.
-      api_key: `api_key`,
-
-      // Required: Delivery Token is a read-only credential. 
-      delivery_token: `delivery_token`,
-      
-      // Required: Environment where you published your data.
-      environment: `environment`,
-
-      // Optional: CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 
-      cdn: `cdn_url`,
-
-      // Optional: expediteBuild set this to either true or false
-      expediteBuild: `boolean_value`,
-
-      // Optional: Specify true if you want to generate custom schema
-      enableSchemaGeneration : `boolean_value`,
-
-      // Optional: Specify true if you want to generate optional graphql fields for mandatory Contentstack fields
-      disableMandatoryFields : `boolean_value`,
-
-      // Optional: Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.
-      type_prefix: `Contentstack`, // (default)
-
-      // Optional: Specify true if you want to download all your contentstack images locally
-      downloadImages: `boolean_value`,
-
-      // Optional: Specify the content types from which you want the plugin to retrieve data.
-      contentTypes: [‘blog’,’author’],
-      // This will fetch the data of the ‘blog’ and ‘author’ content types only.
-
-      // Optional: Specify the content types that the plugin should exclude while fetching data of all content types.
-      excludeContentTypes: [‘home’,’about’],
-      // This will fetch the data of all the available content types excluding the ‘home’ and ‘about’ content types.
-
-      // Note: Only one of the above options should be used to fetch data. If you add both options to fetch all contentTypes and excludeContentTypes, than only one of the query gets executed.
-
-      // Optional: Include the locales that you want the plugin to fetch data from.
-      locales: [‘en-us’,’fr-fr’],
-      // In this case, the plugin will fetch only English (United States) and French (France) language data.
-
-      // Optional: Specify the content types and locales of which you want the plugin to retrieve data.
-    },
-  },
-]
-// Note: access_token is replaced by delivery_token
+module.exports = {
+  plugins: [
+    {
+      resolve: `gatsby-source-contentstack`,
+      options: {
+        api_key: `api_key`,
+        delivery_token: `delivery_token`,
+        environment: `environment`,
+      }
+    }
+  ]
+};
 ```
+
+
+## Plugin options
+
+| Option                 | Required | Type     | Description                                                |
+| ---------------------- | -------- | -------- | ---------------------------------------------------------- |
+| api_key                | yes      | string   | Unique key assigned to each stack                          |
+| delivery_token         | yes      | string   | read-only credential                                       |
+| environment            | yes      | string   | Environment where you published your data                  |
+| cdn                    | no       | string   | cdn end point. For eg: https://eu-cdn.contentstack.com/v3  |
+| expediteBuild          | no       | boolean  | Significantly enhances build process                       |
+| enableSchemaGeneration | no       | boolean  | Generate custom schema                                     |
+| disableMandatoryFields | no       | boolean  | Generate optional graphql fields                           |
+| type_prefix            | no       | string   | Specify a different prefix for types. For eg: Contentstack |
+| downloadImages         | no       | boolean  | Download images to disk                                    |
+| contentTypes           | no       | string[] | Explicitly set which content types to include              |
+| excludeContentTypes    | no       | string[] | Explicitly set which content types to exclude              |
+| locales                | no       | string[] | Which language data to fetch                               |
+
+
 There is a provision to speed up the ```gatsby build``` process. To do this, you can set the value of the **expediteBuild** to **true**. So when you set the value of this parameter to true, the build process is significantly enhanced as only published assets and entries are synced parallelly. 
 
 However, when you want to perform ```gatsby develop```, ensure to set the value of **expediteBuild** to **false**.
