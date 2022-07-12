@@ -7,7 +7,11 @@ var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"))
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var fetch = require('node-fetch');
+var preferDefault = function preferDefault(m) {
+  return m && m["default"] || m;
+};
+
+var fetch = preferDefault(require('node-fetch')); // eslint-disable-next-line import/no-unresolved
 
 var deleteContentstackNodes = function deleteContentstackNodes(item, type, createNodeId, getNode, deleteNode, typePrefix) {
   var nodeId = '';
