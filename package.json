@@ -28,7 +28,7 @@
   "dependencies": {
     "gatsby-core-utils": "^3.3.0",
     "gatsby-source-filesystem": "^4.4.0",
-    "node-fetch": "2.1.2",
+    "node-fetch": "3.2.10",
     "progress": "^2.0.3",
     "query-string": "6.0.0"
   },
