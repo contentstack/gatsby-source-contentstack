@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-contentstack",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
@@ -28,7 +28,7 @@
   "dependencies": {
     "gatsby-core-utils": "^3.3.0",
     "gatsby-source-filesystem": "^4.4.0",
-    "node-fetch": "2.1.2",
+    "node-fetch": "2.6.7",
     "progress": "^2.0.3",
     "query-string": "6.0.0"
   },
@@ -43,7 +43,7 @@
     "@commitlint/config-conventional": "^13.1.0",
     "@semantic-release/commit-analyzer": "^8.0.1",
     "@semantic-release/git": "^9.0.0",
-    "@semantic-release/npm": "^7.1.3",
+    "@semantic-release/npm": "^9.0.1",
     "@semantic-release/release-notes-generator": "^9.0.3",
     "babel-eslint": "10.0.3",
     "eslint": "6.1.0",
@@ -54,7 +54,7 @@
     "eslint-plugin-react-hooks": "1.7.0",
     "husky": "^4.3.8",
     "prettier": "^1.5.3",
-    "semantic-release": "^17.4.4"
+    "semantic-release": "^19.0.3"
   },
   "peerDependencies": {
     "gatsby": "^3.0.0 || ^4.0.0",
