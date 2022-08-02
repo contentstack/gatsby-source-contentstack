@@ -1,5 +1,12 @@
 'use strict';
-/** NPM dependencies */
+/*
+  `node-fetch` have different export depending on CJS or ESM
+  context - requiring CJS (regular build) will return a function directly,
+  requiring ESM (what is currently being bundled for rendering engines
+  which are used by DSG) will return object with `default` field which is
+  a function. `preferDefault` helper will just use `.default` if available,
+  but will fallback to entire export if not available
+*/
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
@@ -7,7 +14,11 @@ var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"))
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var fetch = require('node-fetch');
+var preferDefault = function preferDefault(m) {
+  return m && m["default"] || m;
+};
+
+var fetch = preferDefault(require('node-fetch'));
 
 var deleteContentstackNodes = function deleteContentstackNodes(item, type, createNodeId, getNode, deleteNode, typePrefix) {
   var nodeId = '';

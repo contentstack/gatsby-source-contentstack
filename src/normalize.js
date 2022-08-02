@@ -323,47 +323,20 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
         };
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid].type = '[Int]!';
+            fields[field.uid].type = '[Float]!';
           } else {
-            fields[field.uid].type = 'Int!';
+            fields[field.uid].type = 'Float!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = '[Int]';
+          fields[field.uid].type = '[Float]';
         } else {
-          fields[field.uid].type = 'Int';
+          fields[field.uid].type = 'Float';
         }
         break;
       // This is to support custom field types nested inside groups, global_fields & modular_blocks
       case 'json':
-        // fields[field.uid] = {
-        //   resolve: function resolve(source, args, context) {
-        //     if (getJSONToHtmlRequired(jsonRteToHtml, field)) {
-        //       const keys = Object.keys(source);
-        //       const embeddedItems = {};
-        //       for (let i = 0; i < keys.length; i++) {
-        //         const key = keys[i];
-        //         if (!source[key]) {
-        //           continue;
-        //         }
-        //         if (Array.isArray(source[key])) {
-        //           for (let j = 0; j < source[key].length; j++) {
-        //             if (source[key][j].type === 'doc') {
-        //               source[key] = parseJSONRTEToHtml(source[key][j].children, embeddedItems, key, source, context, createNodeId, prefix);
-        //             }
-        //           }
-        //         } else {
-        //           if (source[key].type === 'doc') {
-        //             source[key] = parseJSONRTEToHtml(source[key].children, embeddedItems, key, source, context, createNodeId, prefix);
-        //           }
-        //         }
-        //       }
-        //     }
-        //     return source[field.uid] || null;
-        //   }
-        // };
         if (getJSONToHtmlRequired(jsonRteToHtml, field)) {
           jsonRteFields.push({ parent, field });
-
           if (field.mandatory && !disableMandatoryFields) {
             if (field.multiple) {
               fields[field.uid] = '[String]!';

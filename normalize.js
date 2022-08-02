@@ -6,9 +6,9 @@ var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
 var _require = require('./utils'),
     getJSONToHtmlRequired = _require.getJSONToHtmlRequired;
@@ -371,46 +371,20 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid].type = '[Int]!';
+            fields[field.uid].type = '[Float]!';
           } else {
-            fields[field.uid].type = 'Int!';
+            fields[field.uid].type = 'Float!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = '[Int]';
+          fields[field.uid].type = '[Float]';
         } else {
-          fields[field.uid].type = 'Int';
+          fields[field.uid].type = 'Float';
         }
 
         break;
       // This is to support custom field types nested inside groups, global_fields & modular_blocks
 
       case 'json':
-        // fields[field.uid] = {
-        //   resolve: function resolve(source, args, context) {
-        //     if (getJSONToHtmlRequired(jsonRteToHtml, field)) {
-        //       const keys = Object.keys(source);
-        //       const embeddedItems = {};
-        //       for (let i = 0; i < keys.length; i++) {
-        //         const key = keys[i];
-        //         if (!source[key]) {
-        //           continue;
-        //         }
-        //         if (Array.isArray(source[key])) {
-        //           for (let j = 0; j < source[key].length; j++) {
-        //             if (source[key][j].type === 'doc') {
-        //               source[key] = parseJSONRTEToHtml(source[key][j].children, embeddedItems, key, source, context, createNodeId, prefix);
-        //             }
-        //           }
-        //         } else {
-        //           if (source[key].type === 'doc') {
-        //             source[key] = parseJSONRTEToHtml(source[key].children, embeddedItems, key, source, context, createNodeId, prefix);
-        //           }
-        //         }
-        //       }
-        //     }
-        //     return source[field.uid] || null;
-        //   }
-        // };
         if (getJSONToHtmlRequired(jsonRteToHtml, field)) {
           jsonRteFields.push({
             parent: parent,

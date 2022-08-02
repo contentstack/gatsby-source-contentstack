@@ -1,7 +1,18 @@
 'use strict';
+
+/*
+  `node-fetch` have different export depending on CJS or ESM
+  context - requiring CJS (regular build) will return a function directly,
+  requiring ESM (what is currently being bundled for rendering engines
+  which are used by DSG) will return object with `default` field which is
+  a function. `preferDefault` helper will just use `.default` if available,
+  but will fallback to entire export if not available
+*/
+const preferDefault = m => (m && m.default) || m;
+
 /**NPM dependencies */
 const queryString = require('query-string');
-const fetch = require('node-fetch');
+const fetch = preferDefault(require('node-fetch'));
 
 // eslint-disable-next-line import/no-unresolved
 const { version } = require('./package.json');

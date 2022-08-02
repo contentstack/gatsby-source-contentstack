@@ -59,6 +59,9 @@ plugins: [
       locales: [‘en-us’,’fr-fr’],
       // In this case, the plugin will fetch only English (United States) and French (France) language data.
 
+      // Optional:Specify true to convert the JSONRte repsonse to HTML default it is set to false
+      jsonRteToHtml: false,
+
       // Optional: Specify the content types and locales of which you want the plugin to retrieve data.
     },
   },
@@ -150,6 +153,7 @@ To use this, you need to have the following plugins installed:
 - gatsby-transformer-sharp
 - gatsby-plugin-sharp
 - gatsby-source-filesystem
+- gatsby-plugin-image
 
 ```graphql
 {
@@ -258,7 +262,9 @@ Here’s an example of the same:
 }
 ```
 
-For more information checkout gatsby's documentation on usage of the [new image plugin](https://www.gatsbyjs.com/docs/how-to/plugins-and-themes/adding-gatsby-image-support/).
+For more information checkout gatsby's image plugin documentation on usage of the [new image plugin](https://www.gatsbyjs.com/docs/how-to/plugins-and-themes/adding-gatsby-image-support/).
+
+For more information on region support please refer [About Region's](https://www.contentstack.com/docs/developers/contentstack-regions/api-endpoints/)
 
 [gatsby]: https://www.gatsbyjs.org/
 [contentstack]: https://www.contentstack.com/
