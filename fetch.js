@@ -60,34 +60,35 @@ var OPTIONS_ENTRIES_CLASS_MAPPING = {
 
 exports.fetchData = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(configOptions, reporter, cache, contentTypeOption) {
-    var syncData, entryService, _syncData, contentstackData;
+    var activity, syncData, entryService, _syncData, contentstackData;
 
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            console.time('Fetch Contentstack data');
-            console.log('Starting to fetch data from Contentstack');
-            _context.prev = 2;
+            activity = reporter.activityTimer("Fetching contentstack data");
+            activity.start();
+            activity.setStatus('Starting to fetch data from Contentstack');
+            _context.prev = 3;
             syncData = {};
             entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
-            _context.next = 7;
+            _context.next = 8;
             return entryService.fetchSyncData(configOptions, cache, fetchSyncData);
 
-          case 7:
+          case 8:
             _syncData = _context.sent;
             syncData.data = _syncData.data;
             contentstackData = {
               syncData: syncData.data
             };
-            console.timeEnd('Fetch Contentstack data');
+            activity.end();
             return _context.abrupt("return", {
               contentstackData: contentstackData
             });
 
-          case 14:
-            _context.prev = 14;
-            _context.t0 = _context["catch"](2);
+          case 15:
+            _context.prev = 15;
+            _context.t0 = _context["catch"](3);
             reporter.panic({
               id: CODES.SyncError,
               context: {
@@ -96,12 +97,12 @@ exports.fetchData = /*#__PURE__*/function () {
               error: _context.t0
             });
 
-          case 17:
+          case 18:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 14]]);
+    }, _callee, null, [[3, 15]]);
   }));
 
   return function (_x, _x2, _x3, _x4) {
