@@ -81,7 +81,7 @@ exports.fetchData = /*#__PURE__*/function () {
             contentstackData = {
               syncData: syncData.data
             };
-            activity.end();
+            activity.end("Fetching Contentstack data completed");
             return _context.abrupt("return", {
               contentstackData: contentstackData
             });

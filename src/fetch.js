@@ -50,7 +50,7 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
     syncData.data = _syncData.data;
     const contentstackData = { syncData: syncData.data };
   
-    activity.end()
+    activity.end("Fetching Contentstack data completed");
   
     return { contentstackData };
   } catch (error) {
