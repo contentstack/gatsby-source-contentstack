@@ -66,7 +66,7 @@ exports.fetchData = /*#__PURE__*/function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            activity = reporter.activityTimer("Fetching contentstack data");
+            activity = reporter.activityTimer("Fetching Contentstack data");
             activity.start();
             activity.setStatus('Starting to fetch data from Contentstack');
             _context.prev = 3;
@@ -81,7 +81,7 @@ exports.fetchData = /*#__PURE__*/function () {
             contentstackData = {
               syncData: syncData.data
             };
-            activity.end("Fetching Contentstack data completed");
+            activity.end();
             return _context.abrupt("return", {
               contentstackData: contentstackData
             });
