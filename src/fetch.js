@@ -39,8 +39,9 @@ const OPTIONS_ENTRIES_CLASS_MAPPING = {
 };
 
 exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) => {
-  console.time('Fetch Contentstack data');
-  console.log('Starting to fetch data from Contentstack');
+  const activity= reporter.activityTimer(`Fetching Contentstack data`);
+  activity.start();
+  activity.setStatus('Starting to fetch data from Contentstack');
 
   try {
     let syncData = {};
@@ -49,7 +50,7 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
     syncData.data = _syncData.data;
     const contentstackData = { syncData: syncData.data };
   
-    console.timeEnd('Fetch Contentstack data');
+    activity.end()
   
     return { contentstackData };
   } catch (error) {
