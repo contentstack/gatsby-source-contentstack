@@ -30,10 +30,10 @@ plugins: [
       // Optional: CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 
       cdn: `cdn_url`,
 
-      // Optional: expediteBuild set this to either true or false
+      // Recommended: Specify true if you want to fetch/source data parallelly. It enhances the performance on both gatsby build/develop command.
       expediteBuild: `boolean_value`,
 
-      // Optional: Specify true if you want to generate custom schema
+      // Recommended: Specify true if you want to generate custom schema when the content type models are complex.
       enableSchemaGeneration : `boolean_value`,
 
       // Optional: Specify true if you want to generate optional graphql fields for mandatory Contentstack fields
@@ -53,16 +53,12 @@ plugins: [
       excludeContentTypes: [‘home’,’about’],
       // This will fetch the data of all the available content types excluding the ‘home’ and ‘about’ content types.
 
-      // Note: Only one of the above options should be used to fetch data. If you add both options to fetch all contentTypes and excludeContentTypes, than only one of the query gets executed.
-
       // Optional: Include the locales that you want the plugin to fetch data from.
       locales: [‘en-us’,’fr-fr’],
       // In this case, the plugin will fetch only English (United States) and French (France) language data.
 
-      // Optional:Specify true to convert the JSONRte repsonse to HTML default it is set to false
-      jsonRteToHtml: false,
-
-      // Optional: Specify the content types and locales of which you want the plugin to retrieve data.
+      // Optional: Specify true to convert the JSON-RTE repsonse to HTML. Default it is set to false
+      jsonRteToHtml: false ,
     },
   },
 ]
