@@ -1,13 +1,19 @@
 'use strict';
 
-exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
+const Contentstack = require('@contentstack/utils');
+
+const { getJSONToHtmlRequired } = require('./utils');
+const { makeEntryNodeUid, makeAssetNodeUid } = require('./normalize');
+
+exports.createResolvers = async ({ createResolvers, cache, createNodeId }, configOptions) => {
   const resolvers = {};
 
   const typePrefix = configOptions.type_prefix || 'Contentstack';
-  const [fileFields, references, groups] = await Promise.all([
+  const [fileFields, references, groups, jsonRteFields] = await Promise.all([
     cache.get(`${typePrefix}_${configOptions.api_key}_file_fields`),
     cache.get(`${typePrefix}_${configOptions.api_key}_references`),
     cache.get(`${typePrefix}_${configOptions.api_key}_groups`),
+    cache.get(`${typePrefix}_${configOptions.api_key}_json_rte_fields`),
   ]);
 
   fileFields && fileFields.forEach(fileField => {
@@ -75,5 +81,88 @@ exports.createResolvers = async ({ createResolvers, cache }, configOptions) => {
       },
     };
   });
+  jsonRteFields && jsonRteFields.forEach(jsonRteField => {
+    resolvers[jsonRteField.parent] = {
+      ...resolvers[jsonRteField.parent],
+      ...{
+        [jsonRteField.field.uid]: {
+          resolve: (source, args, context) => {
+            if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, jsonRteField.field)) {
+              const keys = Object.keys(source);
+              const embeddedItems = {};
+              for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                if (!source[key]) {
+                  continue;
+                }
+                if (Array.isArray(source[key])) {
+                  for (let j = 0; j < source[key].length; j++) {
+                    if (source[key][j].type === 'doc') {
+                      source[key] = parseJSONRTEToHtml(source[key][j].children, embeddedItems, key, source, context, createNodeId, typePrefix);
+                    }
+                  }
+                } else {
+                  if (source[key].type === 'doc') {
+                    source[key] = parseJSONRTEToHtml(source[key].children, embeddedItems, key, source, context, createNodeId, typePrefix);
+                  }
+                }
+              }
+            }
+            return source[jsonRteField.field.uid] || null;
+          }
+        }
+      }
+    };
+  });
   createResolvers(resolvers);
+};
+
+function parseJSONRTEToHtml(children, embeddedItems, key, source, context, createNodeId, prefix) {
+  embeddedItems[key] = embeddedItems[key] || [];
+  getChildren(children, embeddedItems, key, source, context, createNodeId, prefix);
+  source._embedded_items = { ...source._embedded_items, ...embeddedItems };
+  return parseJSONRteToHtmlHelper(source, key);
+}
+
+function getChildren(children, embeddedItems, key, source, context, createNodeId, prefix) {
+  for (let j = 0; j < children.length; j++) {
+    const child = children[j];
+    if (child.type === 'reference') {
+
+      let id;
+      if (child.attrs && child.attrs.type === 'asset') {
+        id = makeAssetNodeUid({
+          publish_details: { locale: source.publish_details.locale },
+          uid: child.attrs['asset-uid'],
+        }, createNodeId, prefix);
+      } else {
+        id = makeEntryNodeUid({
+          publish_details: { locale: source.publish_details.locale },
+          uid: child.attrs['entry-uid']
+        }, createNodeId, prefix);
+      }
+
+      const node = context.nodeModel.getNodeById({ id });
+      // The following line is required by contentstack utils package to parse value from json to html.
+      node._content_type_uid = child.attrs['content-type-uid'];
+      embeddedItems[key].push(node);
+    }
+    if (child.children) {
+      getChildren(child.children, embeddedItems, key, source, context, createNodeId, prefix);
+    }
+  }
+}
+
+function parseJSONRteToHtmlHelper(value, path) {
+  let jsonRteToHtml = {};
+  if (value) {
+    Contentstack.jsonToHTML({
+      entry: value,
+      paths: [path]
+    });
+    jsonRteToHtml = value[path];
+  } else {
+    jsonRteToHtml = null;
+  }
+  return jsonRteToHtml;
 };
