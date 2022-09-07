@@ -20,9 +20,7 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
   } catch (error) {
     reporter.panic({
       id: CODES.SyncError,
-      context: {
-        sourceMessage: `Error occurred while fetching contentstack in [sourceNodes]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`
-      },
+      context: { sourceMessage: `Error occurred while fetching contentstack in [sourceNodes]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.` },
       error
     });
     throw error;
@@ -49,7 +47,6 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
     if (n.internal.type === `${typePrefix}_assets`) {
       assetsNodeIds.add(n.id);
     }
-
     touchNode(n);
   });
 
@@ -84,7 +81,6 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
   // Cache the found count
   configOptions.downloadImages && await cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
-  // adding nodes
   const contentTypesMap = {};
   contentstackData.contentTypes.forEach(contentType => {
     contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -96,7 +92,7 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
   syncData.entry_published && syncData.entry_published.forEach(item => {
     item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
     const contentType = contentTypesMap[item.content_type_uid];
-    const normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+    const normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
     const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
     createNode(entryNode);
   });

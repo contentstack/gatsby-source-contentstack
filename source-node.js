@@ -138,7 +138,6 @@ exports.sourceNodes = /*#__PURE__*/function () {
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
 
           case 33:
-            // adding nodes
             contentTypesMap = {};
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -149,7 +148,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
               item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var contentType = contentTypesMap[item.content_type_uid];
-              var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+              var normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
               var entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
               createNode(entryNode);
             });
