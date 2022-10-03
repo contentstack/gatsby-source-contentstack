@@ -140,6 +140,36 @@ referred entry are often needed, the referred entry data is provided at the `ref
 }
 ```
 
+## Querying global fields
+
+Global fields provide a convenient way of capturing a common set of fields. These implement
+a common interface which can be used to commonise between different types using the global field.
+
+For example, suppose you used a global field for author information:
+
+```graphql
+fragment Author on contentstack_author {
+  name
+}
+
+query {
+  allContentstackBlogs {
+    node {
+      authors {
+        ...Author
+      }
+    }
+  }
+  allContentstackArticles {
+    node {
+      authors {
+        ...Author
+      }
+    }
+  }
+}
+```
+
 ## Querying downloaded images
 
 ## Prerequisites
