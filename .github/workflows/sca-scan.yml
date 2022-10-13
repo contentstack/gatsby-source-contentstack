@@ -1,8 +1,5 @@
 name: Source Composition Analysis Scan
 on:
-  push:
-    branches:
-      - master
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
@@ -14,3 +11,5 @@ jobs:
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects
