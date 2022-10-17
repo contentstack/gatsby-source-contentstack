@@ -186,28 +186,45 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
   return entryObj;
 };
 
-const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId) => {
+const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, interfaceParent) => {
   const blockFields = {};
-  let blockType = `type ${parent} @infer {`;
+  let blockType = interfaceParent ? `type ${parent} implements ${interfaceParent} @infer {` : `type ${parent} @infer {`;
+  let blockInterface = interfaceParent && `interface ${interfaceParent} {`;
 
   blocks.forEach(block => {
     const newparent = parent.concat(block.uid);
-    blockType = blockType.concat(`${block.uid} : ${newparent} `);
-    const { fields } = buildCustomSchema(block.schema, types, references, groups, fileFields, jsonRteFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
+    // If this block has a reference_to, it is a global field and should have a new interface
+    const newInterfaceParent = block.reference_to ? `${prefix}_${block.reference_to}` : interfaceParent && interfaceParent.concat(block.uid);
 
+    blockType = blockType.concat(`${block.uid} : ${newparent} `);
+    blockInterface = blockInterface && blockInterface.concat(`${block.uid} : ${newInterfaceParent}`);
+
+    const { fields } = buildCustomSchema(block.schema, types, references, groups, fileFields, jsonRteFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, newInterfaceParent);
+
+    const typeFields = {};
+    const interfaceFields = {};
     for (const key in fields) {
-      if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
-        fields[key] = fields[key].type;
-      }
+      typeFields[key] = fields[key].type || fields[key];
+      interfaceFields[key] = typeFields[key].replace(newparent, newInterfaceParent);
     }
+
     if (Object.keys(fields).length > 0) {
-      const type = `type ${newparent} @infer ${JSON.stringify(fields).replace(/"/g, '')}`;
-      types.push(type);
+      if (newInterfaceParent) {
+        const interfaceType = `interface ${newInterfaceParent} ${JSON.stringify(interfaceFields).replace(/"/g, '')}`;
+        const type = `type ${newparent} implements ${newInterfaceParent} @infer ${JSON.stringify(typeFields).replace(/"/g, '')}`;
+        types.push(interfaceType, type);
+      } else {
+        const type = `type ${newparent} @infer ${JSON.stringify(typeFields).replace(/"/g, '')}`;
+        types.push(type);
+      }
       blockFields[block.uid] = `${newparent}`;
     }
   });
+
   blockType = blockType.concat('}');
-  return blockType;
+  blockInterface = blockInterface && blockInterface.concat('}');
+
+  return blockInterface ? [blockInterface, blockType] : [blockType];
 };
 
 exports.extendSchemaWithDefaultEntryFields = schema => {
@@ -265,7 +282,7 @@ exports.extendSchemaWithDefaultEntryFields = schema => {
 };
 
 const buildCustomSchema = (exports.buildCustomSchema = (schema, types, references, groups,
-  fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId) => {
+  fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, interfaceParent) => {
   const fields = {};
   groups = groups || [];
   references = references || [];
@@ -398,52 +415,64 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
         break;
       case 'group':
       case 'global_field':
-        let newparent = parent.concat('_', field.uid);
+        const newParent = parent.concat('_', field.uid);
+        // If this is a global field, generate a new top-level interface for it
+        const newInterfaceParent = field.data_type === 'global_field'
+          ? `${prefix}_${field.reference_to}`
+          : interfaceParent && interfaceParent.concat('_', field.uid);
 
-        const result = buildCustomSchema(field.schema, types, references, groups, fileFields, jsonRteFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
+        const result = buildCustomSchema(field.schema, types, references, groups, fileFields, jsonRteFields, newParent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, newInterfaceParent);
 
+        const typeFields = {};
+        const interfaceFields = {};
         for (const key in result.fields) {
-          if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
-            result.fields[key] = result.fields[key].type;
-          }
+          typeFields[key] = result.fields[key].type || result.fields[key];
+          interfaceFields[key] = typeFields[key].replace(newParent, newInterfaceParent);
         }
 
-        if (Object.keys(result.fields).length > 0) {
-          let type = `type ${newparent} @infer ${JSON.stringify(result.fields).replace(/"/g, '')}`;
-          types.push(type);
+        if (Object.keys(typeFields).length > 0) {
+          if (newInterfaceParent) {
+            const interfaceType = `interface ${newInterfaceParent} ${JSON.stringify(interfaceFields).replace(/"/g, '')}`;
+            const type = `type ${newParent} implements ${newInterfaceParent} @infer ${JSON.stringify(typeFields).replace(/"/g, '')}`;
+            types.push(interfaceType, type);
+          } else {
+            const type = `type ${newParent} @infer ${JSON.stringify(typeFields).replace(/"/g, '')}`;
+            types.push(type);
+          }
 
           groups.push({ parent, field });
 
           if (field.mandatory && !disableMandatoryFields) {
             if (field.multiple) {
-              fields[field.uid] = `[${newparent}]!`;
+              fields[field.uid] = `[${newParent}]!`;
             } else {
-              fields[field.uid] = `${newparent}!`;
+              fields[field.uid] = `${newParent}!`;
             }
           } else if (field.multiple) {
-            fields[field.uid] = `[${newparent}]`;
+            fields[field.uid] = `[${newParent}]`;
           } else {
-            fields[field.uid] = `${newparent}`;
+            fields[field.uid] = `${newParent}`;
           }
         }
 
         break;
       case 'blocks':
-        let blockparent = parent.concat('_', field.uid);
+        const blockParent = parent.concat('_', field.uid);
+        const blockInterfaceParent = interfaceParent && interfaceParent.concat('_', field.uid);
 
-        const blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, jsonRteFields, blockparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId);
-        types.push(blockType);
+        const blockTypes = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, jsonRteFields, blockParent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, blockInterfaceParent);
+        types.push(...blockTypes);
 
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid] = `[${blockparent}]!`;
+            fields[field.uid] = `[${blockParent}]!`;
           } else {
-            fields[field.uid] = `${blockparent}!`;
+            fields[field.uid] = `${blockParent}!`;
           }
         } else if (field.multiple) {
-          fields[field.uid] = `[${blockparent}]`;
+          fields[field.uid] = `[${blockParent}]`;
         } else {
-          fields[field.uid] = `${blockparent}`;
+          fields[field.uid] = `${blockParent}`;
         }
 
         break;
