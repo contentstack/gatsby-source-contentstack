@@ -224,7 +224,7 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
 
     var newInterfaceParent = block.reference_to ? "".concat(prefix, "_").concat(block.reference_to) : interfaceParent && interfaceParent.concat(block.uid);
     blockType = blockType.concat("".concat(block.uid, " : ").concat(newparent, " "));
-    blockInterface = blockInterface && blockInterface.concat("".concat(block.uid, " : ").concat(newInterfaceParent));
+    blockInterface = blockInterface && blockInterface.concat("".concat(block.uid, " : ").concat(newInterfaceParent, " "));
 
     var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, jsonRteFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, newInterfaceParent),
         fields = _buildCustomSchema.fields;
