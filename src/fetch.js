@@ -56,7 +56,7 @@ exports.fetchData = async (
   cache,
   contentTypeOption
 ) => {
-  logger = reporter
+  logger = reporter;
   activity = reporter.activityTimer(`Fetching Contentstack data`);
   activity.start();
   activity.setStatus('Starting to fetch data from Contentstack');
@@ -67,7 +67,7 @@ exports.fetchData = async (
     const _syncData = await entryService.fetchSyncData(
       configOptions,
       cache,
-      fetchSyncData,
+      fetchSyncData
     );
     syncData.data = _syncData.data;
     const contentstackData = { syncData: syncData.data };
@@ -140,12 +140,14 @@ const fetchCsData = async (url, config, query) => {
         } else {
           if (data) {
             data?.items?.map((item, index) => {
+              logger?.info('First logger');
               if (!item.data.hasOwnProperty('publish_details')) {
                 data?.items?.splice(index, 1);
                 logger?.info('Testing warning');
               }
             });
           }
+
           resolve(data);
         }
       })

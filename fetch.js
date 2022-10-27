@@ -215,11 +215,15 @@ var fetchCsData = /*#__PURE__*/function () {
                     var _data$items;
 
                     data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.map(function (item, index) {
+                      var _logger;
+
+                      (_logger = logger) === null || _logger === void 0 ? void 0 : _logger.info('First logger');
+
                       if (!item.data.hasOwnProperty('publish_details')) {
-                        var _data$items2, _logger;
+                        var _data$items2, _logger2;
 
                         data === null || data === void 0 ? void 0 : (_data$items2 = data.items) === null || _data$items2 === void 0 ? void 0 : _data$items2.splice(index, 1);
-                        (_logger = logger) === null || _logger === void 0 ? void 0 : _logger.info('Testing warning');
+                        (_logger2 = logger) === null || _logger2 === void 0 ? void 0 : _logger2.info('Testing warning');
                       }
                     });
                   }
