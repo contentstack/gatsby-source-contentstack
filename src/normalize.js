@@ -58,18 +58,18 @@ exports.processEntry = (contentType, entry, createNodeId, createContentDigest, t
 exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) => {
   const resolveEntry = {
     ...entry,
-    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions),
+    ...builtEntry(contentType.schema, entry, entry?.publish_details?.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions),
   };
   return resolveEntry;
 };
 
 const makeAssetNodeUid = (exports.makeAssetNodeUid = (asset, createNodeId, typePrefix) => {
-  const publishedLocale = asset.publish_details.locale;
+  const publishedLocale = asset?.publish_details?.locale;
   return createNodeId(`${typePrefix.toLowerCase()}-assets-${asset.uid}-${publishedLocale}`);
 });
 
 const makeEntryNodeUid = (exports.makeEntryNodeUid = (entry, createNodeId, typePrefix) => {
-  const publishedLocale = entry.publish_details.locale;
+  const publishedLocale = entry?.publish_details?.locale;
   return createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${publishedLocale}`);
 });
 

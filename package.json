@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-contentstack",
-  "version": "4.0.7",
+  "version": "4.0.8",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",

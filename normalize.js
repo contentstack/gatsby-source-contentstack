@@ -71,18 +71,24 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
 };
 
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
-  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
+  var _entry$publish_detail;
+
+  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry === null || entry === void 0 ? void 0 : (_entry$publish_detail = entry.publish_details) === null || _entry$publish_detail === void 0 ? void 0 : _entry$publish_detail.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
 
   return resolveEntry;
 };
 
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId, typePrefix) {
-  var publishedLocale = asset.publish_details.locale;
+  var _asset$publish_detail;
+
+  var publishedLocale = asset === null || asset === void 0 ? void 0 : (_asset$publish_detail = asset.publish_details) === null || _asset$publish_detail === void 0 ? void 0 : _asset$publish_detail.locale;
   return createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(asset.uid, "-").concat(publishedLocale));
 };
 
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId, typePrefix) {
-  var publishedLocale = entry.publish_details.locale;
+  var _entry$publish_detail2;
+
+  var publishedLocale = entry === null || entry === void 0 ? void 0 : (_entry$publish_detail2 = entry.publish_details) === null || _entry$publish_detail2 === void 0 ? void 0 : _entry$publish_detail2.locale;
   return createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(publishedLocale));
 };
 
