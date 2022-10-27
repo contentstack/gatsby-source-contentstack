@@ -162,16 +162,20 @@ function getChildren(children, embeddedItems, key, source, context, createNodeId
       var id = void 0;
 
       if (child.attrs && child.attrs.type === 'asset') {
+        var _source$publish_detai;
+
         id = makeAssetNodeUid({
           publish_details: {
-            locale: source.publish_details.locale
+            locale: source === null || source === void 0 ? void 0 : (_source$publish_detai = source.publish_details) === null || _source$publish_detai === void 0 ? void 0 : _source$publish_detai.locale
           },
           uid: child.attrs['asset-uid']
         }, createNodeId, prefix);
       } else {
+        var _source$publish_detai2;
+
         id = makeEntryNodeUid({
           publish_details: {
-            locale: source.publish_details.locale
+            locale: source === null || source === void 0 ? void 0 : (_source$publish_detai2 = source.publish_details) === null || _source$publish_detai2 === void 0 ? void 0 : _source$publish_detai2.locale
           },
           uid: child.attrs['entry-uid']
         }, createNodeId, prefix);

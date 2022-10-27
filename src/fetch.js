@@ -144,9 +144,9 @@ const fetchCsData = async (url, config, query) => {
                 data?.items?.splice(index, 1);
                 console.log('resolved data........', data);
               }
-            });
-            resolve(data);
+            }); 
           }
+          resolve(data);
         }
       })
       .catch(err => {

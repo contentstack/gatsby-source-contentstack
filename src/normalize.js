@@ -58,7 +58,7 @@ exports.processEntry = (contentType, entry, createNodeId, createContentDigest, t
 exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) => {
   const resolveEntry = {
     ...entry,
-    ...builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions),
+    ...builtEntry(contentType.schema, entry, entry?.publish_details?.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions),
   };
   return resolveEntry;
 };
@@ -69,7 +69,7 @@ const makeAssetNodeUid = (exports.makeAssetNodeUid = (asset, createNodeId, typeP
 });
 
 const makeEntryNodeUid = (exports.makeEntryNodeUid = (entry, createNodeId, typePrefix) => {
-  console.log("entry..........",entry)
+  console.log("entry..........",entry?.publish_details)
   const publishedLocale = entry?.publish_details?.locale;
   console.log("locales____________",publishedLocale)
   return createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${publishedLocale}`);

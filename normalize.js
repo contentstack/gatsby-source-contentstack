@@ -71,7 +71,9 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
 };
 
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
-  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
+  var _entry$publish_detail;
+
+  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry === null || entry === void 0 ? void 0 : (_entry$publish_detail = entry.publish_details) === null || _entry$publish_detail === void 0 ? void 0 : _entry$publish_detail.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
 
   return resolveEntry;
 };
@@ -84,10 +86,10 @@ var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId,
 };
 
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId, typePrefix) {
-  var _entry$publish_detail;
+  var _entry$publish_detail2;
 
-  console.log("entry..........", entry);
-  var publishedLocale = entry === null || entry === void 0 ? void 0 : (_entry$publish_detail = entry.publish_details) === null || _entry$publish_detail === void 0 ? void 0 : _entry$publish_detail.locale;
+  console.log("entry..........", entry === null || entry === void 0 ? void 0 : entry.publish_details);
+  var publishedLocale = entry === null || entry === void 0 ? void 0 : (_entry$publish_detail2 = entry.publish_details) === null || _entry$publish_detail2 === void 0 ? void 0 : _entry$publish_detail2.locale;
   console.log("locales____________", publishedLocale);
   return createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(publishedLocale));
 };

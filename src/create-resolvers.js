@@ -132,12 +132,12 @@ function getChildren(children, embeddedItems, key, source, context, createNodeId
       let id;
       if (child.attrs && child.attrs.type === 'asset') {
         id = makeAssetNodeUid({
-          publish_details: { locale: source.publish_details.locale },
+          publish_details: { locale: source?.publish_details?.locale },
           uid: child.attrs['asset-uid'],
         }, createNodeId, prefix);
       } else {
         id = makeEntryNodeUid({
-          publish_details: { locale: source.publish_details.locale },
+          publish_details: { locale: source?.publish_details?.locale },
           uid: child.attrs['entry-uid']
         }, createNodeId, prefix);
       }

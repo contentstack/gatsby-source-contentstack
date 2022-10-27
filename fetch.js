@@ -224,8 +224,9 @@ var fetchCsData = /*#__PURE__*/function () {
                         console.log('resolved data........', data);
                       }
                     });
-                    resolve(data);
                   }
+
+                  resolve(data);
                 }
               })["catch"](function (err) {
                 console.error(err);
