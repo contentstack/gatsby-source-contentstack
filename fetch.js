@@ -211,21 +211,23 @@ var fetchCsData = /*#__PURE__*/function () {
                   console.error(data);
                   reject(data);
                 } else {
-                  if (data) {
+                  // if (data) {
+                  if (data.items) {
                     var filteredArray = data === null || data === void 0 ? void 0 : data.items.filter(function (item) {
                       return item.data.hasOwnProperty('publish_details');
                     });
-                    data.items = filteredArray; // data?.items?.map((item, index) => {
-                    //   if (item.data.hasOwnProperty('publish_details')) {
-                    //     // data?.items?.splice(index, 1);
-                    //     // logger?.info('Testing warning');
-                    //     console.log('testing');
-                    //   } else {
-                    //     data?.items?.splice(index, 1);
-                    //     logger?.info('Inside condition');
-                    //   }
-                    // });
-                  }
+                    data.items = filteredArray;
+                  } // data?.items?.map((item, index) => {
+                  //   if (item.data.hasOwnProperty('publish_details')) {
+                  //     // data?.items?.splice(index, 1);
+                  //     // logger?.info('Testing warning');
+                  //     console.log('testing');
+                  //   } else {
+                  //     data?.items?.splice(index, 1);
+                  //     logger?.info('Inside condition');
+                  //   }
+                  // });
+
 
                   console.log('logg', data);
                   resolve(data);
