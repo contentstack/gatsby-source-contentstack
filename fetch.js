@@ -212,22 +212,22 @@ var fetchCsData = /*#__PURE__*/function () {
                   reject(data);
                 } else {
                   if (data) {
-                    var _data$items;
-
-                    data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.map(function (item, index) {
-                      if (item.data.hasOwnProperty('publish_details')) {
-                        // data?.items?.splice(index, 1);
-                        // logger?.info('Testing warning');
-                        console.log('testing');
-                      } else {
-                        var _data$items2, _logger;
-
-                        data === null || data === void 0 ? void 0 : (_data$items2 = data.items) === null || _data$items2 === void 0 ? void 0 : _data$items2.splice(index, 1);
-                        (_logger = logger) === null || _logger === void 0 ? void 0 : _logger.info('Inside condition');
-                      }
+                    var filteredArray = data === null || data === void 0 ? void 0 : data.items.filter(function (item) {
+                      return item.data.hasOwnProperty('publish_details');
                     });
+                    data.items = filteredArray; // data?.items?.map((item, index) => {
+                    //   if (item.data.hasOwnProperty('publish_details')) {
+                    //     // data?.items?.splice(index, 1);
+                    //     // logger?.info('Testing warning');
+                    //     console.log('testing');
+                    //   } else {
+                    //     data?.items?.splice(index, 1);
+                    //     logger?.info('Inside condition');
+                    //   }
+                    // });
                   }
 
+                  console.log('logg', data);
                   resolve(data);
                 }
               })["catch"](function (err) {

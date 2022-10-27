@@ -139,18 +139,23 @@ const fetchCsData = async (url, config, query) => {
           reject(data);
         } else {
           if (data) {
-            data?.items?.map((item, index) => {
-              if (item.data.hasOwnProperty('publish_details')) {
-                // data?.items?.splice(index, 1);
-                // logger?.info('Testing warning');
-                console.log('testing');
-              } else {
-                data?.items?.splice(index, 1);
-                logger?.info('Inside condition');
-              }
+            const filteredArray = data?.items.filter(item => {
+              return item.data.hasOwnProperty('publish_details');
             });
-          }
 
+            data.items = filteredArray;
+            // data?.items?.map((item, index) => {
+            //   if (item.data.hasOwnProperty('publish_details')) {
+            //     // data?.items?.splice(index, 1);
+            //     // logger?.info('Testing warning');
+            //     console.log('testing');
+            //   } else {
+            //     data?.items?.splice(index, 1);
+            //     logger?.info('Inside condition');
+            //   }
+            // });
+          }
+          console.log('logg', data);
           resolve(data);
         }
       })
