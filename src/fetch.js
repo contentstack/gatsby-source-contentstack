@@ -141,10 +141,11 @@ const fetchCsData = async (url, config, query) => {
                 console.log('indexed....', index);
                 data?.items?.splice(index, 1);
                 console.log('resolved data........', data);
+                resolve(data);
               }
             });
-            resolve(data);
           }
+          resolve(data);
         }
       })
       .catch(err => {

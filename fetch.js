@@ -219,10 +219,12 @@ var fetchCsData = /*#__PURE__*/function () {
                         console.log('indexed....', index);
                         data === null || data === void 0 ? void 0 : (_data$items2 = data.items) === null || _data$items2 === void 0 ? void 0 : _data$items2.splice(index, 1);
                         console.log('resolved data........', data);
+                        resolve(data);
                       }
                     });
-                    resolve(data);
                   }
+
+                  resolve(data);
                 }
               })["catch"](function (err) {
                 console.error(err);
