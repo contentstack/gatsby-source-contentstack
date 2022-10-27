@@ -69,9 +69,7 @@ const makeAssetNodeUid = (exports.makeAssetNodeUid = (asset, createNodeId, typeP
 });
 
 const makeEntryNodeUid = (exports.makeEntryNodeUid = (entry, createNodeId, typePrefix) => {
-  console.log("entry..........",entry?.publish_details)
   const publishedLocale = entry?.publish_details?.locale;
-  console.log("locales____________",publishedLocale)
   return createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${publishedLocale}`);
 });
 

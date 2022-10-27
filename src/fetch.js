@@ -63,7 +63,7 @@ exports.fetchData = async (
     const _syncData = await entryService.fetchSyncData(
       configOptions,
       cache,
-      fetchSyncData
+      fetchSyncData,
     );
     syncData.data = _syncData.data;
     const contentstackData = { syncData: syncData.data };
@@ -134,35 +134,15 @@ const fetchCsData = async (url, config, query) => {
           console.error(data);
           reject(data);
         } else {
-          // if (data) {
-          //   console.log('checking data....', data);
-          //   data?.items?.map((item, index) => {
-          //     console.log('item.........'.item);
-          //     if (!item.data.hasOwnProperty('publish_details')) {
-          //       console.log('indexed....', index);
-          //       console.log('.........................');
-          //       data?.items?.splice(index, 1);
-          //       console.log('resolved data........', data);
-          //     }
-          //   });
-          // }
           if (data) {
-            console.log('checking data....', data);
-            const resultData = data?.items?.filter(async (item, index) => {
-              console.log('item.........'.item);
-              return item.data.hasOwnProperty('publish_details')
-                ? data.items
-                : null;
-              // if (!item.data.hasOwnProperty('publish_details')) {
-              //   console.log('indexed....', index);
-              //   console.log('.........................');
-              //   data?.items?.splice(index, 1);
-              //   console.log('resolved data........', data);
-              // }
+            data?.items?.map((item, index) => {
+              if (!item.data.hasOwnProperty('publish_details')) {
+                data?.items?.splice(index, 1);
+                reporter.info('Testing warning');
+              }
             });
-            console.log('resultData++++++++++', resultData);
-            resolve(resultData);
           }
+          resolve(data);
         }
       })
       .catch(err => {

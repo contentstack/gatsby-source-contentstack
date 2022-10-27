@@ -182,11 +182,11 @@ var fetchSyncData = /*#__PURE__*/function () {
 }();
 
 var fetchCsData = /*#__PURE__*/function () {
-  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(url, config, query) {
+  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(url, config, query) {
     var queryParams, apiUrl, option;
-    return _regenerator["default"].wrap(function _callee5$(_context5) {
+    return _regenerator["default"].wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
             query = query || {};
             query.include_count = true;
@@ -200,7 +200,7 @@ var fetchCsData = /*#__PURE__*/function () {
                 access_token: config.delivery_token
               }
             };
-            return _context5.abrupt("return", new Promise(function (resolve, reject) {
+            return _context4.abrupt("return", new Promise(function (resolve, reject) {
               fetch(apiUrl, option).then(function (response) {
                 return response.json();
               }).then(function (data) {
@@ -208,46 +208,20 @@ var fetchCsData = /*#__PURE__*/function () {
                   console.error(data);
                   reject(data);
                 } else {
-                  // if (data) {
-                  //   console.log('checking data....', data);
-                  //   data?.items?.map((item, index) => {
-                  //     console.log('item.........'.item);
-                  //     if (!item.data.hasOwnProperty('publish_details')) {
-                  //       console.log('indexed....', index);
-                  //       console.log('.........................');
-                  //       data?.items?.splice(index, 1);
-                  //       console.log('resolved data........', data);
-                  //     }
-                  //   });
-                  // }
                   if (data) {
                     var _data$items;
 
-                    console.log('checking data....', data);
-                    var resultData = data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.filter( /*#__PURE__*/function () {
-                      var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(item, index) {
-                        return _regenerator["default"].wrap(function _callee4$(_context4) {
-                          while (1) {
-                            switch (_context4.prev = _context4.next) {
-                              case 0:
-                                console.log('item.........'.item);
-                                return _context4.abrupt("return", item.data.hasOwnProperty('publish_details') ? data.items : null);
+                    data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.map(function (item, index) {
+                      if (!item.data.hasOwnProperty('publish_details')) {
+                        var _data$items2;
 
-                              case 2:
-                              case "end":
-                                return _context4.stop();
-                            }
-                          }
-                        }, _callee4);
-                      }));
-
-                      return function (_x12, _x13) {
-                        return _ref5.apply(this, arguments);
-                      };
-                    }());
-                    console.log('resultData++++++++++', resultData);
-                    resolve(resultData);
+                        data === null || data === void 0 ? void 0 : (_data$items2 = data.items) === null || _data$items2 === void 0 ? void 0 : _data$items2.splice(index, 1);
+                        reporter.info('Testing warning');
+                      }
+                    });
                   }
+
+                  resolve(data);
                 }
               })["catch"](function (err) {
                 console.error(err);
@@ -257,10 +231,10 @@ var fetchCsData = /*#__PURE__*/function () {
 
           case 7:
           case "end":
-            return _context5.stop();
+            return _context4.stop();
         }
       }
-    }, _callee5);
+    }, _callee4);
   }));
 
   return function fetchCsData(_x9, _x10, _x11) {
@@ -269,29 +243,29 @@ var fetchCsData = /*#__PURE__*/function () {
 }();
 
 var getPagedData = /*#__PURE__*/function () {
-  var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(url, config, responseKey) {
+  var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(url, config, responseKey) {
     var query,
         skip,
         limit,
         aggregatedResponse,
         response,
-        _args6 = arguments;
-    return _regenerator["default"].wrap(function _callee6$(_context6) {
+        _args5 = arguments;
+    return _regenerator["default"].wrap(function _callee5$(_context5) {
       while (1) {
-        switch (_context6.prev = _context6.next) {
+        switch (_context5.prev = _context5.next) {
           case 0:
-            query = _args6.length > 3 && _args6[3] !== undefined ? _args6[3] : {};
-            skip = _args6.length > 4 && _args6[4] !== undefined ? _args6[4] : 0;
-            limit = _args6.length > 5 && _args6[5] !== undefined ? _args6[5] : 100;
-            aggregatedResponse = _args6.length > 6 && _args6[6] !== undefined ? _args6[6] : null;
+            query = _args5.length > 3 && _args5[3] !== undefined ? _args5[3] : {};
+            skip = _args5.length > 4 && _args5[4] !== undefined ? _args5[4] : 0;
+            limit = _args5.length > 5 && _args5[5] !== undefined ? _args5[5] : 100;
+            aggregatedResponse = _args5.length > 6 && _args5[6] !== undefined ? _args5[6] : null;
             query.skip = skip;
             query.limit = limit;
             query.include_global_field_schema = true;
-            _context6.next = 9;
+            _context5.next = 9;
             return fetchCsData(url, config, query);
 
           case 9:
-            response = _context6.sent;
+            response = _context5.sent;
 
             if (!aggregatedResponse) {
               aggregatedResponse = response[responseKey];
@@ -300,43 +274,43 @@ var getPagedData = /*#__PURE__*/function () {
             }
 
             if (!(skip + limit <= response.count)) {
-              _context6.next = 13;
+              _context5.next = 13;
               break;
             }
 
-            return _context6.abrupt("return", getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse));
+            return _context5.abrupt("return", getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse));
 
           case 13:
-            return _context6.abrupt("return", aggregatedResponse);
+            return _context5.abrupt("return", aggregatedResponse);
 
           case 14:
           case "end":
-            return _context6.stop();
+            return _context5.stop();
         }
       }
-    }, _callee6);
+    }, _callee5);
   }));
 
-  return function getPagedData(_x14, _x15, _x16) {
-    return _ref6.apply(this, arguments);
+  return function getPagedData(_x12, _x13, _x14) {
+    return _ref5.apply(this, arguments);
   };
 }();
 
 var getSyncData = /*#__PURE__*/function () {
-  var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(url, config, query, responseKey) {
+  var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(url, config, query, responseKey) {
     var aggregatedResponse,
         response,
-        _args7 = arguments;
-    return _regenerator["default"].wrap(function _callee7$(_context7) {
+        _args6 = arguments;
+    return _regenerator["default"].wrap(function _callee6$(_context6) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context6.prev = _context6.next) {
           case 0:
-            aggregatedResponse = _args7.length > 4 && _args7[4] !== undefined ? _args7[4] : null;
-            _context7.next = 3;
+            aggregatedResponse = _args6.length > 4 && _args6[4] !== undefined ? _args6[4] : null;
+            _context6.next = 3;
             return fetchCsData(url, config, query);
 
           case 3:
-            response = _context7.sent;
+            response = _context6.sent;
 
             if (!aggregatedResponse) {
               aggregatedResponse = {};
@@ -350,26 +324,26 @@ var getSyncData = /*#__PURE__*/function () {
             }
 
             if (!response.pagination_token) {
-              _context7.next = 7;
+              _context6.next = 7;
               break;
             }
 
-            return _context7.abrupt("return", getSyncData(url, config, query = {
+            return _context6.abrupt("return", getSyncData(url, config, query = {
               pagination_token: response.pagination_token
             }, responseKey, aggregatedResponse));
 
           case 7:
-            return _context7.abrupt("return", aggregatedResponse);
+            return _context6.abrupt("return", aggregatedResponse);
 
           case 8:
           case "end":
-            return _context7.stop();
+            return _context6.stop();
         }
       }
-    }, _callee7);
+    }, _callee6);
   }));
 
-  return function getSyncData(_x17, _x18, _x19, _x20) {
-    return _ref7.apply(this, arguments);
+  return function getSyncData(_x15, _x16, _x17, _x18) {
+    return _ref6.apply(this, arguments);
   };
 }();
