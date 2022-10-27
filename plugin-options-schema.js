@@ -1,7 +1,8 @@
 'use strict';
 
 var _require = require('./node-helper'),
-  validateContentstackAccess = _require.validateContentstackAccess;
+    validateContentstackAccess = _require.validateContentstackAccess;
+
 exports.pluginOptionsSchema = function (_ref) {
   var Joi = _ref.Joi;
   return Joi.object({
@@ -20,4 +21,3 @@ exports.pluginOptionsSchema = function (_ref) {
     jsonRteToHtml: Joi["boolean"]()["default"](false).description("Specify true if you want to generate html from json RTE field")
   }).external(validateContentstackAccess);
 };
-//# sourceMappingURL=plugin-options-schema.js.map

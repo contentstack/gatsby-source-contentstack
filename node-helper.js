@@ -1,5 +1,4 @@
 'use strict';
-
 /*
   `node-fetch` have different export depending on CJS or ESM
   context - requiring CJS (regular build) will return a function directly,
@@ -8,27 +7,38 @@
   a function. `preferDefault` helper will just use `.default` if available,
   but will fallback to entire export if not available
 */
+
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
 var preferDefault = function preferDefault(m) {
   return m && m["default"] || m;
 };
+
 var fetch = preferDefault(require('node-fetch'));
+
 var deleteContentstackNodes = function deleteContentstackNodes(item, type, createNodeId, getNode, deleteNode, typePrefix) {
   var nodeId = '';
   var node = null;
+
   if (type === 'entry') {
     nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(item.uid, "-").concat(item.locale));
   }
+
   if (type === 'asset') {
     nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(item.uid, "-").concat(item.locale));
   }
+
   node = getNode(nodeId);
+
   if (node) {
     deleteNode(node);
   }
 };
+
 var validateContentstackAccess = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(pluginOptions) {
     var host;
@@ -40,7 +50,9 @@ var validateContentstackAccess = /*#__PURE__*/function () {
               _context.next = 2;
               break;
             }
+
             return _context.abrupt("return", undefined);
+
           case 2:
             host = pluginOptions.cdn ? pluginOptions.cdn : 'https://cdn.contentstack.io/v3';
             _context.next = 5;
@@ -54,8 +66,10 @@ var validateContentstackAccess = /*#__PURE__*/function () {
             }).then(function (ok) {
               if (!ok) throw new Error("Cannot access Contentstack with api_key=".concat(pluginOptions.api_key, " & delivery_token=").concat(pluginOptions.delivery_token, "."));
             });
+
           case 5:
             return _context.abrupt("return", undefined);
+
           case 6:
           case "end":
             return _context.stop();
@@ -63,10 +77,11 @@ var validateContentstackAccess = /*#__PURE__*/function () {
       }
     }, _callee);
   }));
+
   return function validateContentstackAccess(_x) {
     return _ref.apply(this, arguments);
   };
 }();
+
 exports.deleteContentstackNodes = deleteContentstackNodes;
 exports.validateContentstackAccess = validateContentstackAccess;
-//# sourceMappingURL=node-helper.js.map
