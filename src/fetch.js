@@ -140,10 +140,13 @@ const fetchCsData = async (url, config, query) => {
         } else {
           if (data) {
             data?.items?.map((item, index) => {
-              logger?.info('First logger');
-              if (!item.data.hasOwnProperty('publish_details')) {
+              if (item.data.hasOwnProperty('publish_details')) {
+                // data?.items?.splice(index, 1);
+                // logger?.info('Testing warning');
+                console.log('testing');
+              } else {
                 data?.items?.splice(index, 1);
-                logger?.info('Testing warning');
+                logger?.info('Inside condition');
               }
             });
           }
