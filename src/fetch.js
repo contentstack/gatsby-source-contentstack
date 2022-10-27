@@ -134,19 +134,33 @@ const fetchCsData = async (url, config, query) => {
           console.error(data);
           reject(data);
         } else {
+          // if (data) {
+          //   console.log('checking data....', data);
+          //   data?.items?.map((item, index) => {
+          //     console.log('item.........'.item);
+          //     if (!item.data.hasOwnProperty('publish_details')) {
+          //       console.log('indexed....', index);
+          //       console.log('.........................');
+          //       data?.items?.splice(index, 1);
+          //       console.log('resolved data........', data);
+          //     }
+          //   });
+          // }
           if (data) {
             console.log('checking data....', data);
-            data?.items?.map((item, index) => {
+            const resultData = data?.items?.filter((item, index) => {
               console.log('item.........'.item);
-              if (!item.data.hasOwnProperty('publish_details')) {
-                console.log('indexed....', index);
-                console.log(".........................")
-                data?.items?.splice(index, 1);
-                console.log('resolved data........', data);
-              }
-            }); 
+              return item.data.hasOwnProperty('publish_details');
+              // if (!item.data.hasOwnProperty('publish_details')) {
+              //   console.log('indexed....', index);
+              //   console.log('.........................');
+              //   data?.items?.splice(index, 1);
+              //   console.log('resolved data........', data);
+              // }
+            });
+            console.log('resultData++++++++++', resultData);
+            resolve(resultData);
           }
-          resolve(data);
         }
       })
       .catch(err => {

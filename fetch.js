@@ -208,25 +208,34 @@ var fetchCsData = /*#__PURE__*/function () {
                   console.error(data);
                   reject(data);
                 } else {
+                  // if (data) {
+                  //   console.log('checking data....', data);
+                  //   data?.items?.map((item, index) => {
+                  //     console.log('item.........'.item);
+                  //     if (!item.data.hasOwnProperty('publish_details')) {
+                  //       console.log('indexed....', index);
+                  //       console.log('.........................');
+                  //       data?.items?.splice(index, 1);
+                  //       console.log('resolved data........', data);
+                  //     }
+                  //   });
+                  // }
                   if (data) {
                     var _data$items;
 
                     console.log('checking data....', data);
-                    data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.map(function (item, index) {
+                    var resultData = data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.filter(function (item, index) {
                       console.log('item.........'.item);
-
-                      if (!item.data.hasOwnProperty('publish_details')) {
-                        var _data$items2;
-
-                        console.log('indexed....', index);
-                        console.log(".........................");
-                        data === null || data === void 0 ? void 0 : (_data$items2 = data.items) === null || _data$items2 === void 0 ? void 0 : _data$items2.splice(index, 1);
-                        console.log('resolved data........', data);
-                      }
+                      return item.data.hasOwnProperty('publish_details'); // if (!item.data.hasOwnProperty('publish_details')) {
+                      //   console.log('indexed....', index);
+                      //   console.log('.........................');
+                      //   data?.items?.splice(index, 1);
+                      //   console.log('resolved data........', data);
+                      // }
                     });
+                    console.log('resultData++++++++++', resultData);
+                    resolve(resultData);
                   }
-
-                  resolve(data);
                 }
               })["catch"](function (err) {
                 console.error(err);
