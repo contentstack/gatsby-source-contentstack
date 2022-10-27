@@ -136,18 +136,14 @@ const fetchCsData = async (url, config, query) => {
         } else {
           if (data) {
             console.log('checking data....', data);
-            const itemsArray = data.items;
-            itemsArray.map(item => {
-              if (item.data.hasOwnProperty('publish_details')) {
-                const index = item.data.indexOf('publish_details');
+            data?.items?.map(item, index => {
+              if (!item.data.hasOwnProperty('publish_details')) {
                 console.log('indexed....', index);
+                data?.items?.splice(index, 1);
+                console.log('resolved data........', data);
               }
             });
             resolve(data);
-          } else {
-            // const index = data?.items.data.indexOf("publish_details");
-            // console.log("indexed....",index)
-            // data?.data.splice(index)
           }
         }
       })

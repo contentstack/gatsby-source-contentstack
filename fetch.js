@@ -209,18 +209,19 @@ var fetchCsData = /*#__PURE__*/function () {
                   reject(data);
                 } else {
                   if (data) {
+                    var _data$items;
+
                     console.log('checking data....', data);
-                    var itemsArray = data.items;
-                    itemsArray.map(function (item) {
-                      if (item.data.hasOwnProperty('publish_details')) {
-                        var index = item.data.indexOf('publish_details');
+                    data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.map(item, function (index) {
+                      if (!item.data.hasOwnProperty('publish_details')) {
+                        var _data$items2;
+
                         console.log('indexed....', index);
+                        data === null || data === void 0 ? void 0 : (_data$items2 = data.items) === null || _data$items2 === void 0 ? void 0 : _data$items2.splice(index, 1);
+                        console.log('resolved data........', data);
                       }
                     });
                     resolve(data);
-                  } else {// const index = data?.items.data.indexOf("publish_details");
-                    // console.log("indexed....",index)
-                    // data?.data.splice(index)
                   }
                 }
               })["catch"](function (err) {
