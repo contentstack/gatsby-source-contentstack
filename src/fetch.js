@@ -135,8 +135,15 @@ const fetchCsData = async (url, config, query) => {
           reject(data);
         } else {
           if (data) {
-            console.log('checking data....', data);
-            resolve(data);
+            // console.log('checking data....', data);
+            if(data?.items.data.hasOwnProperty("publish_details")){
+              resolve(data);
+            }else{
+              const index = data?.items.data.indexOf("publish_details");
+              console.log("indexed....",index)
+              // data?.data.splice(index)
+            }
+            
           }
         }
       })
