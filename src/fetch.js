@@ -140,6 +140,7 @@ const fetchCsData = async (url, config, query) => {
               console.log('item.........'.item);
               if (!item.data.hasOwnProperty('publish_details')) {
                 console.log('indexed....', index);
+                console.log(".........................")
                 data?.items?.splice(index, 1);
                 console.log('resolved data........', data);
               }

@@ -219,6 +219,7 @@ var fetchCsData = /*#__PURE__*/function () {
                         var _data$items2;
 
                         console.log('indexed....', index);
+                        console.log(".........................");
                         data === null || data === void 0 ? void 0 : (_data$items2 = data.items) === null || _data$items2 === void 0 ? void 0 : _data$items2.splice(index, 1);
                         console.log('resolved data........', data);
                       }

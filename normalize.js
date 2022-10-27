@@ -82,7 +82,9 @@ var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId,
 };
 
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId, typePrefix) {
+  console.log("entry..........", entry);
   var publishedLocale = entry.publish_details.locale;
+  console.log("locales____________", publishedLocale);
   return createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(publishedLocale));
 };
 
