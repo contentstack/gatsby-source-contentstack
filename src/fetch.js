@@ -47,13 +47,17 @@ const OPTIONS_ENTRIES_CLASS_MAPPING = {
   excludeContentTypeslocales: FetchSpecifiedLocalesAndContentTypesEntries,
 };
 
+let activity;
+let logger;
+
 exports.fetchData = async (
   configOptions,
   reporter,
   cache,
   contentTypeOption
 ) => {
-  const activity = reporter.activityTimer(`Fetching Contentstack data`);
+  logger = reporter
+  activity = reporter.activityTimer(`Fetching Contentstack data`);
   activity.start();
   activity.setStatus('Starting to fetch data from Contentstack');
 
@@ -138,7 +142,7 @@ const fetchCsData = async (url, config, query) => {
             data?.items?.map((item, index) => {
               if (!item.data.hasOwnProperty('publish_details')) {
                 data?.items?.splice(index, 1);
-                reporter.info('Testing warning');
+                logger?.info('Testing warning');
               }
             });
           }

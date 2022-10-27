@@ -57,25 +57,28 @@ var OPTIONS_ENTRIES_CLASS_MAPPING = {
   contentTypeslocales: FetchSpecifiedLocalesAndContentTypesEntries,
   excludeContentTypeslocales: FetchSpecifiedLocalesAndContentTypesEntries
 };
+var activity;
+var logger;
 
 exports.fetchData = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(configOptions, reporter, cache, contentTypeOption) {
-    var activity, syncData, entryService, _syncData, contentstackData;
+    var syncData, entryService, _syncData, contentstackData;
 
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
+            logger = reporter;
             activity = reporter.activityTimer("Fetching Contentstack data");
             activity.start();
             activity.setStatus('Starting to fetch data from Contentstack');
-            _context.prev = 3;
+            _context.prev = 4;
             syncData = {};
             entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
-            _context.next = 8;
+            _context.next = 9;
             return entryService.fetchSyncData(configOptions, cache, fetchSyncData);
 
-          case 8:
+          case 9:
             _syncData = _context.sent;
             syncData.data = _syncData.data;
             contentstackData = {
@@ -86,9 +89,9 @@ exports.fetchData = /*#__PURE__*/function () {
               contentstackData: contentstackData
             });
 
-          case 15:
-            _context.prev = 15;
-            _context.t0 = _context["catch"](3);
+          case 16:
+            _context.prev = 16;
+            _context.t0 = _context["catch"](4);
             reporter.panic({
               id: CODES.SyncError,
               context: {
@@ -97,12 +100,12 @@ exports.fetchData = /*#__PURE__*/function () {
               error: _context.t0
             });
 
-          case 18:
+          case 19:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 15]]);
+    }, _callee, null, [[4, 16]]);
   }));
 
   return function (_x, _x2, _x3, _x4) {
@@ -213,10 +216,10 @@ var fetchCsData = /*#__PURE__*/function () {
 
                     data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.map(function (item, index) {
                       if (!item.data.hasOwnProperty('publish_details')) {
-                        var _data$items2;
+                        var _data$items2, _logger;
 
                         data === null || data === void 0 ? void 0 : (_data$items2 = data.items) === null || _data$items2 === void 0 ? void 0 : _data$items2.splice(index, 1);
-                        reporter.info('Testing warning');
+                        (_logger = logger) === null || _logger === void 0 ? void 0 : _logger.info('Testing warning');
                       }
                     });
                   }
