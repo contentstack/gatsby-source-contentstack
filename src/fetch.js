@@ -148,9 +148,11 @@ const fetchCsData = async (url, config, query) => {
           // }
           if (data) {
             console.log('checking data....', data);
-            const resultData = data?.items?.filter((item, index) => {
+            const resultData = data?.items?.filter(async (item, index) => {
               console.log('item.........'.item);
-              return item.data.hasOwnProperty('publish_details');
+              return item.data.hasOwnProperty('publish_details')
+                ? data.items
+                : null;
               // if (!item.data.hasOwnProperty('publish_details')) {
               //   console.log('indexed....', index);
               //   console.log('.........................');
