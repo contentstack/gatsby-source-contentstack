@@ -135,23 +135,19 @@ const fetchCsData = async (url, config, query) => {
           reject(data);
         } else {
           if (data) {
-            // console.log('checking data....', data);
-            if(data?.items.data.hasOwnProperty("publish_details")){
-              const itemsArray = data?.items
-              itemsArray.map((item)=>{
-                if(item.data.hasOwnProperty("publish_details")){
-                  const index = item.data.indexOf("publish_details");
-                  console.log("indexed....",index)
-                }
-              })
-              // console.log("indexed....",index)
-              resolve(data);
-            }else{
-              const index = data?.items.data.indexOf("publish_details");
-              console.log("indexed....",index)
-              // data?.data.splice(index)
-            }
-            
+            console.log('checking data....', data);
+            const itemsArray = data.items;
+            itemsArray.map(item => {
+              if (item.data.hasOwnProperty('publish_details')) {
+                const index = item.data.indexOf('publish_details');
+                console.log('indexed....', index);
+              }
+            });
+            resolve(data);
+          } else {
+            // const index = data?.items.data.indexOf("publish_details");
+            // console.log("indexed....",index)
+            // data?.data.splice(index)
           }
         }
       })
