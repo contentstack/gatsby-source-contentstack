@@ -64,13 +64,13 @@ exports.normalizeEntry = (contentType, entry, entriesNodeIds, assetsNodeIds, cre
 };
 
 const makeAssetNodeUid = (exports.makeAssetNodeUid = (asset, createNodeId, typePrefix) => {
-  const publishedLocale = asset.publish_details.locale;
+  const publishedLocale = asset?.publish_details?.locale;
   return createNodeId(`${typePrefix.toLowerCase()}-assets-${asset.uid}-${publishedLocale}`);
 });
 
 const makeEntryNodeUid = (exports.makeEntryNodeUid = (entry, createNodeId, typePrefix) => {
   console.log("entry..........",entry)
-  const publishedLocale = entry.publish_details.locale;
+  const publishedLocale = entry?.publish_details?.locale;
   console.log("locales____________",publishedLocale)
   return createNodeId(`${typePrefix.toLowerCase()}-entry-${entry.uid}-${publishedLocale}`);
 });

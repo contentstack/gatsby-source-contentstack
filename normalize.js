@@ -77,13 +77,17 @@ exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNod
 };
 
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId, typePrefix) {
-  var publishedLocale = asset.publish_details.locale;
+  var _asset$publish_detail;
+
+  var publishedLocale = asset === null || asset === void 0 ? void 0 : (_asset$publish_detail = asset.publish_details) === null || _asset$publish_detail === void 0 ? void 0 : _asset$publish_detail.locale;
   return createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(asset.uid, "-").concat(publishedLocale));
 };
 
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId, typePrefix) {
+  var _entry$publish_detail;
+
   console.log("entry..........", entry);
-  var publishedLocale = entry.publish_details.locale;
+  var publishedLocale = entry === null || entry === void 0 ? void 0 : (_entry$publish_detail = entry.publish_details) === null || _entry$publish_detail === void 0 ? void 0 : _entry$publish_detail.locale;
   console.log("locales____________", publishedLocale);
   return createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(publishedLocale));
 };
