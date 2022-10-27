@@ -213,7 +213,7 @@ var fetchCsData = /*#__PURE__*/function () {
 
                     console.log('checking data....', data);
                     data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.map(function (item, index) {
-                      console.log("item.........".item);
+                      console.log('item.........'.item);
 
                       if (!item.data.hasOwnProperty('publish_details')) {
                         var _data$items2;
@@ -221,12 +221,10 @@ var fetchCsData = /*#__PURE__*/function () {
                         console.log('indexed....', index);
                         data === null || data === void 0 ? void 0 : (_data$items2 = data.items) === null || _data$items2 === void 0 ? void 0 : _data$items2.splice(index, 1);
                         console.log('resolved data........', data);
-                        resolve(data);
                       }
                     });
+                    resolve(data);
                   }
-
-                  resolve(data);
                 }
               })["catch"](function (err) {
                 console.error(err);
