@@ -136,7 +136,8 @@ const fetchCsData = async (url, config, query) => {
         } else {
           if (data) {
             console.log('checking data....', data);
-            data?.items?.map(item, index => {
+            data?.items?.map((item, index) => {
+              console.log("item.........".item);
               if (!item.data.hasOwnProperty('publish_details')) {
                 console.log('indexed....', index);
                 data?.items?.splice(index, 1);

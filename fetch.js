@@ -212,7 +212,9 @@ var fetchCsData = /*#__PURE__*/function () {
                     var _data$items;
 
                     console.log('checking data....', data);
-                    data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.map(item, function (index) {
+                    data === null || data === void 0 ? void 0 : (_data$items = data.items) === null || _data$items === void 0 ? void 0 : _data$items.map(function (item, index) {
+                      console.log("item.........".item);
+
                       if (!item.data.hasOwnProperty('publish_details')) {
                         var _data$items2;
 
