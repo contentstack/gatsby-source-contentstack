@@ -197,7 +197,7 @@ const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, j
     const newInterfaceParent = block.reference_to ? `${prefix}_${block.reference_to}` : interfaceParent && interfaceParent.concat(block.uid);
 
     blockType = blockType.concat(`${block.uid} : ${newparent} `);
-    blockInterface = blockInterface && blockInterface.concat(`${block.uid} : ${newInterfaceParent}`);
+    blockInterface = blockInterface && blockInterface.concat(`${block.uid} : ${newInterfaceParent} `);
 
     const { fields } = buildCustomSchema(block.schema, types, references, groups, fileFields, jsonRteFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, newInterfaceParent);
 
