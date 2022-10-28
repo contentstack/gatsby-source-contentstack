@@ -28,7 +28,7 @@
   "dependencies": {
     "@contentstack/utils": "^1.1.1",
     "gatsby-core-utils": "^3.3.0",
-    "gatsby-source-filesystem": "^4.4.0",
+    "gatsby-source-filesystem": "^4.24.0",
     "node-fetch": "2.6.7",
     "progress": "^2.0.3",
     "query-string": "6.0.0"
