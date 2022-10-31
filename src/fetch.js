@@ -16,8 +16,17 @@ const fetch = preferDefault(require('node-fetch'));
 
 // eslint-disable-next-line import/no-unresolved
 const { version } = require('./package.json');
-const { FetchDefaultContentTypes, FetchSpecifiedContentTypes, FetchUnspecifiedContentTypes } = require('./contenttype-data');
-const { FetchDefaultEntries, FetchSpecifiedContentTypesEntries, FetchSpecifiedLocalesEntries, FetchSpecifiedLocalesAndContentTypesEntries } = require('./entry-data');
+const {
+  FetchDefaultContentTypes,
+  FetchSpecifiedContentTypes,
+  FetchUnspecifiedContentTypes,
+} = require('./contenttype-data');
+const {
+  FetchDefaultEntries,
+  FetchSpecifiedContentTypesEntries,
+  FetchSpecifiedLocalesEntries,
+  FetchSpecifiedLocalesAndContentTypesEntries,
+} = require('./entry-data');
 const { CODES } = require('./utils');
 
 const OPTION_CLASS_MAPPING = {
@@ -38,30 +47,44 @@ const OPTIONS_ENTRIES_CLASS_MAPPING = {
   excludeContentTypeslocales: FetchSpecifiedLocalesAndContentTypesEntries,
 };
 
-exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) => {
-  const activity= reporter.activityTimer(`Fetching Contentstack data`);
+let activity;
+let logger;
+
+exports.fetchData = async (
+  configOptions,
+  reporter,
+  cache,
+  contentTypeOption
+) => {
+  logger = reporter;
+  activity = reporter.activityTimer(`Fetching Contentstack data`);
   activity.start();
   activity.setStatus('Starting to fetch data from Contentstack');
 
   try {
     let syncData = {};
     const entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
-    const _syncData = await entryService.fetchSyncData(configOptions, cache, fetchSyncData);
+    const _syncData = await entryService.fetchSyncData(
+      configOptions,
+      cache,
+      fetchSyncData
+    );
     syncData.data = _syncData.data;
     const contentstackData = { syncData: syncData.data };
-  
-    activity.end()
-  
+
+    activity.end();
+
     return { contentstackData };
   } catch (error) {
     reporter.panic({
       id: CODES.SyncError,
-      context: { sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.` },
-      error
+      context: {
+        sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`,
+      },
+      error,
     });
   }
 };
-
 
 exports.fetchContentTypes = async (config, contentTypeOption) => {
   try {
@@ -70,13 +93,20 @@ exports.fetchContentTypes = async (config, contentTypeOption) => {
     const url = 'content_types';
     const responseKey = 'content_types';
     const contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
-    const allContentTypes = await contentType.getPagedData(url, config, responseKey, getPagedData);
+    const allContentTypes = await contentType.getPagedData(
+      url,
+      config,
+      responseKey,
+      getPagedData
+    );
     return allContentTypes;
   } catch (error) {
     reporter.panic({
       id: CODES.SyncError,
-      context: { sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.` },
-      error
+      context: {
+        sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`,
+      },
+      error,
     });
   }
 };
@@ -97,8 +127,8 @@ const fetchCsData = async (url, config, query) => {
     headers: {
       'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
       api_key: config.api_key,
-      access_token: config.delivery_token
-    }
+      access_token: config.delivery_token,
+    },
   };
   return new Promise((resolve, reject) => {
     fetch(apiUrl, option)
@@ -108,17 +138,31 @@ const fetchCsData = async (url, config, query) => {
           console.error(data);
           reject(data);
         } else {
+          if (data.items) {
+            const filteredData = data?.items.filter(item => {
+              return item.data.hasOwnProperty('publish_details');
+            });
+            data.items = filteredData;
+          }
           resolve(data);
         }
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err);
         reject(err);
       });
   });
 };
 
-const getPagedData = async (url, config, responseKey, query = {}, skip = 0, limit = 100, aggregatedResponse = null) => {
+const getPagedData = async (
+  url,
+  config,
+  responseKey,
+  query = {},
+  skip = 0,
+  limit = 100,
+  aggregatedResponse = null
+) => {
   query.skip = skip;
   query.limit = limit;
   query.include_global_field_schema = true;
@@ -129,12 +173,26 @@ const getPagedData = async (url, config, responseKey, query = {}, skip = 0, limi
     aggregatedResponse = aggregatedResponse.concat(response[responseKey]);
   }
   if (skip + limit <= response.count) {
-    return getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse);
+    return getPagedData(
+      url,
+      config,
+      responseKey,
+      (query = {}),
+      skip + limit,
+      limit,
+      aggregatedResponse
+    );
   }
   return aggregatedResponse;
 };
 
-const getSyncData = async (url, config, query, responseKey, aggregatedResponse = null) => {
+const getSyncData = async (
+  url,
+  config,
+  query,
+  responseKey,
+  aggregatedResponse = null
+) => {
   const response = await fetchCsData(url, config, query);
   if (!aggregatedResponse) {
     aggregatedResponse = {};
@@ -143,11 +201,21 @@ const getSyncData = async (url, config, query, responseKey, aggregatedResponse =
     aggregatedResponse.sync_token = response.sync_token;
   } else {
     aggregatedResponse.data = aggregatedResponse.data || [];
-    aggregatedResponse.data = aggregatedResponse.data.concat(response[responseKey]);
-    aggregatedResponse.sync_token = response.sync_token ? response.sync_token : aggregatedResponse.sync_token;
+    aggregatedResponse.data = aggregatedResponse.data.concat(
+      response[responseKey]
+    );
+    aggregatedResponse.sync_token = response.sync_token
+      ? response.sync_token
+      : aggregatedResponse.sync_token;
   }
   if (response.pagination_token) {
-    return getSyncData(url, config, query = { pagination_token: response.pagination_token }, responseKey, aggregatedResponse);
+    return getSyncData(
+      url,
+      config,
+      (query = { pagination_token: response.pagination_token }),
+      responseKey,
+      aggregatedResponse
+    );
   }
   return aggregatedResponse;
 };
