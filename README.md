@@ -59,6 +59,9 @@ plugins: [
 
       // Optional: Specify true to convert the JSON-RTE repsonse to HTML. Default it is set to false
       jsonRteToHtml: false ,
+      
+      // Optional: Specify a number to perform http-retries for network failures. By default it is set to 3.
+      httpRetries: 2
     },
   },
 ]
