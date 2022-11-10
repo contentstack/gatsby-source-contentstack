@@ -7,7 +7,7 @@ const { fetchContentTypes } = require('./fetch');
 const { getContentTypeOption } = require('./utils');
 const { resolveGatsbyImageData } = require('./gatsby-plugin-image');
 
-exports.createSchemaCustomization = async ({ cache, actions, schema, reporter }, configOptions) => {
+exports.createSchemaCustomization = async ({ cache, actions, schema, reporter, createNodeId }, configOptions) => {
   let contentTypes;
 
   const typePrefix = configOptions.type_prefix || 'Contentstack';
@@ -22,7 +22,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
     console.error('Contentstack fetch content type failed!');
   }
 
-  let references = [], groups = [], fileFields = [];
+  let references = [], groups = [], fileFields = [], jsonRteFields = [];
 
   if (configOptions.enableSchemaGeneration) {
     const { createTypes } = actions;
@@ -86,10 +86,11 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
       const name = `${typePrefix}_${contentTypeUid}`;
       const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-      let result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml);
+      let result = buildCustomSchema(extendedSchema, [], [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml, createNodeId, undefined);
       references = references.concat(result.references);
       groups = groups.concat(result.groups);
       fileFields = fileFields.concat(result.fileFields);
+      jsonRteFields = jsonRteFields.concat(result.jsonRteFields);
       const typeDefs = [`type linktype { title: String href: String }`,
         schema.buildObjectType({
           name,
@@ -106,6 +107,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter },
       await cache.set(`${typePrefix}_${configOptions.api_key}_references`, references),
       await cache.set(`${typePrefix}_${configOptions.api_key}_groups`, groups),
       await cache.set(`${typePrefix}_${configOptions.api_key}_file_fields`, fileFields),
+      await cache.set(`${typePrefix}_${configOptions.api_key}_json_rte_fields`, jsonRteFields),
     ]);
   }
 };

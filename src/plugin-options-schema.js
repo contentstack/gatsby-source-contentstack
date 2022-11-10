@@ -17,5 +17,6 @@ exports.pluginOptionsSchema = ({ Joi }) => {
     excludeContentTypes: Joi.array().items(Joi.string().required()).description(`Specify list of content-types to be excluded while fetching data from contentstack`),
     locales: Joi.array().items(Joi.string().required()).description(`Specify list of locales to be fetched from contentstack`),
     jsonRteToHtml: Joi.boolean().default(false).description(`Specify true if you want to generate html from json RTE field`),
+    httpRetries: Joi.number().integer().default(3).description(`Specify the number of times to perform http request on a network failure`),
   }).external(validateContentstackAccess);
 };

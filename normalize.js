@@ -2,15 +2,18 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
-var Contentstack = require('@contentstack/utils');
+var _require = require('./utils'),
+    getJSONToHtmlRequired = _require.getJSONToHtmlRequired;
 
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
   var nodeId = createNodeId("".concat(typePrefix.toLowerCase(), "-contentType-").concat(contentType.uid));
@@ -68,22 +71,28 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
 };
 
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
-  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry.publish_details.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
+  var _entry$publish_detail;
+
+  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry === null || entry === void 0 ? void 0 : (_entry$publish_detail = entry.publish_details) === null || _entry$publish_detail === void 0 ? void 0 : _entry$publish_detail.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
 
   return resolveEntry;
 };
 
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId, typePrefix) {
-  var publishedLocale = asset.publish_details.locale;
+  var _asset$publish_detail;
+
+  var publishedLocale = asset === null || asset === void 0 ? void 0 : (_asset$publish_detail = asset.publish_details) === null || _asset$publish_detail === void 0 ? void 0 : _asset$publish_detail.locale;
   return createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(asset.uid, "-").concat(publishedLocale));
 };
 
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId, typePrefix) {
-  var publishedLocale = entry.publish_details.locale;
+  var _entry$publish_detail2;
+
+  var publishedLocale = entry === null || entry === void 0 ? void 0 : (_entry$publish_detail2 = entry.publish_details) === null || _entry$publish_detail2 === void 0 ? void 0 : _entry$publish_detail2.locale;
   return createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(publishedLocale));
 };
 
-var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
+var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
   var groupObj = null;
 
   if (field.multiple) {
@@ -109,7 +118,7 @@ var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeId
   return groupObj;
 };
 
-var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix) {
+var normalizeModularBlock = function normalizeModularBlock(blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
   var modularBlocksObj = [];
 
   if (value) {
@@ -194,27 +203,15 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
 
       case 'group':
       case 'global_field':
-        entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
         break;
 
       case 'blocks':
-        entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix);
+        entryObj[field.uid] = normalizeModularBlock(field.blocks, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
         break;
 
       case 'json':
-        if (getJSONToHtmlRequired(configOptions.jsonRteToHtml, field)) {
-          var valueClone = {
-            value: value
-          };
-          Contentstack.jsonToHTML({
-            entry: valueClone,
-            paths: ['value']
-          });
-          entryObj[field.uid] = valueClone.value;
-        } else {
-          entryObj[field.uid] = value;
-        }
-
+        entryObj[field.uid] = value;
         break;
 
       default:
@@ -224,30 +221,45 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   return entryObj;
 };
 
-var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, parent, prefix, disableMandatoryFields) {
+var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, interfaceParent) {
   var blockFields = {};
-  var blockType = "type ".concat(parent, " @infer {");
+  var blockType = interfaceParent ? "type ".concat(parent, " implements ").concat(interfaceParent, " @infer {") : "type ".concat(parent, " @infer {");
+  var blockInterface = interfaceParent && "interface ".concat(interfaceParent, " {");
   blocks.forEach(function (block) {
-    var newparent = parent.concat(block.uid);
-    blockType = blockType.concat("".concat(block.uid, " : ").concat(newparent, " "));
+    var newparent = parent.concat(block.uid); // If this block has a reference_to, it is a global field and should have a new interface
 
-    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields),
+    var newInterfaceParent = block.reference_to ? "".concat(prefix, "_").concat(block.reference_to) : interfaceParent && interfaceParent.concat(block.uid);
+    blockType = blockType.concat("".concat(block.uid, " : ").concat(newparent, " "));
+    blockInterface = blockInterface && blockInterface.concat("".concat(block.uid, " : ").concat(newInterfaceParent, " "));
+
+    var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, jsonRteFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, newInterfaceParent),
         fields = _buildCustomSchema.fields;
 
+    var typeFields = {};
+    var interfaceFields = {};
+
     for (var key in fields) {
-      if (Object.prototype.hasOwnProperty.call(fields[key], 'type')) {
-        fields[key] = fields[key].type;
-      }
+      typeFields[key] = fields[key].type || fields[key];
+      interfaceFields[key] = typeFields[key].replace(newparent, newInterfaceParent);
     }
 
     if (Object.keys(fields).length > 0) {
-      var type = "type ".concat(newparent, " @infer ").concat(JSON.stringify(fields).replace(/"/g, ''));
-      types.push(type);
+      if (newInterfaceParent) {
+        var interfaceType = "interface ".concat(newInterfaceParent, " ").concat(JSON.stringify(interfaceFields).replace(/"/g, ''));
+        var type = "type ".concat(newparent, " implements ").concat(newInterfaceParent, " @infer ").concat(JSON.stringify(typeFields).replace(/"/g, ''));
+        types.push(interfaceType, type);
+      } else {
+        var _type = "type ".concat(newparent, " @infer ").concat(JSON.stringify(typeFields).replace(/"/g, ''));
+
+        types.push(_type);
+      }
+
       blockFields[block.uid] = "".concat(newparent);
     }
   });
   blockType = blockType.concat('}');
-  return blockType;
+  blockInterface = blockInterface && blockInterface.concat('}');
+  return blockInterface ? [blockInterface, blockType] : [blockType];
 };
 
 exports.extendSchemaWithDefaultEntryFields = function (schema) {
@@ -302,13 +314,16 @@ exports.extendSchemaWithDefaultEntryFields = function (schema) {
   return schema;
 };
 
-var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, parent, prefix, disableMandatoryFields, jsonRteToHtml) {
+var buildCustomSchema = exports.buildCustomSchema = function (schema, types, references, groups, fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, interfaceParent) {
   var fields = {};
   groups = groups || [];
   references = references || [];
   fileFields = fileFields || [];
   types = types || [];
+  jsonRteFields = jsonRteFields || [];
   schema.forEach(function (field) {
+    var _types;
+
     switch (field.data_type) {
       case 'text':
         fields[field.uid] = {
@@ -381,36 +396,55 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid].type = '[Int]!';
+            fields[field.uid].type = '[Float]!';
           } else {
-            fields[field.uid].type = 'Int!';
+            fields[field.uid].type = 'Float!';
           }
         } else if (field.multiple) {
-          fields[field.uid].type = '[Int]';
+          fields[field.uid].type = '[Float]';
         } else {
-          fields[field.uid].type = 'Int';
+          fields[field.uid].type = 'Float';
         }
 
         break;
       // This is to support custom field types nested inside groups, global_fields & modular_blocks
 
       case 'json':
-        fields[field.uid] = {
-          resolve: function resolve(source) {
-            return source[field.uid] || null;
-          }
-        };
+        if (getJSONToHtmlRequired(jsonRteToHtml, field)) {
+          jsonRteFields.push({
+            parent: parent,
+            field: field
+          });
 
-        if (field.mandatory && !disableMandatoryFields) {
-          if (field.multiple) {
-            fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? '[String]!' : '[JSON]!';
+          if (field.mandatory && !disableMandatoryFields) {
+            if (field.multiple) {
+              fields[field.uid] = '[String]!';
+            } else {
+              fields[field.uid] = 'String!';
+            }
+          } else if (field.multiple) {
+            fields[field.uid] = '[String]';
           } else {
-            fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? 'String!' : 'JSON!';
+            fields[field.uid] = 'String';
           }
-        } else if (field.multiple) {
-          fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? '[String]' : '[JSON]';
         } else {
-          fields[field.uid].type = getJSONToHtmlRequired(jsonRteToHtml, field) ? 'String' : 'JSON';
+          fields[field.uid] = {
+            resolve: function resolve(source) {
+              return source[field.uid] || null;
+            }
+          };
+
+          if (field.mandatory && !disableMandatoryFields) {
+            if (field.multiple) {
+              fields[field.uid].type = '[JSON]!';
+            } else {
+              fields[field.uid].type = 'JSON!';
+            }
+          } else if (field.multiple) {
+            fields[field.uid].type = '[JSON]';
+          } else {
+            fields[field.uid].type = 'JSON';
+          }
         }
 
         break;
@@ -452,18 +486,29 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
       case 'group':
       case 'global_field':
-        var newparent = parent.concat('_', field.uid);
-        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, newparent, prefix, disableMandatoryFields);
+        var newParent = parent.concat('_', field.uid); // If this is a global field, generate a new top-level interface for it
+
+        var newInterfaceParent = field.data_type === 'global_field' ? "".concat(prefix, "_").concat(field.reference_to) : interfaceParent && interfaceParent.concat('_', field.uid);
+        var result = buildCustomSchema(field.schema, types, references, groups, fileFields, jsonRteFields, newParent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, newInterfaceParent);
+        var typeFields = {};
+        var interfaceFields = {};
 
         for (var key in result.fields) {
-          if (Object.prototype.hasOwnProperty.call(result.fields[key], 'type')) {
-            result.fields[key] = result.fields[key].type;
-          }
+          typeFields[key] = result.fields[key].type || result.fields[key];
+          interfaceFields[key] = typeFields[key].replace(newParent, newInterfaceParent);
         }
 
-        if (Object.keys(result.fields).length > 0) {
-          var type = "type ".concat(newparent, " @infer ").concat(JSON.stringify(result.fields).replace(/"/g, ''));
-          types.push(type);
+        if (Object.keys(typeFields).length > 0) {
+          if (newInterfaceParent) {
+            var interfaceType = "interface ".concat(newInterfaceParent, " ").concat(JSON.stringify(interfaceFields).replace(/"/g, ''));
+            var type = "type ".concat(newParent, " implements ").concat(newInterfaceParent, " @infer ").concat(JSON.stringify(typeFields).replace(/"/g, ''));
+            types.push(interfaceType, type);
+          } else {
+            var _type2 = "type ".concat(newParent, " @infer ").concat(JSON.stringify(typeFields).replace(/"/g, ''));
+
+            types.push(_type2);
+          }
+
           groups.push({
             parent: parent,
             field: field
@@ -471,34 +516,36 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
 
           if (field.mandatory && !disableMandatoryFields) {
             if (field.multiple) {
-              fields[field.uid] = "[".concat(newparent, "]!");
+              fields[field.uid] = "[".concat(newParent, "]!");
             } else {
-              fields[field.uid] = "".concat(newparent, "!");
+              fields[field.uid] = "".concat(newParent, "!");
             }
           } else if (field.multiple) {
-            fields[field.uid] = "[".concat(newparent, "]");
+            fields[field.uid] = "[".concat(newParent, "]");
           } else {
-            fields[field.uid] = "".concat(newparent);
+            fields[field.uid] = "".concat(newParent);
           }
         }
 
         break;
 
       case 'blocks':
-        var blockparent = parent.concat('_', field.uid);
-        var blockType = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, blockparent, prefix, disableMandatoryFields);
-        types.push(blockType);
+        var blockParent = parent.concat('_', field.uid);
+        var blockInterfaceParent = interfaceParent && interfaceParent.concat('_', field.uid);
+        var blockTypes = buildBlockCustomSchema(field.blocks, types, references, groups, fileFields, jsonRteFields, blockParent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, blockInterfaceParent);
+
+        (_types = types).push.apply(_types, (0, _toConsumableArray2["default"])(blockTypes));
 
         if (field.mandatory && !disableMandatoryFields) {
           if (field.multiple) {
-            fields[field.uid] = "[".concat(blockparent, "]!");
+            fields[field.uid] = "[".concat(blockParent, "]!");
           } else {
-            fields[field.uid] = "".concat(blockparent, "!");
+            fields[field.uid] = "".concat(blockParent, "!");
           }
         } else if (field.multiple) {
-          fields[field.uid] = "[".concat(blockparent, "]");
+          fields[field.uid] = "[".concat(blockParent, "]");
         } else {
-          fields[field.uid] = "".concat(blockparent);
+          fields[field.uid] = "".concat(blockParent);
         }
 
         break;
@@ -509,9 +556,9 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
         if (typeof field.reference_to === 'string' || field.reference_to.length === 1) {
           field.reference_to = Array.isArray(field.reference_to) ? field.reference_to[0] : field.reference_to;
 
-          var _type = "type ".concat(prefix, "_").concat(field.reference_to, " implements Node @infer { title: String").concat(disableMandatoryFields ? '' : '!', " }");
+          var _type3 = "type ".concat(prefix, "_").concat(field.reference_to, " implements Node @infer { title: String").concat(disableMandatoryFields ? '' : '!', " }");
 
-          types.push(_type);
+          types.push(_type3);
           references.push({
             parent: parent,
             uid: field.uid
@@ -555,10 +602,7 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
     types: types,
     references: references,
     groups: groups,
-    fileFields: fileFields
+    fileFields: fileFields,
+    jsonRteFields: jsonRteFields
   };
-};
-
-var getJSONToHtmlRequired = function getJSONToHtmlRequired(jsonRteToHtml, field) {
-  return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
 };

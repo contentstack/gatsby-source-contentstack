@@ -14,9 +14,9 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
 var _require = require('gatsby/graphql'),
     GraphQLInt = _require.GraphQLInt,
@@ -38,13 +38,13 @@ var _require5 = require('./gatsby-plugin-image'),
 
 exports.createSchemaCustomization = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref2, configOptions) {
-    var cache, actions, schema, reporter, contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
+    var cache, actions, schema, reporter, createNodeId, contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, jsonRteFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
 
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            cache = _ref2.cache, actions = _ref2.actions, schema = _ref2.schema, reporter = _ref2.reporter;
+            cache = _ref2.cache, actions = _ref2.actions, schema = _ref2.schema, reporter = _ref2.reporter, createNodeId = _ref2.createNodeId;
             typePrefix = configOptions.type_prefix || 'Contentstack';
             disableMandatoryFields = configOptions.disableMandatoryFields || false;
             jsonRteToHtml = configOptions.jsonRteToHtml || false;
@@ -68,10 +68,10 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             console.error('Contentstack fetch content type failed!');
 
           case 16:
-            references = [], groups = [], fileFields = [];
+            references = [], groups = [], fileFields = [], jsonRteFields = [];
 
             if (!configOptions.enableSchemaGeneration) {
-              _context2.next = 50;
+              _context2.next = 53;
               break;
             }
 
@@ -196,10 +196,11 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               var contentTypeUid = contentType.uid.replace(/-/g, '_');
               var name = "".concat(typePrefix, "_").concat(contentTypeUid);
               var extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
-              var result = buildCustomSchema(extendedSchema, [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml);
+              var result = buildCustomSchema(extendedSchema, [], [], [], [], [], name, typePrefix, disableMandatoryFields, jsonRteToHtml, createNodeId, undefined);
               references = references.concat(result.references);
               groups = groups.concat(result.groups);
               fileFields = fileFields.concat(result.fileFields);
+              jsonRteFields = jsonRteFields.concat(result.jsonRteFields);
               var typeDefs = ["type linktype { title: String href: String }", schema.buildObjectType({
                 name: name,
                 fields: result.fields,
@@ -227,11 +228,16 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
 
           case 46:
             _context2.t5 = _context2.sent;
-            _context2.t6 = [_context2.t3, _context2.t4, _context2.t5];
-            _context2.next = 50;
-            return _context2.t2.all.call(_context2.t2, _context2.t6);
+            _context2.next = 49;
+            return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_json_rte_fields"), jsonRteFields);
 
-          case 50:
+          case 49:
+            _context2.t6 = _context2.sent;
+            _context2.t7 = [_context2.t3, _context2.t4, _context2.t5, _context2.t6];
+            _context2.next = 53;
+            return _context2.t2.all.call(_context2.t2, _context2.t7);
+
+          case 53:
           case "end":
             return _context2.stop();
         }

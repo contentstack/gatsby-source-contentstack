@@ -59,7 +59,9 @@ plugins: [
       locales: [‘en-us’,’fr-fr’],
       // In this case, the plugin will fetch only English (United States) and French (France) language data.
 
-      // Optional: Specify the content types and locales of which you want the plugin to retrieve data.
+       // Optional: Specify true to convert the JSON-RTE repsonse to HTML. Default it is set to false
+      jsonRteToHtml: false ,
+      
     },
   },
 ]

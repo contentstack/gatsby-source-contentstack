@@ -27,6 +27,8 @@ const OPTIONS_ENTRIES_CLASS_MAPPING = {
   excludeContentTypeslocales: FetchSpecifiedLocalesAndContentTypesEntries,
 };
 
+let globalConfig;
+
 exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) => {
   console.time('Fetch Contentstack data');
   console.log('Starting to fetch data from Contentstack');
@@ -52,6 +54,7 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
 
 
 exports.fetchContentTypes = async (config, contentTypeOption) => {
+  globalConfig = config;
   try {
     config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
 
@@ -75,6 +78,51 @@ const fetchSyncData = async (query, config) => {
   return response;
 };
 
+const getData = async (url, options) => {
+  let retries = 0;
+  return new Promise((resolve, reject) => {
+    const handleResponse = () => {
+      fetch(url, options)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error_code) {
+            console.error(data);
+            if (data.error_code >= 500) {
+              throw new Error(`Server error: ${data.error_code}`);
+            }
+            reject(data);
+          } else {
+            if (data.items) {
+              const filteredData = data?.items.filter(item => {
+                return item.data.hasOwnProperty('publish_details');
+              });
+              data.items = filteredData;
+            }
+            resolve(data);
+          }
+        })
+        .catch(async err => {
+          const retryAttempt = globalConfig.httpRetries
+            ? globalConfig.httpRetries
+            : 3;
+          if (retries < retryAttempt) {
+            retries++;
+            const timeToWait = 2 ** retries * 100;
+            await waitFor(timeToWait);
+            handleResponse();
+          } else {
+            console.error(err);
+            reject(
+              new Error(`Fetch failed after ${retryAttempt} retry attempts.`)
+            );
+          }
+        });
+    };
+    retries = 1;
+    handleResponse();
+  });
+};
+
 const fetchCsData = async (url, config, query) => {
   query = query || {};
   query.include_count = true;
@@ -88,22 +136,8 @@ const fetchCsData = async (url, config, query) => {
       access_token: config.delivery_token
     }
   };
-  return new Promise((resolve, reject) => {
-    fetch(apiUrl, option)
-      .then(response => response.json())
-      .then(data => {
-        if (data.error_code) {
-          console.error(data);
-          reject(data);
-        } else {
-          resolve(data);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        reject(err);
-      });
-  });
+  const data = await getData(apiUrl, option);
+  return data;
 };
 
 const getPagedData = async (url, config, responseKey, query = {}, skip = 0, limit = 100, aggregatedResponse = null) => {
