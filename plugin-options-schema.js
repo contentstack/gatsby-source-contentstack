@@ -1,8 +1,7 @@
 'use strict';
 
 var _require = require('./node-helper'),
-    validateContentstackAccess = _require.validateContentstackAccess;
-
+  validateContentstackAccess = _require.validateContentstackAccess;
 exports.pluginOptionsSchema = function (_ref) {
   var Joi = _ref.Joi;
   return Joi.object({
