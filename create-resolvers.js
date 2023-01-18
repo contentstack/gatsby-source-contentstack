@@ -14,18 +14,20 @@ var _require2 = require('./normalize'),
   makeEntryNodeUid = _require2.makeEntryNodeUid,
   makeAssetNodeUid = _require2.makeAssetNodeUid;
 exports.createResolvers = /*#__PURE__*/function () {
-  var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref2, configOptions) {
-    var createResolvers, cache, createNodeId, resolvers, typePrefix, _yield$Promise$all, _yield$Promise$all2, fileFields, references, groups, jsonRteFields;
-    return _regenerator["default"].wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
+  var _ref = (0, _asyncToGenerator2["default"])(function (_ref2, configOptions) {
+    var createResolvers = _ref2.createResolvers,
+      cache = _ref2.cache,
+      createNodeId = _ref2.createNodeId;
+    return /*#__PURE__*/_regenerator["default"].mark(function _callee() {
+      var resolvers, typePrefix, _yield$Promise$all, _yield$Promise$all2, fileFields, references, groups, jsonRteFields;
+      return _regenerator["default"].wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
           case 0:
-            createResolvers = _ref2.createResolvers, cache = _ref2.cache, createNodeId = _ref2.createNodeId;
             resolvers = {};
             typePrefix = configOptions.type_prefix || 'Contentstack';
-            _context.next = 5;
+            _context.next = 4;
             return Promise.all([cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_file_fields")), cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_references")), cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_groups")), cache.get("".concat(typePrefix, "_").concat(configOptions.api_key, "_json_rte_fields"))]);
-          case 5:
+          case 4:
             _yield$Promise$all = _context.sent;
             _yield$Promise$all2 = (0, _slicedToArray2["default"])(_yield$Promise$all, 4);
             fileFields = _yield$Promise$all2[0];
@@ -113,13 +115,13 @@ exports.createResolvers = /*#__PURE__*/function () {
               }));
             });
             createResolvers(resolvers);
-          case 16:
+          case 15:
           case "end":
             return _context.stop();
         }
-      }
-    }, _callee);
-  }));
+      }, _callee);
+    })();
+  });
   return function (_x, _x2) {
     return _ref.apply(this, arguments);
   };
@@ -176,3 +178,4 @@ function parseJSONRteToHtmlHelper(value, path) {
   return jsonRteToHtml;
 }
 ;
+//# sourceMappingURL=create-resolvers.js.map

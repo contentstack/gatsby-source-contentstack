@@ -44,28 +44,26 @@ var getBase64Image = exports.getBase64Image = function (props, cache, reporter) 
     var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
       var content_type, extension, absolutePath, base64;
       return _regenerator["default"].wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              content_type = props.image.content_type;
-              extension = mimeTypeExtensions[content_type];
-              _context.next = 4;
-              return fetchRemoteFile({
-                url: csImageUrl,
-                cache: cache,
-                ext: extension
-              });
-            case 4:
-              absolutePath = _context.sent;
-              _context.next = 7;
-              return readFile(absolutePath);
-            case 7:
-              base64 = _context.sent.toString('base64');
-              return _context.abrupt("return", "data:image/".concat(toFormat || originalFormat, ";base64,").concat(base64));
-            case 9:
-            case "end":
-              return _context.stop();
-          }
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            content_type = props.image.content_type;
+            extension = mimeTypeExtensions[content_type];
+            _context.next = 4;
+            return fetchRemoteFile({
+              url: csImageUrl,
+              cache: cache,
+              ext: extension
+            });
+          case 4:
+            absolutePath = _context.sent;
+            _context.next = 7;
+            return readFile(absolutePath);
+          case 7:
+            base64 = _context.sent.toString('base64');
+            return _context.abrupt("return", "data:image/".concat(toFormat || originalFormat, ";base64,").concat(base64));
+          case 9:
+          case "end":
+            return _context.stop();
         }
       }, _callee);
     }));
@@ -135,24 +133,27 @@ function generateImageSource(filename, width, height, toFormat, _fit, imageTrans
   };
 }
 exports.resolveGatsbyImageData = /*#__PURE__*/function () {
-  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref3) {
-    var image, options, cache, reporter, _yield$import, generateImageData, _getBasicImageProps, baseUrl, contentType, width, height, _contentType$split, _contentType$split2, format, imageProps, placeholderDataURI;
-    return _regenerator["default"].wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
+  var _ref2 = (0, _asyncToGenerator2["default"])(function (_ref3) {
+    var image = _ref3.image,
+      options = _ref3.options,
+      cache = _ref3.cache,
+      reporter = _ref3.reporter;
+    return /*#__PURE__*/_regenerator["default"].mark(function _callee2() {
+      var _yield$import, generateImageData, _getBasicImageProps, baseUrl, contentType, width, height, _contentType$split, _contentType$split2, format, imageProps, placeholderDataURI;
+      return _regenerator["default"].wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
           case 0:
-            image = _ref3.image, options = _ref3.options, cache = _ref3.cache, reporter = _ref3.reporter;
             if (isImage(image)) {
-              _context2.next = 3;
+              _context2.next = 2;
               break;
             }
             return _context2.abrupt("return", null);
-          case 3:
-            _context2.next = 5;
+          case 2:
+            _context2.next = 4;
             return Promise.resolve().then(function () {
               return _interopRequireWildcard(require('gatsby-plugin-image'));
             });
-          case 5:
+          case 4:
             _yield$import = _context2.sent;
             generateImageData = _yield$import.generateImageData;
             _getBasicImageProps = getBasicImageProps(image, options), baseUrl = _getBasicImageProps.baseUrl, contentType = _getBasicImageProps.contentType, width = _getBasicImageProps.width, height = _getBasicImageProps.height;
@@ -173,32 +174,33 @@ exports.resolveGatsbyImageData = /*#__PURE__*/function () {
             }));
             placeholderDataURI = null;
             if (!(options.placeholder === 'blurred')) {
-              _context2.next = 16;
+              _context2.next = 15;
               break;
             }
-            _context2.next = 15;
+            _context2.next = 14;
             return getBase64Image({
               baseUrl: baseUrl,
               image: image,
               options: options
             }, cache, reporter);
-          case 15:
+          case 14:
             placeholderDataURI = _context2.sent;
-          case 16:
+          case 15:
             if (placeholderDataURI) {
               imageProps.placeholder = {
                 fallback: placeholderDataURI
               };
             }
             return _context2.abrupt("return", imageProps);
-          case 18:
+          case 17:
           case "end":
             return _context2.stop();
         }
-      }
-    }, _callee2);
-  }));
+      }, _callee2);
+    })();
+  });
   return function (_x) {
     return _ref2.apply(this, arguments);
   };
 }();
+//# sourceMappingURL=gatsby-plugin-image.js.map

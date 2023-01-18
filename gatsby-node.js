@@ -18,3 +18,4 @@ exports.sourceNodes = sourceNodes;
 exports.createResolvers = createResolvers;
 exports.pluginOptionsSchema = pluginOptionsSchema;
 exports.onPluginInit = onPluginInit;
+//# sourceMappingURL=gatsby-node.js.map

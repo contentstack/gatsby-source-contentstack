@@ -34,3 +34,4 @@ exports.onPluginInit = function (_ref) {
   var reporter = _ref.reporter;
   reporter.setErrorMap(ERROR_MAP);
 };
+//# sourceMappingURL=plugin-init.js.map

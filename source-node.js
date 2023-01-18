@@ -23,32 +23,40 @@ var _require4 = require('./normalize'),
   makeEntryNodeUid = _require4.makeEntryNodeUid,
   makeAssetNodeUid = _require4.makeAssetNodeUid;
 exports.sourceNodes = /*#__PURE__*/function () {
-  var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref2, configOptions) {
-    var cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache, createNode, deleteNode, touchNode, createNodeField, typePrefix, contentstackData, contentTypeOption, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, assetUids, contentTypesMap;
-    return _regenerator["default"].wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
+  var _ref = (0, _asyncToGenerator2["default"])(function (_ref2, configOptions) {
+    var cache = _ref2.cache,
+      actions = _ref2.actions,
+      getNode = _ref2.getNode,
+      getNodes = _ref2.getNodes,
+      createNodeId = _ref2.createNodeId,
+      reporter = _ref2.reporter,
+      createContentDigest = _ref2.createContentDigest,
+      getNodesByType = _ref2.getNodesByType,
+      getCache = _ref2.getCache;
+    return /*#__PURE__*/_regenerator["default"].mark(function _callee() {
+      var createNode, deleteNode, touchNode, createNodeField, typePrefix, contentstackData, contentTypeOption, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, assetUids, contentTypesMap;
+      return _regenerator["default"].wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
           case 0:
-            cache = _ref2.cache, actions = _ref2.actions, getNode = _ref2.getNode, getNodes = _ref2.getNodes, createNodeId = _ref2.createNodeId, reporter = _ref2.reporter, createContentDigest = _ref2.createContentDigest, getNodesByType = _ref2.getNodesByType, getCache = _ref2.getCache;
             createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, createNodeField = actions.createNodeField; // use a custom type prefix if specified
             typePrefix = configOptions.type_prefix || 'Contentstack';
-            _context.prev = 3;
+            _context.prev = 2;
             contentTypeOption = getContentTypeOption(configOptions);
-            _context.next = 7;
+            _context.next = 6;
             return fetchData(configOptions, reporter, cache, contentTypeOption);
-          case 7:
+          case 6:
             _yield$fetchData = _context.sent;
             _contentstackData = _yield$fetchData.contentstackData;
             contentstackData = _contentstackData;
-            _context.next = 12;
+            _context.next = 11;
             return cache.get(typePrefix);
-          case 12:
+          case 11:
             contentstackData.contentTypes = _context.sent;
-            _context.next = 19;
+            _context.next = 18;
             break;
-          case 15:
-            _context.prev = 15;
-            _context.t0 = _context["catch"](3);
+          case 14:
+            _context.prev = 14;
+            _context.t0 = _context["catch"](2);
             reporter.panic({
               id: CODES.SyncError,
               context: {
@@ -57,7 +65,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
               error: _context.t0
             });
             throw _context.t0;
-          case 19:
+          case 18:
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
                 merged[item.type] = [];
@@ -103,17 +111,17 @@ exports.sourceNodes = /*#__PURE__*/function () {
               assetsNodeIds.add(assetNodeId);
               assetUids.push(assetNodeId);
             });
-            _context.next = 29;
+            _context.next = 28;
             return cache.set(ASSET_NODE_UIDS, assetUids);
-          case 29:
+          case 28:
             _context.t1 = configOptions.downloadImages;
             if (!_context.t1) {
-              _context.next = 33;
+              _context.next = 32;
               break;
             }
-            _context.next = 33;
+            _context.next = 32;
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
-          case 33:
+          case 32:
             contentTypesMap = {};
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -133,10 +141,10 @@ exports.sourceNodes = /*#__PURE__*/function () {
               createNode(assetNode);
             });
             if (!configOptions.downloadImages) {
-              _context.next = 40;
+              _context.next = 39;
               break;
             }
-            _context.next = 40;
+            _context.next = 39;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -147,7 +155,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
               createNodeField: createNodeField,
               getNode: getNode
             }, typePrefix, configOptions);
-          case 40:
+          case 39:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'entry', createNodeId, getNode, deleteNode, typePrefix);
@@ -170,14 +178,15 @@ exports.sourceNodes = /*#__PURE__*/function () {
                 return deleteNode(node);
               });
             });
-          case 45:
+          case 44:
           case "end":
             return _context.stop();
         }
-      }
-    }, _callee, null, [[3, 15]]);
-  }));
+      }, _callee, null, [[2, 14]]);
+    })();
+  });
   return function (_x, _x2) {
     return _ref.apply(this, arguments);
   };
 }();
+//# sourceMappingURL=source-node.js.map

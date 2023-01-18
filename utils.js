@@ -63,3 +63,4 @@ exports.getContentTypeOption = function (configOptions) {
 exports.getJSONToHtmlRequired = function (jsonRteToHtml, field) {
   return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
 };
+//# sourceMappingURL=utils.js.map

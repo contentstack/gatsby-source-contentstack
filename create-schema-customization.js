@@ -23,35 +23,39 @@ var _require4 = require('./utils'),
 var _require5 = require('./gatsby-plugin-image'),
   resolveGatsbyImageData = _require5.resolveGatsbyImageData;
 exports.createSchemaCustomization = /*#__PURE__*/function () {
-  var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(_ref2, configOptions) {
-    var cache, actions, schema, reporter, createNodeId, contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, jsonRteFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
-    return _regenerator["default"].wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
+  var _ref = (0, _asyncToGenerator2["default"])(function (_ref2, configOptions) {
+    var cache = _ref2.cache,
+      actions = _ref2.actions,
+      schema = _ref2.schema,
+      reporter = _ref2.reporter,
+      createNodeId = _ref2.createNodeId;
+    return /*#__PURE__*/_regenerator["default"].mark(function _callee2() {
+      var contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, jsonRteFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
+      return _regenerator["default"].wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
           case 0:
-            cache = _ref2.cache, actions = _ref2.actions, schema = _ref2.schema, reporter = _ref2.reporter, createNodeId = _ref2.createNodeId;
             typePrefix = configOptions.type_prefix || 'Contentstack';
             disableMandatoryFields = configOptions.disableMandatoryFields || false;
             jsonRteToHtml = configOptions.jsonRteToHtml || false;
-            _context2.prev = 4;
+            _context2.prev = 3;
             contentTypeOption = getContentTypeOption(configOptions);
-            _context2.next = 8;
+            _context2.next = 7;
             return fetchContentTypes(configOptions, contentTypeOption);
-          case 8:
+          case 7:
             contentTypes = _context2.sent;
-            _context2.next = 11;
+            _context2.next = 10;
             return cache.set(typePrefix, contentTypes);
-          case 11:
-            _context2.next = 16;
+          case 10:
+            _context2.next = 15;
             break;
-          case 13:
-            _context2.prev = 13;
-            _context2.t0 = _context2["catch"](4);
+          case 12:
+            _context2.prev = 12;
+            _context2.t0 = _context2["catch"](3);
             console.error('Contentstack fetch content type failed!');
-          case 16:
+          case 15:
             references = [], groups = [], fileFields = [], jsonRteFields = [];
             if (!configOptions.enableSchemaGeneration) {
-              _context2.next = 53;
+              _context2.next = 52;
               break;
             }
             createTypes = actions.createTypes;
@@ -101,31 +105,29 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
                 infer: true
               }
             }; // Checks if gatsby-plugin-image is installed.
-            _context2.prev = 21;
-            _context2.next = 24;
+            _context2.prev = 20;
+            _context2.next = 23;
             return Promise.resolve().then(function () {
               return _interopRequireWildcard(require('gatsby-plugin-image/graphql-utils'));
             });
-          case 24:
+          case 23:
             _yield$import = _context2.sent;
             getGatsbyImageFieldConfig = _yield$import.getGatsbyImageFieldConfig;
             fieldConfig = {};
             fieldConfig = getGatsbyImageFieldConfig( /*#__PURE__*/function () {
               var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(image, options) {
                 return _regenerator["default"].wrap(function _callee$(_context) {
-                  while (1) {
-                    switch (_context.prev = _context.next) {
-                      case 0:
-                        return _context.abrupt("return", resolveGatsbyImageData({
-                          image: image,
-                          options: options,
-                          cache: cache,
-                          reporter: reporter
-                        }));
-                      case 1:
-                      case "end":
-                        return _context.stop();
-                    }
+                  while (1) switch (_context.prev = _context.next) {
+                    case 0:
+                      return _context.abrupt("return", resolveGatsbyImageData({
+                        image: image,
+                        options: options,
+                        cache: cache,
+                        reporter: reporter
+                      }));
+                    case 1:
+                    case "end":
+                      return _context.stop();
                   }
                 }, _callee);
               }));
@@ -152,15 +154,15 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             });
             fieldConfig.type = GraphQLJSON;
             assetTypeSchema.fields.gatsbyImageData = fieldConfig;
-            _context2.next = 35;
+            _context2.next = 34;
             break;
-          case 32:
-            _context2.prev = 32;
-            _context2.t1 = _context2["catch"](21);
+          case 31:
+            _context2.prev = 31;
+            _context2.t1 = _context2["catch"](20);
             if (_context2.t1.code === 'MODULE_NOT_FOUND') {
               reporter.info("Gatsby plugin image is required to use new gatsby image plugin's feature. Please check https://github.com/contentstack/gatsby-source-contentstack#the-new-gatsby-image-plugin for more help.");
             }
-          case 35:
+          case 34:
             createTypes([schema.buildObjectType(contentTypeSchema), schema.buildObjectType(assetTypeSchema)]);
             contentTypes && contentTypes.forEach(function (contentType) {
               var contentTypeUid = contentType.uid.replace(/-/g, '_');
@@ -183,33 +185,34 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               createTypes(result.types);
             });
             _context2.t2 = Promise;
-            _context2.next = 40;
+            _context2.next = 39;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_references"), references);
-          case 40:
+          case 39:
             _context2.t3 = _context2.sent;
-            _context2.next = 43;
+            _context2.next = 42;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_groups"), groups);
-          case 43:
+          case 42:
             _context2.t4 = _context2.sent;
-            _context2.next = 46;
+            _context2.next = 45;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_file_fields"), fileFields);
-          case 46:
+          case 45:
             _context2.t5 = _context2.sent;
-            _context2.next = 49;
+            _context2.next = 48;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_json_rte_fields"), jsonRteFields);
-          case 49:
+          case 48:
             _context2.t6 = _context2.sent;
             _context2.t7 = [_context2.t3, _context2.t4, _context2.t5, _context2.t6];
-            _context2.next = 53;
+            _context2.next = 52;
             return _context2.t2.all.call(_context2.t2, _context2.t7);
-          case 53:
+          case 52:
           case "end":
             return _context2.stop();
         }
-      }
-    }, _callee2, null, [[4, 13], [21, 32]]);
-  }));
+      }, _callee2, null, [[3, 12], [20, 31]]);
+    })();
+  });
   return function (_x, _x2) {
     return _ref.apply(this, arguments);
   };
 }();
+//# sourceMappingURL=create-schema-customization.js.map

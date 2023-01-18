@@ -21,3 +21,4 @@ exports.pluginOptionsSchema = function (_ref) {
     httpRetries: Joi.number().integer()["default"](3).description("Specify the number of times to perform http request on a network failure")
   }).external(validateContentstackAccess);
 };
+//# sourceMappingURL=plugin-options-schema.js.map

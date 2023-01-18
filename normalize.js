@@ -516,3 +516,4 @@ var buildCustomSchema = exports.buildCustomSchema = function (schema, types, ref
     jsonRteFields: jsonRteFields
   };
 };
+//# sourceMappingURL=normalize.js.map

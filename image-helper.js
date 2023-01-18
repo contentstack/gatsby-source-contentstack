@@ -45,3 +45,4 @@ exports.mimeTypeExtensions = mimeTypeExtensions;
 exports.validImageFormats = validImageFormats;
 exports.isImage = isImage;
 exports.createUrl = createUrl;
+//# sourceMappingURL=image-helper.js.map
