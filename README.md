@@ -4,6 +4,9 @@ Contentstack provides a source plugin for pulling content into [Gatsby][gatsby] 
 
 Here’s an example site built using this source plugin: https://xenodochial-hodgkin-8a267e.netlify.com/
 
+> **NOTE**
+> Description will be updated here
+
 ## Install
 
 `npm install --save gatsby-source-contentstack`
