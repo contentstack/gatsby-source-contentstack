@@ -4,8 +4,13 @@ Contentstack provides a source plugin for pulling content into [Gatsby][gatsby] 
 
 Here’s an example site built using this source plugin: https://xenodochial-hodgkin-8a267e.netlify.com/
 
-> **NOTE**
-> Description will be updated here
+
+
+##### **NOTE**
+
+ >- Use Node v18+ and React v18+ while using v5.x.x of gatsby-source-contentstack.
+ >- Please refer migration guide: [Migrating from v4 to v5](https://v5.gatsbyjs.com/docs/reference/release-notes/migrating-from-v4-to-v5/)
+
 
 ## Install
 
