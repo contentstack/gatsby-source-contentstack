@@ -246,8 +246,9 @@ var fetchCsData = /*#__PURE__*/function () {
           option = {
             headers: {
               'X-User-Agent': "contentstack-gatsby-source-plugin-".concat(version),
-              api_key: config.api_key,
-              access_token: config.delivery_token
+              api_key: config === null || config === void 0 ? void 0 : config.api_key,
+              access_token: config === null || config === void 0 ? void 0 : config.delivery_token,
+              branch: config !== null && config !== void 0 && config.branch ? config.branch : 'main'
             }
           };
           _context6.next = 8;

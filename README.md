@@ -35,6 +35,9 @@ plugins: [
       // Required: Environment where you published your data.
       environment: `environment`,
 
+      // Optional: Specify branch name. Default it would fetch from "main".
+      branch: `branch name`,
+
       // Optional: CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 
       cdn: `cdn_url`,
 
