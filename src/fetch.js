@@ -175,8 +175,9 @@ const fetchCsData = async (url, config, query) => {
   const option = {
     headers: {
       'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
-      api_key: config.api_key,
-      access_token: config.delivery_token,
+      api_key: config?.api_key,
+      access_token: config?.delivery_token,
+      branch: config?.branch ? config.branch : 'main',
     },
   };
   const data = await getData(apiUrl, option);
