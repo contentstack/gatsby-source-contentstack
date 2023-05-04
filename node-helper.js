@@ -46,7 +46,8 @@ var validateContentstackAccess = /*#__PURE__*/function () {
           return fetch("".concat(host, "/content_types?include_count=false"), {
             headers: {
               api_key: "".concat(pluginOptions.api_key),
-              access_token: "".concat(pluginOptions.delivery_token)
+              access_token: "".concat(pluginOptions.delivery_token),
+              branch: pluginOptions === null || pluginOptions === void 0 ? void 0 : pluginOptions.branch
             }
           }).then(function (res) {
             return res.ok;

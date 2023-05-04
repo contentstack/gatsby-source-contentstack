@@ -26,22 +26,27 @@ const deleteContentstackNodes = (item, type, createNodeId, getNode, deleteNode, 
 };
 
 const validateContentstackAccess = async pluginOptions => {
-  if (process.env.NODE_ENV === `test`) return undefined
+  if (process.env.NODE_ENV === `test`) return undefined;
 
-  let host = pluginOptions.cdn ? pluginOptions.cdn : 'https://cdn.contentstack.io/v3';
+  let host = pluginOptions.cdn
+    ? pluginOptions.cdn
+    : 'https://cdn.contentstack.io/v3';
   await fetch(`${host}/content_types?include_count=false`, {
     headers: {
       api_key: `${pluginOptions.api_key}`,
       access_token: `${pluginOptions.delivery_token}`,
+      branch: pluginOptions?.branch,
     },
   })
     .then(res => res.ok)
     .then(ok => {
       if (!ok)
-        throw new Error(`Cannot access Contentstack with api_key=${pluginOptions.api_key} & delivery_token=${pluginOptions.delivery_token}.`);
+        throw new Error(
+          `Cannot access Contentstack with api_key=${pluginOptions.api_key} & delivery_token=${pluginOptions.delivery_token}.`
+        );
     });
 
-  return undefined
+  return undefined;
 };
 
 exports.deleteContentstackNodes = deleteContentstackNodes;
