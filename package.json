@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-contentstack",
-  "version": "4.0.9",
+  "version": "4.1.0",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
@@ -31,7 +31,7 @@
     "gatsby-source-filesystem": "^4.24.0",
     "node-fetch": "2.6.7",
     "progress": "^2.0.3",
-    "query-string": "6.0.0"
+    "query-string": "^7.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.15.4",
