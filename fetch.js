@@ -55,6 +55,7 @@ var OPTIONS_ENTRIES_CLASS_MAPPING = {
 };
 var activity;
 var globalConfig;
+var syncToken = [];
 exports.fetchData = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(configOptions, reporter, cache, contentTypeOption) {
     var syncData, entryService, _syncData, contentstackData;

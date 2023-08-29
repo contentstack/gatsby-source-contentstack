@@ -1,3 +1,8 @@
+## **NOTE**
+> This version of Gatsby v5.0.5 is for a specific customer only 
+
+
+
 # gatsby-source-contentstack
 
 Contentstack provides a source plugin for pulling content into [Gatsby][gatsby] from [Contentstack][contentstack] stacks. It helps you query content types and entries in Gatsby using GraphQL.
