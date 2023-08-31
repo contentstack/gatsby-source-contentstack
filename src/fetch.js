@@ -50,6 +50,9 @@ const OPTIONS_ENTRIES_CLASS_MAPPING = {
 let activity;
 let globalConfig;
 
+const syncToken = [];
+
+
 exports.fetchData = async (
   configOptions,
   reporter,
@@ -224,6 +227,18 @@ const getSyncData = async (
   aggregatedResponse = null
 ) => {
   const response = await fetchCsData(url, config, query);
+
+  /* 
+  Below syncToken array would contain type --> 'asset_published', 'entry_published' sync tokens
+  */
+  if (
+    response.items.some(item =>
+      ['entry_published', 'asset_published'].includes(item.type)
+    )
+  ) {
+    syncToken.push(response.sync_token);
+  }
+
   if (!aggregatedResponse) {
     aggregatedResponse = {};
     aggregatedResponse.data = [];
@@ -247,5 +262,24 @@ const getSyncData = async (
       aggregatedResponse
     );
   }
+
+  if (response.sync_token) {
+    /**
+     * To make final sync call and concatenate the result if found any during on fetch request.
+     */
+    const aggregatedSyncToken = syncToken.filter(item => item !== undefined);
+    for (const token of aggregatedSyncToken) {
+      const syncResponse = await fetchCsData(
+        url,
+        config,
+        (query = { sync_token: token })
+      );
+      aggregatedResponse.data = aggregatedResponse.data?.concat(
+        ...syncResponse.items
+      );
+      aggregatedResponse.sync_token = syncResponse.sync_token;
+    }
+  }
+
   return aggregatedResponse;
 };
