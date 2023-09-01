@@ -10,7 +10,11 @@
 */
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 var preferDefault = function preferDefault(m) {
   return m && m["default"] || m;
 };
@@ -51,6 +55,7 @@ var OPTIONS_ENTRIES_CLASS_MAPPING = {
 };
 var activity;
 var globalConfig;
+var syncToken = [];
 exports.fetchData = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(configOptions, reporter, cache, contentTypeOption) {
     var syncData, entryService, _syncData, contentstackData;
@@ -311,7 +316,7 @@ var getSyncData = /*#__PURE__*/function () {
   var _ref8 = (0, _asyncToGenerator2["default"])(function (url, config, query, responseKey) {
     var aggregatedResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
-      var response;
+      var response, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, syncResponse;
       return _regenerator["default"].wrap(function _callee8$(_context8) {
         while (1) switch (_context8.prev = _context8.next) {
           case 0:
@@ -319,6 +324,14 @@ var getSyncData = /*#__PURE__*/function () {
             return fetchCsData(url, config, query);
           case 2:
             response = _context8.sent;
+            /* 
+            Below syncToken array would contain type --> 'asset_published', 'entry_published' sync tokens
+            */
+            if (response.items.some(function (item) {
+              return ['entry_published', 'asset_published'].includes(item.type);
+            })) {
+              syncToken.push(response.sync_token);
+            }
             if (!aggregatedResponse) {
               aggregatedResponse = {};
               aggregatedResponse.data = [];
@@ -330,19 +343,61 @@ var getSyncData = /*#__PURE__*/function () {
               aggregatedResponse.sync_token = response.sync_token ? response.sync_token : aggregatedResponse.sync_token;
             }
             if (!response.pagination_token) {
-              _context8.next = 6;
+              _context8.next = 7;
               break;
             }
             return _context8.abrupt("return", getSyncData(url, config, query = {
               pagination_token: response.pagination_token
             }, responseKey, aggregatedResponse));
-          case 6:
-            return _context8.abrupt("return", aggregatedResponse);
           case 7:
+            if (!response.sync_token) {
+              _context8.next = 29;
+              break;
+            }
+            /**
+             * To make final sync call and concatenate the result if found any during on fetch request.
+             */
+            aggregatedSyncToken = syncToken.filter(function (item) {
+              return item !== undefined;
+            });
+            _iterator = _createForOfIteratorHelper(aggregatedSyncToken);
+            _context8.prev = 10;
+            _iterator.s();
+          case 12:
+            if ((_step = _iterator.n()).done) {
+              _context8.next = 21;
+              break;
+            }
+            token = _step.value;
+            _context8.next = 16;
+            return fetchCsData(url, config, query = {
+              sync_token: token
+            });
+          case 16:
+            syncResponse = _context8.sent;
+            aggregatedResponse.data = (_aggregatedResponse$d = aggregatedResponse.data) === null || _aggregatedResponse$d === void 0 ? void 0 : (_aggregatedResponse$d2 = _aggregatedResponse$d).concat.apply(_aggregatedResponse$d2, (0, _toConsumableArray2["default"])(syncResponse.items));
+            aggregatedResponse.sync_token = syncResponse.sync_token;
+          case 19:
+            _context8.next = 12;
+            break;
+          case 21:
+            _context8.next = 26;
+            break;
+          case 23:
+            _context8.prev = 23;
+            _context8.t0 = _context8["catch"](10);
+            _iterator.e(_context8.t0);
+          case 26:
+            _context8.prev = 26;
+            _iterator.f();
+            return _context8.finish(26);
+          case 29:
+            return _context8.abrupt("return", aggregatedResponse);
+          case 30:
           case "end":
             return _context8.stop();
         }
-      }, _callee8);
+      }, _callee8, null, [[10, 23, 26, 29]]);
     })();
   });
   return function getSyncData(_x18, _x19, _x20, _x21) {
