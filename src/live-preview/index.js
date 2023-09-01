@@ -150,7 +150,6 @@ export class ContentstackGatsby {
     identifyReferences(data, currentPath = [], referenceFieldPaths = []) {
         const paths = [];
         for (const [k, v] of Object.entries(data)) {
-            // console.log(k, v, currentPath.join("."))
             if (!v) {
                 continue;
             }
@@ -174,7 +173,6 @@ export class ContentstackGatsby {
                     // need to go over all refs since each of them could be of different
                     // content type and might contain refs
                     for (const val of v) {
-                        // console.log(val, tempPath)
                         const p = this.identifyReferences(val, tempPath, referenceFieldPaths)
                         paths.push(...p)
                     }
@@ -216,7 +214,6 @@ export class ContentstackGatsby {
             }
 
             const paths = this.identifyReferences(receivedData, [], this.referenceFieldPaths)
-            // console.log("includeReference:", paths)
 
             const entry = await this.stackSdk.ContentType(contentTypeUid)
                 .Entry(entryUid)

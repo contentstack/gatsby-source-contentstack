@@ -1,7 +1,15 @@
+// This is a helper class to help store key-value data inside
+// an individual Storage object's key. 
+// It simply performs the JSON parsing and stringifying steps
+
 export class Storage {
     storage;
     name;
 
+    /**
+     * @param {string} name 
+     * @param {Storage.prototype} storage 
+     */
     constructor(storage, name) {
         if (!storage?.__proto__ === Storage.prototype) {
             throw new Error("storage should implment Storage")
@@ -21,7 +29,6 @@ export class Storage {
 
     set(key, value) {
         const area = this.#getArea();
-        // console.log(value, typeof value)
         area[key] = value;
         this.storage.setItem(this.name, JSON.stringify(area))
     }
