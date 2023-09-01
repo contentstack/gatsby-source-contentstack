@@ -1,4 +1,5 @@
 import contentstack from "contentstack"
+import { jsonToHTML } from "@contentstack/utils"
 import isEmpty from "lodash.isempty";
 import { Storage } from "./storage-helper";
 
@@ -37,6 +38,10 @@ export class ContentstackGatsby {
         this.referenceFieldsStorage = new Storage(window.sessionStorage, "reference_fields");
         this.referenceFields = this.referenceFieldsStorage.get();
 
+        // json rte fields in various CTs
+        this.jsonRteFieldsStorage = new Storage(window.sessionStorage, "json_rte_fields");
+        this.jsonRteFields = this.jsonRteFieldsStorage.get();
+
         // only field paths extracted from the above map for current CT
         this.referenceFieldPaths = [];
 
@@ -48,7 +53,7 @@ export class ContentstackGatsby {
     async fetchContentTypes(uids) {
         try {
             const result = await this.stackSdk.getContentTypes({
-                query: {"uid": {"$in": uids}}
+                query: { "uid": { "$in": uids } }
             })
             if (result) {
                 const contentTypes = {};
@@ -79,7 +84,7 @@ export class ContentstackGatsby {
         return this.contentTypes;
     }
 
-    async extractReferences(refPathMap = {}, depth = MAX_DEPTH_ALLOWED, seen = []) {
+    async extractReferences(refPathMap = {}, jsonRtePaths = [], depth = MAX_DEPTH_ALLOWED, seen = []) {
         if (depth < 0) {
             return refPathMap;
         }
@@ -96,20 +101,19 @@ export class ContentstackGatsby {
                 if (refPath === "") {
                     rPath = []
                 }
-                this.extractUids(contentTypes[uid].schema, rPath, refPathMap);
+                this.extractUids(contentTypes[uid].schema, rPath, refPathMap, jsonRtePaths);
             }
         }
         if (Object.keys(refPathMap).length > refPathsCount) {
-            await this.extractReferences(refPathMap, depth - 1, seen);
+            await this.extractReferences(refPathMap, jsonRtePaths, depth - 1, seen);
         }
-        return refPathMap;
+        return { refPathMap, jsonRtePaths };
     }
 
-    extractUids(schema, pathPrefix = [], refPathMap = {}) {
+    extractUids(schema, pathPrefix = [], refPathMap = {}, jsonRtePaths = []) {
         const referredUids = []
-        const currentPath = []
         for (const field of schema) {
-            const fieldPath = [...pathPrefix, ...currentPath, field.uid]
+            const fieldPath = [...pathPrefix, field.uid]
             if (field.data_type === "reference" &&
                 Array.isArray(field.reference_to) &&
                 field.reference_to.length > 0
@@ -121,14 +125,19 @@ export class ContentstackGatsby {
                 for (const block of field.blocks) {
                     const { referredUids: blockRefUids } = this.extractUids(
                         block.schema,
-                        [...fieldPath, block.uid], refPathMap
+                        [...fieldPath, block.uid], refPathMap,
+                        jsonRtePaths
                     )
                     referredUids.push(...blockRefUids)
                 }
             }
             else if (field.data_type === "group" && field.schema && field.schema.length > 0) {
-                const { referredUids: groupRefUids } = this.extractUids(field.schema, [...fieldPath], refPathMap)
+                const { referredUids: groupRefUids } = this.extractUids(field.schema, [...fieldPath], refPathMap, jsonRtePaths)
                 referredUids.push(...groupRefUids)
+            }
+            else if (field.data_type === "json" && field.field_metadata?.allow_json_rte) {
+                const rtePath = [...pathPrefix, field.uid].join(".");
+                jsonRtePaths.push(rtePath)
             }
         }
         return { referredUids, refPathMap };
@@ -202,9 +211,14 @@ export class ContentstackGatsby {
             const contentTypeUid = live_preview?.content_type_uid;
             const entryUid = live_preview?.entry_uid;
 
-            if (isEmpty(this.referenceFields[contentTypeUid])) {
-                this.referenceFields[contentTypeUid] = await this.extractReferences({ "": [contentTypeUid] });
+            if (isEmpty(this.referenceFields[contentTypeUid]) || isEmpty(this.jsonRteFields[contentTypeUid])) {
+                const { refPathMap, jsonRtePaths } = await this.extractReferences({ "": [contentTypeUid] });
+                // store reference paths
+                this.referenceFields[contentTypeUid] = refPathMap
                 this.referenceFieldsStorage.set(contentTypeUid, this.referenceFields[contentTypeUid])
+                // store json rte paths
+                this.jsonRteFields[contentTypeUid] = jsonRtePaths
+                this.jsonRteFieldsStorage.set(contentTypeUid, this.jsonRteFields[contentTypeUid])
             }
 
             if (isEmpty(this.referenceFieldPaths)) {
@@ -220,10 +234,15 @@ export class ContentstackGatsby {
                 .includeReference(paths)
                 .toJSON().fetch()
             if (!isEmpty(entry)) {
+                if (this.config.jsonRteToHtml) {
+                    jsonToHTML({
+                        entry: entry,
+                        paths: this.jsonRteFields[contentTypeUid] ?? []
+                    })
+                }
                 return entry;
             }
         }
         return receivedData;
     }
-
 }
