@@ -1,1 +1,1 @@
-export { useContentstackImage } from "./use-contentstack-image";
+export { useContentstackImage } from './use-contentstack-image';
