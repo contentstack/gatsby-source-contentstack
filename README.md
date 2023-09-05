@@ -303,6 +303,52 @@ Here’s an example of the same:
 }
 ```
 
+## Using live preview
+
+Since version 5.1, a class - `ContentstackGatsby` is provided which facilitates the setup of live preview.
+
+Initialize `ContentstackGatsby` and live preview SDK.
+
+```jsx
+import { ContentstackGatsby } from "gatsby-source-contentstack/live-preview";
+import ContentstackLivePreview from "@contentstack/live-preview-utils";
+
+export const getCSData = new ContentstackGatsby({
+    api_key: GATSBY_CONTENTSTACK_API_KEY,
+    environment: GATSBY_CONTENTSTACK_ENVIRONMENT,
+    live_preview: {
+        management_token: GATSBY_CONTENTSTACK_MANAGEMENT_TOKEN,
+        enable: true,
+        host: "api.contentstack.io" // "eu-api.contentstack.com" for EU region
+    }
+});
+
+ContentstackLivePreview.init({
+    stackSdk: getCSData.stackSdk,
+});
+```
+Next, in a page/component, pass a function to `ContentstackLivePreview`'s `onEntryChange()` or `onLiveEdit()` method. This function should call ContentstackGatsby.get() with the initial data as a parameter.
+
+
+```jsx
+const Home = (props) => {
+  const [data, setData] = useState(props.data.allContentstackPage.nodes[0])
+
+  const fetchLivePreviewData = async () => {
+    const updatedData = await getCSData.get(props.data.allContentstackPage.nodes[0]);
+    setData(updatedData)
+  }
+
+  useEffect(() => {
+    ContentstackLivePreview.onLiveEdit(fetchLivePreviewData)
+  }, [])
+
+  return <div>{data.title}</div>
+}
+```
+
+For more information on using live preview, please refer to [Set up Live Preview](https://www.contentstack.com/docs/developers/sample-apps/build-a-starter-website-with-gatsby-and-contentstack#set-up-live-preview-optional) for Gatsby sites.
+
 For more information checkout gatsby's image plugin documentation on usage of the [new image plugin](https://www.gatsbyjs.com/docs/how-to/plugins-and-themes/adding-gatsby-image-support/).
 
 For more information on region support please refer [About Region's](https://www.contentstack.com/docs/developers/contentstack-regions/api-endpoints/)
