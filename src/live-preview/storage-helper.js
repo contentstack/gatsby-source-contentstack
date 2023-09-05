@@ -1,5 +1,5 @@
 // This is a helper class to help store key-value data inside
-// an individual Storage object's key.
+// an individual Storage object's key. 
 // It simply performs the JSON parsing and stringifying steps
 
 export class Storage {
@@ -7,18 +7,18 @@ export class Storage {
   name;
 
   /**
-   * @param {string} name
-   * @param {Storage.prototype} storage
+   * @param {string} name 
+   * @param {Storage.prototype} storage 
    */
   constructor(storage, name) {
     if (!storage?.__proto__ === Storage.prototype) {
-      throw new Error('storage should implment Storage');
+      throw new Error("storage should implment Web Storage API")
     }
     this.storage = storage;
-    this.name = name;
-    const stored = this.storage.getItem(name);
+    this.name = "cslp_" + name;
+    const stored = this.storage.getItem(this.name);
     if (!stored) {
-      this.storage.setItem(name, '{}');
+      this.storage.setItem(this.name, "{}")
     }
   }
 
@@ -30,7 +30,7 @@ export class Storage {
   set(key, value) {
     const area = this.#getArea();
     area[key] = value;
-    this.storage.setItem(this.name, JSON.stringify(area));
+    this.storage.setItem(this.name, JSON.stringify(area))
   }
 
   get(key) {

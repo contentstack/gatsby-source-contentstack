@@ -15,9 +15,14 @@ export class ContentstackGatsby {
 
   constructor(config) {
     this.config = config;
+    this.livePreviewConfig = {
+      hash: "",
+      content_type_uid: "",
+      entry_uid: ""
+    }
     this.stackSdk = contentstack.Stack({
       api_key: config.api_key,
-      delivery_token: '', // since we only use this to fetch data for live preview, we don't need this
+      delivery_token: config.delivery_token,
 
       environment: config.environment,
       live_preview: {
@@ -27,18 +32,14 @@ export class ContentstackGatsby {
       },
     });
 
-    // the SDK only makes call to cdn for getting content types
-    // hence, we override the SDK config to force it to fetch the
-    // data from api
-    this.stackSdk.setHost(config.live_preview.host);
-    this.stackSdk.headers.authorization = config.live_preview?.management_token;
-
     // reference fields in various CTs and the CTs they refer
     this.referenceFieldsStorage = new Storage(
       window.sessionStorage,
       'reference_fields'
     );
     this.referenceFields = this.referenceFieldsStorage.get();
+
+    this.statusStorage = new Storage(window.sessionStorage, "status")
 
     // json rte fields in various CTs
     this.jsonRteFieldsStorage = new Storage(
@@ -93,11 +94,12 @@ export class ContentstackGatsby {
 
   async extractReferences(
     refPathMap = {},
+    status,
     jsonRtePaths = [],
     depth = MAX_DEPTH_ALLOWED,
     seen = []
   ) {
-    if (depth < 0) {
+    if (depth <= 0) {
       return refPathMap;
     }
     const uids = [...new Set(Object.values(refPathMap).flat())];
@@ -115,6 +117,11 @@ export class ContentstackGatsby {
         if (refPath === '') {
           rPath = [];
         }
+
+        if (!status.hasLivePreviewEntryFound) {
+          status.hasLivePreviewEntryFound = this.isCurrentEntryEdited(uid)
+        }
+
         this.extractUids(
           contentTypes[uid].schema,
           rPath,
@@ -124,7 +131,7 @@ export class ContentstackGatsby {
       }
     }
     if (Object.keys(refPathMap).length > refPathsCount) {
-      await this.extractReferences(refPathMap, jsonRtePaths, depth - 1, seen);
+      await this.extractReferences(refPathMap, status, jsonRtePaths, depth - 1, seen);
     }
     return { refPathMap, jsonRtePaths };
   }
@@ -192,6 +199,7 @@ export class ContentstackGatsby {
    */
   identifyReferences(data, currentPath = [], referenceFieldPaths = []) {
     const paths = [];
+
     for (const [k, v] of Object.entries(data)) {
       if (!v) {
         continue;
@@ -243,14 +251,27 @@ export class ContentstackGatsby {
     return [...new Set(paths)];
   }
 
+  isCurrentEntryEdited(entryContentType) {
+    return entryContentType === this.livePreviewConfig?.content_type_uid
+  }
+
   async get(data) {
     const receivedData = structuredClone(data);
-
     const { live_preview } = this.stackSdk;
 
+    let status = {
+      hasLivePreviewEntryFound: false
+    }
+
     if (live_preview?.hash && live_preview.hash !== 'init') {
-      const contentTypeUid = live_preview?.content_type_uid;
-      const entryUid = live_preview?.entry_uid;
+      this.livePreviewConfig = live_preview;
+      if (!receivedData.__typename) {
+        throw new Error("Entry data must contain __typename")
+      }
+      const contentTypeUid = receivedData.__typename.split("_").slice(1).join("_")
+      const entryUid = receivedData.uid;
+
+      status = this.statusStorage.get(contentTypeUid) ?? { hasLivePreviewEntryFound: this.isCurrentEntryEdited(contentTypeUid) }
 
       if (
         isEmpty(this.referenceFields[contentTypeUid]) ||
@@ -258,7 +279,7 @@ export class ContentstackGatsby {
       ) {
         const { refPathMap, jsonRtePaths } = await this.extractReferences({
           '': [contentTypeUid],
-        });
+        }, status);
         // store reference paths
         this.referenceFields[contentTypeUid] = refPathMap;
         this.referenceFieldsStorage.set(
@@ -273,20 +294,20 @@ export class ContentstackGatsby {
         );
       }
 
-      if (isEmpty(this.referenceFieldPaths)) {
-        let referencePaths = Object.keys(this.referenceFields[contentTypeUid]);
-        // omit the first path (root - ""), the one provided to extractReferences
-        this.referenceFieldPaths = referencePaths.slice(
-          1,
-          referencePaths.length
-        );
-      }
+      let referencePaths = Object.keys(this.referenceFields[contentTypeUid]);
+      referencePaths = referencePaths.filter(field => !!field)
 
       const paths = this.identifyReferences(
         receivedData,
         [],
-        this.referenceFieldPaths
+        referencePaths
       );
+
+      this.statusStorage.set(contentTypeUid, status)
+
+      if (!status.hasLivePreviewEntryFound) {
+        return receivedData
+      }
 
       const entry = await this.stackSdk
         .ContentType(contentTypeUid)
