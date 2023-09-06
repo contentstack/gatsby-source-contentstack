@@ -20,17 +20,20 @@ export class ContentstackGatsby {
       content_type_uid: "",
       entry_uid: ""
     }
-    this.stackSdk = contentstack.Stack({
+    
+    const stackConfig = {
       api_key: config.api_key,
       delivery_token: config.delivery_token,
-
       environment: config.environment,
+      ...(config.region && { region: config.region }),
+      ...(config.branch && { branch: config.branch }),
       live_preview: {
         host: config.live_preview.host,
         management_token: config.live_preview.management_token,
         enable: config.live_preview.enable,
       },
-    });
+    }
+    this.stackSdk = contentstack.Stack(stackConfig);
 
     // reference fields in various CTs and the CTs they refer
     this.referenceFieldsStorage = new Storage(

@@ -22,22 +22,22 @@ export class Storage {
     }
   }
 
-  #getArea() {
+  getArea() {
     const area = JSON.parse(this.storage.getItem(this.name));
     return area;
   }
 
   set(key, value) {
-    const area = this.#getArea();
+    const area = this.getArea();
     area[key] = value;
     this.storage.setItem(this.name, JSON.stringify(area))
   }
 
   get(key) {
     if (!key) {
-      return this.#getArea();
+      return this.getArea();
     }
-    const area = this.#getArea();
+    const area = this.getArea();
     return area[key];
   }
 }
