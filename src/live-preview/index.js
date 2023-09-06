@@ -62,6 +62,10 @@ export class ContentstackGatsby {
     this.contentTypes = this.contentTypesStorage.get();
   }
 
+  setHost(host) {
+    this.stackSdk.setHost(host);
+  }
+
   async fetchContentTypes(uids) {
     try {
       const result = await this.stackSdk.getContentTypes({
