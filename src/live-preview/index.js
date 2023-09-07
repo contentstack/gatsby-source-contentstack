@@ -303,7 +303,10 @@ export class ContentstackGatsby {
     if (live_preview?.hash && live_preview.hash !== 'init') {
       this.livePreviewConfig = live_preview;
       if (!receivedData.__typename) {
-        throw new Error("Entry data must contain __typename")
+        throw new Error("Entry data must contain __typename for live preview")
+      }
+      if (!receivedData.uid) {
+        throw new Error("Entry data must contain uid for live preview")
       }
       const contentTypeUid = receivedData.__typename.split("_").slice(1).join("_")
       const entryUid = receivedData.uid;
