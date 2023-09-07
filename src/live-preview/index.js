@@ -66,6 +66,36 @@ export class ContentstackGatsby {
     this.stackSdk.setHost(host);
   }
 
+  static addContentTypeUidFromTypename(entry) {
+    if (typeof entry === "undefined") {
+      throw new TypeError("entry cannot be empty");
+    }
+    if (entry === null) {
+      throw new TypeError("entry cannot be null")
+    }
+    if (typeof entry !== "object") {
+      throw new TypeError("entry must be an object")
+    }
+    if (Array.isArray(entry)) {
+      throw new TypeError("entry cannot be an object, pass an instance of entry")
+    }
+
+    traverse(entry)
+
+    function traverse(field) {
+      if (!field || typeof field !== "object") {
+        return;
+      }
+      if (Array.isArray(field)) {
+        field.forEach((instance) => traverse(instance))
+      }
+      if (Object.hasOwnProperty.call(field, "__typename") && typeof field.__typename == "string") {
+        field._content_type_uid = field.__typename.split("_").slice(1).join("_");
+      }
+      Object.values(field).forEach((subField) => traverse(subField))
+    }
+  }
+
   async fetchContentTypes(uids) {
     try {
       const result = await this.stackSdk.getContentTypes({
