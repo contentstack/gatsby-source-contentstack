@@ -275,7 +275,7 @@ var getPagedData = /*#__PURE__*/function () {
   var _ref7 = (0, _asyncToGenerator2["default"])(function (url, config, responseKey) {
     var query = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var skip = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
-    var limit = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 100;
+    var limit = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : (config === null || config === void 0 ? void 0 : config.limit) || 50;
     var aggregatedResponse = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee7() {
       var response;
@@ -283,7 +283,8 @@ var getPagedData = /*#__PURE__*/function () {
         while (1) switch (_context7.prev = _context7.next) {
           case 0:
             query.skip = skip;
-            query.limit = limit;
+            //if limit is greater than 100, it will throw ann error that limit cannot exceed 100.
+            query.limit = limit > 100 ? (console.error('Limit cannot exceed 100.'), 100) : limit;
             query.include_global_field_schema = true;
             _context7.next = 5;
             return fetchCsData(url, config, query);
