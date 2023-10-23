@@ -198,7 +198,7 @@ const getPagedData = async (
   query.skip = skip;
   //if limit is greater than 100, it will throw ann error that limit cannot exceed 100.
   query.limit =
-    limit >= 100 ? (console.error('Limit cannot exceed 100.'), 100) : limit;
+    limit > 100 ? (console.error('Limit cannot exceed 100.'), 100) : limit;
   query.include_global_field_schema = true;
   const response = await fetchCsData(url, config, query);
   if (!aggregatedResponse) {

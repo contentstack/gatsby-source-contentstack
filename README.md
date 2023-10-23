@@ -72,7 +72,7 @@ plugins: [
       // Optional: Specify a number to perform http-retries for network failures. By default it is set to 3.
       httpRetries: 2,
 
-      //Specify the limit. Maximum limit accepted is 100.
+      //Specify the number of entries/assets to be fetched per page. Maximum limit accepted is 100.
       limit: 50
     },
   },
