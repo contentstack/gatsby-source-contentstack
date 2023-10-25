@@ -192,7 +192,7 @@ const getPagedData = async (
   responseKey,
   query = {},
   skip = 0,
-  limit = config?.limit || 50,
+  limit = config?.limit,
   aggregatedResponse = null
 ) => {
   query.skip = skip;

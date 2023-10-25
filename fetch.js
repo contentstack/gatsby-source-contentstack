@@ -275,7 +275,7 @@ var getPagedData = /*#__PURE__*/function () {
   var _ref7 = (0, _asyncToGenerator2["default"])(function (url, config, responseKey) {
     var query = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var skip = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
-    var limit = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : (config === null || config === void 0 ? void 0 : config.limit) || 50;
+    var limit = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : config === null || config === void 0 ? void 0 : config.limit;
     var aggregatedResponse = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee7() {
       var response;
