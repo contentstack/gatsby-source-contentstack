@@ -15,8 +15,13 @@ class FetchDefaultEntries extends FetchEntries {
         const assetTokenKey = `${typePrefix.toLowerCase()}-sync-token-asset-${configOptions.api_key}`;
         const [syncEntryToken, syncAssetToken] = await Promise.all([cache.get(entryTokenKey), cache.get(assetTokenKey)])
 
-        const syncEntryParams = syncEntryToken ? { sync_token: syncEntryToken } : { init: true };
-        const syncAssetParams = syncAssetToken ? { sync_token: syncAssetToken } : { init: true };
+        
+        const syncEntryParams = syncEntryToken
+          ? { sync_token: syncEntryToken }
+          : { init: true, limit: configOptions.limit };
+        const syncAssetParams = syncAssetToken
+          ? { sync_token: syncAssetToken }
+          : { init: true, limit: configOptions.limit };
 
         syncEntryParams.type = 'entry_published,entry_unpublished,entry_deleted';
         syncAssetParams.type = 'asset_published,asset_unpublished,asset_deleted';
@@ -27,7 +32,9 @@ class FetchDefaultEntries extends FetchEntries {
       } else {
         const tokenKey = `${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`;
         const syncToken = await cache.get(tokenKey);
-        const syncParams = syncToken ? { sync_token: syncToken } : { init: true };
+        const syncParams = syncToken
+          ? { sync_token: syncToken }
+          : { init: true, limit: configOptions.limit };
 
         syncData = await fn.apply(null, [syncParams, configOptions]);
         // Caching token for the next sync
