@@ -18,10 +18,10 @@ class FetchDefaultEntries extends FetchEntries {
         
         const syncEntryParams = syncEntryToken
           ? { sync_token: syncEntryToken }
-          : { init: true, limit: configOptions.limit > 100 ? 100 : configOptions.limit };
+          : { init: true, limit: configOptions.limit > 50 ? 100 : configOptions.limit };
         const syncAssetParams = syncAssetToken
           ? { sync_token: syncAssetToken }
-          : { init: true, limit: configOptions.limit > 100 ? 100 : configOptions.limit };
+          : { init: true, limit: configOptions.limit > 50 ? 100 : configOptions.limit };
 
         syncEntryParams.type = 'entry_published,entry_unpublished,entry_deleted';
         syncAssetParams.type = 'asset_published,asset_unpublished,asset_deleted';
@@ -34,7 +34,7 @@ class FetchDefaultEntries extends FetchEntries {
         const syncToken = await cache.get(tokenKey);
         const syncParams = syncToken
           ? { sync_token: syncToken }
-          : { init: true, limit: configOptions.limit > 100 ? 100 : configOptions.limit };
+          : { init: true, limit: configOptions.limit > 50 ? 100 : configOptions.limit };
 
         syncData = await fn.apply(null, [syncParams, configOptions]);
         // Caching token for the next sync
