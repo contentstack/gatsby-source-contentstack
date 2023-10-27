@@ -52,7 +52,6 @@ let globalConfig;
 
 const syncToken = [];
 
-
 exports.fetchData = async (
   configOptions,
   reporter,
@@ -193,11 +192,15 @@ const getPagedData = async (
   responseKey,
   query = {},
   skip = 0,
-  limit = 100,
+  limit = config?.limit,
   aggregatedResponse = null
 ) => {
   query.skip = skip;
-  query.limit = limit;
+  //if limit is greater than 100, it will throw ann error that limit cannot exceed 100.
+  if (limit > 100) {
+    console.error('Limit cannot exceed 100. Setting limit to 50.');
+  }
+  query.limit = limit > 100 ? 50 : limit;
   query.include_global_field_schema = true;
   const response = await fetchCsData(url, config, query);
   if (!aggregatedResponse) {
