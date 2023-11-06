@@ -10,14 +10,25 @@
 const preferDefault = m => (m && m.default) || m;
 const fetch = preferDefault(require('node-fetch'));
 
-const deleteContentstackNodes = (item, type, createNodeId, getNode, deleteNode, typePrefix) => {
+const deleteContentstackNodes = (
+  item,
+  type,
+  createNodeId,
+  getNode,
+  deleteNode,
+  typePrefix
+) => {
   let nodeId = '';
   let node = null;
   if (type === 'entry') {
-    nodeId = createNodeId(`${typePrefix.toLowerCase()}-entry-${item.uid}-${item.locale}`);
+    nodeId = createNodeId(
+      `${typePrefix.toLowerCase()}-entry-${item.uid}-${item.locale}`
+    );
   }
   if (type === 'asset') {
-    nodeId = createNodeId(`${typePrefix.toLowerCase()}-assets-${item.uid}-${item.locale}`);
+    nodeId = createNodeId(
+      `${typePrefix.toLowerCase()}-assets-${item.uid}-${item.locale}`
+    );
   }
   node = getNode(nodeId);
   if (node) {
@@ -31,12 +42,24 @@ const validateContentstackAccess = async pluginOptions => {
   let host = pluginOptions.cdn
     ? pluginOptions.cdn
     : 'https://cdn.contentstack.io/v3';
+
+  let headers = {
+    api_key: `${pluginOptions.api_key}`,
+    access_token: `${pluginOptions.delivery_token}`,
+    branch: pluginOptions?.branch,
+  };
+  // Check if config has the key: enableEarlyAccess, it's an array of strings, and it's not empty
+  if (
+    pluginOptions.enableEarlyAccess &&
+    Array.isArray(pluginOptions.enableEarlyAccess) &&
+    pluginOptions.enableEarlyAccess.length > 0
+  ) {
+    const earlyAccessHeaders = pluginOptions.enableEarlyAccess.join(',');
+    headers['x-header-ea'] = earlyAccessHeaders;
+  }
+
   await fetch(`${host}/content_types?include_count=false`, {
-    headers: {
-      api_key: `${pluginOptions.api_key}`,
-      access_token: `${pluginOptions.delivery_token}`,
-      branch: pluginOptions?.branch,
-    },
+    headers: headers,
   })
     .then(res => res.ok)
     .then(ok => {
