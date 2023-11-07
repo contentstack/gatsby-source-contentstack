@@ -49,10 +49,10 @@ const validateContentstackAccess = async pluginOptions => {
     api_key: `${pluginOptions.api_key}`,
     access_token: `${pluginOptions.delivery_token}`,
     branch: pluginOptions?.branch,
-    ...getCustomHeaders(
-      pluginOptions?.enableEarlyAccessKey,
-      pluginOptions?.enableEarlyAccessValue
-    ),
+    // ...getCustomHeaders(
+    //   pluginOptions?.enableEarlyAccessKey,
+    //   pluginOptions?.enableEarlyAccessValue
+    // ),
   })
     .then(res => res.ok)
     .then(ok => {
