@@ -10,6 +10,8 @@
 const preferDefault = m => (m && m.default) || m;
 const fetch = preferDefault(require('node-fetch'));
 
+const { getCustomHeaders } = require('./utils');
+
 const deleteContentstackNodes = (
   item,
   type,
@@ -47,6 +49,10 @@ const validateContentstackAccess = async pluginOptions => {
       api_key: `${pluginOptions.api_key}`,
       access_token: `${pluginOptions.delivery_token}`,
       branch: pluginOptions?.branch,
+      ...getCustomHeaders(
+        pluginOptions?.enableEarlyAccessKey,
+        pluginOptions?.enableEarlyAccessValue
+      ),
     },
   })
     .then(res => res.ok)
