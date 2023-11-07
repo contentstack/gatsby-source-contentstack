@@ -46,13 +46,15 @@ const validateContentstackAccess = async pluginOptions => {
     : 'https://cdn.contentstack.io/v3';
 
   await fetch(`${host}/content_types?include_count=false`, {
-    api_key: `${pluginOptions.api_key}`,
-    access_token: `${pluginOptions.delivery_token}`,
-    branch: pluginOptions?.branch,
-    ...getCustomHeaders(
-      pluginOptions?.enableEarlyAccessKey,
-      pluginOptions?.enableEarlyAccessValue
-    ),
+    headers: {
+      api_key: `${pluginOptions.api_key}`,
+      access_token: `${pluginOptions.delivery_token}`,
+      branch: pluginOptions?.branch,
+      ...getCustomHeaders(
+        pluginOptions?.enableEarlyAccessKey,
+        pluginOptions?.enableEarlyAccessValue
+      ),
+    },
   })
     .then(res => res.ok)
     .then(ok => {
