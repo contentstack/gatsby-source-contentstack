@@ -77,9 +77,9 @@ plugins: [
 
       //Optional: Specify the header to be passed to Contentstack API
       enableEarlyAccessKey: 'x-header-ea'
-      
-      //Optional: Specify list of headers to be passed to Contentstack API.
-      enableEarlyAccessValue: ['newcda','taxonomy']
+
+      //Optional: Specify list of headers to be passed to Contentstack API for the key specified in enableEarlyAccessKey. The Value should be a string. In case of multiple headers, separate them with a comma. For eg:'header1,header2'
+      enableEarlyAccessValue: 'newcda,taxonomy'
 
     },
   },

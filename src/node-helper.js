@@ -43,25 +43,14 @@ const validateContentstackAccess = async pluginOptions => {
     ? pluginOptions.cdn
     : 'https://cdn.contentstack.io/v3';
 
-  let headers = {
+  await fetch(`${host}/content_types?include_count=false`, {
     api_key: `${pluginOptions.api_key}`,
     access_token: `${pluginOptions.delivery_token}`,
     branch: pluginOptions?.branch,
-  };
-  // Check if config has the key: enableEarlyAccess, it's an array of strings, and it's not empty
-  if (
-    pluginOptions?.enableEarlyAccessValue &&
-    pluginOptions?.enableEarlyAccessKey &&
-    pluginOptions?.enableEarlyAccessKey !== '' &&
-    Array.isArray(pluginOptions.enableEarlyAccessValue) &&
-    pluginOptions.enableEarlyAccessValue.length > 0
-  ) {
-    const earlyAccessHeaders = pluginOptions.enableEarlyAccessValue.join(',');
-    headers[pluginOptions?.enableEarlyAccessKey] = earlyAccessHeaders;
-  }
-
-  await fetch(`${host}/content_types?include_count=false`, {
-    headers: headers,
+    ...getCustomHeaders(
+      pluginOptions?.enableEarlyAccessKey,
+      pluginOptions?.enableEarlyAccessValue
+    ),
   })
     .then(res => res.ok)
     .then(ok => {

@@ -27,7 +27,7 @@ const {
   FetchSpecifiedLocalesEntries,
   FetchSpecifiedLocalesAndContentTypesEntries,
 } = require('./entry-data');
-const { CODES } = require('./utils');
+const { CODES, getCustomHeaders } = require('./utils');
 
 const OPTION_CLASS_MAPPING = {
   '': FetchDefaultContentTypes,
@@ -180,19 +180,12 @@ const fetchCsData = async (url, config, query) => {
       api_key: config?.api_key,
       access_token: config?.delivery_token,
       branch: config?.branch ? config.branch : 'main',
+      ...getCustomHeaders(
+        config?.enableEarlyAccessKey,
+        config?.enableEarlyAccessValue
+      ),
     },
   };
-  // Check if config has the key: enableEarlyAccess,IF YES, it's an array of strings, and it's not empty
-  if (
-    config?.enableEarlyAccessValue &&
-    config?.enableEarlyAccessKey &&
-    config?.enableEarlyAccessKey !== '' &&
-    Array.isArray(config.enableEarlyAccessValue) &&
-    config.enableEarlyAccessValue.length > 0
-  ) {
-    const earlyAccessHeaders = config.enableEarlyAccessValue.join(',');
-    option.headers[config?.enableEarlyAccessKey] = earlyAccessHeaders;
-  }
   const data = await getData(apiUrl, option);
   return data;
 };
