@@ -10,8 +10,6 @@
 const preferDefault = m => (m && m.default) || m;
 const fetch = preferDefault(require('node-fetch'));
 
-const { getCustomHeaders } = require('./utils');
-
 const deleteContentstackNodes = (
   item,
   type,
@@ -44,11 +42,12 @@ const validateContentstackAccess = async pluginOptions => {
   let host = pluginOptions.cdn
     ? pluginOptions.cdn
     : 'https://cdn.contentstack.io/v3';
-
   await fetch(`${host}/content_types?include_count=false`, {
-    api_key: `${pluginOptions.api_key}`,
-    access_token: `${pluginOptions.delivery_token}`,
-    branch: pluginOptions?.branch,
+    headers: {
+      api_key: `${pluginOptions.api_key}`,
+      access_token: `${pluginOptions.delivery_token}`,
+      branch: pluginOptions?.branch,
+    },
   })
     .then(res => res.ok)
     .then(ok => {
