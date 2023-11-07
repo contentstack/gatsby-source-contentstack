@@ -50,12 +50,14 @@ const validateContentstackAccess = async pluginOptions => {
   };
   // Check if config has the key: enableEarlyAccess, it's an array of strings, and it's not empty
   if (
-    pluginOptions.enableEarlyAccess &&
-    Array.isArray(pluginOptions.enableEarlyAccess) &&
-    pluginOptions.enableEarlyAccess.length > 0
+    pluginOptions?.enableEarlyAccessValue &&
+    pluginOptions?.enableEarlyAccessKey &&
+    pluginOptions?.enableEarlyAccessKey !== '' &&
+    Array.isArray(pluginOptions.enableEarlyAccessValue) &&
+    pluginOptions.enableEarlyAccessValue.length > 0
   ) {
-    const earlyAccessHeaders = pluginOptions.enableEarlyAccess.join(',');
-    headers['x-header-ea'] = earlyAccessHeaders;
+    const earlyAccessHeaders = pluginOptions.enableEarlyAccessValue.join(',');
+    headers[pluginOptions?.enableEarlyAccessKey] = earlyAccessHeaders;
   }
 
   await fetch(`${host}/content_types?include_count=false`, {

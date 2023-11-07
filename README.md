@@ -75,8 +75,11 @@ plugins: [
       //Optional: Specify the number of entries/assets to be fetched per page. Maximum limit accepted is 100. By default it is set to 50.
       limit: 50
 
+      //Optional: Specify the header to be passed to Contentstack API
+      enableEarlyAccessKey: 'x-header-ea'
+      
       //Optional: Specify list of headers to be passed to Contentstack API.
-      enableEarlyAccess : ['newcda','taxonomy']
+      enableEarlyAccessValue: ['newcda','taxonomy']
 
     },
   },

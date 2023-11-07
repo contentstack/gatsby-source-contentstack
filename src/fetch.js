@@ -184,12 +184,14 @@ const fetchCsData = async (url, config, query) => {
   };
   // Check if config has the key: enableEarlyAccess,IF YES, it's an array of strings, and it's not empty
   if (
-    config?.enableEarlyAccess &&
-    Array.isArray(config.enableEarlyAccess) &&
-    config.enableEarlyAccess.length > 0
+    config?.enableEarlyAccessValue &&
+    config?.enableEarlyAccessKey &&
+    config?.enableEarlyAccessKey !== '' &&
+    Array.isArray(config.enableEarlyAccessValue) &&
+    config.enableEarlyAccessValue.length > 0
   ) {
-    const earlyAccessHeaders = config.enableEarlyAccess.join(',');
-    option.headers['x-header-ea'] = earlyAccessHeaders;
+    const earlyAccessHeaders = config.enableEarlyAccessValue.join(',');
+    option.headers[config?.enableEarlyAccessKey] = earlyAccessHeaders;
   }
   const data = await getData(apiUrl, option);
   return data;
