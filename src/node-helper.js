@@ -10,6 +10,8 @@
 const preferDefault = m => (m && m.default) || m;
 const fetch = preferDefault(require('node-fetch'));
 
+const { getCustomHeaders } = require('./utils');
+
 const deleteContentstackNodes = (
   item,
   type,
