@@ -6,7 +6,8 @@
     "prepublish": "npm run build",
     "build": "babel src --out-dir .",
     "watch": "babel -w src --out-dir .",
-    "test": "jest —colors --watch"
+    "test": "jest —-colors",
+    "test:watch": "jest —-colors --watch"
   },
   "engines": {
     "node": ">=18.0.0"
