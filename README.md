@@ -72,13 +72,21 @@ plugins: [
       // Optional: Specify a number to perform http-retries for network failures. By default it is set to 3.
       httpRetries: 2,
 
-      //Specify the number of entries/assets to be fetched per page. Maximum limit accepted is 100. By default it is set to 50.
+      //Optional: Specify the number of entries/assets to be fetched per page. Maximum limit accepted is 100. By default it is set to 50.
       limit: 50
+
+      //Optional: Specify the header to be passed to Contentstack API
+      enableEarlyAccessKey: 'x-header-ea'
+
+      //Optional: Specify list of headers to be passed to Contentstack API for the key specified in enableEarlyAccessKey. The Value should be a string. In case of multiple headers, separate them with a comma. For eg:'header1,header2'
+      enableEarlyAccessValue: 'newcda,taxonomy'
+
     },
   },
 ]
 // Note: access_token is replaced by delivery_token
 ```
+
 There is a provision to speed up the `gatsby build` process. To do this, you can set the value of the **expediteBuild** to **true**. So when you set the value of this parameter to true, the build process is significantly enhanced as only published assets and entries are synced parallelly.
 
 However, when you want to perform `gatsby develop`, ensure to set the value of **expediteBuild** to **false**.

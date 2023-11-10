@@ -10,14 +10,27 @@
 const preferDefault = m => (m && m.default) || m;
 const fetch = preferDefault(require('node-fetch'));
 
-const deleteContentstackNodes = (item, type, createNodeId, getNode, deleteNode, typePrefix) => {
+const { getCustomHeaders } = require('./utils');
+
+const deleteContentstackNodes = (
+  item,
+  type,
+  createNodeId,
+  getNode,
+  deleteNode,
+  typePrefix
+) => {
   let nodeId = '';
   let node = null;
   if (type === 'entry') {
-    nodeId = createNodeId(`${typePrefix.toLowerCase()}-entry-${item.uid}-${item.locale}`);
+    nodeId = createNodeId(
+      `${typePrefix.toLowerCase()}-entry-${item.uid}-${item.locale}`
+    );
   }
   if (type === 'asset') {
-    nodeId = createNodeId(`${typePrefix.toLowerCase()}-assets-${item.uid}-${item.locale}`);
+    nodeId = createNodeId(
+      `${typePrefix.toLowerCase()}-assets-${item.uid}-${item.locale}`
+    );
   }
   node = getNode(nodeId);
   if (node) {
@@ -31,11 +44,16 @@ const validateContentstackAccess = async pluginOptions => {
   let host = pluginOptions.cdn
     ? pluginOptions.cdn
     : 'https://cdn.contentstack.io/v3';
+
   await fetch(`${host}/content_types?include_count=false`, {
     headers: {
       api_key: `${pluginOptions.api_key}`,
       access_token: `${pluginOptions.delivery_token}`,
       branch: pluginOptions?.branch,
+      ...getCustomHeaders(
+        pluginOptions?.enableEarlyAccessKey,
+        pluginOptions?.enableEarlyAccessValue
+      ),
     },
   })
     .then(res => res.ok)

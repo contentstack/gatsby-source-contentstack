@@ -27,7 +27,7 @@ const {
   FetchSpecifiedLocalesEntries,
   FetchSpecifiedLocalesAndContentTypesEntries,
 } = require('./entry-data');
-const { CODES } = require('./utils');
+const { CODES, getCustomHeaders } = require('./utils');
 
 const OPTION_CLASS_MAPPING = {
   '': FetchDefaultContentTypes,
@@ -180,6 +180,10 @@ const fetchCsData = async (url, config, query) => {
       api_key: config?.api_key,
       access_token: config?.delivery_token,
       branch: config?.branch ? config.branch : 'main',
+      ...getCustomHeaders(
+        config?.enableEarlyAccessKey,
+        config?.enableEarlyAccessValue
+      ),
     },
   };
   const data = await getData(apiUrl, option);
