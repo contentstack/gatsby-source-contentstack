@@ -19,7 +19,10 @@ exports.pluginOptionsSchema = function (_ref) {
     excludeContentTypes: Joi.array().items(Joi.string().required()).description("Specify list of content-types to be excluded while fetching data from contentstack"),
     locales: Joi.array().items(Joi.string().required()).description("Specify list of locales to be fetched from contentstack"),
     jsonRteToHtml: Joi["boolean"]()["default"](false).description("Specify true if you want to generate html from json RTE field"),
-    httpRetries: Joi.number().integer()["default"](3).description("Specify the number of times to perform http request on a network failure")
+    httpRetries: Joi.number().integer()["default"](3).description("Specify the number of times to perform http request on a network failure"),
+    limit: Joi.number().integer()["default"](50).description("Specify the number of entries/assets to be fetched per page"),
+    enableEarlyAccessKey: Joi.string().description("Specify the Header key to be passed to Contentstack API"),
+    enableEarlyAccessValue: Joi.array().items(Joi.string().required()).description("Specify list of headers to be passed to Contentstack API"),
   }).external(validateContentstackAccess);
 };
 //# sourceMappingURL=plugin-options-schema.js.map

@@ -2,27 +2,30 @@
 
 const ProgressBar = require('progress');
 
-exports.createProgress = function (message, reporter) {
+exports.createProgress = function(message, reporter) {
   if (reporter && reporter.createProgress) {
     return reporter.createProgress(message);
   }
 
-  const bar = new ProgressBar(` [:bar] :current/:total :elapsed s :percent ${message}`, {
-    total: 0,
-    width: 30,
-    clear: true
-  });
+  const bar = new ProgressBar(
+    ` [:bar] :current/:total :elapsed s :percent ${message}`,
+    {
+      total: 0,
+      width: 30,
+      clear: true,
+    }
+  );
 
   return {
-    start() { },
+    start() {},
     tick() {
       bar.tick();
     },
-    done() { },
+    done() {},
     set total(value) {
       bar.total = value;
-    }
-  }
+    },
+  };
 };
 
 exports.checkIfUnsupportedFormat = data => {
@@ -40,7 +43,9 @@ exports.checkIfUnsupportedFormat = data => {
 };
 
 exports.SUPPORTED_FILES_COUNT = 'SUPPORTED_FILES_COUNT';
-exports.IMAGE_REGEXP = new RegExp('https://(stag-images|(eu-|azure-na-|azure-eu-|azure-k8s-)?images).(blz-)?contentstack.(io|com)/v3/assets/');
+exports.IMAGE_REGEXP = new RegExp(
+  'https://(stag-images|(eu-|azure-na-|azure-eu-|azure-k8s-)?images).(blz-)?contentstack.(io|com)/v3/assets/'
+);
 exports.ASSET_NODE_UIDS = 'ASSET_NODE_UIDS';
 
 exports.CODES = {
@@ -70,5 +75,16 @@ exports.getContentTypeOption = configOptions => {
 };
 
 exports.getJSONToHtmlRequired = (jsonRteToHtml, field) => {
-  return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
+  return (
+    jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte
+  );
+};
+
+exports.getCustomHeaders = (key, value) => {
+  const sanitizedKey = typeof key === 'string' ? key.trim() : '';
+  const sanitizedValue = typeof value === 'string' ? value.trim() : '';
+  if (!sanitizedKey || !sanitizedValue || !sanitizedKey.startsWith('x-')) {
+    return {};
+  }
+  return { [sanitizedKey]: sanitizedValue.replace(/\s/g, '') };
 };
