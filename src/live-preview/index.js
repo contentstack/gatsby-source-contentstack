@@ -20,7 +20,11 @@ export class ContentstackGatsby {
       content_type_uid: "",
       entry_uid: ""
     }
-    
+
+    if (this.config?.maxDepth) {
+      console.log("MAX_DEPTH:", this.config.maxDepth);
+    }
+
     const stackConfig = {
       api_key: config.api_key,
       delivery_token: config.delivery_token,
@@ -133,10 +137,13 @@ export class ContentstackGatsby {
     refPathMap = {},
     status,
     jsonRtePaths = [],
-    depth = MAX_DEPTH_ALLOWED,
+    depth = this.config.maxDepth ?? MAX_DEPTH_ALLOWED,
     seen = []
   ) {
+    console.log(`extractReferences: Depth - ${depth} (entry - ${this.livePreviewConfig?.entry_uid})`)
+    console.debug("extractReferences: refPathMap", refPathMap)
     if (depth <= 0) {
+      console.log("extractReferences: completed at depth 5, returning refPathMap")
       return refPathMap;
     }
     const uids = [...new Set(Object.values(refPathMap).flat())];
@@ -174,7 +181,12 @@ export class ContentstackGatsby {
   }
 
   extractUids(schema, pathPrefix = [], refPathMap = {}, jsonRtePaths = []) {
+    console.debug(`extractUids: extracting references (entry - ${this.livePreviewConfig?.entry_uid}) for path ${pathPrefix.join(".")}`)
     const referredUids = [];
+    if (!schema) {
+      console.log("extractUids: falsy schema value - ", schema, "at", pathPrefix.join("."))
+      console.log("extractUids: refPathMap - ", refPathMap)
+    }
     for (const field of schema) {
       const fieldPath = [...pathPrefix, field.uid];
       if (
@@ -235,6 +247,7 @@ export class ContentstackGatsby {
    * @param {string[]} referenceFieldPaths - content type reference paths
    */
   identifyReferences(data, currentPath = [], referenceFieldPaths = []) {
+    // console.log("identifyReferences: identifying references at", currentPath.join("."))
     const paths = [];
 
     for (const [k, v] of Object.entries(data)) {
@@ -337,6 +350,8 @@ export class ContentstackGatsby {
       let referencePaths = Object.keys(this.referenceFields[contentTypeUid]);
       referencePaths = referencePaths.filter(field => !!field)
 
+      console.log(`get: all ref paths (entry - ${receivedData.uid})`, referencePaths)
+
       const paths = this.identifyReferences(
         receivedData,
         [],
@@ -348,6 +363,9 @@ export class ContentstackGatsby {
       if (!status.hasLivePreviewEntryFound) {
         return receivedData
       }
+
+      console.log(`get: ref paths found in data (entry - ${receivedData.uid})`, paths);
+
 
       const entry = await this.stackSdk
         .ContentType(contentTypeUid)
