@@ -100,6 +100,7 @@ export class ContentstackGatsby {
     try {
       const result = await this.stackSdk.getContentTypes({
         query: { uid: { $in: uids } },
+        include_global_field_schema: true,
       });
       if (result) {
         const contentTypes = {};
@@ -133,7 +134,7 @@ export class ContentstackGatsby {
     refPathMap = {},
     status,
     jsonRtePaths = [],
-    depth = MAX_DEPTH_ALLOWED,
+    depth = this.config?.maxDepth ?? MAX_DEPTH_ALLOWED,
     seen = []
   ) {
     if (depth <= 0) {
