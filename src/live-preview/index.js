@@ -20,6 +20,8 @@ export class ContentstackGatsby {
       content_type_uid: "",
       entry_uid: ""
     }
+
+    this.config.maxDepth = config.maxDepth && config.maxDepth <= MAX_DEPTH_ALLOWED ? config.maxDepth : MAX_DEPTH_ALLOWED
     
     const stackConfig = {
       api_key: config.api_key,
@@ -134,7 +136,7 @@ export class ContentstackGatsby {
     refPathMap = {},
     status,
     jsonRtePaths = [],
-    depth = this.config?.maxDepth ?? MAX_DEPTH_ALLOWED,
+    depth = this.config.maxDepth,
     seen = []
   ) {
     if (depth <= 0) {
