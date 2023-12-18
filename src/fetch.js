@@ -50,7 +50,7 @@ const OPTIONS_ENTRIES_CLASS_MAPPING = {
 let activity;
 let globalConfig;
 
-const syncToken = [];
+let syncToken = [];
 
 exports.fetchData = async (
   configOptions,
@@ -288,5 +288,6 @@ const getSyncData = async (
     }
   }
 
+  syncToken = []
   return aggregatedResponse;
 };
