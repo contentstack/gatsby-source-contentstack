@@ -25,20 +25,13 @@ exports.createResolvers = async ({ createResolvers, cache, createNodeId }, confi
     contentTypeMap[item.uid] = item;
   })
 
-  // function collectReferences(currentPath = "", selectionSet, schema) {
-  //   let referencePaths = [];
-  //   if (schema.data_type === "reference") {
-  //     referencePaths.push(currentPath.concat(".", schema.uid))
-  //   }
-  //   if (selectionSet?.selections.length) {
-  //     return collectReferences(schema.uid, selectionSet)
-  //   }
-  // }
-
   function getCslpMetaPaths(selectionSet, path = "", schema, fragments) {
-    let referencePaths = [];
+    const referencePaths = [];
     if (schema.data_type === "reference" && path) {
       referencePaths.push(path)
+    }
+    if (!selectionSet || !selectionSet.selections) {
+      return referencePaths;
     }
     for (const selection of selectionSet.selections) {
       // exit when selection.kind is not Field, SelectionSet or InlineFragment
@@ -46,28 +39,36 @@ exports.createResolvers = async ({ createResolvers, cache, createNodeId }, confi
       if (selection?.name?.value === "cslp__meta") {
         continue;
       }
-      if (selection.selectionSet || selection.kind === "FragmentSpread") {
-        let nestedFields = schema?.blocks ?? schema.schema;
-        // selection.kind === "InlineFragment" && selection.typeCondition.name.value
-        if (selection.kind === "FragmentSpread") {
-          const fragmentName = selection.name.value;
-          if (fragmentName in fragments) {
-            const fragmentDefinition = fragments[fragmentName];
-            const refPaths = getCslpMetaPaths(fragmentDefinition.selectionSet, path, schema, fragments);
-            referencePaths.push(...refPaths);
-          }
-        }
+      if (selection.selectionSet || selection.kind === "Field" || selection.kind === "InlineFragment" || selection.kind === "FragmentSpread") {
+
+        const fragmentName = selection.name?.value;
+        const fragmentDefinition = fragments[fragmentName];
         const inlineFragmentNodeType = selection.typeCondition?.name?.value;
-        if (selection.kind === "InlineFragment" && inlineFragmentNodeType) {
+
+        // Fragment
+        // note - when a fragment is used inside a reference field, the reference field
+        // path gets added twice, this can maybe avoided by re-structuring, but a Set just
+        // works fine
+        if (selection.kind === "FragmentSpread" && fragmentDefinition) {
+          const refPaths = getCslpMetaPaths(fragmentDefinition.selectionSet, path, schema, fragments);
+          referencePaths.push(...refPaths);
+        }
+        else if (selection.kind === "InlineFragment" && inlineFragmentNodeType) {
           const contentTypeUid = inlineFragmentNodeType.replace(`${typePrefix}_`, "");
-          if (contentTypeUid) {
-            const contentTypeSchema = contentTypeMap[contentTypeUid];
-            const refPaths = getCslpMetaPaths(selection.selectionSet, path, contentTypeSchema, fragments);
-            referencePaths.push(...refPaths);
+          if (!contentTypeUid || !(contentTypeUid in contentTypeMap)) {
+            return referencePaths;
           }
-        } else {
+          const contentTypeSchema = contentTypeMap[contentTypeUid];
+          const refPaths = getCslpMetaPaths(selection.selectionSet, path, contentTypeSchema, fragments);
+          referencePaths.push(...refPaths);
+        }
+        else {
+          let nestedFields = schema?.blocks ?? schema.schema;
+          if (schema.data_type === "file" || schema.data_type === "link") {
+            return referencePaths;
+          }
           // block
-          if (schema.reference_to) {
+          if (schema.data_type === "reference" && schema.reference_to) {
             nestedFields = contentTypeMap[schema.reference_to[0]].schema
           }
           const nestedFieldSchema = nestedFields.find((item) => item.uid === selection.name.value);
@@ -83,7 +84,7 @@ exports.createResolvers = async ({ createResolvers, cache, createNodeId }, confi
         }
       }
     }
-    return referencePaths;
+    return Array.from(new Set(referencePaths));
   }
 
   function getQueryContentTypeSelection(selectionSet, value, location, depth = 0) {
@@ -160,7 +161,7 @@ exports.createResolvers = async ({ createResolvers, cache, createNodeId }, confi
             "referencePaths": getCslpMetaPaths(queryContentTypeSelection, "", contentType, info?.fragments ?? {})
           }
           // const operation = info.operation;
-          console.log(info.operation)
+          // console.log(info.operation)
           return paths;
         }
       }
