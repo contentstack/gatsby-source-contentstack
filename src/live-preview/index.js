@@ -87,7 +87,6 @@ export class ContentstackGatsby {
       return data;
     }
     const dataCloned = cloneDeep(data);
-    console.log(dataCloned)
     delete dataCloned["$"];
 
     const hasCslpMetaAtRoot = dataCloned.cslp__meta;
@@ -99,8 +98,6 @@ export class ContentstackGatsby {
       this.unwrapEntryData(dataCloned) :
       dataCloned;
     const { live_preview } = this.stackSdk;
-
-
 
     if (live_preview?.hash && live_preview.hash !== 'init') {
       this.livePreviewConfig = live_preview;
