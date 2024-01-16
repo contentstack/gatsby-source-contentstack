@@ -4,6 +4,7 @@ const Contentstack = require('@contentstack/utils');
 
 const { getJSONToHtmlRequired } = require('./utils');
 const { makeEntryNodeUid, makeAssetNodeUid } = require('./normalize');
+const { resolveCslpMeta } = require('./live-preview/resolveCslpMeta');
 
 exports.createResolvers = async ({ createResolvers, cache, createNodeId }, configOptions) => {
   const resolvers = {};
@@ -15,6 +16,33 @@ exports.createResolvers = async ({ createResolvers, cache, createNodeId }, confi
     cache.get(`${typePrefix}_${configOptions.api_key}_groups`),
     cache.get(`${typePrefix}_${configOptions.api_key}_json_rte_fields`),
   ]);
+
+  const contentTypes = await cache.get(typePrefix);
+  const contentTypeMap = {};
+  contentTypes.forEach((item) => {
+    contentTypeMap[item.uid] = item;
+  });
+
+  contentTypes.forEach((contentType) => {
+    resolvers[`${typePrefix}_${contentType.uid}`] = {
+      "cslp__meta": {
+        type: "JSON",
+        resolve(source, args, context, info) {
+          try {
+            return resolveCslpMeta({ source, args, context, info, contentTypeMap, typePrefix })
+          }
+          catch (error) {
+            console.error("ContentstackGatsby (Live Preview):", error)
+            return {
+              error: {
+                message: error.message ?? "failed to resolve cslp__meta"
+              }
+            }
+          }
+        }
+      }
+    }
+  })
 
   fileFields && fileFields.forEach(fileField => {
     resolvers[fileField.parent] = {

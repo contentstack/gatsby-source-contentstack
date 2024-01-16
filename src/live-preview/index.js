@@ -1,7 +1,8 @@
-import contentstack from 'contentstack';
-import { jsonToHTML } from '@contentstack/utils';
-import isEmpty from 'lodash.isempty';
-import { Storage } from './storage-helper';
+import contentstack from "contentstack";
+import { jsonToHTML } from "@contentstack/utils";
+import isEmpty from "lodash.isempty";
+import cloneDeep from "lodash.clonedeep";
+import { Storage } from "./storage-helper";
 
 // max depth for nested references
 const MAX_DEPTH_ALLOWED = 5;
@@ -20,7 +21,7 @@ export class ContentstackGatsby {
       content_type_uid: "",
       entry_uid: ""
     }
-    
+
     const stackConfig = {
       api_key: config.api_key,
       delivery_token: config.delivery_token,
@@ -34,7 +35,6 @@ export class ContentstackGatsby {
       },
     }
     this.stackSdk = contentstack.Stack(stackConfig);
-
     // reference fields in various CTs and the CTs they refer
     this.referenceFieldsStorage = new Storage(
       window.sessionStorage,
@@ -66,6 +66,10 @@ export class ContentstackGatsby {
     this.stackSdk.setHost(host);
   }
 
+  /**
+   * @deprecated With the `cslp__meta` query field, this should not be required
+   * @param {Object.<string, any>} entry 
+   */
   static addContentTypeUidFromTypename(entry) {
     if (typeof entry === "undefined") {
       throw new TypeError("entry cannot be empty");
@@ -100,6 +104,7 @@ export class ContentstackGatsby {
     try {
       const result = await this.stackSdk.getContentTypes({
         query: { uid: { $in: uids } },
+        include_global_field_schema: true,
       });
       if (result) {
         const contentTypes = {};
@@ -109,7 +114,7 @@ export class ContentstackGatsby {
         return contentTypes;
       }
     } catch (error) {
-      console.error('ContentstackGatsby - Failed to fetch content types');
+      console.error("Contentstack Gatsby (Live Preview): failed to fetch content types");
       throw error;
     }
   }
@@ -221,19 +226,12 @@ export class ContentstackGatsby {
     return { referredUids, refPathMap };
   }
 
-  isNested(value) {
-    if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-      return true;
-    }
-    return false;
-  }
-
   /**
-   * Identify reference paths in user-provided data
-   * @param {any} data - entry data
-   * @param {string[]} currentPath - traversal path
-   * @param {string[]} referenceFieldPaths - content type reference paths
-   */
+  * Identify reference paths in user-provided data
+  * @param {any} data - entry data
+  * @param {string[]} currentPath - traversal path
+  * @param {string[]} referenceFieldPaths - content type reference paths
+  */
   identifyReferences(data, currentPath = [], referenceFieldPaths = []) {
     const paths = [];
 
@@ -292,31 +290,63 @@ export class ContentstackGatsby {
     return entryContentType === this.livePreviewConfig?.content_type_uid
   }
 
-  async get(data) {
-    const receivedData = structuredClone(data);
+  async fetchEntry(entryUid, contentTypeUid, referencePaths = [], jsonRtePaths = []) {
+    const entry = await this.stackSdk
+      .ContentType(contentTypeUid)
+      .Entry(entryUid)
+      .includeReference(referencePaths)
+      .toJSON()
+      .fetch();
+
+    if (!isEmpty(entry)) {
+      if (this.config.jsonRteToHtml) {
+        jsonToHTML({
+          entry: entry,
+          paths: jsonRtePaths,
+        });
+      }
+      return entry;
+    }
+  }
+
+  isNested(value) {
+    if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+      return true;
+    }
+    return false;
+  }
+
+  unwrapEntryData(data) {
+    const values = Object.values(data);
+    if (!values) {
+      return data;
+    }
+    if (values && values.length === 1) {
+      return values[0];
+    }
+    return values;
+  }
+
+  async getUsingTypeName(data) {
+    const receivedData = cloneDeep(data);
     const { live_preview } = this.stackSdk;
 
     let status = {
       hasLivePreviewEntryFound: false
     }
 
-    if (live_preview?.hash && live_preview.hash !== 'init') {
-      this.livePreviewConfig = live_preview;
-      if (!receivedData.__typename) {
-        throw new Error("Entry data must contain __typename for live preview")
-      }
-      if (!receivedData.uid) {
-        throw new Error("Entry data must contain uid for live preview")
-      }
-      const contentTypeUid = receivedData.__typename.split("_").slice(1).join("_")
-      const entryUid = receivedData.uid;
+    this.livePreviewConfig = live_preview;
 
-      status = this.statusStorage.get(contentTypeUid) ?? { hasLivePreviewEntryFound: this.isCurrentEntryEdited(contentTypeUid) }
+    const contentTypeUid = receivedData.__typename.split("_").slice(1).join("_")
+    const entryUid = receivedData.uid;
 
-      if (
-        isEmpty(this.referenceFields[contentTypeUid]) ||
-        isEmpty(this.jsonRteFields[contentTypeUid])
-      ) {
+    status = this.statusStorage.get(contentTypeUid) ?? { hasLivePreviewEntryFound: this.isCurrentEntryEdited(contentTypeUid) }
+
+    if (
+      isEmpty(this.referenceFields[contentTypeUid]) ||
+      isEmpty(this.jsonRteFields[contentTypeUid])
+    ) {
+      try {
         const { refPathMap, jsonRtePaths } = await this.extractReferences({
           '': [contentTypeUid],
         }, status);
@@ -333,38 +363,125 @@ export class ContentstackGatsby {
           this.jsonRteFields[contentTypeUid]
         );
       }
-
-      let referencePaths = Object.keys(this.referenceFields[contentTypeUid]);
-      referencePaths = referencePaths.filter(field => !!field)
-
-      const paths = this.identifyReferences(
-        receivedData,
-        [],
-        referencePaths
-      );
-
-      this.statusStorage.set(contentTypeUid, status)
-
-      if (!status.hasLivePreviewEntryFound) {
-        return receivedData
-      }
-
-      const entry = await this.stackSdk
-        .ContentType(contentTypeUid)
-        .Entry(entryUid)
-        .includeReference(paths)
-        .toJSON()
-        .fetch();
-      if (!isEmpty(entry)) {
-        if (this.config.jsonRteToHtml) {
-          jsonToHTML({
-            entry: entry,
-            paths: this.jsonRteFields[contentTypeUid] ?? [],
-          });
-        }
-        return entry;
+      catch (error) {
+        console.error("Contentstack Gatsby (Live Preview): an error occurred while determining reference paths", error);
+        console.log("Contentstack Gatsby (Live Preview): unable to determine reference paths. This may have occurred due to the way the content types refer each other. Please try including the cslp__meta field in your query.");
+        return receivedData;
       }
     }
-    return receivedData;
+
+    let referencePaths = Object.keys(this.referenceFields[contentTypeUid]);
+    referencePaths = referencePaths.filter(field => !!field)
+
+    const paths = this.identifyReferences(
+      receivedData,
+      [],
+      referencePaths
+    );
+
+    this.statusStorage.set(contentTypeUid, status)
+
+    if (!status.hasLivePreviewEntryFound) {
+      return receivedData
+    }
+
+    const entry = await this.fetchEntry(
+      entryUid,
+      contentTypeUid,
+      paths,
+      this.jsonRteFields[contentTypeUid] ?? []
+    );
+    return entry;
+  }
+
+  async get(data) {
+    // if cslp__meta is found, use the paths from cslp__meta
+    // else use the old method to determine the paths
+    if (this.stackSdk.live_preview && !this.stackSdk.live_preview?.enable) {
+      console.warn("Contentstack Gatsby (Live Preview): live preview is disabled in config");
+      return data;
+    }
+    if (data === null) {
+      console.warn("Contentstack Gatsby (Live Preview): null was passed to get()");
+      return data;
+    }
+    if (!this.isNested(data)) {
+      console.warn("Contentstack Gatsby (Live Preview): data passed to get() is invalid")
+      return data;
+    }
+    const dataCloned = cloneDeep(data);
+    delete dataCloned["$"];
+
+    // old method metadata
+    const hasTypeNameAndUid = dataCloned.uid && dataCloned.__typename;
+    // new method metadata
+    const hasCslpMetaAtRoot = dataCloned.cslp__meta;
+    const multipleEntriesKey = Object.keys(dataCloned);
+    const hasSingleEntry = !hasCslpMetaAtRoot && multipleEntriesKey.length === 1;
+    const hasMultipleEntries = !hasCslpMetaAtRoot && multipleEntriesKey.length > 1;
+
+    const receivedData = hasSingleEntry || hasMultipleEntries ?
+      this.unwrapEntryData(dataCloned) :
+      dataCloned;
+    const { live_preview } = this.stackSdk;
+
+    if (live_preview?.hash && live_preview.hash !== 'init') {
+      this.livePreviewConfig = live_preview;
+
+      const hasCslpMeta = receivedData.cslp__meta;
+
+      // item can be null, since gatsby can return null
+      const hasMultipleCslpMeta = Array.isArray(receivedData) &&
+        receivedData.length > 1 &&
+        receivedData.every((item) => item === null || item.cslp__meta);
+
+      if (!hasCslpMeta && !hasMultipleCslpMeta && !hasTypeNameAndUid) {
+        throw new Error("Contentstack Gatsby (Live Preview): Entry data must contain cslp__meta for live preview")
+      }
+
+      if (hasMultipleCslpMeta) {
+        try {
+          const multipleLPEntries = await Promise.all(receivedData.map((item) => {
+            if (item === null) {
+              return Promise.resolve(null)
+            }
+            return this.fetchEntry(
+              item.cslp__meta.entryUid,
+              item.cslp__meta.contentTypeUid,
+              item.cslp__meta.refPaths,
+              item.cslp__meta.rtePaths
+            )
+          }))
+          const result = {}
+          multipleEntriesKey.forEach((key, index) => {
+            result[key] = multipleLPEntries[index];
+          });
+          return result;
+        }
+        catch (error) {
+          console.error("Contentstack Gatsby (Live Preview):", error);
+          return dataCloned;
+        }
+      }
+      else if (hasCslpMeta) {
+        const entryCslpMeta = receivedData.cslp__meta;
+        const contentTypeUid = entryCslpMeta.contentTypeUid;
+        const entryUid = entryCslpMeta.entryUid;
+
+        if (!entryUid || !contentTypeUid) {
+          console.warn("Contentstack Gatsby (Live Preview): no entry uid or content type uid was found inside cslp__meta")
+          return dataCloned;
+        }
+
+        const refPaths = entryCslpMeta.referencePaths ?? [];
+        const rtePaths = entryCslpMeta.jsonRtePaths ?? [];
+        const entry = await this.fetchEntry(entryUid, contentTypeUid, refPaths, rtePaths);
+        return entry;
+      }
+      else if (hasTypeNameAndUid) {
+        return await this.getUsingTypeName(dataCloned);
+      }
+    }
+    return dataCloned;
   }
 }

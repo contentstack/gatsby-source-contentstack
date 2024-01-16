@@ -32,6 +32,7 @@
     "contentstack": "^3.17.1",
     "gatsby-core-utils": "^3.23.0",
     "gatsby-source-filesystem": "^5.7.0",
+    "lodash.clonedeep": "^4.5.0",
     "lodash.isempty": "^4.4.0",
     "node-fetch": "^2.6.9",
     "progress": "^2.0.3",
