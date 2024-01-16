@@ -397,6 +397,10 @@ export class ContentstackGatsby {
   async get(data) {
     // if cslp__meta is found, use the paths from cslp__meta
     // else use the old method to determine the paths
+    if (this.stackSdk.live_preview && !this.stackSdk.live_preview?.enable) {
+      console.warn("Contentstack Gatsby (Live Preview): live preview is disabled in config");
+      return data;
+    }
     if (data === null) {
       console.warn("Contentstack Gatsby (Live Preview): null was passed to get()");
       return data;
