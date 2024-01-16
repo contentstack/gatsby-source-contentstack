@@ -114,7 +114,7 @@ export class ContentstackGatsby {
         return contentTypes;
       }
     } catch (error) {
-      console.error('ContentstackGatsby - Failed to fetch content types');
+      console.error("Contentstack Gatsby (Live Preview): failed to fetch content types");
       throw error;
     }
   }
