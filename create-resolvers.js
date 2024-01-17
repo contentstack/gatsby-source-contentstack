@@ -13,13 +13,15 @@ var _require = require('./utils'),
 var _require2 = require('./normalize'),
   makeEntryNodeUid = _require2.makeEntryNodeUid,
   makeAssetNodeUid = _require2.makeAssetNodeUid;
+var _require3 = require('./live-preview/resolveCslpMeta'),
+  resolveCslpMeta = _require3.resolveCslpMeta;
 exports.createResolvers = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])(function (_ref2, configOptions) {
     var createResolvers = _ref2.createResolvers,
       cache = _ref2.cache,
       createNodeId = _ref2.createNodeId;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee() {
-      var resolvers, typePrefix, _yield$Promise$all, _yield$Promise$all2, fileFields, references, groups, jsonRteFields;
+      var resolvers, typePrefix, _yield$Promise$all, _yield$Promise$all2, fileFields, references, groups, jsonRteFields, contentTypes, contentTypeMap;
       return _regenerator["default"].wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
@@ -34,6 +36,41 @@ exports.createResolvers = /*#__PURE__*/function () {
             references = _yield$Promise$all2[1];
             groups = _yield$Promise$all2[2];
             jsonRteFields = _yield$Promise$all2[3];
+            _context.next = 12;
+            return cache.get(typePrefix);
+          case 12:
+            contentTypes = _context.sent;
+            contentTypeMap = {};
+            contentTypes.forEach(function (item) {
+              contentTypeMap[item.uid] = item;
+            });
+            contentTypes.forEach(function (contentType) {
+              resolvers["".concat(typePrefix, "_").concat(contentType.uid)] = {
+                "cslp__meta": {
+                  type: "JSON",
+                  resolve: function resolve(source, args, context, info) {
+                    try {
+                      return resolveCslpMeta({
+                        source: source,
+                        args: args,
+                        context: context,
+                        info: info,
+                        contentTypeMap: contentTypeMap,
+                        typePrefix: typePrefix
+                      });
+                    } catch (error) {
+                      var _error$message;
+                      console.error("ContentstackGatsby (Live Preview):", error);
+                      return {
+                        error: {
+                          message: (_error$message = error.message) !== null && _error$message !== void 0 ? _error$message : "failed to resolve cslp__meta"
+                        }
+                      };
+                    }
+                  }
+                }
+              };
+            });
             fileFields && fileFields.forEach(function (fileField) {
               resolvers[fileField.parent] = _objectSpread(_objectSpread({}, resolvers[fileField.parent]), (0, _defineProperty2["default"])({}, fileField.field.uid, {
                 resolve: function resolve(source, args, context) {
@@ -115,7 +152,7 @@ exports.createResolvers = /*#__PURE__*/function () {
               }));
             });
             createResolvers(resolvers);
-          case 15:
+          case 21:
           case "end":
             return _context.stop();
         }

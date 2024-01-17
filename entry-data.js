@@ -69,12 +69,14 @@ var FetchDefaultEntries = /*#__PURE__*/function (_FetchEntries) {
               syncEntryParams = syncEntryToken ? {
                 sync_token: syncEntryToken
               } : {
-                init: true
+                init: true,
+                limit: configOptions.limit > 100 ? 50 : configOptions.limit
               };
               syncAssetParams = syncAssetToken ? {
                 sync_token: syncAssetToken
               } : {
-                init: true
+                init: true,
+                limit: configOptions.limit > 100 ? 50 : configOptions.limit
               };
               syncEntryParams.type = 'entry_published,entry_unpublished,entry_deleted';
               syncAssetParams.type = 'asset_published,asset_unpublished,asset_deleted';
@@ -101,7 +103,8 @@ var FetchDefaultEntries = /*#__PURE__*/function (_FetchEntries) {
               syncParams = syncToken ? {
                 sync_token: syncToken
               } : {
-                init: true
+                init: true,
+                limit: configOptions.limit > 100 ? 50 : configOptions.limit
               };
               _context2.next = 35;
               return fn.apply(null, [syncParams, configOptions]);

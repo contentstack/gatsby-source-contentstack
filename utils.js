@@ -1,5 +1,7 @@
 'use strict';
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 var ProgressBar = require('progress');
 exports.createProgress = function (message, reporter) {
   if (reporter && reporter.createProgress) {
@@ -62,5 +64,13 @@ exports.getContentTypeOption = function (configOptions) {
 };
 exports.getJSONToHtmlRequired = function (jsonRteToHtml, field) {
   return jsonRteToHtml && field.field_metadata && field.field_metadata.allow_json_rte;
+};
+exports.getCustomHeaders = function (key, value) {
+  var sanitizedKey = typeof key === 'string' ? key.trim() : '';
+  var sanitizedValue = typeof value === 'string' ? value.trim() : '';
+  if (!sanitizedKey || !sanitizedValue || !sanitizedKey.startsWith('x-')) {
+    return {};
+  }
+  return (0, _defineProperty2["default"])({}, sanitizedKey, sanitizedValue.replace(/\s/g, ''));
 };
 //# sourceMappingURL=utils.js.map
