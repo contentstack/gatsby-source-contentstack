@@ -10,11 +10,16 @@
 */
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var preferDefault = function preferDefault(m) {
   return m && m["default"] || m;
 };
 var fetch = preferDefault(require('node-fetch'));
+var _require = require('./utils'),
+  getCustomHeaders = _require.getCustomHeaders;
 var deleteContentstackNodes = function deleteContentstackNodes(item, type, createNodeId, getNode, deleteNode, typePrefix) {
   var nodeId = '';
   var node = null;
@@ -44,11 +49,11 @@ var validateContentstackAccess = /*#__PURE__*/function () {
           host = pluginOptions.cdn ? pluginOptions.cdn : 'https://cdn.contentstack.io/v3';
           _context.next = 5;
           return fetch("".concat(host, "/content_types?include_count=false"), {
-            headers: {
+            headers: _objectSpread({
               api_key: "".concat(pluginOptions.api_key),
               access_token: "".concat(pluginOptions.delivery_token),
               branch: pluginOptions === null || pluginOptions === void 0 ? void 0 : pluginOptions.branch
-            }
+            }, getCustomHeaders(pluginOptions === null || pluginOptions === void 0 ? void 0 : pluginOptions.enableEarlyAccessKey, pluginOptions === null || pluginOptions === void 0 ? void 0 : pluginOptions.enableEarlyAccessValue))
           }).then(function (res) {
             return res.ok;
           }).then(function (ok) {
