@@ -17,6 +17,7 @@ export class ContentstackGatsby {
       entry_uid: ""
     }
 
+
     const stackConfig = {
       api_key: config.api_key,
       delivery_token: config.delivery_token,
@@ -55,13 +56,6 @@ export class ContentstackGatsby {
       }
       return entry;
     }
-  }
-
-  isNested(value) {
-    if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-      return true;
-    }
-    return false;
   }
 
   unwrapEntryData(data) {
@@ -152,6 +146,7 @@ export class ContentstackGatsby {
       const entry = await this.fetchEntry(entryUid, contentTypeUid, refPaths, rtePaths);
       return entry;
     }
+    return dataCloned;
     return dataCloned;
   }
 }

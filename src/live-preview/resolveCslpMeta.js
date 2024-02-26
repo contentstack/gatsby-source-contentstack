@@ -52,10 +52,8 @@ export function resolveCslpMeta({
   return result;
 }
 
-
 function findQuerySelection(selectionSet, value, location, depth = 0) {
-  // don't need to search for more than one level deep
-  // as cslp__meta can only be one level deep (see all* case below) 
+  // cslp__meta can only be one level deep (or two level deep, see all* case below) 
   // e.g.
   // query {
   //   page {
