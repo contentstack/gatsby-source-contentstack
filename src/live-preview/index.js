@@ -29,8 +29,8 @@ export class ContentstackGatsby {
       ...(config.region && { region: config.region }),
       ...(config.branch && { branch: config.branch }),
       live_preview: {
-        host: config.live_preview.host,
-        management_token: config.live_preview.management_token,
+        host: config.live_preview.preview_host,
+        preview_token: config.live_preview.preview_token,
         enable: config.live_preview.enable,
       },
     }
