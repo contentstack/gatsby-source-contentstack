@@ -226,7 +226,7 @@ const getPagedData = async (
   return aggregatedResponse;
 };
 
-exports.getSyncData = async (
+const getSyncData = async (
   url,
   config,
   query,
@@ -275,7 +275,7 @@ exports.getSyncData = async (
       } catch (error) {
         if (retries < config.httpRetries) {
           const timeToWait = 2 ** retries * 100;
-          console.log(`Retry attempt ${retries + 1} after pagination token error. Waiting for ${timeToWait} ms...`);
+          //Retry attempt ${retries + 1} after pagination token error. Waiting for ${timeToWait} ms...
           await waitFor(timeToWait);
           return await getSyncData(
             url,
@@ -299,7 +299,9 @@ exports.getSyncData = async (
         config,
         { sync_token: token }
       );
-      aggregatedResponse.data = aggregatedResponse.data.concat(syncResponse.items);
+      aggregatedResponse.data = aggregatedResponse.data?.concat(
+        ...syncResponse.items
+      );
       aggregatedResponse.sync_token = syncResponse.sync_token;
     }
   }
