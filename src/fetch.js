@@ -292,12 +292,15 @@ const getSyncData = async (
     }
 
     if (response.sync_token) {
+    /**
+     * To make final sync call and concatenate the result if found any during on fetch request.
+    */
     const aggregatedSyncToken = syncToken.filter(item => item !== undefined);
     for (const token of aggregatedSyncToken) {
       const syncResponse = await fetchCsData(
         url,
         config,
-        { sync_token: token }
+        (query = { sync_token: token })
       );
       aggregatedResponse.data = aggregatedResponse.data?.concat(
         ...syncResponse.items
