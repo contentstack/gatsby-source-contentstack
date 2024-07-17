@@ -231,11 +231,13 @@ const getSyncData = async (
   config,
   query,
   responseKey,
-  aggregatedResponse = null
+  aggregatedResponse = null,
+  retries = 0
 ) => {
+  try {
   const response = await fetchCsData(url, config, query);
 
-  /* 
+  /*
   Below syncToken array would contain type --> 'asset_published', 'entry_published' sync tokens
   */
   if (
@@ -260,20 +262,39 @@ const getSyncData = async (
       ? response.sync_token
       : aggregatedResponse.sync_token;
   }
-  if (response.pagination_token) {
-    return getSyncData(
-      url,
-      config,
-      (query = { pagination_token: response.pagination_token }),
-      responseKey,
-      aggregatedResponse
-    );
-  }
+    if (response.pagination_token) {
+      try {
+        return await getSyncData(
+          url,
+          config,
+          { pagination_token: response.pagination_token },
+          responseKey,
+          aggregatedResponse,
+          0 // Reset retries for each call
+        );
+      } catch (error) {
+        if (retries < config.httpRetries) {
+          const timeToWait = 2 ** retries * 100;
+          //Retry attempt ${retries + 1} after pagination token error. Waiting for ${timeToWait} ms...
+          await waitFor(timeToWait);
+          return await getSyncData(
+            url,
+            config,
+            { pagination_token: response.pagination_token },
+            responseKey,
+            aggregatedResponse,
+            retries + 1
+          );
+        } else {
+          throw new Error(`Failed to fetch sync data after ${config.httpRetries} retry attempts due to invalid pagination token.`);
+        }
+      }
+    }
 
-  if (response.sync_token) {
+    if (response.sync_token) {
     /**
      * To make final sync call and concatenate the result if found any during on fetch request.
-     */
+    */
     const aggregatedSyncToken = syncToken.filter(item => item !== undefined);
     for (const token of aggregatedSyncToken) {
       const syncResponse = await fetchCsData(
@@ -288,6 +309,10 @@ const getSyncData = async (
     }
   }
 
-  syncToken = []
+  syncToken = [];
   return aggregatedResponse;
+} catch (error) {
+  throw new Error(`Failed to fetch sync data: ${error.message}`);
+}
 };
+
