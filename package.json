@@ -34,7 +34,7 @@
     "gatsby-source-filesystem": "^5.7.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isempty": "^4.4.0",
-    "node-fetch": "^2.6.9",
+    "node-fetch": "^3.3.2",
     "progress": "^2.0.3",
     "query-string": "^7.1.1"
   },
