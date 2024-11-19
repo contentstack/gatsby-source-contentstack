@@ -187,14 +187,14 @@ const builtEntry = (schema, entry, locale, entriesNodeIds, assetsNodeIds, create
 };
 
 const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, interfaceParent) => {
-  const blockFields = {};
+  if (interfaceParent)
+    interfaceParent = interfaceParent.replace(/-/g, "_")
   let blockType = interfaceParent ? `type ${parent} implements ${interfaceParent} @infer {` : `type ${parent} @infer {`;
   let blockInterface = interfaceParent && `interface ${interfaceParent} {`;
-
   blocks.forEach(block => {
     const newparent = parent.concat(block.uid);
     // If this block has a reference_to, it is a global field and should have a new interface
-    const newInterfaceParent = block.reference_to ? `${prefix}_${block.reference_to}` : interfaceParent && interfaceParent.concat(block.uid);
+    const newInterfaceParent = block.reference_to ? `${prefix}_${block.reference_to.replace(/-/g, "_")}` : interfaceParent && interfaceParent.concat(block.uid);
 
     blockType = blockType.concat(`${block.uid} : ${newparent} `);
     blockInterface = blockInterface && blockInterface.concat(`${block.uid} : ${newInterfaceParent} `);
