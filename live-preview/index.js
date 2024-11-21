@@ -25,7 +25,7 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 // max depth for nested references
 var MAX_DEPTH_ALLOWED = 5;
-var ContentstackGatsby = /*#__PURE__*/function () {
+var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
   function ContentstackGatsby(config) {
     (0, _classCallCheck2["default"])(this, ContentstackGatsby);
     (0, _defineProperty2["default"])(this, "config", void 0);
@@ -49,8 +49,8 @@ var ContentstackGatsby = /*#__PURE__*/function () {
       branch: config.branch
     }), {}, {
       live_preview: {
-        host: config.live_preview.host,
-        management_token: config.live_preview.management_token,
+        host: config.live_preview.preview_host,
+        preview_token: config.live_preview.preview_token,
         enable: config.live_preview.enable
       }
     });
@@ -683,5 +683,4 @@ var ContentstackGatsby = /*#__PURE__*/function () {
   }]);
   return ContentstackGatsby;
 }();
-exports.ContentstackGatsby = ContentstackGatsby;
 //# sourceMappingURL=index.js.map

@@ -177,13 +177,13 @@ var builtEntry = function builtEntry(schema, entry, locale, entriesNodeIds, asse
   return entryObj;
 };
 var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, references, groups, fileFields, jsonRteFields, parent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, interfaceParent) {
-  var blockFields = {};
+  if (interfaceParent) interfaceParent = interfaceParent.replace(/-/g, "_");
   var blockType = interfaceParent ? "type ".concat(parent, " implements ").concat(interfaceParent, " @infer {") : "type ".concat(parent, " @infer {");
   var blockInterface = interfaceParent && "interface ".concat(interfaceParent, " {");
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
     // If this block has a reference_to, it is a global field and should have a new interface
-    var newInterfaceParent = block.reference_to ? "".concat(prefix, "_").concat(block.reference_to) : interfaceParent && interfaceParent.concat(block.uid);
+    var newInterfaceParent = block.reference_to ? "".concat(prefix, "_").concat(block.reference_to.replace(/-/g, "_")) : interfaceParent && interfaceParent.concat(block.uid);
     blockType = blockType.concat("".concat(block.uid, " : ").concat(newparent, " "));
     blockInterface = blockInterface && blockInterface.concat("".concat(block.uid, " : ").concat(newInterfaceParent, " "));
     var _buildCustomSchema = buildCustomSchema(block.schema, types, references, groups, fileFields, jsonRteFields, newparent, prefix, disableMandatoryFields, jsonRteToHtml, createNodeId, newInterfaceParent),

@@ -323,16 +323,18 @@ var getPagedData = /*#__PURE__*/function () {
 var getSyncData = /*#__PURE__*/function () {
   var _ref8 = (0, _asyncToGenerator2["default"])(function (url, config, query, responseKey) {
     var aggregatedResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
+    var retries = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
-      var response, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, syncResponse;
+      var response, timeToWait, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, syncResponse;
       return _regenerator["default"].wrap(function _callee8$(_context8) {
         while (1) switch (_context8.prev = _context8.next) {
           case 0:
-            _context8.next = 2;
+            _context8.prev = 0;
+            _context8.next = 3;
             return fetchCsData(url, config, query);
-          case 2:
+          case 3:
             response = _context8.sent;
-            /* 
+            /*
             Below syncToken array would contain type --> 'asset_published', 'entry_published' sync tokens
             */
             if (response.items.some(function (item) {
@@ -351,62 +353,90 @@ var getSyncData = /*#__PURE__*/function () {
               aggregatedResponse.sync_token = response.sync_token ? response.sync_token : aggregatedResponse.sync_token;
             }
             if (!response.pagination_token) {
-              _context8.next = 7;
+              _context8.next = 25;
               break;
             }
-            return _context8.abrupt("return", getSyncData(url, config, query = {
+            _context8.prev = 7;
+            _context8.next = 10;
+            return getSyncData(url, config, {
               pagination_token: response.pagination_token
-            }, responseKey, aggregatedResponse));
-          case 7:
+            }, responseKey, aggregatedResponse, 0 // Reset retries for each call
+            );
+          case 10:
+            return _context8.abrupt("return", _context8.sent);
+          case 13:
+            _context8.prev = 13;
+            _context8.t0 = _context8["catch"](7);
+            if (!(retries < config.httpRetries)) {
+              _context8.next = 24;
+              break;
+            }
+            timeToWait = Math.pow(2, retries) * 100; //Retry attempt ${retries + 1} after pagination token error. Waiting for ${timeToWait} ms...
+            _context8.next = 19;
+            return waitFor(timeToWait);
+          case 19:
+            _context8.next = 21;
+            return getSyncData(url, config, {
+              pagination_token: response.pagination_token
+            }, responseKey, aggregatedResponse, retries + 1);
+          case 21:
+            return _context8.abrupt("return", _context8.sent);
+          case 24:
+            throw new Error("Failed to fetch sync data after ".concat(config.httpRetries, " retry attempts due to invalid pagination token."));
+          case 25:
             if (!response.sync_token) {
-              _context8.next = 29;
+              _context8.next = 47;
               break;
             }
             /**
              * To make final sync call and concatenate the result if found any during on fetch request.
-             */
+            */
             aggregatedSyncToken = syncToken.filter(function (item) {
               return item !== undefined;
             });
             _iterator = _createForOfIteratorHelper(aggregatedSyncToken);
-            _context8.prev = 10;
+            _context8.prev = 28;
             _iterator.s();
-          case 12:
+          case 30:
             if ((_step = _iterator.n()).done) {
-              _context8.next = 21;
+              _context8.next = 39;
               break;
             }
             token = _step.value;
-            _context8.next = 16;
+            _context8.next = 34;
             return fetchCsData(url, config, query = {
               sync_token: token
             });
-          case 16:
+          case 34:
             syncResponse = _context8.sent;
             aggregatedResponse.data = (_aggregatedResponse$d = aggregatedResponse.data) === null || _aggregatedResponse$d === void 0 ? void 0 : (_aggregatedResponse$d2 = _aggregatedResponse$d).concat.apply(_aggregatedResponse$d2, (0, _toConsumableArray2["default"])(syncResponse.items));
             aggregatedResponse.sync_token = syncResponse.sync_token;
-          case 19:
-            _context8.next = 12;
+          case 37:
+            _context8.next = 30;
             break;
-          case 21:
-            _context8.next = 26;
+          case 39:
+            _context8.next = 44;
             break;
-          case 23:
-            _context8.prev = 23;
-            _context8.t0 = _context8["catch"](10);
-            _iterator.e(_context8.t0);
-          case 26:
-            _context8.prev = 26;
+          case 41:
+            _context8.prev = 41;
+            _context8.t1 = _context8["catch"](28);
+            _iterator.e(_context8.t1);
+          case 44:
+            _context8.prev = 44;
             _iterator.f();
-            return _context8.finish(26);
-          case 29:
+            return _context8.finish(44);
+          case 47:
             syncToken = [];
             return _context8.abrupt("return", aggregatedResponse);
-          case 31:
+          case 51:
+            _context8.prev = 51;
+            _context8.t2 = _context8["catch"](0);
+            throw new Error("Failed to fetch sync data: ".concat(_context8.t2.message));
+          case 54:
           case "end":
             return _context8.stop();
         }
-      }, _callee8, null, [[10, 23, 26, 29]]);
+      }, _callee8, null, [[0, 51], [7, 13], [28, 41, 44, 47]]);
     })();
   });
   return function getSyncData(_x18, _x19, _x20, _x21) {
