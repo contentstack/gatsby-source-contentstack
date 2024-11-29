@@ -30,7 +30,7 @@ var Storage = exports.Storage = /*#__PURE__*/function () {
       this.storage.setItem(this.name, "{}");
     }
   }
-  (0, _createClass2["default"])(Storage, [{
+  return (0, _createClass2["default"])(Storage, [{
     key: "getArea",
     value: function getArea() {
       var area = JSON.parse(this.storage.getItem(this.name));
@@ -53,6 +53,5 @@ var Storage = exports.Storage = /*#__PURE__*/function () {
       return area[key];
     }
   }]);
-  return Storage;
 }();
 //# sourceMappingURL=storage-helper.js.map

@@ -3,22 +3,22 @@
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+function _callSuper(t, o, e) { return o = (0, _getPrototypeOf2["default"])(o), (0, _possibleConstructorReturn2["default"])(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], (0, _getPrototypeOf2["default"])(t).constructor) : o.apply(t, e)); }
+function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 var FetchEntries = /*#__PURE__*/function () {
   function FetchEntries() {
     (0, _classCallCheck2["default"])(this, FetchEntries);
   }
-  (0, _createClass2["default"])(FetchEntries, [{
+  return (0, _createClass2["default"])(FetchEntries, [{
     key: "fetchSyncData",
     value: function () {
-      var _fetchSyncData = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
+      var _fetchSyncData = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee() {
         return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
@@ -33,19 +33,17 @@ var FetchEntries = /*#__PURE__*/function () {
       return fetchSyncData;
     }()
   }]);
-  return FetchEntries;
 }();
 var FetchDefaultEntries = /*#__PURE__*/function (_FetchEntries) {
-  (0, _inherits2["default"])(FetchDefaultEntries, _FetchEntries);
-  var _super = _createSuper(FetchDefaultEntries);
   function FetchDefaultEntries() {
     (0, _classCallCheck2["default"])(this, FetchDefaultEntries);
-    return _super.apply(this, arguments);
+    return _callSuper(this, FetchDefaultEntries, arguments);
   }
-  (0, _createClass2["default"])(FetchDefaultEntries, [{
+  (0, _inherits2["default"])(FetchDefaultEntries, _FetchEntries);
+  return (0, _createClass2["default"])(FetchDefaultEntries, [{
     key: "fetchSyncData",
     value: function () {
-      var _fetchSyncData2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(configOptions, cache, fn) {
+      var _fetchSyncData2 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee2(configOptions, cache, fn) {
         var typePrefix, syncData, entryTokenKey, assetTokenKey, _yield$Promise$all, _yield$Promise$all2, syncEntryToken, syncAssetToken, syncEntryParams, syncAssetParams, _yield$Promise$all3, _yield$Promise$all4, syncEntryData, syncAssetData, data, tokenKey, syncToken, syncParams;
         return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) switch (_context2.prev = _context2.next) {
@@ -133,19 +131,17 @@ var FetchDefaultEntries = /*#__PURE__*/function (_FetchEntries) {
       return fetchSyncData;
     }()
   }]);
-  return FetchDefaultEntries;
 }(FetchEntries);
 var FetchSpecifiedContentTypesEntries = /*#__PURE__*/function (_FetchEntries2) {
-  (0, _inherits2["default"])(FetchSpecifiedContentTypesEntries, _FetchEntries2);
-  var _super2 = _createSuper(FetchSpecifiedContentTypesEntries);
   function FetchSpecifiedContentTypesEntries() {
     (0, _classCallCheck2["default"])(this, FetchSpecifiedContentTypesEntries);
-    return _super2.apply(this, arguments);
+    return _callSuper(this, FetchSpecifiedContentTypesEntries, arguments);
   }
-  (0, _createClass2["default"])(FetchSpecifiedContentTypesEntries, [{
+  (0, _inherits2["default"])(FetchSpecifiedContentTypesEntries, _FetchEntries2);
+  return (0, _createClass2["default"])(FetchSpecifiedContentTypesEntries, [{
     key: "fetchSyncData",
     value: function () {
-      var _fetchSyncData3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(configOptions, cache, fn) {
+      var _fetchSyncData3 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee3(configOptions, cache, fn) {
         var _yield$Promise$all5, _yield$Promise$all6, syncEntryData, syncAssetData, syncData;
         return _regenerator["default"].wrap(function _callee3$(_context3) {
           while (1) switch (_context3.prev = _context3.next) {
@@ -179,7 +175,7 @@ var FetchSpecifiedContentTypesEntries = /*#__PURE__*/function (_FetchEntries2) {
   }, {
     key: "fetchEntries",
     value: function () {
-      var _fetchEntries = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(configOptions, cache, fn) {
+      var _fetchEntries = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee4(configOptions, cache, fn) {
         var syncData, typePrefix, contentTypes, i, contentType, tokenKey, syncToken, syncParams, _syncData;
         return _regenerator["default"].wrap(function _callee4$(_context4) {
           while (1) switch (_context4.prev = _context4.next) {
@@ -242,7 +238,7 @@ var FetchSpecifiedContentTypesEntries = /*#__PURE__*/function (_FetchEntries2) {
   }, {
     key: "fetchAssets",
     value: function () {
-      var _fetchAssets = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(configOptions, cache, fn) {
+      var _fetchAssets = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee5(configOptions, cache, fn) {
         var fetchAssetService, syncData;
         return _regenerator["default"].wrap(function _callee5$(_context5) {
           while (1) switch (_context5.prev = _context5.next) {
@@ -270,19 +266,17 @@ var FetchSpecifiedContentTypesEntries = /*#__PURE__*/function (_FetchEntries2) {
       return fetchAssets;
     }()
   }]);
-  return FetchSpecifiedContentTypesEntries;
 }(FetchEntries);
 var FetchSpecifiedLocalesEntries = /*#__PURE__*/function (_FetchEntries3) {
-  (0, _inherits2["default"])(FetchSpecifiedLocalesEntries, _FetchEntries3);
-  var _super3 = _createSuper(FetchSpecifiedLocalesEntries);
   function FetchSpecifiedLocalesEntries() {
     (0, _classCallCheck2["default"])(this, FetchSpecifiedLocalesEntries);
-    return _super3.apply(this, arguments);
+    return _callSuper(this, FetchSpecifiedLocalesEntries, arguments);
   }
-  (0, _createClass2["default"])(FetchSpecifiedLocalesEntries, [{
+  (0, _inherits2["default"])(FetchSpecifiedLocalesEntries, _FetchEntries3);
+  return (0, _createClass2["default"])(FetchSpecifiedLocalesEntries, [{
     key: "fetchSyncData",
     value: function () {
-      var _fetchSyncData4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(configOptions, cache, fn) {
+      var _fetchSyncData4 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee6(configOptions, cache, fn) {
         var _yield$Promise$all7, _yield$Promise$all8, syncEntryData, syncAssetData, syncData;
         return _regenerator["default"].wrap(function _callee6$(_context6) {
           while (1) switch (_context6.prev = _context6.next) {
@@ -311,7 +305,7 @@ var FetchSpecifiedLocalesEntries = /*#__PURE__*/function (_FetchEntries3) {
   }, {
     key: "fetchEntries",
     value: function () {
-      var _fetchEntries2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(configOptions, cache, fn) {
+      var _fetchEntries2 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee7(configOptions, cache, fn) {
         var syncData, typePrefix, locales, i, locale, tokenKey, syncToken, syncParams, _syncData;
         return _regenerator["default"].wrap(function _callee7$(_context7) {
           while (1) switch (_context7.prev = _context7.next) {
@@ -371,7 +365,7 @@ var FetchSpecifiedLocalesEntries = /*#__PURE__*/function (_FetchEntries3) {
   }, {
     key: "fetchAssets",
     value: function () {
-      var _fetchAssets2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee8(configOptions, cache, fn) {
+      var _fetchAssets2 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee8(configOptions, cache, fn) {
         var fetchAssetService, syncData;
         return _regenerator["default"].wrap(function _callee8$(_context8) {
           while (1) switch (_context8.prev = _context8.next) {
@@ -399,19 +393,17 @@ var FetchSpecifiedLocalesEntries = /*#__PURE__*/function (_FetchEntries3) {
       return fetchAssets;
     }()
   }]);
-  return FetchSpecifiedLocalesEntries;
 }(FetchEntries);
 var FetchSpecifiedLocalesAndContentTypesEntries = /*#__PURE__*/function (_FetchEntries4) {
-  (0, _inherits2["default"])(FetchSpecifiedLocalesAndContentTypesEntries, _FetchEntries4);
-  var _super4 = _createSuper(FetchSpecifiedLocalesAndContentTypesEntries);
   function FetchSpecifiedLocalesAndContentTypesEntries() {
     (0, _classCallCheck2["default"])(this, FetchSpecifiedLocalesAndContentTypesEntries);
-    return _super4.apply(this, arguments);
+    return _callSuper(this, FetchSpecifiedLocalesAndContentTypesEntries, arguments);
   }
-  (0, _createClass2["default"])(FetchSpecifiedLocalesAndContentTypesEntries, [{
+  (0, _inherits2["default"])(FetchSpecifiedLocalesAndContentTypesEntries, _FetchEntries4);
+  return (0, _createClass2["default"])(FetchSpecifiedLocalesAndContentTypesEntries, [{
     key: "fetchSyncData",
     value: function () {
-      var _fetchSyncData5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee9(configOptions, cache, fn) {
+      var _fetchSyncData5 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee9(configOptions, cache, fn) {
         var _yield$Promise$all9, _yield$Promise$all10, syncEntryData, syncAssetData, syncData;
         return _regenerator["default"].wrap(function _callee9$(_context9) {
           while (1) switch (_context9.prev = _context9.next) {
@@ -440,7 +432,7 @@ var FetchSpecifiedLocalesAndContentTypesEntries = /*#__PURE__*/function (_FetchE
   }, {
     key: "fetchEntries",
     value: function () {
-      var _fetchEntries3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee10(configOptions, cache, fn) {
+      var _fetchEntries3 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee10(configOptions, cache, fn) {
         var syncData, typePrefix, contentTypes, locales, i, contentType, j, locale, tokenKey, syncToken, syncParams, _syncData;
         return _regenerator["default"].wrap(function _callee10$(_context10) {
           while (1) switch (_context10.prev = _context10.next) {
@@ -516,7 +508,7 @@ var FetchSpecifiedLocalesAndContentTypesEntries = /*#__PURE__*/function (_FetchE
   }, {
     key: "fetchAssets",
     value: function () {
-      var _fetchAssets3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee11(configOptions, cache, fn) {
+      var _fetchAssets3 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee11(configOptions, cache, fn) {
         var fetchAssetService, syncData;
         return _regenerator["default"].wrap(function _callee11$(_context11) {
           while (1) switch (_context11.prev = _context11.next) {
@@ -544,16 +536,15 @@ var FetchSpecifiedLocalesAndContentTypesEntries = /*#__PURE__*/function (_FetchE
       return fetchAssets;
     }()
   }]);
-  return FetchSpecifiedLocalesAndContentTypesEntries;
 }(FetchEntries);
 var FetchAssets = /*#__PURE__*/function () {
   function FetchAssets() {
     (0, _classCallCheck2["default"])(this, FetchAssets);
   }
-  (0, _createClass2["default"])(FetchAssets, [{
+  return (0, _createClass2["default"])(FetchAssets, [{
     key: "fetchAssets",
     value: function () {
-      var _fetchAssets4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee12(configOptions, cache, fn) {
+      var _fetchAssets4 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee12(configOptions, cache, fn) {
         var typePrefix, syncData, assetTokenKey, syncAssetToken, syncAssetParams, syncAssetData;
         return _regenerator["default"].wrap(function _callee12$(_context12) {
           while (1) switch (_context12.prev = _context12.next) {
@@ -597,7 +588,6 @@ var FetchAssets = /*#__PURE__*/function () {
       return fetchAssets;
     }()
   }]);
-  return FetchAssets;
 }();
 exports.FetchEntries = FetchEntries;
 exports.FetchDefaultEntries = FetchDefaultEntries;
