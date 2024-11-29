@@ -180,6 +180,7 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
   if (interfaceParent) interfaceParent = interfaceParent.replace(/-/g, "_");
   var blockType = interfaceParent ? "type ".concat(parent, " implements ").concat(interfaceParent, " @infer {") : "type ".concat(parent, " @infer {");
   var blockInterface = interfaceParent && "interface ".concat(interfaceParent, " {");
+  var blockFields = {}; 
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
     // If this block has a reference_to, it is a global field and should have a new interface
