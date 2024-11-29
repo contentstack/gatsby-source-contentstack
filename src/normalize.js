@@ -191,6 +191,7 @@ const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, j
     interfaceParent = interfaceParent.replace(/-/g, "_")
   let blockType = interfaceParent ? `type ${parent} implements ${interfaceParent} @infer {` : `type ${parent} @infer {`;
   let blockInterface = interfaceParent && `interface ${interfaceParent} {`;
+  let blockFields = {}; // Initialize blockFields here
   blocks.forEach(block => {
     const newparent = parent.concat(block.uid);
     // If this block has a reference_to, it is a global field and should have a new interface
@@ -226,6 +227,7 @@ const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, j
 
   return blockInterface ? [blockInterface, blockType] : [blockType];
 };
+
 
 exports.extendSchemaWithDefaultEntryFields = schema => {
   schema.push({
