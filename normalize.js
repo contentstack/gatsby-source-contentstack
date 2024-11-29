@@ -4,8 +4,8 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0, _defineProperty2["default"])(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var _require = require('./utils'),
   getJSONToHtmlRequired = _require.getJSONToHtmlRequired;
 exports.processContentType = function (contentType, createNodeId, createContentDigest, typePrefix) {
@@ -56,17 +56,17 @@ exports.processEntry = function (contentType, entry, createNodeId, createContent
 };
 exports.normalizeEntry = function (contentType, entry, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
   var _entry$publish_detail;
-  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry === null || entry === void 0 ? void 0 : (_entry$publish_detail = entry.publish_details) === null || _entry$publish_detail === void 0 ? void 0 : _entry$publish_detail.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
+  var resolveEntry = _objectSpread(_objectSpread({}, entry), builtEntry(contentType.schema, entry, entry === null || entry === void 0 || (_entry$publish_detail = entry.publish_details) === null || _entry$publish_detail === void 0 ? void 0 : _entry$publish_detail.locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions));
   return resolveEntry;
 };
 var makeAssetNodeUid = exports.makeAssetNodeUid = function (asset, createNodeId, typePrefix) {
   var _asset$publish_detail;
-  var publishedLocale = asset === null || asset === void 0 ? void 0 : (_asset$publish_detail = asset.publish_details) === null || _asset$publish_detail === void 0 ? void 0 : _asset$publish_detail.locale;
+  var publishedLocale = asset === null || asset === void 0 || (_asset$publish_detail = asset.publish_details) === null || _asset$publish_detail === void 0 ? void 0 : _asset$publish_detail.locale;
   return createNodeId("".concat(typePrefix.toLowerCase(), "-assets-").concat(asset.uid, "-").concat(publishedLocale));
 };
 var makeEntryNodeUid = exports.makeEntryNodeUid = function (entry, createNodeId, typePrefix) {
   var _entry$publish_detail2;
-  var publishedLocale = entry === null || entry === void 0 ? void 0 : (_entry$publish_detail2 = entry.publish_details) === null || _entry$publish_detail2 === void 0 ? void 0 : _entry$publish_detail2.locale;
+  var publishedLocale = entry === null || entry === void 0 || (_entry$publish_detail2 = entry.publish_details) === null || _entry$publish_detail2 === void 0 ? void 0 : _entry$publish_detail2.locale;
   return createNodeId("".concat(typePrefix.toLowerCase(), "-entry-").concat(entry.uid, "-").concat(publishedLocale));
 };
 var normalizeGroup = function normalizeGroup(field, value, locale, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions) {
@@ -180,6 +180,7 @@ var buildBlockCustomSchema = function buildBlockCustomSchema(blocks, types, refe
   if (interfaceParent) interfaceParent = interfaceParent.replace(/-/g, "_");
   var blockType = interfaceParent ? "type ".concat(parent, " implements ").concat(interfaceParent, " @infer {") : "type ".concat(parent, " @infer {");
   var blockInterface = interfaceParent && "interface ".concat(interfaceParent, " {");
+  var blockFields = {}; 
   blocks.forEach(function (block) {
     var newparent = parent.concat(block.uid);
     // If this block has a reference_to, it is a global field and should have a new interface
