@@ -13,11 +13,11 @@ var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"))
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0, _defineProperty2["default"])(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var preferDefault = function preferDefault(m) {
   return m && m["default"] || m;
 };
@@ -61,7 +61,7 @@ var activity;
 var globalConfig;
 var syncToken = [];
 exports.fetchData = /*#__PURE__*/function () {
-  var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(configOptions, reporter, cache, contentTypeOption) {
+  var _ref = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee(configOptions, reporter, cache, contentTypeOption) {
     var syncData, entryService, _syncData, contentstackData;
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
@@ -105,7 +105,7 @@ exports.fetchData = /*#__PURE__*/function () {
   };
 }();
 exports.fetchContentTypes = /*#__PURE__*/function () {
-  var _ref2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(config, contentTypeOption) {
+  var _ref2 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee2(config, contentTypeOption) {
     var url, responseKey, contentType, allContentTypes;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
@@ -117,7 +117,7 @@ exports.fetchContentTypes = /*#__PURE__*/function () {
           responseKey = 'content_types';
           contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
           _context2.next = 8;
-          return contentType.getPagedData(url, config, responseKey, getPagedData);
+          return contentType.getPagedData(url, config, responseKey, _getPagedData);
         case 8:
           allContentTypes = _context2.sent;
           return _context2.abrupt("return", allContentTypes);
@@ -142,14 +142,14 @@ exports.fetchContentTypes = /*#__PURE__*/function () {
   };
 }();
 var fetchSyncData = /*#__PURE__*/function () {
-  var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(query, config) {
+  var _ref3 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee3(query, config) {
     var url, response;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) switch (_context3.prev = _context3.next) {
         case 0:
           url = 'stacks/sync';
           _context3.next = 3;
-          return getSyncData(url, config, query, 'items');
+          return _getSyncData(url, config, query, 'items');
         case 3:
           response = _context3.sent;
           return _context3.abrupt("return", response);
@@ -169,14 +169,14 @@ function waitFor(milliseconds) {
   });
 }
 var getData = /*#__PURE__*/function () {
-  var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(url, options) {
+  var _ref4 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee5(url, options) {
     var retries;
     return _regenerator["default"].wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
         case 0:
           retries = 0;
           return _context5.abrupt("return", new Promise(function (resolve, reject) {
-            var handleResponse = function handleResponse() {
+            var _handleResponse = function handleResponse() {
               fetch(url, options).then(function (response) {
                 return response.json();
               }).then(function (data) {
@@ -195,8 +195,8 @@ var getData = /*#__PURE__*/function () {
                   }
                   resolve(data);
                 }
-              })["catch"]( /*#__PURE__*/function () {
-                var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(err) {
+              })["catch"](/*#__PURE__*/function () {
+                var _ref5 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee4(err) {
                   var retryAttempt, timeToWait;
                   return _regenerator["default"].wrap(function _callee4$(_context4) {
                     while (1) switch (_context4.prev = _context4.next) {
@@ -211,7 +211,7 @@ var getData = /*#__PURE__*/function () {
                         _context4.next = 6;
                         return waitFor(timeToWait);
                       case 6:
-                        handleResponse();
+                        _handleResponse();
                         _context4.next = 11;
                         break;
                       case 9:
@@ -229,7 +229,7 @@ var getData = /*#__PURE__*/function () {
               }());
             };
             retries = 1;
-            handleResponse();
+            _handleResponse();
           }));
         case 2:
         case "end":
@@ -242,7 +242,7 @@ var getData = /*#__PURE__*/function () {
   };
 }();
 var fetchCsData = /*#__PURE__*/function () {
-  var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(url, config, query) {
+  var _ref6 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee6(url, config, query) {
     var queryParams, apiUrl, option, data;
     return _regenerator["default"].wrap(function _callee6$(_context6) {
       while (1) switch (_context6.prev = _context6.next) {
@@ -275,7 +275,7 @@ var fetchCsData = /*#__PURE__*/function () {
     return _ref6.apply(this, arguments);
   };
 }();
-var getPagedData = /*#__PURE__*/function () {
+var _getPagedData = /*#__PURE__*/function () {
   var _ref7 = (0, _asyncToGenerator2["default"])(function (url, config, responseKey) {
     var query = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var skip = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
@@ -306,7 +306,7 @@ var getPagedData = /*#__PURE__*/function () {
               _context7.next = 10;
               break;
             }
-            return _context7.abrupt("return", getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse));
+            return _context7.abrupt("return", _getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse));
           case 10:
             return _context7.abrupt("return", aggregatedResponse);
           case 11:
@@ -320,19 +320,21 @@ var getPagedData = /*#__PURE__*/function () {
     return _ref7.apply(this, arguments);
   };
 }();
-var getSyncData = /*#__PURE__*/function () {
+var _getSyncData = /*#__PURE__*/function () {
   var _ref8 = (0, _asyncToGenerator2["default"])(function (url, config, query, responseKey) {
     var aggregatedResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
+    var retries = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
-      var response, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, syncResponse;
+      var response, timeToWait, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, syncResponse;
       return _regenerator["default"].wrap(function _callee8$(_context8) {
         while (1) switch (_context8.prev = _context8.next) {
           case 0:
-            _context8.next = 2;
+            _context8.prev = 0;
+            _context8.next = 3;
             return fetchCsData(url, config, query);
-          case 2:
+          case 3:
             response = _context8.sent;
-            /* 
+            /*
             Below syncToken array would contain type --> 'asset_published', 'entry_published' sync tokens
             */
             if (response.items.some(function (item) {
@@ -351,62 +353,90 @@ var getSyncData = /*#__PURE__*/function () {
               aggregatedResponse.sync_token = response.sync_token ? response.sync_token : aggregatedResponse.sync_token;
             }
             if (!response.pagination_token) {
-              _context8.next = 7;
+              _context8.next = 25;
               break;
             }
-            return _context8.abrupt("return", getSyncData(url, config, query = {
+            _context8.prev = 7;
+            _context8.next = 10;
+            return _getSyncData(url, config, {
               pagination_token: response.pagination_token
-            }, responseKey, aggregatedResponse));
-          case 7:
+            }, responseKey, aggregatedResponse, 0 // Reset retries for each call
+            );
+          case 10:
+            return _context8.abrupt("return", _context8.sent);
+          case 13:
+            _context8.prev = 13;
+            _context8.t0 = _context8["catch"](7);
+            if (!(retries < config.httpRetries)) {
+              _context8.next = 24;
+              break;
+            }
+            timeToWait = Math.pow(2, retries) * 100; //Retry attempt ${retries + 1} after pagination token error. Waiting for ${timeToWait} ms...
+            _context8.next = 19;
+            return waitFor(timeToWait);
+          case 19:
+            _context8.next = 21;
+            return _getSyncData(url, config, {
+              pagination_token: response.pagination_token
+            }, responseKey, aggregatedResponse, retries + 1);
+          case 21:
+            return _context8.abrupt("return", _context8.sent);
+          case 24:
+            throw new Error("Failed to fetch sync data after ".concat(config.httpRetries, " retry attempts due to invalid pagination token."));
+          case 25:
             if (!response.sync_token) {
-              _context8.next = 29;
+              _context8.next = 47;
               break;
             }
             /**
              * To make final sync call and concatenate the result if found any during on fetch request.
-             */
+            */
             aggregatedSyncToken = syncToken.filter(function (item) {
               return item !== undefined;
             });
             _iterator = _createForOfIteratorHelper(aggregatedSyncToken);
-            _context8.prev = 10;
+            _context8.prev = 28;
             _iterator.s();
-          case 12:
+          case 30:
             if ((_step = _iterator.n()).done) {
-              _context8.next = 21;
+              _context8.next = 39;
               break;
             }
             token = _step.value;
-            _context8.next = 16;
+            _context8.next = 34;
             return fetchCsData(url, config, query = {
               sync_token: token
             });
-          case 16:
+          case 34:
             syncResponse = _context8.sent;
             aggregatedResponse.data = (_aggregatedResponse$d = aggregatedResponse.data) === null || _aggregatedResponse$d === void 0 ? void 0 : (_aggregatedResponse$d2 = _aggregatedResponse$d).concat.apply(_aggregatedResponse$d2, (0, _toConsumableArray2["default"])(syncResponse.items));
             aggregatedResponse.sync_token = syncResponse.sync_token;
-          case 19:
-            _context8.next = 12;
+          case 37:
+            _context8.next = 30;
             break;
-          case 21:
-            _context8.next = 26;
+          case 39:
+            _context8.next = 44;
             break;
-          case 23:
-            _context8.prev = 23;
-            _context8.t0 = _context8["catch"](10);
-            _iterator.e(_context8.t0);
-          case 26:
-            _context8.prev = 26;
+          case 41:
+            _context8.prev = 41;
+            _context8.t1 = _context8["catch"](28);
+            _iterator.e(_context8.t1);
+          case 44:
+            _context8.prev = 44;
             _iterator.f();
-            return _context8.finish(26);
-          case 29:
+            return _context8.finish(44);
+          case 47:
             syncToken = [];
             return _context8.abrupt("return", aggregatedResponse);
-          case 31:
+          case 51:
+            _context8.prev = 51;
+            _context8.t2 = _context8["catch"](0);
+            throw new Error("Failed to fetch sync data: ".concat(_context8.t2.message));
+          case 54:
           case "end":
             return _context8.stop();
         }
-      }, _callee8, null, [[10, 23, 26, 29]]);
+      }, _callee8, null, [[0, 51], [7, 13], [28, 41, 44, 47]]);
     })();
   });
   return function getSyncData(_x18, _x19, _x20, _x21) {

@@ -18,14 +18,14 @@ var _utils = require("@contentstack/utils");
 var _lodash = _interopRequireDefault(require("lodash.isempty"));
 var _lodash2 = _interopRequireDefault(require("lodash.clonedeep"));
 var _storageHelper = require("./storage-helper");
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0, _defineProperty2["default"])(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 // max depth for nested references
 var MAX_DEPTH_ALLOWED = 5;
-var ContentstackGatsby = /*#__PURE__*/function () {
+var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
   function ContentstackGatsby(config) {
     (0, _classCallCheck2["default"])(this, ContentstackGatsby);
     (0, _defineProperty2["default"])(this, "config", void 0);
@@ -49,8 +49,8 @@ var ContentstackGatsby = /*#__PURE__*/function () {
       branch: config.branch
     }), {}, {
       live_preview: {
-        host: config.live_preview.host,
-        management_token: config.live_preview.management_token,
+        host: config.live_preview.preview_host,
+        preview_token: config.live_preview.preview_token,
         enable: config.live_preview.enable
       }
     });
@@ -71,7 +71,7 @@ var ContentstackGatsby = /*#__PURE__*/function () {
     this.contentTypesStorage = new _storageHelper.Storage(window.sessionStorage, 'content_types');
     this.contentTypes = this.contentTypesStorage.get();
   }
-  (0, _createClass2["default"])(ContentstackGatsby, [{
+  return (0, _createClass2["default"])(ContentstackGatsby, [{
     key: "setHost",
     value: function setHost(host) {
       this.stackSdk.setHost(host);
@@ -84,7 +84,7 @@ var ContentstackGatsby = /*#__PURE__*/function () {
   }, {
     key: "fetchContentTypes",
     value: function () {
-      var _fetchContentTypes = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(uids) {
+      var _fetchContentTypes = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee(uids) {
         var result, contentTypes;
         return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
@@ -132,7 +132,7 @@ var ContentstackGatsby = /*#__PURE__*/function () {
   }, {
     key: "getContentTypes",
     value: function () {
-      var _getContentTypes = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(uids) {
+      var _getContentTypes = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee2(uids) {
         var _this = this;
         var uidsToFetch, types;
         return _regenerator["default"].wrap(function _callee2$(_context2) {
@@ -324,7 +324,7 @@ var ContentstackGatsby = /*#__PURE__*/function () {
           k = _Object$entries$_i[0],
           v = _Object$entries$_i[1];
         if (!v) {
-          return "continue";
+          return 1; // continue
         }
         if (currentPath.length > 0) {
           var refPath = currentPath.join('.');
@@ -373,8 +373,7 @@ var ContentstackGatsby = /*#__PURE__*/function () {
         }
       };
       for (var _i = 0, _Object$entries = Object.entries(data); _i < _Object$entries.length; _i++) {
-        var _ret = _loop();
-        if (_ret === "continue") continue;
+        if (_loop()) continue;
       }
       return (0, _toConsumableArray2["default"])(new Set(paths));
     }
@@ -446,7 +445,7 @@ var ContentstackGatsby = /*#__PURE__*/function () {
   }, {
     key: "getUsingTypeName",
     value: function () {
-      var _getUsingTypeName = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(data) {
+      var _getUsingTypeName = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee5(data) {
         var _this$statusStorage$g, _this$jsonRteFields$c;
         var receivedData, live_preview, status, contentTypeUid, entryUid, _yield$this$extractRe, refPathMap, jsonRtePaths, referencePaths, paths, entry;
         return _regenerator["default"].wrap(function _callee5$(_context5) {
@@ -522,7 +521,7 @@ var ContentstackGatsby = /*#__PURE__*/function () {
   }, {
     key: "get",
     value: function () {
-      var _get = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(data) {
+      var _get = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee6(data) {
         var _this$stackSdk$live_p,
           _this5 = this;
         var dataCloned, hasTypeNameAndUid, hasCslpMetaAtRoot, multipleEntriesKey, hasSingleEntry, hasMultipleEntries, receivedData, live_preview, hasCslpMeta, hasMultipleCslpMeta, multipleLPEntries, result, _entryCslpMeta$refere, _entryCslpMeta$jsonRt, entryCslpMeta, contentTypeUid, entryUid, refPaths, rtePaths, entry;
@@ -681,7 +680,5 @@ var ContentstackGatsby = /*#__PURE__*/function () {
       }
     }
   }]);
-  return ContentstackGatsby;
 }();
-exports.ContentstackGatsby = ContentstackGatsby;
 //# sourceMappingURL=index.js.map
