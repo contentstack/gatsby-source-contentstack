@@ -168,7 +168,7 @@ const getData = async (url, options) => {
   });
 };
 
-const fetchCsData = async (url, config, query) => {
+const fetchCsData = async (url, config, query,  SyncRetryCount = 0) => {
   query = query || {};
   query.include_count = true;
   query.environment = config.environment;
@@ -296,12 +296,32 @@ const getSyncData = async (
      * To make final sync call and concatenate the result if found any during on fetch request.
     */
     const aggregatedSyncToken = syncToken.filter(item => item !== undefined);
-    for (const token of aggregatedSyncToken) {
-      const syncResponse = await fetchCsData(
-        url,
-        config,
-        (query = { sync_token: token })
-      );
+      for (const token of aggregatedSyncToken) {
+
+        let syncResponse;
+        try {
+          
+          syncResponse = await fetchCsData(
+          url,
+          config,
+            (query = { sync_token: token }),
+          0 // Reset SyncRetryCount for each call
+        );
+        } catch (error) {
+          if (SyncRetryCount < config.httpRetries) { 
+            const timeToWait = 2 ** SyncRetryCount * 100;
+            //Retry attempt ${retries + 1} after sync token error. Waiting for ${timeToWait} ms...
+            await waitFor(timeToWait);
+            return syncResponse = await fetchCsData(
+              url,
+              config,
+              (query = { sync_token: token }),
+              SyncRetryCount + 1
+            );
+          } else {
+            throw new Error(`Failed to fetch sync data after ${config.httpRetries} retry attempts due to invalid sync token.`);
+          }
+        }
       aggregatedResponse.data = aggregatedResponse.data?.concat(
         ...syncResponse.items
       );

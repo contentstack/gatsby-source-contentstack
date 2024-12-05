@@ -242,35 +242,38 @@ var getData = /*#__PURE__*/function () {
   };
 }();
 var fetchCsData = /*#__PURE__*/function () {
-  var _ref6 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee6(url, config, query) {
-    var queryParams, apiUrl, option, data;
-    return _regenerator["default"].wrap(function _callee6$(_context6) {
-      while (1) switch (_context6.prev = _context6.next) {
-        case 0:
-          query = query || {};
-          query.include_count = true;
-          query.environment = config.environment;
-          queryParams = queryString.stringify(query);
-          apiUrl = "".concat(config.cdn, "/").concat(url, "?").concat(queryParams);
-          option = {
-            headers: _objectSpread({
-              'X-User-Agent': "contentstack-gatsby-source-plugin-".concat(version),
-              api_key: config === null || config === void 0 ? void 0 : config.api_key,
-              access_token: config === null || config === void 0 ? void 0 : config.delivery_token,
-              branch: config !== null && config !== void 0 && config.branch ? config.branch : 'main'
-            }, getCustomHeaders(config === null || config === void 0 ? void 0 : config.enableEarlyAccessKey, config === null || config === void 0 ? void 0 : config.enableEarlyAccessValue))
-          };
-          _context6.next = 8;
-          return getData(apiUrl, option);
-        case 8:
-          data = _context6.sent;
-          return _context6.abrupt("return", data);
-        case 10:
-        case "end":
-          return _context6.stop();
-      }
-    }, _callee6);
-  }));
+  var _ref6 = (0, _asyncToGenerator2["default"])(function (url, config, query) {
+    var SyncRetryCount = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+    return /*#__PURE__*/_regenerator["default"].mark(function _callee6() {
+      var queryParams, apiUrl, option, data;
+      return _regenerator["default"].wrap(function _callee6$(_context6) {
+        while (1) switch (_context6.prev = _context6.next) {
+          case 0:
+            query = query || {};
+            query.include_count = true;
+            query.environment = config.environment;
+            queryParams = queryString.stringify(query);
+            apiUrl = "".concat(config.cdn, "/").concat(url, "?").concat(queryParams);
+            option = {
+              headers: _objectSpread({
+                'X-User-Agent': "contentstack-gatsby-source-plugin-".concat(version),
+                api_key: config === null || config === void 0 ? void 0 : config.api_key,
+                access_token: config === null || config === void 0 ? void 0 : config.delivery_token,
+                branch: config !== null && config !== void 0 && config.branch ? config.branch : 'main'
+              }, getCustomHeaders(config === null || config === void 0 ? void 0 : config.enableEarlyAccessKey, config === null || config === void 0 ? void 0 : config.enableEarlyAccessValue))
+            };
+            _context6.next = 8;
+            return getData(apiUrl, option);
+          case 8:
+            data = _context6.sent;
+            return _context6.abrupt("return", data);
+          case 10:
+          case "end":
+            return _context6.stop();
+        }
+      }, _callee6);
+    })();
+  });
   return function fetchCsData(_x12, _x13, _x14) {
     return _ref6.apply(this, arguments);
   };
@@ -325,7 +328,7 @@ var _getSyncData = /*#__PURE__*/function () {
     var aggregatedResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
     var retries = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
-      var response, timeToWait, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, syncResponse;
+      var response, timeToWait, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, syncResponse, _timeToWait;
       return _regenerator["default"].wrap(function _callee8$(_context8) {
         while (1) switch (_context8.prev = _context8.next) {
           case 0:
@@ -385,7 +388,7 @@ var _getSyncData = /*#__PURE__*/function () {
             throw new Error("Failed to fetch sync data after ".concat(config.httpRetries, " retry attempts due to invalid pagination token."));
           case 25:
             if (!response.sync_token) {
-              _context8.next = 47;
+              _context8.next = 63;
               break;
             }
             /**
@@ -399,44 +402,69 @@ var _getSyncData = /*#__PURE__*/function () {
             _iterator.s();
           case 30:
             if ((_step = _iterator.n()).done) {
-              _context8.next = 39;
+              _context8.next = 55;
               break;
             }
             token = _step.value;
-            _context8.next = 34;
+            syncResponse = void 0;
+            _context8.prev = 33;
+            _context8.next = 36;
             return fetchCsData(url, config, query = {
               sync_token: token
-            });
-          case 34:
+            }, 0 // Reset SyncRetryCount for each call
+            );
+          case 36:
             syncResponse = _context8.sent;
-            aggregatedResponse.data = (_aggregatedResponse$d = aggregatedResponse.data) === null || _aggregatedResponse$d === void 0 ? void 0 : (_aggregatedResponse$d2 = _aggregatedResponse$d).concat.apply(_aggregatedResponse$d2, (0, _toConsumableArray2["default"])(syncResponse.items));
-            aggregatedResponse.sync_token = syncResponse.sync_token;
-          case 37:
-            _context8.next = 30;
+            _context8.next = 51;
             break;
           case 39:
-            _context8.next = 44;
-            break;
-          case 41:
-            _context8.prev = 41;
-            _context8.t1 = _context8["catch"](28);
-            _iterator.e(_context8.t1);
-          case 44:
-            _context8.prev = 44;
-            _iterator.f();
-            return _context8.finish(44);
+            _context8.prev = 39;
+            _context8.t1 = _context8["catch"](33);
+            if (!(SyncRetryCount < config.httpRetries)) {
+              _context8.next = 50;
+              break;
+            }
+            _timeToWait = Math.pow(2, SyncRetryCount) * 100; //Retry attempt ${retries + 1} after sync token error. Waiting for ${timeToWait} ms...
+            _context8.next = 45;
+            return waitFor(_timeToWait);
+          case 45:
+            _context8.next = 47;
+            return fetchCsData(url, config, query = {
+              sync_token: token
+            }, SyncRetryCount + 1);
           case 47:
+            return _context8.abrupt("return", syncResponse = _context8.sent);
+          case 50:
+            throw new Error("Failed to fetch sync data after ".concat(config.httpRetries, " retry attempts due to invalid sync token."));
+          case 51:
+            aggregatedResponse.data = (_aggregatedResponse$d = aggregatedResponse.data) === null || _aggregatedResponse$d === void 0 ? void 0 : (_aggregatedResponse$d2 = _aggregatedResponse$d).concat.apply(_aggregatedResponse$d2, (0, _toConsumableArray2["default"])(syncResponse.items));
+            aggregatedResponse.sync_token = syncResponse.sync_token;
+          case 53:
+            _context8.next = 30;
+            break;
+          case 55:
+            _context8.next = 60;
+            break;
+          case 57:
+            _context8.prev = 57;
+            _context8.t2 = _context8["catch"](28);
+            _iterator.e(_context8.t2);
+          case 60:
+            _context8.prev = 60;
+            _iterator.f();
+            return _context8.finish(60);
+          case 63:
             syncToken = [];
             return _context8.abrupt("return", aggregatedResponse);
-          case 51:
-            _context8.prev = 51;
-            _context8.t2 = _context8["catch"](0);
-            throw new Error("Failed to fetch sync data: ".concat(_context8.t2.message));
-          case 54:
+          case 67:
+            _context8.prev = 67;
+            _context8.t3 = _context8["catch"](0);
+            throw new Error("Failed to fetch sync data: ".concat(_context8.t3.message));
+          case 70:
           case "end":
             return _context8.stop();
         }
-      }, _callee8, null, [[0, 51], [7, 13], [28, 41, 44, 47]]);
+      }, _callee8, null, [[0, 67], [7, 13], [28, 57, 60, 63], [33, 39]]);
     })();
   });
   return function getSyncData(_x18, _x19, _x20, _x21) {
