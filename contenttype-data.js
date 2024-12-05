@@ -2,22 +2,22 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+function _callSuper(t, o, e) { return o = (0, _getPrototypeOf2["default"])(o), (0, _possibleConstructorReturn2["default"])(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], (0, _getPrototypeOf2["default"])(t).constructor) : o.apply(t, e)); }
+function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 var FetchContentTypes = /*#__PURE__*/function () {
   function FetchContentTypes() {
     (0, _classCallCheck2["default"])(this, FetchContentTypes);
   }
-  (0, _createClass2["default"])(FetchContentTypes, [{
+  return (0, _createClass2["default"])(FetchContentTypes, [{
     key: "getPagedData",
     value: function () {
-      var _getPagedData = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
+      var _getPagedData = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee() {
         return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
@@ -32,19 +32,17 @@ var FetchContentTypes = /*#__PURE__*/function () {
       return getPagedData;
     }()
   }]);
-  return FetchContentTypes;
 }();
 var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
-  (0, _inherits2["default"])(FetchDefaultContentTypes, _FetchContentTypes);
-  var _super = _createSuper(FetchDefaultContentTypes);
   function FetchDefaultContentTypes() {
     (0, _classCallCheck2["default"])(this, FetchDefaultContentTypes);
-    return _super.apply(this, arguments);
+    return _callSuper(this, FetchDefaultContentTypes, arguments);
   }
-  (0, _createClass2["default"])(FetchDefaultContentTypes, [{
+  (0, _inherits2["default"])(FetchDefaultContentTypes, _FetchContentTypes);
+  return (0, _createClass2["default"])(FetchDefaultContentTypes, [{
     key: "getPagedData",
     value: function () {
-      var _getPagedData2 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(url, config, responseKey, fn) {
+      var _getPagedData2 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee2(url, config, responseKey, fn) {
         var query, result;
         return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) switch (_context2.prev = _context2.next) {
@@ -69,19 +67,17 @@ var FetchDefaultContentTypes = /*#__PURE__*/function (_FetchContentTypes) {
       return getPagedData;
     }()
   }]);
-  return FetchDefaultContentTypes;
 }(FetchContentTypes);
 var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
-  (0, _inherits2["default"])(FetchSpecifiedContentTypes, _FetchContentTypes2);
-  var _super2 = _createSuper(FetchSpecifiedContentTypes);
   function FetchSpecifiedContentTypes() {
     (0, _classCallCheck2["default"])(this, FetchSpecifiedContentTypes);
-    return _super2.apply(this, arguments);
+    return _callSuper(this, FetchSpecifiedContentTypes, arguments);
   }
-  (0, _createClass2["default"])(FetchSpecifiedContentTypes, [{
+  (0, _inherits2["default"])(FetchSpecifiedContentTypes, _FetchContentTypes2);
+  return (0, _createClass2["default"])(FetchSpecifiedContentTypes, [{
     key: "getPagedData",
     value: function () {
-      var _getPagedData3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3(url, config, responseKey, fn) {
+      var _getPagedData3 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee3(url, config, responseKey, fn) {
         var query, contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
         return _regenerator["default"].wrap(function _callee3$(_context3) {
           while (1) switch (_context3.prev = _context3.next) {
@@ -129,19 +125,17 @@ var FetchSpecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes2) {
       return getPagedData;
     }()
   }]);
-  return FetchSpecifiedContentTypes;
 }(FetchContentTypes);
 var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
-  (0, _inherits2["default"])(FetchUnspecifiedContentTypes, _FetchContentTypes3);
-  var _super3 = _createSuper(FetchUnspecifiedContentTypes);
   function FetchUnspecifiedContentTypes() {
     (0, _classCallCheck2["default"])(this, FetchUnspecifiedContentTypes);
-    return _super3.apply(this, arguments);
+    return _callSuper(this, FetchUnspecifiedContentTypes, arguments);
   }
-  (0, _createClass2["default"])(FetchUnspecifiedContentTypes, [{
+  (0, _inherits2["default"])(FetchUnspecifiedContentTypes, _FetchContentTypes3);
+  return (0, _createClass2["default"])(FetchUnspecifiedContentTypes, [{
     key: "getPagedData",
     value: function () {
-      var _getPagedData4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(url, config, responseKey, fn) {
+      var _getPagedData4 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee4(url, config, responseKey, fn) {
         var query, contentTypes, referredContentTypes, referredContentTypesList, referredContentTypesData, result;
         return _regenerator["default"].wrap(function _callee4$(_context4) {
           while (1) switch (_context4.prev = _context4.next) {
@@ -189,13 +183,12 @@ var FetchUnspecifiedContentTypes = /*#__PURE__*/function (_FetchContentTypes3) {
       return getPagedData;
     }()
   }]);
-  return FetchUnspecifiedContentTypes;
 }(FetchContentTypes);
 var ReferredContentTypes = /*#__PURE__*/function () {
   function ReferredContentTypes() {
     (0, _classCallCheck2["default"])(this, ReferredContentTypes);
   }
-  (0, _createClass2["default"])(ReferredContentTypes, [{
+  return (0, _createClass2["default"])(ReferredContentTypes, [{
     key: "getReferredContentTypes",
     value: function getReferredContentTypes(contentTypes) {
       var referredContentTypes = {};
@@ -222,7 +215,6 @@ var ReferredContentTypes = /*#__PURE__*/function () {
       return Object.keys(referredContentTypes);
     }
   }]);
-  return ReferredContentTypes;
 }();
 exports.FetchContentTypes = FetchContentTypes;
 exports.FetchDefaultContentTypes = FetchDefaultContentTypes;

@@ -11,7 +11,7 @@ var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/de
 // This is a helper class to help store key-value data inside
 // an individual Storage object's key. 
 // It simply performs the JSON parsing and stringifying steps
-var Storage = /*#__PURE__*/function () {
+var Storage = exports.Storage = /*#__PURE__*/function () {
   /**
    * @param {string} name 
    * @param {Storage.prototype} storage 
@@ -30,7 +30,7 @@ var Storage = /*#__PURE__*/function () {
       this.storage.setItem(this.name, "{}");
     }
   }
-  (0, _createClass2["default"])(Storage, [{
+  return (0, _createClass2["default"])(Storage, [{
     key: "getArea",
     value: function getArea() {
       var area = JSON.parse(this.storage.getItem(this.name));
@@ -53,7 +53,5 @@ var Storage = /*#__PURE__*/function () {
       return area[key];
     }
   }]);
-  return Storage;
 }();
-exports.Storage = Storage;
 //# sourceMappingURL=storage-helper.js.map
