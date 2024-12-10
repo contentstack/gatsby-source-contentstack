@@ -114,23 +114,36 @@ exports.fetchContentTypes = async (config, contentTypeOption) => {
 };
 
 exports.fetchTaxonomies = async (configOptions) => {
-  const url = `https://api.contentstack.io/v3/taxonomies`;
+  if (!configOptions.management_token) {
+    throw new Error(
+      'Management token is required to fetch taxonomies. Please provide a valid management_token in plugin options.'
+    );
+  }
+
+  const url = `https://api.contentstack.io/v3/taxonomies`; // Use management API endpoint
   const options = {
     headers: {
-      'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
-      api_key: configOptions.api_key,
-      authorization: configOptions.management_token, // Management token for Taxonomy API
-      branch: configOptions.branch || 'main',
+      'api_key': configOptions.api_key,
+      'authorization': configOptions.management_token, // Use management token
+      'Content-Type': 'application/json',
+      'X-User-Agent': `contentstack-gatsby-source-plugin`,
     },
   };
 
   try {
-    const response = await getData(url, options);
-    return response.taxonomies || [];
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch taxonomies. HTTP Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.taxonomies || [];
   } catch (error) {
     throw new Error(`Failed to fetch taxonomies: ${error.message}`);
   }
 };
+
+
 
 const fetchSyncData = async (query, config) => {
   const url = 'stacks/sync';
