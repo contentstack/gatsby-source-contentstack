@@ -131,11 +131,13 @@ exports.fetchTaxonomies = async (configOptions) => {
   };
 
   try {
+    console.log('fetching taxonomies', url);
+    
     const response = await fetch(url, options);
     if (!response.ok) {
       throw new Error(`Failed to fetch taxonomies. HTTP Status: ${response.status}`);
     }
-
+    console.log('response', response);
     const data = await response.json();
     return data.taxonomies || [];
   } catch (error) {

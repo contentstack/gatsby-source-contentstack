@@ -164,30 +164,32 @@ exports.fetchTaxonomies = /*#__PURE__*/function () {
             }
           };
           _context3.prev = 4;
-          _context3.next = 7;
+          console.log('fetching taxonomies', url);
+          _context3.next = 8;
           return fetch(url, options);
-        case 7:
+        case 8:
           response = _context3.sent;
           if (response.ok) {
-            _context3.next = 10;
+            _context3.next = 11;
             break;
           }
           throw new Error("Failed to fetch taxonomies. HTTP Status: ".concat(response.status));
-        case 10:
-          _context3.next = 12;
+        case 11:
+          console.log('response', response);
+          _context3.next = 14;
           return response.json();
-        case 12:
+        case 14:
           data = _context3.sent;
           return _context3.abrupt("return", data.taxonomies || []);
-        case 16:
-          _context3.prev = 16;
+        case 18:
+          _context3.prev = 18;
           _context3.t0 = _context3["catch"](4);
           throw new Error("Failed to fetch taxonomies: ".concat(_context3.t0.message));
-        case 19:
+        case 21:
         case "end":
           return _context3.stop();
       }
-    }, _callee3, null, [[4, 16]]);
+    }, _callee3, null, [[4, 18]]);
   }));
   return function (_x7) {
     return _ref3.apply(this, arguments);
