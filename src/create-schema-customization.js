@@ -19,7 +19,7 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter, c
     // Caching content-types because we need to be able to support multiple stacks.
     await cache.set(typePrefix, contentTypes);
   } catch (error) {
-    console.error('Contentstack fetch content type failed!');
+    console.error('Contentstack fetch content type failed!', error);
   }
 
   let references = [], groups = [], fileFields = [], jsonRteFields = [];
@@ -82,7 +82,9 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter, c
 
     createTypes([schema.buildObjectType(contentTypeSchema), schema.buildObjectType(assetTypeSchema)]);
 
-    contentTypes && contentTypes.forEach(contentType => {
+    // Process Content Types
+    contentTypes &&
+      contentTypes.forEach((contentType) => {
       const contentTypeUid = contentType.uid.replace(/-/g, '_');
       const name = `${typePrefix}_${contentTypeUid}`;
       const extendedSchema = extendSchemaWithDefaultEntryFields(contentType.schema);
@@ -103,6 +105,31 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter, c
       createTypes(result.types);
     });
 
+    // Check if content types include taxonomies
+    const hasTaxonomies = contentTypes.some((contentType) =>
+      contentType.schema.some((field) => field.data_type === 'taxonomy')
+    );
+
+    if (hasTaxonomies) {
+      const taxonomySchema = `
+        type ${typePrefix}Taxonomy implements Node {
+          uid: String!
+          name: String!
+          terms: [${typePrefix}TaxonomyTerm!]!
+        }
+
+        type ${typePrefix}TaxonomyTerm {
+          uid: String!
+          name: String!
+          parent_uid: String
+          children: [${typePrefix}TaxonomyTerm!]
+        }
+      `;
+      createTypes(taxonomySchema);
+      reporter.info('Taxonomy schema added to the GraphQL schema.');
+    }
+
+    // Cache schema-related metadata
     await Promise.all([
       await cache.set(`${typePrefix}_${configOptions.api_key}_references`, references),
       await cache.set(`${typePrefix}_${configOptions.api_key}_groups`, groups),

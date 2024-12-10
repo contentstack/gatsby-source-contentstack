@@ -113,6 +113,25 @@ exports.fetchContentTypes = async (config, contentTypeOption) => {
   }
 };
 
+exports.fetchTaxonomies = async (configOptions) => {
+  const url = `${configOptions.cdn || 'https://api.contentstack.io/v3'}/taxonomies`;
+  const options = {
+    headers: {
+      'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
+      api_key: configOptions.api_key,
+      authorization: configOptions.management_token, // Management token for Taxonomy API
+      branch: configOptions.branch || 'main',
+    },
+  };
+
+  try {
+    const response = await getData(url, options);
+    return response.taxonomies || [];
+  } catch (error) {
+    throw new Error(`Failed to fetch taxonomies: ${error.message}`);
+  }
+};
+
 const fetchSyncData = async (query, config) => {
   const url = 'stacks/sync';
   const response = await getSyncData(url, config, query, 'items');

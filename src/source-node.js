@@ -3,7 +3,7 @@
 const { checkIfUnsupportedFormat, SUPPORTED_FILES_COUNT, IMAGE_REGEXP, CODES, getContentTypeOption, ASSET_NODE_UIDS } = require('./utils');
 const downloadAssets = require('./download-assets');
 const { deleteContentstackNodes } = require('./node-helper');
-const { fetchData } = require('./fetch');
+const { fetchData, fetchTaxonomies } = require('./fetch'); // Kept this import for taxonomy fetching
 const { normalizeEntry, processContentType, processEntry, processAsset, makeEntryNodeUid, makeAssetNodeUid } = require('./normalize');
 
 exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, reporter, createContentDigest, getNodesByType, getCache }, configOptions) => {
@@ -34,7 +34,39 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
     return merged;
   }, {});
 
-  // for checking if the reference node is present or not
+  // Check for taxonomy presence dynamically in content types
+  const hasTaxonomies = contentstackData.contentTypes.some((contentType) =>
+    contentType.schema.some((field) => field.data_type === 'taxonomy')
+  );
+
+  if (hasTaxonomies) {
+    try {
+      reporter.info('Taxonomies detected. Fetching taxonomy data...');
+      const taxonomies = await fetchTaxonomies(configOptions);
+
+      taxonomies.forEach((taxonomy) => {
+        const taxonomyNode = {
+          ...taxonomy,
+          id: createNodeId(`contentstack-taxonomy-${taxonomy.uid}`),
+          parent: null,
+          children: [],
+          internal: {
+            type: `${typePrefix}Taxonomy`,
+            contentDigest: createContentDigest(taxonomy),
+          },
+        };
+        createNode(taxonomyNode);
+      });
+
+      reporter.info('Taxonomy nodes created.');
+    } catch (error) {
+      reporter.warn('Failed to fetch taxonomies. Continuing without taxonomy nodes.');
+    }
+  } else {
+    reporter.info('No taxonomies found in content types. Skipping taxonomy processing.');
+  }
+
+  // For checking if the reference node is present or not
   const entriesNodeIds = new Set();
   const assetsNodeIds = new Set();
 
