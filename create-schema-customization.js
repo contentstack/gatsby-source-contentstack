@@ -30,7 +30,7 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
       reporter = _ref2.reporter,
       createNodeId = _ref2.createNodeId;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee2() {
-      var contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, jsonRteFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig;
+      var contentTypes, typePrefix, disableMandatoryFields, jsonRteToHtml, contentTypeOption, references, groups, fileFields, jsonRteFields, createTypes, contentTypeSchema, assetTypeSchema, _yield$import, getGatsbyImageFieldConfig, fieldConfig, hasTaxonomies, taxonomySchema;
       return _regenerator["default"].wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
@@ -51,11 +51,11 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
           case 12:
             _context2.prev = 12;
             _context2.t0 = _context2["catch"](3);
-            console.error('Contentstack fetch content type failed!');
+            console.error('Contentstack fetch content type failed!', _context2.t0);
           case 15:
             references = [], groups = [], fileFields = [], jsonRteFields = [];
             if (!configOptions.enableSchemaGeneration) {
-              _context2.next = 52;
+              _context2.next = 54;
               break;
             }
             createTypes = actions.createTypes;
@@ -164,6 +164,8 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
             }
           case 34:
             createTypes([schema.buildObjectType(contentTypeSchema), schema.buildObjectType(assetTypeSchema)]);
+
+            // Process Content Types
             contentTypes && contentTypes.forEach(function (contentType) {
               var contentTypeUid = contentType.uid.replace(/-/g, '_');
               var name = "".concat(typePrefix, "_").concat(contentTypeUid);
@@ -184,27 +186,41 @@ exports.createSchemaCustomization = /*#__PURE__*/function () {
               result.types = result.types.concat(typeDefs);
               createTypes(result.types);
             });
+
+            // Check if content types include taxonomies
+            hasTaxonomies = contentTypes.some(function (contentType) {
+              return contentType.schema.some(function (field) {
+                return field.data_type === 'taxonomy';
+              });
+            });
+            if (hasTaxonomies) {
+              taxonomySchema = "\n        type ".concat(typePrefix, "Taxonomy implements Node {\n          uid: String!\n          name: String!\n          terms: [").concat(typePrefix, "TaxonomyTerm!]!\n        }\n\n        type ").concat(typePrefix, "TaxonomyTerm {\n          uid: String!\n          name: String!\n          parent_uid: String\n          children: [").concat(typePrefix, "TaxonomyTerm!]\n        }\n      ");
+              createTypes(taxonomySchema);
+              reporter.info('Taxonomy schema added to the GraphQL schema.');
+            }
+
+            // Cache schema-related metadata
             _context2.t2 = Promise;
-            _context2.next = 39;
+            _context2.next = 41;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_references"), references);
-          case 39:
+          case 41:
             _context2.t3 = _context2.sent;
-            _context2.next = 42;
+            _context2.next = 44;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_groups"), groups);
-          case 42:
+          case 44:
             _context2.t4 = _context2.sent;
-            _context2.next = 45;
+            _context2.next = 47;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_file_fields"), fileFields);
-          case 45:
+          case 47:
             _context2.t5 = _context2.sent;
-            _context2.next = 48;
+            _context2.next = 50;
             return cache.set("".concat(typePrefix, "_").concat(configOptions.api_key, "_json_rte_fields"), jsonRteFields);
-          case 48:
+          case 50:
             _context2.t6 = _context2.sent;
             _context2.t7 = [_context2.t3, _context2.t4, _context2.t5, _context2.t6];
-            _context2.next = 52;
+            _context2.next = 54;
             return _context2.t2.all.call(_context2.t2, _context2.t7);
-          case 52:
+          case 54:
           case "end":
             return _context2.stop();
         }

@@ -2,7 +2,10 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0, _defineProperty2["default"])(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var _require = require('./utils'),
   checkIfUnsupportedFormat = _require.checkIfUnsupportedFormat,
   SUPPORTED_FILES_COUNT = _require.SUPPORTED_FILES_COUNT,
@@ -14,7 +17,8 @@ var downloadAssets = require('./download-assets');
 var _require2 = require('./node-helper'),
   deleteContentstackNodes = _require2.deleteContentstackNodes;
 var _require3 = require('./fetch'),
-  fetchData = _require3.fetchData;
+  fetchData = _require3.fetchData,
+  fetchTaxonomies = _require3.fetchTaxonomies; // Kept this import for taxonomy fetching
 var _require4 = require('./normalize'),
   normalizeEntry = _require4.normalizeEntry,
   processContentType = _require4.processContentType,
@@ -34,7 +38,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
       getNodesByType = _ref2.getNodesByType,
       getCache = _ref2.getCache;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee() {
-      var createNode, deleteNode, touchNode, createNodeField, typePrefix, contentstackData, contentTypeOption, _yield$fetchData, _contentstackData, syncData, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, assetUids, contentTypesMap;
+      var createNode, deleteNode, touchNode, createNodeField, typePrefix, contentstackData, contentTypeOption, _yield$fetchData, _contentstackData, syncData, hasTaxonomies, taxonomies, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, assetUids, contentTypesMap;
       return _regenerator["default"].wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
@@ -72,7 +76,48 @@ exports.sourceNodes = /*#__PURE__*/function () {
               }
               merged[item.type].push(item);
               return merged;
-            }, {}); // for checking if the reference node is present or not
+            }, {}); // Check for taxonomy presence dynamically in content types
+            hasTaxonomies = contentstackData.contentTypes.some(function (contentType) {
+              return contentType.schema.some(function (field) {
+                return field.data_type === 'taxonomy';
+              });
+            });
+            if (!hasTaxonomies) {
+              _context.next = 35;
+              break;
+            }
+            _context.prev = 21;
+            reporter.info('Taxonomies detected. Fetching taxonomy data...');
+            _context.next = 25;
+            return fetchTaxonomies(configOptions);
+          case 25:
+            taxonomies = _context.sent;
+            taxonomies.forEach(function (taxonomy) {
+              var taxonomyNode = _objectSpread(_objectSpread({}, taxonomy), {}, {
+                id: createNodeId("contentstack-taxonomy-".concat(taxonomy.uid)),
+                parent: null,
+                children: [],
+                internal: {
+                  type: "".concat(typePrefix, "Taxonomy"),
+                  contentDigest: createContentDigest(taxonomy)
+                }
+              });
+              createNode(taxonomyNode);
+            });
+            reporter.info('Taxonomy nodes created.');
+            _context.next = 33;
+            break;
+          case 30:
+            _context.prev = 30;
+            _context.t1 = _context["catch"](21);
+            reporter.warn('Failed to fetch taxonomies. Continuing without taxonomy nodes.');
+          case 33:
+            _context.next = 36;
+            break;
+          case 35:
+            reporter.info('No taxonomies found in content types. Skipping taxonomy processing.');
+          case 36:
+            // For checking if the reference node is present or not
             entriesNodeIds = new Set();
             assetsNodeIds = new Set();
             existingNodes = getNodes().filter(function (n) {
@@ -111,17 +156,17 @@ exports.sourceNodes = /*#__PURE__*/function () {
               assetsNodeIds.add(assetNodeId);
               assetUids.push(assetNodeId);
             });
-            _context.next = 28;
+            _context.next = 45;
             return cache.set(ASSET_NODE_UIDS, assetUids);
-          case 28:
-            _context.t1 = configOptions.downloadImages;
-            if (!_context.t1) {
-              _context.next = 32;
+          case 45:
+            _context.t2 = configOptions.downloadImages;
+            if (!_context.t2) {
+              _context.next = 49;
               break;
             }
-            _context.next = 32;
+            _context.next = 49;
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
-          case 32:
+          case 49:
             contentTypesMap = {};
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -141,10 +186,10 @@ exports.sourceNodes = /*#__PURE__*/function () {
               createNode(assetNode);
             });
             if (!configOptions.downloadImages) {
-              _context.next = 39;
+              _context.next = 56;
               break;
             }
-            _context.next = 39;
+            _context.next = 56;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -155,7 +200,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
               createNodeField: createNodeField,
               getNode: getNode
             }, typePrefix, configOptions);
-          case 39:
+          case 56:
             // deleting nodes
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'entry', createNodeId, getNode, deleteNode, typePrefix);
@@ -178,11 +223,11 @@ exports.sourceNodes = /*#__PURE__*/function () {
                 return deleteNode(node);
               });
             });
-          case 44:
+          case 61:
           case "end":
             return _context.stop();
         }
-      }, _callee, null, [[2, 14]]);
+      }, _callee, null, [[2, 14], [21, 30]]);
     })();
   });
   return function (_x, _x2) {

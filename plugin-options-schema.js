@@ -22,7 +22,8 @@ exports.pluginOptionsSchema = function (_ref) {
     httpRetries: Joi.number().integer()["default"](3).description("Specify the number of times to perform http request on a network failure"),
     limit: Joi.number().integer()["default"](50).description("Specify the number of entries/assets to be fetched per page"),
     enableEarlyAccessKey: Joi.string()["default"]('').description("Specify the Header key to be passed to Contentstack API"),
-    enableEarlyAccessValue: Joi.string()["default"]('').description("Specify list of headers to be passed to Contentstack API.")
+    enableEarlyAccessValue: Joi.string()["default"]('').description("Specify list of headers to be passed to Contentstack API."),
+    management_token: Joi.string().optional().description('Your Contentstack management token (required for fetching taxonomies).')
   }).external(validateContentstackAccess);
 };
 //# sourceMappingURL=plugin-options-schema.js.map

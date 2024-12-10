@@ -141,26 +141,78 @@ exports.fetchContentTypes = /*#__PURE__*/function () {
     return _ref2.apply(this, arguments);
   };
 }();
-var fetchSyncData = /*#__PURE__*/function () {
-  var _ref3 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee3(query, config) {
-    var url, response;
+exports.fetchTaxonomies = /*#__PURE__*/function () {
+  var _ref3 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee3(configOptions) {
+    var url, options, response, data;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) switch (_context3.prev = _context3.next) {
         case 0:
-          url = 'stacks/sync';
-          _context3.next = 3;
-          return _getSyncData(url, config, query, 'items');
-        case 3:
+          if (configOptions.management_token) {
+            _context3.next = 2;
+            break;
+          }
+          throw new Error('Management token is required to fetch taxonomies. Please provide a valid management_token in plugin options.');
+        case 2:
+          url = "https://api.contentstack.io/v3/taxonomies"; // Use management API endpoint
+          options = {
+            headers: {
+              'api_key': configOptions.api_key,
+              'authorization': configOptions.management_token,
+              // Use management token
+              'Content-Type': 'application/json',
+              'X-User-Agent': "contentstack-gatsby-source-plugin"
+            }
+          };
+          _context3.prev = 4;
+          _context3.next = 7;
+          return fetch(url, options);
+        case 7:
           response = _context3.sent;
-          return _context3.abrupt("return", response);
-        case 5:
+          if (response.ok) {
+            _context3.next = 10;
+            break;
+          }
+          throw new Error("Failed to fetch taxonomies. HTTP Status: ".concat(response.status));
+        case 10:
+          _context3.next = 12;
+          return response.json();
+        case 12:
+          data = _context3.sent;
+          return _context3.abrupt("return", data.taxonomies || []);
+        case 16:
+          _context3.prev = 16;
+          _context3.t0 = _context3["catch"](4);
+          throw new Error("Failed to fetch taxonomies: ".concat(_context3.t0.message));
+        case 19:
         case "end":
           return _context3.stop();
       }
-    }, _callee3);
+    }, _callee3, null, [[4, 16]]);
   }));
-  return function fetchSyncData(_x7, _x8) {
+  return function (_x7) {
     return _ref3.apply(this, arguments);
+  };
+}();
+var fetchSyncData = /*#__PURE__*/function () {
+  var _ref4 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee4(query, config) {
+    var url, response;
+    return _regenerator["default"].wrap(function _callee4$(_context4) {
+      while (1) switch (_context4.prev = _context4.next) {
+        case 0:
+          url = 'stacks/sync';
+          _context4.next = 3;
+          return _getSyncData(url, config, query, 'items');
+        case 3:
+          response = _context4.sent;
+          return _context4.abrupt("return", response);
+        case 5:
+        case "end":
+          return _context4.stop();
+      }
+    }, _callee4);
+  }));
+  return function fetchSyncData(_x8, _x9) {
+    return _ref4.apply(this, arguments);
   };
 }();
 function waitFor(milliseconds) {
@@ -169,13 +221,13 @@ function waitFor(milliseconds) {
   });
 }
 var getData = /*#__PURE__*/function () {
-  var _ref4 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee5(url, options) {
+  var _ref5 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee6(url, options) {
     var retries;
-    return _regenerator["default"].wrap(function _callee5$(_context5) {
-      while (1) switch (_context5.prev = _context5.next) {
+    return _regenerator["default"].wrap(function _callee6$(_context6) {
+      while (1) switch (_context6.prev = _context6.next) {
         case 0:
           retries = 0;
-          return _context5.abrupt("return", new Promise(function (resolve, reject) {
+          return _context6.abrupt("return", new Promise(function (resolve, reject) {
             var _handleResponse = function handleResponse() {
               fetch(url, options).then(function (response) {
                 return response.json();
@@ -196,35 +248,35 @@ var getData = /*#__PURE__*/function () {
                   resolve(data);
                 }
               })["catch"](/*#__PURE__*/function () {
-                var _ref5 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee4(err) {
+                var _ref6 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee5(err) {
                   var retryAttempt, timeToWait;
-                  return _regenerator["default"].wrap(function _callee4$(_context4) {
-                    while (1) switch (_context4.prev = _context4.next) {
+                  return _regenerator["default"].wrap(function _callee5$(_context5) {
+                    while (1) switch (_context5.prev = _context5.next) {
                       case 0:
                         retryAttempt = globalConfig.httpRetries ? globalConfig.httpRetries : 3;
                         if (!(retries < retryAttempt)) {
-                          _context4.next = 9;
+                          _context5.next = 9;
                           break;
                         }
                         retries++;
                         timeToWait = Math.pow(2, retries) * 100;
-                        _context4.next = 6;
+                        _context5.next = 6;
                         return waitFor(timeToWait);
                       case 6:
                         _handleResponse();
-                        _context4.next = 11;
+                        _context5.next = 11;
                         break;
                       case 9:
                         console.error(err);
                         reject(new Error("Fetch failed after ".concat(retryAttempt, " retry attempts.")));
                       case 11:
                       case "end":
-                        return _context4.stop();
+                        return _context5.stop();
                     }
-                  }, _callee4);
+                  }, _callee5);
                 }));
-                return function (_x11) {
-                  return _ref5.apply(this, arguments);
+                return function (_x12) {
+                  return _ref6.apply(this, arguments);
                 };
               }());
             };
@@ -233,21 +285,21 @@ var getData = /*#__PURE__*/function () {
           }));
         case 2:
         case "end":
-          return _context5.stop();
+          return _context6.stop();
       }
-    }, _callee5);
+    }, _callee6);
   }));
-  return function getData(_x9, _x10) {
-    return _ref4.apply(this, arguments);
+  return function getData(_x10, _x11) {
+    return _ref5.apply(this, arguments);
   };
 }();
 var fetchCsData = /*#__PURE__*/function () {
-  var _ref6 = (0, _asyncToGenerator2["default"])(function (url, config, query) {
+  var _ref7 = (0, _asyncToGenerator2["default"])(function (url, config, query) {
     var SyncRetryCount = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-    return /*#__PURE__*/_regenerator["default"].mark(function _callee6() {
+    return /*#__PURE__*/_regenerator["default"].mark(function _callee7() {
       var queryParams, apiUrl, option, data;
-      return _regenerator["default"].wrap(function _callee6$(_context6) {
-        while (1) switch (_context6.prev = _context6.next) {
+      return _regenerator["default"].wrap(function _callee7$(_context7) {
+        while (1) switch (_context7.prev = _context7.next) {
           case 0:
             query = query || {};
             query.include_count = true;
@@ -262,32 +314,32 @@ var fetchCsData = /*#__PURE__*/function () {
                 branch: config !== null && config !== void 0 && config.branch ? config.branch : 'main'
               }, getCustomHeaders(config === null || config === void 0 ? void 0 : config.enableEarlyAccessKey, config === null || config === void 0 ? void 0 : config.enableEarlyAccessValue))
             };
-            _context6.next = 8;
+            _context7.next = 8;
             return getData(apiUrl, option);
           case 8:
-            data = _context6.sent;
-            return _context6.abrupt("return", data);
+            data = _context7.sent;
+            return _context7.abrupt("return", data);
           case 10:
           case "end":
-            return _context6.stop();
+            return _context7.stop();
         }
-      }, _callee6);
+      }, _callee7);
     })();
   });
-  return function fetchCsData(_x12, _x13, _x14) {
-    return _ref6.apply(this, arguments);
+  return function fetchCsData(_x13, _x14, _x15) {
+    return _ref7.apply(this, arguments);
   };
 }();
 var _getPagedData = /*#__PURE__*/function () {
-  var _ref7 = (0, _asyncToGenerator2["default"])(function (url, config, responseKey) {
+  var _ref8 = (0, _asyncToGenerator2["default"])(function (url, config, responseKey) {
     var query = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var skip = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
     var limit = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : config === null || config === void 0 ? void 0 : config.limit;
     var aggregatedResponse = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
-    return /*#__PURE__*/_regenerator["default"].mark(function _callee7() {
+    return /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
       var response;
-      return _regenerator["default"].wrap(function _callee7$(_context7) {
-        while (1) switch (_context7.prev = _context7.next) {
+      return _regenerator["default"].wrap(function _callee8$(_context8) {
+        while (1) switch (_context8.prev = _context8.next) {
           case 0:
             query.skip = skip;
             //if limit is greater than 100, it will throw ann error that limit cannot exceed 100.
@@ -296,47 +348,47 @@ var _getPagedData = /*#__PURE__*/function () {
             }
             query.limit = limit > 100 ? 50 : limit;
             query.include_global_field_schema = true;
-            _context7.next = 6;
+            _context8.next = 6;
             return fetchCsData(url, config, query);
           case 6:
-            response = _context7.sent;
+            response = _context8.sent;
             if (!aggregatedResponse) {
               aggregatedResponse = response[responseKey];
             } else {
               aggregatedResponse = aggregatedResponse.concat(response[responseKey]);
             }
             if (!(skip + limit <= response.count)) {
-              _context7.next = 10;
+              _context8.next = 10;
               break;
             }
-            return _context7.abrupt("return", _getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse));
+            return _context8.abrupt("return", _getPagedData(url, config, responseKey, query = {}, skip + limit, limit, aggregatedResponse));
           case 10:
-            return _context7.abrupt("return", aggregatedResponse);
+            return _context8.abrupt("return", aggregatedResponse);
           case 11:
           case "end":
-            return _context7.stop();
+            return _context8.stop();
         }
-      }, _callee7);
+      }, _callee8);
     })();
   });
-  return function getPagedData(_x15, _x16, _x17) {
-    return _ref7.apply(this, arguments);
+  return function getPagedData(_x16, _x17, _x18) {
+    return _ref8.apply(this, arguments);
   };
 }();
 var _getSyncData = /*#__PURE__*/function () {
-  var _ref8 = (0, _asyncToGenerator2["default"])(function (url, config, query, responseKey) {
+  var _ref9 = (0, _asyncToGenerator2["default"])(function (url, config, query, responseKey) {
     var aggregatedResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
     var retries = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
-    return /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
+    return /*#__PURE__*/_regenerator["default"].mark(function _callee9() {
       var response, timeToWait, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, syncResponse, _timeToWait;
-      return _regenerator["default"].wrap(function _callee8$(_context8) {
-        while (1) switch (_context8.prev = _context8.next) {
+      return _regenerator["default"].wrap(function _callee9$(_context9) {
+        while (1) switch (_context9.prev = _context9.next) {
           case 0:
-            _context8.prev = 0;
-            _context8.next = 3;
+            _context9.prev = 0;
+            _context9.next = 3;
             return fetchCsData(url, config, query);
           case 3:
-            response = _context8.sent;
+            response = _context9.sent;
             /*
             Below syncToken array would contain type --> 'asset_published', 'entry_published' sync tokens
             */
@@ -356,39 +408,39 @@ var _getSyncData = /*#__PURE__*/function () {
               aggregatedResponse.sync_token = response.sync_token ? response.sync_token : aggregatedResponse.sync_token;
             }
             if (!response.pagination_token) {
-              _context8.next = 25;
+              _context9.next = 25;
               break;
             }
-            _context8.prev = 7;
-            _context8.next = 10;
+            _context9.prev = 7;
+            _context9.next = 10;
             return _getSyncData(url, config, {
               pagination_token: response.pagination_token
             }, responseKey, aggregatedResponse, 0 // Reset retries for each call
             );
           case 10:
-            return _context8.abrupt("return", _context8.sent);
+            return _context9.abrupt("return", _context9.sent);
           case 13:
-            _context8.prev = 13;
-            _context8.t0 = _context8["catch"](7);
+            _context9.prev = 13;
+            _context9.t0 = _context9["catch"](7);
             if (!(retries < config.httpRetries)) {
-              _context8.next = 24;
+              _context9.next = 24;
               break;
             }
             timeToWait = Math.pow(2, retries) * 100; //Retry attempt ${retries + 1} after pagination token error. Waiting for ${timeToWait} ms...
-            _context8.next = 19;
+            _context9.next = 19;
             return waitFor(timeToWait);
           case 19:
-            _context8.next = 21;
+            _context9.next = 21;
             return _getSyncData(url, config, {
               pagination_token: response.pagination_token
             }, responseKey, aggregatedResponse, retries + 1);
           case 21:
-            return _context8.abrupt("return", _context8.sent);
+            return _context9.abrupt("return", _context9.sent);
           case 24:
             throw new Error("Failed to fetch sync data after ".concat(config.httpRetries, " retry attempts due to invalid pagination token."));
           case 25:
             if (!response.sync_token) {
-              _context8.next = 63;
+              _context9.next = 63;
               break;
             }
             /**
@@ -398,77 +450,77 @@ var _getSyncData = /*#__PURE__*/function () {
               return item !== undefined;
             });
             _iterator = _createForOfIteratorHelper(aggregatedSyncToken);
-            _context8.prev = 28;
+            _context9.prev = 28;
             _iterator.s();
           case 30:
             if ((_step = _iterator.n()).done) {
-              _context8.next = 55;
+              _context9.next = 55;
               break;
             }
             token = _step.value;
             syncResponse = void 0;
-            _context8.prev = 33;
-            _context8.next = 36;
+            _context9.prev = 33;
+            _context9.next = 36;
             return fetchCsData(url, config, query = {
               sync_token: token
             }, 0 // Reset SyncRetryCount for each call
             );
           case 36:
-            syncResponse = _context8.sent;
-            _context8.next = 51;
+            syncResponse = _context9.sent;
+            _context9.next = 51;
             break;
           case 39:
-            _context8.prev = 39;
-            _context8.t1 = _context8["catch"](33);
+            _context9.prev = 39;
+            _context9.t1 = _context9["catch"](33);
             if (!(SyncRetryCount < config.httpRetries)) {
-              _context8.next = 50;
+              _context9.next = 50;
               break;
             }
             _timeToWait = Math.pow(2, SyncRetryCount) * 100; //Retry attempt ${retries + 1} after sync token error. Waiting for ${timeToWait} ms...
-            _context8.next = 45;
+            _context9.next = 45;
             return waitFor(_timeToWait);
           case 45:
-            _context8.next = 47;
+            _context9.next = 47;
             return fetchCsData(url, config, query = {
               sync_token: token
             }, SyncRetryCount + 1);
           case 47:
-            return _context8.abrupt("return", syncResponse = _context8.sent);
+            return _context9.abrupt("return", syncResponse = _context9.sent);
           case 50:
             throw new Error("Failed to fetch sync data after ".concat(config.httpRetries, " retry attempts due to invalid sync token."));
           case 51:
             aggregatedResponse.data = (_aggregatedResponse$d = aggregatedResponse.data) === null || _aggregatedResponse$d === void 0 ? void 0 : (_aggregatedResponse$d2 = _aggregatedResponse$d).concat.apply(_aggregatedResponse$d2, (0, _toConsumableArray2["default"])(syncResponse.items));
             aggregatedResponse.sync_token = syncResponse.sync_token;
           case 53:
-            _context8.next = 30;
+            _context9.next = 30;
             break;
           case 55:
-            _context8.next = 60;
+            _context9.next = 60;
             break;
           case 57:
-            _context8.prev = 57;
-            _context8.t2 = _context8["catch"](28);
-            _iterator.e(_context8.t2);
+            _context9.prev = 57;
+            _context9.t2 = _context9["catch"](28);
+            _iterator.e(_context9.t2);
           case 60:
-            _context8.prev = 60;
+            _context9.prev = 60;
             _iterator.f();
-            return _context8.finish(60);
+            return _context9.finish(60);
           case 63:
             syncToken = [];
-            return _context8.abrupt("return", aggregatedResponse);
+            return _context9.abrupt("return", aggregatedResponse);
           case 67:
-            _context8.prev = 67;
-            _context8.t3 = _context8["catch"](0);
-            throw new Error("Failed to fetch sync data: ".concat(_context8.t3.message));
+            _context9.prev = 67;
+            _context9.t3 = _context9["catch"](0);
+            throw new Error("Failed to fetch sync data: ".concat(_context9.t3.message));
           case 70:
           case "end":
-            return _context8.stop();
+            return _context9.stop();
         }
-      }, _callee8, null, [[0, 67], [7, 13], [28, 57, 60, 63], [33, 39]]);
+      }, _callee9, null, [[0, 67], [7, 13], [28, 57, 60, 63], [33, 39]]);
     })();
   });
-  return function getSyncData(_x18, _x19, _x20, _x21) {
-    return _ref8.apply(this, arguments);
+  return function getSyncData(_x19, _x20, _x21, _x22) {
+    return _ref9.apply(this, arguments);
   };
 }();
 //# sourceMappingURL=fetch.js.map
