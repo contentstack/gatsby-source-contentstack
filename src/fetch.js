@@ -114,7 +114,7 @@ exports.fetchContentTypes = async (config, contentTypeOption) => {
 };
 
 exports.fetchTaxonomies = async (configOptions) => {
-  const url = `${configOptions.cdn || 'https://api.contentstack.io/v3'}/taxonomies`;
+  const url = `https://api.contentstack.io/v3/taxonomies`;
   const options = {
     headers: {
       'X-User-Agent': `contentstack-gatsby-source-plugin-${version}`,
