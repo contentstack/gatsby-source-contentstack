@@ -10,6 +10,7 @@ exports.pluginOptionsSchema = function (_ref) {
     environment: Joi.string().required().description("Environment where you published your data."),
     branch: Joi.string()["default"]('main').description("Specify a branch from where you'd like to fetch the data. Default it will be fetched from main"),
     cdn: Joi.string()["default"]("https://cdn.contentstack.io/v3").description("CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3 "),
+    api_host: Joi.string()["default"]("api.contentstack.io").description("API Host set this to point to other api end point. For eg: eu-cdn.contentstack.com"),
     type_prefix: Joi.string()["default"]("Contentstack").description("Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks."),
     expediteBuild: Joi["boolean"]()["default"](false).description("expediteBuild set this to either true or false."),
     enableSchemaGeneration: Joi["boolean"]()["default"](false).description("Specify true if you want to generate custom schema."),

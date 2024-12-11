@@ -37,38 +37,38 @@ exports.sourceNodes = /*#__PURE__*/function () {
       createContentDigest = _ref2.createContentDigest,
       getNodesByType = _ref2.getNodesByType,
       getCache = _ref2.getCache;
-    return /*#__PURE__*/_regenerator["default"].mark(function _callee() {
+    return /*#__PURE__*/_regenerator["default"].mark(function _callee2() {
       var createNode, deleteNode, touchNode, createNodeField, typePrefix, contentstackData, contentTypeOption, _yield$fetchData, _contentstackData, syncData, hasTaxonomies, taxonomies, entriesNodeIds, assetsNodeIds, existingNodes, countOfSupportedFormatFiles, assetUids, contentTypesMap;
-      return _regenerator["default"].wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
+      return _regenerator["default"].wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
           case 0:
             createNode = actions.createNode, deleteNode = actions.deleteNode, touchNode = actions.touchNode, createNodeField = actions.createNodeField; // use a custom type prefix if specified
             typePrefix = configOptions.type_prefix || 'Contentstack';
-            _context.prev = 2;
+            _context2.prev = 2;
             contentTypeOption = getContentTypeOption(configOptions);
-            _context.next = 6;
+            _context2.next = 6;
             return fetchData(configOptions, reporter, cache, contentTypeOption);
           case 6:
-            _yield$fetchData = _context.sent;
+            _yield$fetchData = _context2.sent;
             _contentstackData = _yield$fetchData.contentstackData;
             contentstackData = _contentstackData;
-            _context.next = 11;
+            _context2.next = 11;
             return cache.get(typePrefix);
           case 11:
-            contentstackData.contentTypes = _context.sent;
-            _context.next = 18;
+            contentstackData.contentTypes = _context2.sent;
+            _context2.next = 18;
             break;
           case 14:
-            _context.prev = 14;
-            _context.t0 = _context["catch"](2);
+            _context2.prev = 14;
+            _context2.t0 = _context2["catch"](2);
             reporter.panic({
               id: CODES.SyncError,
               context: {
                 sourceMessage: "Error occurred while fetching contentstack in [sourceNodes]. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help."
               },
-              error: _context.t0
+              error: _context2.t0
             });
-            throw _context.t0;
+            throw _context2.t0;
           case 18:
             syncData = contentstackData.syncData.reduce(function (merged, item) {
               if (!merged[item.type]) {
@@ -83,46 +83,71 @@ exports.sourceNodes = /*#__PURE__*/function () {
               });
             });
             if (!hasTaxonomies) {
-              _context.next = 35;
+              _context2.next = 39;
               break;
             }
-            _context.prev = 21;
-            reporter.info('Taxonomies detected. Fetching taxonomy data...');
-            _context.next = 25;
+            _context2.prev = 21;
+            reporter.info('Fetching taxonomies...');
+            console.log('Fetching taxonomies with configOptions:', configOptions);
+            _context2.next = 26;
             return fetchTaxonomies(configOptions);
-          case 25:
-            taxonomies = _context.sent;
-            taxonomies.forEach(function (taxonomy) {
-              var taxonomyNode = _objectSpread(_objectSpread({}, taxonomy), {}, {
-                id: createNodeId("contentstack-taxonomy-".concat(taxonomy.uid)),
-                parent: null,
-                children: [],
-                internal: {
-                  type: "".concat(typePrefix, "Taxonomy"),
-                  contentDigest: createContentDigest(taxonomy)
-                }
-              });
-              createNode(taxonomyNode);
-            });
-            reporter.info('Taxonomy nodes created.');
-            _context.next = 33;
-            break;
+          case 26:
+            taxonomies = _context2.sent;
+            console.log('Fetched taxonomies:', taxonomies);
+            _context2.next = 30;
+            return Promise.all(taxonomies.map(/*#__PURE__*/function () {
+              var _ref3 = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee(taxonomy) {
+                var taxonomyNode;
+                return _regenerator["default"].wrap(function _callee$(_context) {
+                  while (1) switch (_context.prev = _context.next) {
+                    case 0:
+                      taxonomyNode = _objectSpread(_objectSpread({}, taxonomy), {}, {
+                        id: createNodeId("".concat(taxonomy.uid)),
+                        parent: null,
+                        children: [],
+                        internal: {
+                          type: "".concat(typePrefix, "Taxonomy"),
+                          contentDigest: createContentDigest(taxonomy)
+                        }
+                      });
+                      _context.next = 3;
+                      return createNode(taxonomyNode);
+                    case 3:
+                      reporter.info("Created taxonomy node: ".concat(taxonomy.uid));
+                    case 4:
+                    case "end":
+                      return _context.stop();
+                  }
+                }, _callee);
+              }));
+              return function (_x3) {
+                return _ref3.apply(this, arguments);
+              };
+            }()));
           case 30:
-            _context.prev = 30;
-            _context.t1 = _context["catch"](21);
-            reporter.warn('Failed to fetch taxonomies. Continuing without taxonomy nodes.');
-          case 33:
-            _context.next = 36;
+            reporter.info('Taxonomy nodes created.');
+            _context2.next = 37;
             break;
-          case 35:
+          case 33:
+            _context2.prev = 33;
+            _context2.t1 = _context2["catch"](21);
+            console.log('Error fetching taxonomies:', _context2.t1);
+            reporter.warn("Failed to fetch or create taxonomies. Error: ".concat(_context2.t1.message));
+          case 37:
+            _context2.next = 40;
+            break;
+          case 39:
             reporter.info('No taxonomies found in content types. Skipping taxonomy processing.');
-          case 36:
+          case 40:
+            console.log('Starting to process existing nodes...');
+
             // For checking if the reference node is present or not
             entriesNodeIds = new Set();
             assetsNodeIds = new Set();
             existingNodes = getNodes().filter(function (n) {
               return n.internal.owner === 'gatsby-source-contentstack';
             });
+            console.log('Existing nodes:', existingNodes.length);
             existingNodes.forEach(function (n) {
               if (n.internal.type !== "".concat(typePrefix, "ContentTypes") && n.internal.type !== "".concat(typePrefix, "_assets")) {
                 entriesNodeIds.add(n.id);
@@ -132,10 +157,12 @@ exports.sourceNodes = /*#__PURE__*/function () {
               }
               touchNode(n);
             });
+            console.log('Existing nodes processed.');
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
               var entryNodeId = makeEntryNodeUid(item.data, createNodeId, typePrefix);
               entriesNodeIds.add(entryNodeId);
             });
+            console.log('Entry published nodes processed.');
             countOfSupportedFormatFiles = 0, assetUids = [];
             syncData.asset_published && syncData.asset_published.forEach(function (item) {
               /**
@@ -156,17 +183,22 @@ exports.sourceNodes = /*#__PURE__*/function () {
               assetsNodeIds.add(assetNodeId);
               assetUids.push(assetNodeId);
             });
-            _context.next = 45;
+            console.log('Asset published nodes processed.');
+            _context2.next = 54;
             return cache.set(ASSET_NODE_UIDS, assetUids);
-          case 45:
-            _context.t2 = configOptions.downloadImages;
-            if (!_context.t2) {
-              _context.next = 49;
+          case 54:
+            console.log('Asset UIDs cached.');
+
+            // Cache the found count
+            _context2.t2 = configOptions.downloadImages;
+            if (!_context2.t2) {
+              _context2.next = 59;
               break;
             }
-            _context.next = 49;
+            _context2.next = 59;
             return cache.set(SUPPORTED_FILES_COUNT, countOfSupportedFormatFiles);
-          case 49:
+          case 59:
+            console.log('Supported files count cached.');
             contentTypesMap = {};
             contentstackData.contentTypes.forEach(function (contentType) {
               contentType.uid = contentType.uid.replace(/-/g, '_');
@@ -174,6 +206,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
               contentTypesMap[contentType.uid] = contentType;
               createNode(contentTypeNode);
             });
+            console.log('Content types processed.');
             syncData.entry_published && syncData.entry_published.forEach(function (item) {
               item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var contentType = contentTypesMap[item.content_type_uid];
@@ -181,15 +214,18 @@ exports.sourceNodes = /*#__PURE__*/function () {
               var entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
               createNode(entryNode);
             });
+            console.log('Entry nodes created.');
             syncData.asset_published && syncData.asset_published.forEach(function (item) {
               var assetNode = processAsset(item.data, createNodeId, createContentDigest, typePrefix);
               createNode(assetNode);
             });
+            console.log('Asset nodes created.');
             if (!configOptions.downloadImages) {
-              _context.next = 56;
+              _context2.next = 71;
               break;
             }
-            _context.next = 56;
+            console.log('Starting to download assets...');
+            _context2.next = 71;
             return downloadAssets({
               cache: cache,
               getCache: getCache,
@@ -200,20 +236,29 @@ exports.sourceNodes = /*#__PURE__*/function () {
               createNodeField: createNodeField,
               getNode: getNode
             }, typePrefix, configOptions);
-          case 56:
+          case 71:
             // deleting nodes
+            console.log('Deleting unpublished entry nodes...');
             syncData.entry_unpublished && syncData.entry_unpublished.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'entry', createNodeId, getNode, deleteNode, typePrefix);
             });
+            console.log('Entry unpublished nodes deleted.');
+            console.log('Deleting unpublished asset nodes...');
             syncData.asset_unpublished && syncData.asset_unpublished.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'asset', createNodeId, getNode, deleteNode, typePrefix);
             });
+            console.log('Asset unpublished nodes deleted.');
+            console.log('Deleting deleted entry nodes...');
             syncData.entry_deleted && syncData.entry_deleted.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'entry', createNodeId, getNode, deleteNode, typePrefix);
             });
+            console.log('Entry deleted nodes deleted.');
+            console.log('Deleting deleted asset nodes...');
             syncData.asset_deleted && syncData.asset_deleted.forEach(function (item) {
               return deleteContentstackNodes(item.data, 'asset', createNodeId, getNode, deleteNode, typePrefix);
             });
+            console.log('Asset deleted nodes deleted.');
+            console.log('Deleting deleted content type nodes...');
             syncData.content_type_deleted && syncData.content_type_deleted.forEach(function (item) {
               item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
               var sameContentTypeNodes = getNodes().filter(function (n) {
@@ -223,11 +268,13 @@ exports.sourceNodes = /*#__PURE__*/function () {
                 return deleteNode(node);
               });
             });
-          case 61:
+            console.log('Content type deleted nodes deleted.');
+            console.log('Source nodes process completed.');
+          case 87:
           case "end":
-            return _context.stop();
+            return _context2.stop();
         }
-      }, _callee, null, [[2, 14], [21, 30]]);
+      }, _callee2, null, [[2, 14], [21, 33]]);
     })();
   });
   return function (_x, _x2) {
