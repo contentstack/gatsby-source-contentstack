@@ -106,7 +106,7 @@ exports.sourceNodes = /*#__PURE__*/function () {
                         parent: null,
                         children: [],
                         internal: {
-                          type: "".concat(typePrefix, "Taxonomy"),
+                          type: "Taxonomy",
                           contentDigest: createContentDigest(taxonomy)
                         }
                       });

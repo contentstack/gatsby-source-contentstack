@@ -54,7 +54,7 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
             parent: null,
             children: [],
             internal: {
-              type: `${typePrefix}Taxonomy`,
+              type: `Taxonomy`,
               contentDigest: createContentDigest(taxonomy),
             },
           };
