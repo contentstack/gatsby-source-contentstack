@@ -297,15 +297,15 @@ const getSyncData = async (
     */
     const aggregatedSyncToken = syncToken.filter(item => item !== undefined);
       for (const token of aggregatedSyncToken) {
-
+        let SyncRetryCount;
         let syncResponse;
         try {
-          
+          SyncRetryCount = 0;
           syncResponse = await fetchCsData(
           url,
           config,
             (query = { sync_token: token }),
-          0 // Reset SyncRetryCount for each call
+            SyncRetryCount // Reset SyncRetryCount for each call
         );
         } catch (error) {
           if (SyncRetryCount < config.httpRetries) { 
