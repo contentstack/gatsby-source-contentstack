@@ -328,7 +328,7 @@ var _getSyncData = /*#__PURE__*/function () {
     var aggregatedResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
     var retries = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
     return /*#__PURE__*/_regenerator["default"].mark(function _callee8() {
-      var response, timeToWait, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, syncResponse, _timeToWait;
+      var response, timeToWait, aggregatedSyncToken, _iterator, _step, _aggregatedResponse$d, _aggregatedResponse$d2, token, SyncRetryCount, syncResponse, _timeToWait;
       return _regenerator["default"].wrap(function _callee8$(_context8) {
         while (1) switch (_context8.prev = _context8.next) {
           case 0:
@@ -388,7 +388,7 @@ var _getSyncData = /*#__PURE__*/function () {
             throw new Error("Failed to fetch sync data after ".concat(config.httpRetries, " retry attempts due to invalid pagination token."));
           case 25:
             if (!response.sync_token) {
-              _context8.next = 63;
+              _context8.next = 65;
               break;
             }
             /**
@@ -402,69 +402,71 @@ var _getSyncData = /*#__PURE__*/function () {
             _iterator.s();
           case 30:
             if ((_step = _iterator.n()).done) {
-              _context8.next = 55;
+              _context8.next = 57;
               break;
             }
             token = _step.value;
+            SyncRetryCount = void 0;
             syncResponse = void 0;
-            _context8.prev = 33;
-            _context8.next = 36;
+            _context8.prev = 34;
+            SyncRetryCount = 0;
+            _context8.next = 38;
             return fetchCsData(url, config, query = {
               sync_token: token
-            }, 0 // Reset SyncRetryCount for each call
+            }, SyncRetryCount // Reset SyncRetryCount for each call
             );
-          case 36:
+          case 38:
             syncResponse = _context8.sent;
-            _context8.next = 51;
+            _context8.next = 53;
             break;
-          case 39:
-            _context8.prev = 39;
-            _context8.t1 = _context8["catch"](33);
+          case 41:
+            _context8.prev = 41;
+            _context8.t1 = _context8["catch"](34);
             if (!(SyncRetryCount < config.httpRetries)) {
-              _context8.next = 50;
+              _context8.next = 52;
               break;
             }
             _timeToWait = Math.pow(2, SyncRetryCount) * 100; //Retry attempt ${retries + 1} after sync token error. Waiting for ${timeToWait} ms...
-            _context8.next = 45;
-            return waitFor(_timeToWait);
-          case 45:
             _context8.next = 47;
+            return waitFor(_timeToWait);
+          case 47:
+            _context8.next = 49;
             return fetchCsData(url, config, query = {
               sync_token: token
             }, SyncRetryCount + 1);
-          case 47:
+          case 49:
             return _context8.abrupt("return", syncResponse = _context8.sent);
-          case 50:
+          case 52:
             throw new Error("Failed to fetch sync data after ".concat(config.httpRetries, " retry attempts due to invalid sync token."));
-          case 51:
+          case 53:
             aggregatedResponse.data = (_aggregatedResponse$d = aggregatedResponse.data) === null || _aggregatedResponse$d === void 0 ? void 0 : (_aggregatedResponse$d2 = _aggregatedResponse$d).concat.apply(_aggregatedResponse$d2, (0, _toConsumableArray2["default"])(syncResponse.items));
             aggregatedResponse.sync_token = syncResponse.sync_token;
-          case 53:
+          case 55:
             _context8.next = 30;
             break;
-          case 55:
-            _context8.next = 60;
-            break;
           case 57:
-            _context8.prev = 57;
+            _context8.next = 62;
+            break;
+          case 59:
+            _context8.prev = 59;
             _context8.t2 = _context8["catch"](28);
             _iterator.e(_context8.t2);
-          case 60:
-            _context8.prev = 60;
+          case 62:
+            _context8.prev = 62;
             _iterator.f();
-            return _context8.finish(60);
-          case 63:
+            return _context8.finish(62);
+          case 65:
             syncToken = [];
             return _context8.abrupt("return", aggregatedResponse);
-          case 67:
-            _context8.prev = 67;
+          case 69:
+            _context8.prev = 69;
             _context8.t3 = _context8["catch"](0);
             throw new Error("Failed to fetch sync data: ".concat(_context8.t3.message));
-          case 70:
+          case 72:
           case "end":
             return _context8.stop();
         }
-      }, _callee8, null, [[0, 67], [7, 13], [28, 57, 60, 63], [33, 39]]);
+      }, _callee8, null, [[0, 69], [7, 13], [28, 59, 62, 65], [34, 41]]);
     })();
   });
   return function getSyncData(_x18, _x19, _x20, _x21) {
