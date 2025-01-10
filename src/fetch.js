@@ -168,7 +168,7 @@ const getData = async (url, options) => {
   });
 };
 
-const fetchCsData = async (url, config, query,  SyncRetryCount = 0) => {
+const fetchCsData = async (url, config, query) => {
   query = query || {};
   query.include_count = true;
   query.environment = config.environment;
@@ -235,33 +235,33 @@ const getSyncData = async (
   retries = 0
 ) => {
   try {
-  const response = await fetchCsData(url, config, query);
+    const response = await fetchCsData(url, config, query);
 
-  /*
+    /*
   Below syncToken array would contain type --> 'asset_published', 'entry_published' sync tokens
   */
-  if (
-    response.items.some(item =>
-      ['entry_published', 'asset_published'].includes(item.type)
-    )
-  ) {
-    syncToken.push(response.sync_token);
-  }
+    if (
+      response.items.some(item =>
+        ['entry_published', 'asset_published'].includes(item.type)
+      )
+    ) {
+      syncToken.push(response.sync_token);
+    }
 
-  if (!aggregatedResponse) {
-    aggregatedResponse = {};
-    aggregatedResponse.data = [];
-    aggregatedResponse.data = response[responseKey];
-    aggregatedResponse.sync_token = response.sync_token;
-  } else {
-    aggregatedResponse.data = aggregatedResponse.data || [];
-    aggregatedResponse.data = aggregatedResponse.data.concat(
-      response[responseKey]
-    );
-    aggregatedResponse.sync_token = response.sync_token
-      ? response.sync_token
-      : aggregatedResponse.sync_token;
-  }
+    if (!aggregatedResponse) {
+      aggregatedResponse = {};
+      aggregatedResponse.data = [];
+      aggregatedResponse.data = response[responseKey];
+      aggregatedResponse.sync_token = response.sync_token;
+    } else {
+      aggregatedResponse.data = aggregatedResponse.data || [];
+      aggregatedResponse.data = aggregatedResponse.data.concat(
+        response[responseKey]
+      );
+      aggregatedResponse.sync_token = response.sync_token
+        ? response.sync_token
+        : aggregatedResponse.sync_token;
+    }
     if (response.pagination_token) {
       try {
         return await getSyncData(
@@ -292,47 +292,45 @@ const getSyncData = async (
     }
 
     if (response.sync_token) {
-    /**
-     * To make final sync call and concatenate the result if found any during on fetch request.
-    */
-    const aggregatedSyncToken = syncToken.filter(item => item !== undefined);
+      /**
+       * To make final sync call and concatenate the result if found any during on fetch request.
+       */
+      const aggregatedSyncToken = syncToken.filter(item => item !== undefined);
+      let SyncRetryCount = 0;
       for (const token of aggregatedSyncToken) {
-
         let syncResponse;
         try {
-          
           syncResponse = await fetchCsData(
-          url,
-          config,
-            (query = { sync_token: token }),
-          0 // Reset SyncRetryCount for each call
-        );
+            url,
+            config,
+            (query = { sync_token: token })
+          );
         } catch (error) {
-          if (SyncRetryCount < config.httpRetries) { 
+          if (SyncRetryCount < config.httpRetries) {
             const timeToWait = 2 ** SyncRetryCount * 100;
+            SyncRetryCount++;
             //Retry attempt ${retries + 1} after sync token error. Waiting for ${timeToWait} ms...
             await waitFor(timeToWait);
-            return syncResponse = await fetchCsData(
+            return (syncResponse = await fetchCsData(
               url,
               config,
-              (query = { sync_token: token }),
-              SyncRetryCount + 1
-            );
+              (query = { sync_token: token })
+            ));
           } else {
             throw new Error(`Failed to fetch sync data after ${config.httpRetries} retry attempts due to invalid sync token.`);
           }
         }
-      aggregatedResponse.data = aggregatedResponse.data?.concat(
-        ...syncResponse.items
-      );
-      aggregatedResponse.sync_token = syncResponse.sync_token;
+        aggregatedResponse.data = aggregatedResponse.data?.concat(
+          ...syncResponse.items
+        );
+        aggregatedResponse.sync_token = syncResponse.sync_token;
+      }
     }
-  }
 
-  syncToken = [];
-  return aggregatedResponse;
-} catch (error) {
-  throw new Error(`Failed to fetch sync data: ${error.message}`);
-}
+    syncToken = [];
+    return aggregatedResponse;
+  } catch (error) {
+    throw new Error(`Failed to fetch sync data: ${error.message}`);
+  }
 };
 
