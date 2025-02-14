@@ -124,6 +124,7 @@ function waitFor(milliseconds) {
 }
 
 const getData = async (url, options) => {
+  console.log("URL:", url);
   let retries = 0;
   return new Promise((resolve, reject) => {
     const handleResponse = () => {
@@ -131,7 +132,7 @@ const getData = async (url, options) => {
         .then(response => response.json())
         .then(data => {
           if (data.error_code) {
-            console.error(data);
+            console.error("data ERROR: ", data);
             if (data.error_code >= 500) {
               throw new Error(`Server error: ${data.error_code}`);
             }
@@ -156,7 +157,7 @@ const getData = async (url, options) => {
             await waitFor(timeToWait);
             handleResponse();
           } else {
-            console.error(err);
+            console.error("Got an ERROR:", err);
             reject(
               new Error(`Fetch failed after ${retryAttempt} retry attempts.`)
             );
@@ -190,6 +191,7 @@ const fetchCsData = async (url, config, query) => {
     },
   };
   const data = await getData(apiUrl, option);
+  console.log("Data fetched from getData fucntion:", data);
   return data;
 };
 
@@ -310,7 +312,7 @@ const getSyncData = async (
             (query = { sync_token: `${token}uce` })
           );
         } catch (error) {
-          console.error(error);
+          console.error("Got Error 2", error);
           if (SyncRetryCount < config.httpRetries) {
             const timeToWait = 2 ** SyncRetryCount * 100;
             SyncRetryCount++;
