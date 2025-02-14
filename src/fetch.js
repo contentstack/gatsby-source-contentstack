@@ -313,11 +313,14 @@ const getSyncData = async (
           );
         } catch (error) {
           console.error("Got Error 2", error);
+          console.log("SyncRetryCount:", SyncRetryCount);
+          console.log("Config.httpRetries:", config.httpRetries);
           if (SyncRetryCount < config.httpRetries) {
             const timeToWait = 2 ** SyncRetryCount * 100;
             SyncRetryCount++;
             //Retry attempt ${retries + 1} after sync token error. Waiting for ${timeToWait} ms...
             await waitFor(timeToWait);
+            console.log("Retrying for sync token:", token);
             return (syncResponse = await fetchCsData(
               url,
               config,
