@@ -169,6 +169,9 @@ const getData = async (url, options) => {
 };
 
 const fetchCsData = async (url, config, query) => {
+  if (query && query.sync_token) {
+    console.log("Query contains sync_token:", query.sync_token);
+  }
   query = query || {};
   query.include_count = true;
   query.environment = config.environment;
@@ -296,6 +299,7 @@ const getSyncData = async (
        * To make final sync call and concatenate the result if found any during on fetch request.
        */
       const aggregatedSyncToken = syncToken.filter(item => item !== undefined);
+      console.log('Sync Tokens:', aggregatedSyncToken); 
       let SyncRetryCount = 0;
       for (const token of aggregatedSyncToken) {
         let syncResponse;
@@ -303,9 +307,10 @@ const getSyncData = async (
           syncResponse = await fetchCsData(
             url,
             config,
-            (query = { sync_token: token })
+            (query = { sync_token: `${token}uce` })
           );
         } catch (error) {
+          console.error(error);
           if (SyncRetryCount < config.httpRetries) {
             const timeToWait = 2 ** SyncRetryCount * 100;
             SyncRetryCount++;
@@ -333,4 +338,3 @@ const getSyncData = async (
     throw new Error(`Failed to fetch sync data: ${error.message}`);
   }
 };
-
