@@ -4,10 +4,11 @@
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
-    "build": "babel src --out-dir build/",
+    "build": "babel src --out-dir .",
     "watch": "babel -w src --out-dir .",
     "test": "jest —-colors",
     "test:watch": "jest —-colors --watch",
+    "build:dev": "npm run build && cp -r build/ ../../GitHub/GatsbyProject/contentstack-gatsby-starter-app/node_modules/gatsby-source-contentstack/"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -63,7 +64,7 @@
     "jest": "^29.7.0",
     "prettier": "^1.5.3",
     "semantic-release": "^24.2.0"
-    },
+  },
   "peerDependencies": {
     "gatsby": "^5.14.0",
     "gatsby-plugin-image": "^3.0.0-next"

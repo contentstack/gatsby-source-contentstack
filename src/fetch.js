@@ -79,10 +79,10 @@ exports.fetchData = async (configOptions, reporter, cache, contentTypeOption) =>
   try {
     const entryService = new OPTIONS_ENTRIES_CLASS_MAPPING[contentTypeOption]();
     const _syncData = await entryService.fetchSyncData(configOptions, cache, fetchSyncData);
-    const syncData = { data: _syncData.data };
+    const syncData = { syncData: { data: _syncData.data } };
 
     activity.end();
-    return { contentstackData: syncData.data }
+    return { contentstackData: syncData };
   } catch (error) {
     handleFetchError(reporter, error);
   }
