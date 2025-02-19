@@ -7,8 +7,7 @@
     "build": "babel src --out-dir .",
     "watch": "babel -w src --out-dir .",
     "test": "jest —-colors",
-    "test:watch": "jest —-colors --watch",
-    "build:dev": "npm run build && cp -r build/ ../../GitHub/GatsbyProject/contentstack-gatsby-starter-app/node_modules/gatsby-source-contentstack/"
+    "test:watch": "jest —-colors --watch"
   },
   "engines": {
     "node": ">=18.0.0"
