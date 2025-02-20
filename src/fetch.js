@@ -299,7 +299,6 @@ const getSyncData = async (url, config, query, responseKey, aggregatedResponse =
 };
 
 const handlePagination = async (url, config, paginationToken, responseKey, aggregatedResponse, retries = 0) => {
-  let lastError = null;
   try {
     return await getSyncData(url, config, { pagination_token: paginationToken }, responseKey, aggregatedResponse, 0);
   } catch (error) {
