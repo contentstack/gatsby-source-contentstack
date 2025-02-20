@@ -309,7 +309,7 @@ const handlePagination = async (url, config, paginationToken, responseKey, aggre
       await waitFor(retryDelay);
       return await handlePagination(url, config, paginationToken, responseKey, aggregatedResponse, retries + 1);
     }
-    throw new Error(`Failed to fetch sync data after ${config.httpRetries} retries due to pagination error. \nLast error details:${JSON.stringify(lastError, null, 2)}`);
+    throw new Error(`Failed to fetch sync data after ${config.httpRetries} retries due to pagination error.`);
   }
 };
 
