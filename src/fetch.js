@@ -50,7 +50,7 @@ const OPTIONS_ENTRIES_CLASS_MAPPING = {
 let activity;
 let globalConfig;
 
-let syncToken = [];
+let syncTokens = [];
 
 function handleFetchError(reporter, error) {
   reporter.panic({
@@ -235,7 +235,6 @@ const getSyncData = async (url, config, query, responseKey, aggregatedResponse =
   try {
     const response = await fetchCsData(url, config, query);
     const syncEvents = ['entry_published', 'asset_published'];
-    let syncTokens = [];
 
     // Collect sync tokens from response items
     if (response.items.some(item => syncEvents.includes(item.type))) {
@@ -263,6 +262,7 @@ const getSyncData = async (url, config, query, responseKey, aggregatedResponse =
       await processSyncTokens(url, config, syncTokens, aggregatedResponse);
     }
 
+    syncTokens = [];
     return aggregatedResponse;
   } catch (error) {
     throw new Error(`Failed to fetch sync data: ${error.message}`);
