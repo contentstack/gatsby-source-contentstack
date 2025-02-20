@@ -248,8 +248,9 @@ const getSyncData = async (url, config, query, responseKey, aggregatedResponse =
         sync_token: response.sync_token,
       };
     } else {
-      aggregatedResponse.data = [...(aggregatedResponse.data || []), ...response[responseKey]];
-      aggregatedResponse.sync_token = response.sync_token || aggregatedResponse.sync_token;
+      aggregatedResponse.data = aggregatedResponse.data || [];
+      aggregatedResponse.data = aggregatedResponse.data.concat(response[responseKey]);
+      aggregatedResponse.sync_token = response.sync_token ? response.sync_token : aggregatedResponse.sync_token;
     }
 
     // Handle pagination
