@@ -52,6 +52,17 @@ let globalConfig;
 
 let syncToken = [];
 
+function handleFetchError(reporter, error) {
+  reporter.panic({
+    id: CODES.SyncError,
+    context: {
+      sourceMessage:
+        "Fetching Contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.",
+    },
+    error,
+  });
+}
+
 exports.fetchData = async (
   configOptions,
   reporter,
@@ -103,13 +114,7 @@ exports.fetchContentTypes = async (config, contentTypeOption) => {
     );
     return allContentTypes;
   } catch (error) {
-    reporter.panic({
-      id: CODES.SyncError,
-      context: {
-        sourceMessage: `Fetching contentstack data failed. Please check https://www.contentstack.com/docs/developers/apis/content-delivery-api/ for more help.`,
-      },
-      error,
-    });
+    handleFetchError(reporter, error);
   }
 };
 
@@ -226,111 +231,86 @@ const getPagedData = async (
   return aggregatedResponse;
 };
 
-const getSyncData = async (
-  url,
-  config,
-  query,
-  responseKey,
-  aggregatedResponse = null,
-  retries = 0
-) => {
+const getSyncData = async (url, config, query, responseKey, aggregatedResponse = null, retries = 0) => {
   try {
     const response = await fetchCsData(url, config, query);
+    const syncEvents = ['entry_published', 'asset_published'];
+    let syncTokens = [];
 
-    /*
-  Below syncToken array would contain type --> 'asset_published', 'entry_published' sync tokens
-  */
-    if (
-      response.items.some(item =>
-        ['entry_published', 'asset_published'].includes(item.type)
-      )
-    ) {
-      syncToken.push(response.sync_token);
+    // Collect sync tokens from response items
+    if (response.items.some(item => syncEvents.includes(item.type))) {
+      syncTokens.push(response.sync_token);
     }
 
+    // Initialize aggregated response if not provided
     if (!aggregatedResponse) {
-      aggregatedResponse = {};
-      aggregatedResponse.data = [];
-      aggregatedResponse.data = response[responseKey];
-      aggregatedResponse.sync_token = response.sync_token;
+      aggregatedResponse = {
+        data: response[responseKey] || [],
+        sync_token: response.sync_token,
+      };
     } else {
-      aggregatedResponse.data = aggregatedResponse.data || [];
-      aggregatedResponse.data = aggregatedResponse.data.concat(
-        response[responseKey]
-      );
-      aggregatedResponse.sync_token = response.sync_token
-        ? response.sync_token
-        : aggregatedResponse.sync_token;
+      aggregatedResponse.data = [...(aggregatedResponse.data || []), ...response[responseKey]];
+      aggregatedResponse.sync_token = response.sync_token || aggregatedResponse.sync_token;
     }
+
+    // Handle pagination
     if (response.pagination_token) {
-      try {
-        return await getSyncData(
-          url,
-          config,
-          { pagination_token: response.pagination_token },
-          responseKey,
-          aggregatedResponse,
-          0 // Reset retries for each call
-        );
-      } catch (error) {
-        if (retries < config.httpRetries) {
-          const timeToWait = 2 ** retries * 100;
-          //Retry attempt ${retries + 1} after pagination token error. Waiting for ${timeToWait} ms...
-          await waitFor(timeToWait);
-          return await getSyncData(
-            url,
-            config,
-            { pagination_token: response.pagination_token },
-            responseKey,
-            aggregatedResponse,
-            retries + 1
-          );
-        } else {
-          throw new Error(`Failed to fetch sync data after ${config.httpRetries} retry attempts due to invalid pagination token.`);
-        }
-      }
+      return handlePagination(url, config, response.pagination_token, responseKey, aggregatedResponse);
     }
 
+    // Handle sync tokens for final sync call
     if (response.sync_token) {
-      /**
-       * To make final sync call and concatenate the result if found any during on fetch request.
-       */
-      const aggregatedSyncToken = syncToken.filter(item => item !== undefined);
-      let SyncRetryCount = 0;
-      for (const token of aggregatedSyncToken) {
-        let syncResponse;
-        try {
-          syncResponse = await fetchCsData(
-            url,
-            config,
-            (query = { sync_token: token })
-          );
-        } catch (error) {
-          if (SyncRetryCount < config.httpRetries) {
-            const timeToWait = 2 ** SyncRetryCount * 100;
-            SyncRetryCount++;
-            //Retry attempt ${retries + 1} after sync token error. Waiting for ${timeToWait} ms...
-            await waitFor(timeToWait);
-            return (syncResponse = await fetchCsData(
-              url,
-              config,
-              (query = { sync_token: token })
-            ));
-          } else {
-            throw new Error(`Failed to fetch sync data after ${config.httpRetries} retry attempts due to invalid sync token.`);
-          }
-        }
-        aggregatedResponse.data = aggregatedResponse.data?.concat(
-          ...syncResponse.items
-        );
-        aggregatedResponse.sync_token = syncResponse.sync_token;
-      }
+      await processSyncTokens(url, config, syncTokens, aggregatedResponse);
     }
 
-    syncToken = [];
     return aggregatedResponse;
   } catch (error) {
     throw new Error(`Failed to fetch sync data: ${error.message}`);
+  }
+};
+
+const handlePagination = async (url, config, paginationToken, responseKey, aggregatedResponse, retries = 0) => {
+  let lastError = null;
+  try {
+    return await getSyncData(url, config, { pagination_token: paginationToken }, responseKey, aggregatedResponse, 0);
+  } catch (error) {
+    lastError = error;
+    if (retries < config.httpRetries) {
+      const retryDelay = 2 ** retries * 100;
+      await waitFor(retryDelay);
+      return await handlePagination(url, config, paginationToken, responseKey, aggregatedResponse, retries + 1);
+    }
+    throw new Error(`Failed to fetch sync data after ${config.httpRetries} retries due to pagination error. \nLast error details:${JSON.stringify(lastError, null, 2)}`);
+  }
+};
+
+const processSyncTokens = async (url, config, syncTokens, aggregatedResponse) => {
+  const validTokens = syncTokens.filter(Boolean);
+
+  for (const token of validTokens) {
+    let retries = 0;
+    let lastError = null;
+
+    while (retries <= config.httpRetries) {
+      try {
+        let syncResponse;
+        syncResponse = await fetchCsData(url, config, { sync_token: token });
+        aggregatedResponse.data = [...(aggregatedResponse.data || []), ...syncResponse.items];
+        aggregatedResponse.sync_token = syncResponse.sync_token;
+        break;
+      } catch (error) {
+        retries++;
+        lastError = error;
+        if (retries > config.httpRetries) {
+          throw new Error(
+            `Failed to fetch sync data after ${config.httpRetries} retries due to sync token error.\nLast error details: ${JSON.stringify(lastError, null, 2)}`
+          );
+        }
+        const retryDelay = 2 ** retries * 100;
+        await waitFor(retryDelay);
+        console.warn(`✅----- Retrying request (${retries}/${config.httpRetries})...`);
+      }
+    }
   }
 };
 
