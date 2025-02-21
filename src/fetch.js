@@ -136,7 +136,9 @@ const getData = async (url, options) => {
         .then(response => response.json())
         .then(data => {
           if (data.error_code) {
-            console.error(data);
+            console.warn(
+              `Error ${data.error_code}: ${data.error_message}. Details: ${JSON.stringify(data.errors)}`
+            );
             if (data.error_code >= 500) {
               throw new Error(`Server error: ${data.error_code}`);
             }
@@ -161,7 +163,6 @@ const getData = async (url, options) => {
             await waitFor(timeToWait);
             handleResponse();
           } else {
-            console.error(err);
             reject(
               new Error(`Fetch failed after ${retryAttempt} retry attempts.`)
             );
@@ -264,6 +265,7 @@ const getSyncData = async (url, config, query, responseKey, aggregatedResponse =
     // Handle sync tokens for final sync call
     if (response.sync_token) {
       const validTokens = syncToken.filter(item => item !== undefined);
+      let lastError = null;
       for (const token of validTokens) {
         let syncResponse;
         let SyncRetryCount = 0; 
@@ -273,12 +275,15 @@ const getSyncData = async (url, config, query, responseKey, aggregatedResponse =
             break; 
           } catch (error) {
             SyncRetryCount++;
+            lastError = error;
             if (SyncRetryCount <= config.httpRetries) {
               const timeToWait = 2 ** (SyncRetryCount - 1) * 100; 
-              console.log(`Retry attempt ${SyncRetryCount}. Waiting for ${timeToWait} ms...`);
+              console.info(`Hold on... Retrying...`);
               await waitFor(timeToWait);
             } else {
-              throw new Error(`Failed to fetch sync data after ${config.httpRetries} retry attempts due to invalid sync token.`);
+              throw new Error(
+                `Failed to fetch sync data after ${config.httpRetries} retry attempts due to invalid sync token.\nLastError: ${JSON.stringify(lastError, null, 2)}`
+              );
             }
           }
         }
