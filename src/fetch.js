@@ -130,11 +130,17 @@ const getData = async (url, options) => {
         .then(response => response.json())
         .then(data => {
           if (data.error_code) {
-            console.warn(
-              `Error ${data.error_code}: ${data.error_message}. Details: ${JSON.stringify(data.errors)}`
-            );
-            if (data.error_code >= 500) {
+            if (data.error_code === 141) {
+              console.warn(
+                `Error ${data.error_code}: ${data.error_message}. Details: ${JSON.stringify(data.errors)}`
+              );
+              console.info("Retrying... Please wait...")
+            }
+            else if (data.error_code >= 500) {
               throw new Error(`Server error: ${data.error_code}`);
+            }
+            else {
+              console.error("data");
             }
             reject(data);
           } else {
@@ -253,7 +259,7 @@ const getSyncData = async (url, config, query, responseKey, aggregatedResponse =
 
     // Handle pagination
     if (response.pagination_token) {
-      return handlePagination(url, config, response.pagination_token, responseKey, aggregatedResponse);
+      await handlePagination(url, config, response.pagination_token, responseKey, aggregatedResponse);
     }
 
     // Handle sync tokens for final sync call
@@ -288,7 +294,7 @@ const processSyncTokens = async (url, config, aggregatedResponse, syncToken) => 
           await waitFor(delay);
         } else {
           throw new Error(
-            `Failed to fetch sync data after ${config.httpRetries} retry attempts due to sync token error.`
+            `Failed after ${config.httpRetries} retries due to a sync token error.`
           );
         }
       }
@@ -309,11 +315,11 @@ const handlePagination = async (url, config, paginationToken, responseKey, aggre
     return await getSyncData(url, config, { pagination_token: paginationToken }, responseKey, aggregatedResponse, 0);
   } catch (error) {
     if (retries < config.httpRetries) {
-      const retryDelay = 2 ** retries * 1000;
+      const retryDelay = Math.min(2 ** retries * 1000, 30000);
       await waitFor(retryDelay);
       return await handlePagination(url, config, paginationToken, responseKey, aggregatedResponse, retries + 1);
     }
-    throw new Error(`Failed to fetch sync data after ${config.httpRetries} retries due to pagination error.`);
+    throw new Error(`Failed after ${config.httpRetries} retries due to a pagination token error.`);
   }
 };
 
