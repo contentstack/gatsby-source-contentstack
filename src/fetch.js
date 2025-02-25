@@ -91,7 +91,6 @@ exports.fetchContentTypes = async (config, contentTypeOption) => {
   globalConfig = config;
   try {
     config.cdn = config.cdn ? config.cdn : 'https://cdn.contentstack.io/v3';
-
     const url = 'content_types';
     const responseKey = 'content_types';
     const contentType = new OPTION_CLASS_MAPPING[contentTypeOption]();
@@ -280,7 +279,7 @@ const processSyncTokens = async (url, config, aggregatedResponse, syncToken) => 
     // Attempt to fetch data using the token, with retries.
     while (SyncRetryCount <= config.httpRetries) {
       try {
-        syncResponse = await fetchCsData(url, config, { sync_token: "token" });
+        syncResponse = await fetchCsData(url, config, { sync_token: token });
         break;
       } catch (error) {
         SyncRetryCount++;
