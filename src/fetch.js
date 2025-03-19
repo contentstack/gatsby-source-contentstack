@@ -144,12 +144,6 @@ const getData = async (url, options) => {
             }
             reject(data);
           } else {
-            if (data.items) {
-              const filteredData = data?.items.filter(item => {
-                return item.data.hasOwnProperty('publish_details');
-              });
-              data.items = filteredData;
-            }
             resolve(data);
           }
         })
