@@ -20,72 +20,45 @@ Open the gatsby-config.js file from the root directory of your Gatsby project an
 
 ```javascript
 // In your gatsby-config.js
-plugins: [
-  {
-    resolve: `gatsby-source-contentstack`,
-    options: {
-      // Required: API Key is a unique key assigned to each stack.
-      api_key: `api_key`,
 
-      // Required: Delivery Token is a read-only credential.
-      delivery_token: `delivery_token`,
-
-      // Required: Environment where you published your data.
-      environment: `environment`,
-
-      // Optional: Specify branch name. Default it would fetch from "main".
-      branch: `branch name`,
-
-      // Optional: CDN set this to point to other cdn end point. For eg: https://eu-cdn.contentstack.com/v3
-      cdn: `cdn_url`,
-
-      // Recommended: Specify true if you want to fetch/source data parallelly. It enhances the performance on both gatsby build/develop command.
-      expediteBuild: `boolean_value`,
-
-      // Recommended: Specify true if you want to generate custom schema when the content type models are complex.
-      enableSchemaGeneration : `boolean_value`,
-
-      // Optional: Specify true if you want to generate optional graphql fields for mandatory Contentstack fields
-      disableMandatoryFields : `boolean_value`,
-
-      // Optional: Specify a different prefix for types. This is useful in cases where you have multiple instances of the plugin to be connected to different stacks.
-      type_prefix: `Contentstack`, // (default)
-
-      // Optional: Specify true if you want to download all your contentstack images locally
-      downloadImages: `boolean_value`,
-
-      // Optional: Specify the content types from which you want the plugin to retrieve data.
-      contentTypes: [‘blog’,’author’],
-      // This will fetch the data of the ‘blog’ and ‘author’ content types only.
-
-      // Optional: Specify the content types that the plugin should exclude while fetching data of all content types.
-      excludeContentTypes: [‘home’,’about’],
-      // This will fetch the data of all the available content types excluding the ‘home’ and ‘about’ content types.
-
-      // Optional: Include the locales that you want the plugin to fetch data from.
-      locales: [‘en-us’,’fr-fr’],
-      // In this case, the plugin will fetch only English (United States) and French (France) language data.
-
-      // Optional: Specify true to convert the JSON-RTE repsonse to HTML. Default it is set to false
-      jsonRteToHtml: false ,
-
-      // Optional: Specify a number to perform http-retries for network failures. By default it is set to 3.
-      httpRetries: 2,
-
-      //Optional: Specify the number of entries/assets to be fetched per page. Maximum limit accepted is 100. By default it is set to 50.
-      limit: 50
-
-      //Optional: Specify the header to be passed to Contentstack API
-      enableEarlyAccessKey: 'x-header-ea'
-
-      //Optional: Specify list of headers to be passed to Contentstack API for the key specified in enableEarlyAccessKey. The Value should be a string. In case of multiple headers, separate them with a comma. For eg:'header1,header2'
-      enableEarlyAccessValue: 'newcda,taxonomy'
-
-    },
-  },
-]
-// Note: access_token is replaced by delivery_token
+module.exports = {
+  plugins: [
+    {
+      resolve: `gatsby-source-contentstack`,
+      options: {
+        api_key: `api_key`,
+        delivery_token: `delivery_token`,
+        environment: `environment`,
+      }
+    }
+  ]
+};
 ```
+
+## Plugin Options
+
+| Option                 | Required | Type     | Description                                                | Default | Example |
+| ---------------------- | -------- | -------- | ---------------------------------------------------------- | ------- | ------- |
+| api_key                | Required      | string   | API Key is a unique key assigned to each stack.           | N/A     | `"api_key"` |
+| delivery_token         | Required      | string   | Delivery Token is a read-only credential.                 | N/A     | `"delivery_token"` |
+| environment            | Required      | string   | Environment where you published your data.                | N/A     | `"environment"` |
+| branch                 | Optional       | string   | Specify branch name. Default it would fetch from "main".   | `main` | `"branch name"` |
+| cdn                    | Optional       | string   | CDN set this to point to other CDN endpoint.              |  `"https://cdn.contentstack.io/v3"`   | `"https://eu-cdn.contentstack.com/v3"` |
+| expediteBuild          | Recommended       | boolean  | Specify true if you want to fetch/source data parallelly. | `false` |  `true` |
+| enableSchemaGeneration | Recommended       | boolean  | Specify true if you want to generate a custom schema.     | `false` | `true`  |
+| disableMandatoryFields | Optional       | boolean  | Specify true to generate optional GraphQL fields.         | `false` | `true` |
+| type_prefix            | Optional       | string   | Specify a different prefix for types.                     | `Contentstack` | `Contentstack_Stack_A` |
+| downloadImages         | Optional       | boolean  | Specify true to download all Contentstack images locally. | `false` | `true` |
+| contentTypes           | Optional       | string[] | Specify the content types to retrieve data from.          | | `[‘blog’,’author’]` This will fetch the data of the ‘blog’ and ‘author’ content types only. |
+| excludeContentTypes    | Optional       | string[] | Specify the content types to exclude while fetching data. | | `[‘home’,’about’]` This will fetch the data of all the available content types excluding the ‘home’ and ‘about’ content types.|
+| locales                | no       | string[] | Include the locales that you want to fetch data from.     | | `[‘en-us’,’fr-fr’]` In this case, the plugin will fetch only English (United States) and French (France) language data. |
+| jsonRteToHtml          | no       | boolean  | Specify true to convert the JSON-RTE response to HTML.    | `false` | `true` |
+| httpRetries            | no       | number   | Specify the number of HTTP retries for network failures.  | `3`     | `2` |
+| limit                  | no       | number   | Specify the number of entries/assets per page (Max: 100). | `50`    | `50` |
+| enableEarlyAccessKey   | no       | string   | Specify list of headers to be passed to Contentstack API for the key specified in enableEarlyAccessKey. The Value should be a string. In case of multiple headers, separate them with a comma.      |     | `'x-header-ea'` |
+| enableEarlyAccessValue | no       | string   | Specify list of headers to be passed to Contentstack API for the key specified in enableEarlyAccessKey. The Value should be a string. In case of multiple headers, separate them with a comma: 'header1,header2'    |    | `'newcda,taxonomy'` |
+
+
 
 There is a provision to speed up the `gatsby build` process. To do this, you can set the value of the **expediteBuild** to **true**. So when you set the value of this parameter to true, the build process is significantly enhanced as only published assets and entries are synced parallelly.
 
