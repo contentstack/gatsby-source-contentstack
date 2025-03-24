@@ -33,6 +33,7 @@ module.exports = {
     }
   ]
 };
+// Note: access_token is replaced by delivery_token
 ```
 
 ## Plugin Options
