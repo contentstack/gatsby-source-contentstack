@@ -92,9 +92,11 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
   syncData.entry_published && syncData.entry_published.forEach(item => {
     item.content_type_uid = item.content_type_uid.replace(/-/g, '_');
     const contentType = contentTypesMap[item.content_type_uid];
-    const normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
-    const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
-    createNode(entryNode);
+    if (contentType && !configOptions.excludeContentTypes?.includes(item?.content_type_uid)) {
+      const normalizedEntry = normalizeEntry(contentType, item.data, entriesNodeIds, assetsNodeIds, createNodeId, typePrefix, configOptions);
+      const entryNode = processEntry(contentType, normalizedEntry, createNodeId, createContentDigest, typePrefix);
+      createNode(entryNode);
+    }
   });
 
   syncData.asset_published && syncData.asset_published.forEach(item => {
