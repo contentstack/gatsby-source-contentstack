@@ -21,6 +21,7 @@ export function resolveCslpMeta({
   // So, get the correct Selection from query for the current cslp__meta
   const queryContentTypeSelection = findQuerySelection(
     info.operation.selectionSet,
+    info.fragments,
     fieldNodeValue,
     fieldNodeLocation
   )
@@ -52,7 +53,7 @@ export function resolveCslpMeta({
   return result;
 }
 
-function findQuerySelection(selectionSet, value, location, depth = 0) {
+function findQuerySelection(selectionSet, fragments, value, location, depth = 0) {
   // cslp__meta can only be one level deep (or two level deep, see all* case below) 
   // e.g.
   // query {
@@ -64,6 +65,14 @@ function findQuerySelection(selectionSet, value, location, depth = 0) {
   //       cslp__meta
   //     }
   //   }
+  //   allContentstackPage {
+  //     nodes {
+  //       ...PageFragment
+  //     }
+  //   }
+  // }
+  // fragment PageFragment on Contentstack_page {
+  //   cslp__meta
   // }
   if (depth > 1 || !selectionSet || !selectionSet.selections) {
     return;
@@ -76,15 +85,27 @@ function findQuerySelection(selectionSet, value, location, depth = 0) {
     ) {
       return selectionSet
     }
+    if (selection.kind === 'FragmentSpread') {
+      const nestedSelectionSet = findQuerySelection(
+        fragments[selection.name.value].selectionSet,
+        fragments,
+        value,
+        location,
+        depth
+      );
+      if (nestedSelectionSet) {
+        return nestedSelectionSet;
+      }
+    }
     // "nodes" in all* queries will lead to cslp__meta at depth 2
     if (selection.name?.value === "nodes") {
-      const nestedSelectionSet = findQuerySelection(selection.selectionSet, value, location, depth);
+      const nestedSelectionSet = findQuerySelection(selection.selectionSet, fragments, value, location, depth);
       if (nestedSelectionSet) {
         return nestedSelectionSet;
       }
     }
     // search one level deeper for the correct node in this selection
-    const nestedSelectionSet = findQuerySelection(selection.selectionSet, value, location, depth + 1)
+    const nestedSelectionSet = findQuerySelection(selection.selectionSet, fragments, value, location, depth + 1)
     // return when not undefined, meaning the correct selection has been found
     if (nestedSelectionSet) {
       return nestedSelectionSet;
