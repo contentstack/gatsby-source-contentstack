@@ -65,13 +65,16 @@ function findQuerySelection(selectionSet, fragments, value, location, depth = 0)
   //       cslp__meta
   //     }
   //   }
-  //   allContentstackPage {
+  //   page {
+//       ...PageFragment
+  //   }
+  //   allPage {
   //     nodes {
   //       ...PageFragment
   //     }
   //   }
   // }
-  // fragment PageFragment on Contentstack_page {
+  // fragment PageFragment on Page {
   //   cslp__meta
   // }
   if (depth > 1 || !selectionSet || !selectionSet.selections) {
