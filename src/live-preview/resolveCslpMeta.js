@@ -66,7 +66,7 @@ function findQuerySelection(selectionSet, fragments, value, location, depth = 0)
   //     }
   //   }
   //   page {
-//       ...PageFragment
+  //     ...PageFragment
   //   }
   //   allPage {
   //     nodes {
