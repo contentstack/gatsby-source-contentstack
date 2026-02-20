@@ -28,7 +28,10 @@ class FetchDefaultEntries extends FetchEntries {
         const [syncEntryData, syncAssetData] = await Promise.all([fn.apply(null, [syncEntryParams, configOptions]), fn.apply(null, [syncAssetParams, configOptions])]);
         const data = syncEntryData.data.concat(syncAssetData.data);
         syncData.data = data;
-        await Promise.all([cache.set(entryTokenKey, syncEntryData.sync_token), cache.set(assetTokenKey, syncAssetData.sync_token)]);
+        await Promise.all([
+          syncEntryData.sync_token !== undefined ? cache.set(entryTokenKey, syncEntryData.sync_token) : Promise.resolve(),
+          syncAssetData.sync_token !== undefined ? cache.set(assetTokenKey, syncAssetData.sync_token) : Promise.resolve()
+        ]);
       } else {
         const tokenKey = `${typePrefix.toLowerCase()}-sync-token-${configOptions.api_key}`;
         const syncToken = await cache.get(tokenKey);
@@ -38,7 +41,9 @@ class FetchDefaultEntries extends FetchEntries {
 
         syncData = await fn.apply(null, [syncParams, configOptions]);
         // Caching token for the next sync
-        await cache.set(tokenKey, syncData.sync_token);
+        if (syncData.sync_token !== undefined) {
+          await cache.set(tokenKey, syncData.sync_token);
+        }
       }
     } catch (error) {
       throw error;
@@ -80,7 +85,9 @@ class FetchSpecifiedContentTypesEntries extends FetchEntries {
         syncData.data = syncData.data || [];
         syncData.data = syncData.data.concat(_syncData.data);
         // Caching token for the next sync.
-        await cache.set(tokenKey, _syncData.sync_token);
+        if (_syncData.sync_token !== undefined) {
+          await cache.set(tokenKey, _syncData.sync_token);
+        }
       }
       return syncData;
     } catch (error) {
@@ -128,7 +135,9 @@ class FetchSpecifiedLocalesEntries extends FetchEntries {
         syncData.data = syncData.data || [];
         syncData.data = syncData.data.concat(_syncData.data);
         // Caching token for next sync
-        await cache.set(tokenKey, _syncData.sync_token);
+        if (_syncData.sync_token !== undefined) {
+          await cache.set(tokenKey, _syncData.sync_token);
+        }
       }
       return syncData;
     } catch (error) {
@@ -180,7 +189,9 @@ class FetchSpecifiedLocalesAndContentTypesEntries extends FetchEntries {
           syncData.data = syncData.data || [];
           syncData.data = syncData.data.concat(_syncData.data);
           // Caching token for next sync
-          await cache.set(tokenKey, _syncData.sync_token);
+          if (_syncData.sync_token !== undefined) {
+            await cache.set(tokenKey, _syncData.sync_token);
+          }
         }
       }
       return syncData;
@@ -211,7 +222,9 @@ class FetchAssets {
       syncAssetParams.type = 'asset_published,asset_unpublished,asset_deleted';
       const syncAssetData = await fn.apply(null, [syncAssetParams, configOptions]);
       syncData.data = syncAssetData.data;
-      await cache.set(assetTokenKey, syncAssetData.sync_token);
+      if (syncAssetData.sync_token !== undefined) {
+        await cache.set(assetTokenKey, syncAssetData.sync_token);
+      }
       return syncData;
     } catch (error) {
       throw error;
