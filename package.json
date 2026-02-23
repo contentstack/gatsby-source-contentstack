@@ -65,7 +65,7 @@
     "semantic-release": "^24.2.0"
   },
   "peerDependencies": {
-    "gatsby": "5.15.0",
+    "gatsby": "5.16.0",
     "gatsby-plugin-image": "^3.0.0-next"
   },
   "husky": {
