@@ -681,4 +681,3 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
     }
   }]);
 }();
-//# sourceMappingURL=index.js.map
