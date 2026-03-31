@@ -73,6 +73,9 @@
       "commit-msg": "npx --no-install commitlint --edit ${1}"
     }
   },
+  "overrides": {
+    "@pnpm/npm-conf": "^3.0.2"
+  },
   "resolutions": {
     "@semantic-release/commit-analyzer/semantic-release": "^17.0.0"
   }
