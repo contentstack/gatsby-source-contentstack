@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-contentstack",
-  "version": "5.4.2",
+  "version": "5.4.3",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
@@ -10,7 +10,7 @@
     "test:watch": "jest —-colors --watch"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "main": "gatsby-node.js",
   "repository": {
@@ -72,6 +72,9 @@
     "hooks": {
       "commit-msg": "npx --no-install commitlint --edit ${1}"
     }
+  },
+  "overrides": {
+    "@pnpm/npm-conf": "^3.0.2"
   },
   "resolutions": {
     "@semantic-release/commit-analyzer/semantic-release": "^17.0.0"
