@@ -85,12 +85,12 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
     key: "fetchContentTypes",
     value: function () {
       var _fetchContentTypes = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee(uids) {
-        var result, contentTypes;
-        return _regenerator["default"].wrap(function _callee$(_context) {
+        var result, contentTypes, _t;
+        return _regenerator["default"].wrap(function (_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
               _context.prev = 0;
-              _context.next = 3;
+              _context.next = 1;
               return this.stackSdk.getContentTypes({
                 query: {
                   uid: {
@@ -99,10 +99,10 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
                 },
                 include_global_field_schema: true
               });
-            case 3:
+            case 1:
               result = _context.sent;
               if (!result) {
-                _context.next = 8;
+                _context.next = 2;
                 break;
               }
               contentTypes = {};
@@ -110,19 +110,19 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
                 contentTypes[ct.uid] = ct;
               });
               return _context.abrupt("return", contentTypes);
-            case 8:
-              _context.next = 14;
+            case 2:
+              _context.next = 4;
               break;
-            case 10:
-              _context.prev = 10;
-              _context.t0 = _context["catch"](0);
+            case 3:
+              _context.prev = 3;
+              _t = _context["catch"](0);
               console.error("Contentstack Gatsby (Live Preview): failed to fetch content types");
-              throw _context.t0;
-            case 14:
+              throw _t;
+            case 4:
             case "end":
               return _context.stop();
           }
-        }, _callee, this, [[0, 10]]);
+        }, _callee, this, [[0, 3]]);
       }));
       function fetchContentTypes(_x) {
         return _fetchContentTypes.apply(this, arguments);
@@ -135,7 +135,7 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
       var _getContentTypes = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee2(uids) {
         var _this = this;
         var uidsToFetch, types;
-        return _regenerator["default"].wrap(function _callee2$(_context2) {
+        return _regenerator["default"].wrap(function (_context2) {
           while (1) switch (_context2.prev = _context2.next) {
             case 0:
               // fetch and filter only content types that are not available in cache
@@ -143,14 +143,14 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
                 return !_this.contentTypes[uid];
               });
               if (uidsToFetch.length) {
-                _context2.next = 3;
+                _context2.next = 1;
                 break;
               }
               return _context2.abrupt("return", this.contentTypes);
-            case 3:
-              _context2.next = 5;
+            case 1:
+              _context2.next = 2;
               return this.fetchContentTypes(uidsToFetch);
-            case 5:
+            case 2:
               types = _context2.sent;
               uidsToFetch.forEach(function (uid) {
                 // TODO need to set it in two places, can be better
@@ -158,7 +158,7 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
                 _this.contentTypesStorage.set(uid, types[uid]);
               });
               return _context2.abrupt("return", this.contentTypes);
-            case 8:
+            case 3:
             case "end":
               return _context2.stop();
           }
@@ -181,19 +181,19 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
         var seen = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
         return /*#__PURE__*/_regenerator["default"].mark(function _callee3() {
           var uids, contentTypes, refPathsCount, explorePaths, _iterator, _step, _step$value, refPath, refUids, _iterator2, _step2, uid, rPath;
-          return _regenerator["default"].wrap(function _callee3$(_context3) {
+          return _regenerator["default"].wrap(function (_context3) {
             while (1) switch (_context3.prev = _context3.next) {
               case 0:
                 if (!(depth <= 0)) {
-                  _context3.next = 2;
+                  _context3.next = 1;
                   break;
                 }
                 return _context3.abrupt("return", refPathMap);
-              case 2:
+              case 1:
                 uids = (0, _toConsumableArray2["default"])(new Set(Object.values(refPathMap).flat()));
-                _context3.next = 5;
+                _context3.next = 2;
                 return _this2.getContentTypes(uids);
-              case 5:
+              case 2:
                 contentTypes = _context3.sent;
                 refPathsCount = Object.keys(refPathMap).length;
                 explorePaths = Object.entries(refPathMap).filter(function (_ref) {
@@ -232,17 +232,17 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
                   _iterator.f();
                 }
                 if (!(Object.keys(refPathMap).length > refPathsCount)) {
-                  _context3.next = 13;
+                  _context3.next = 3;
                   break;
                 }
-                _context3.next = 13;
+                _context3.next = 3;
                 return _this2.extractReferences(refPathMap, status, jsonRtePaths, depth - 1, seen);
-              case 13:
+              case 3:
                 return _context3.abrupt("return", {
                   refPathMap: refPathMap,
                   jsonRtePaths: jsonRtePaths
                 });
-              case 14:
+              case 4:
               case "end":
                 return _context3.stop();
             }
@@ -392,15 +392,15 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
         var jsonRtePaths = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
         return /*#__PURE__*/_regenerator["default"].mark(function _callee4() {
           var entry;
-          return _regenerator["default"].wrap(function _callee4$(_context4) {
+          return _regenerator["default"].wrap(function (_context4) {
             while (1) switch (_context4.prev = _context4.next) {
               case 0:
-                _context4.next = 2;
+                _context4.next = 1;
                 return _this4.stackSdk.ContentType(contentTypeUid).Entry(entryUid).includeReference(referencePaths).toJSON().fetch();
-              case 2:
+              case 1:
                 entry = _context4.sent;
                 if ((0, _lodash["default"])(entry)) {
-                  _context4.next = 6;
+                  _context4.next = 2;
                   break;
                 }
                 if (_this4.config.jsonRteToHtml) {
@@ -410,7 +410,7 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
                   });
                 }
                 return _context4.abrupt("return", entry);
-              case 6:
+              case 2:
               case "end":
                 return _context4.stop();
             }
@@ -447,8 +447,8 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
     value: function () {
       var _getUsingTypeName = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee5(data) {
         var _this$statusStorage$g, _this$jsonRteFields$c;
-        var receivedData, live_preview, status, contentTypeUid, entryUid, _yield$this$extractRe, refPathMap, jsonRtePaths, referencePaths, paths, entry;
-        return _regenerator["default"].wrap(function _callee5$(_context5) {
+        var receivedData, live_preview, status, contentTypeUid, entryUid, _yield$this$extractRe, refPathMap, jsonRtePaths, referencePaths, paths, entry, _t2;
+        return _regenerator["default"].wrap(function (_context5) {
           while (1) switch (_context5.prev = _context5.next) {
             case 0:
               receivedData = (0, _lodash2["default"])(data);
@@ -463,15 +463,15 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
                 hasLivePreviewEntryFound: this.isCurrentEntryEdited(contentTypeUid)
               };
               if (!((0, _lodash["default"])(this.referenceFields[contentTypeUid]) || (0, _lodash["default"])(this.jsonRteFields[contentTypeUid]))) {
-                _context5.next = 25;
+                _context5.next = 4;
                 break;
               }
-              _context5.prev = 8;
-              _context5.next = 11;
+              _context5.prev = 1;
+              _context5.next = 2;
               return this.extractReferences({
                 '': [contentTypeUid]
               }, status);
-            case 11:
+            case 2:
               _yield$this$extractRe = _context5.sent;
               refPathMap = _yield$this$extractRe.refPathMap;
               jsonRtePaths = _yield$this$extractRe.jsonRtePaths;
@@ -481,15 +481,15 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
               // store json rte paths
               this.jsonRteFields[contentTypeUid] = jsonRtePaths;
               this.jsonRteFieldsStorage.set(contentTypeUid, this.jsonRteFields[contentTypeUid]);
-              _context5.next = 25;
+              _context5.next = 4;
               break;
-            case 20:
-              _context5.prev = 20;
-              _context5.t0 = _context5["catch"](8);
-              console.error("Contentstack Gatsby (Live Preview): an error occurred while determining reference paths", _context5.t0);
+            case 3:
+              _context5.prev = 3;
+              _t2 = _context5["catch"](1);
+              console.error("Contentstack Gatsby (Live Preview): an error occurred while determining reference paths", _t2);
               console.log("Contentstack Gatsby (Live Preview): unable to determine reference paths. This may have occurred due to the way the content types refer each other. Please try including the cslp__meta field in your query.");
               return _context5.abrupt("return", receivedData);
-            case 25:
+            case 4:
               referencePaths = Object.keys(this.referenceFields[contentTypeUid]);
               referencePaths = referencePaths.filter(function (field) {
                 return !!field;
@@ -497,21 +497,21 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
               paths = this.identifyReferences(receivedData, [], referencePaths);
               this.statusStorage.set(contentTypeUid, status);
               if (status.hasLivePreviewEntryFound) {
-                _context5.next = 31;
+                _context5.next = 5;
                 break;
               }
               return _context5.abrupt("return", receivedData);
-            case 31:
-              _context5.next = 33;
+            case 5:
+              _context5.next = 6;
               return this.fetchEntry(entryUid, contentTypeUid, paths, (_this$jsonRteFields$c = this.jsonRteFields[contentTypeUid]) !== null && _this$jsonRteFields$c !== void 0 ? _this$jsonRteFields$c : []);
-            case 33:
+            case 6:
               entry = _context5.sent;
               return _context5.abrupt("return", entry);
-            case 35:
+            case 7:
             case "end":
               return _context5.stop();
           }
-        }, _callee5, this, [[8, 20]]);
+        }, _callee5, this, [[1, 3]]);
       }));
       function getUsingTypeName(_x5) {
         return _getUsingTypeName.apply(this, arguments);
@@ -524,31 +524,31 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
       var _get = (0, _asyncToGenerator2["default"])(/*#__PURE__*/_regenerator["default"].mark(function _callee6(data) {
         var _this$stackSdk$live_p,
           _this5 = this;
-        var dataCloned, hasTypeNameAndUid, hasCslpMetaAtRoot, multipleEntriesKey, hasSingleEntry, hasMultipleEntries, receivedData, live_preview, hasCslpMeta, hasMultipleCslpMeta, multipleLPEntries, result, _entryCslpMeta$refere, _entryCslpMeta$jsonRt, entryCslpMeta, contentTypeUid, entryUid, refPaths, rtePaths, entry;
-        return _regenerator["default"].wrap(function _callee6$(_context6) {
+        var dataCloned, hasTypeNameAndUid, hasCslpMetaAtRoot, multipleEntriesKey, hasSingleEntry, hasMultipleEntries, receivedData, live_preview, hasCslpMeta, hasMultipleCslpMeta, multipleLPEntries, result, _entryCslpMeta$refere, _entryCslpMeta$jsonRt, entryCslpMeta, contentTypeUid, entryUid, refPaths, rtePaths, entry, _t3;
+        return _regenerator["default"].wrap(function (_context6) {
           while (1) switch (_context6.prev = _context6.next) {
             case 0:
               if (!(this.stackSdk.live_preview && !((_this$stackSdk$live_p = this.stackSdk.live_preview) !== null && _this$stackSdk$live_p !== void 0 && _this$stackSdk$live_p.enable))) {
-                _context6.next = 3;
+                _context6.next = 1;
                 break;
               }
               console.warn("Contentstack Gatsby (Live Preview): live preview is disabled in config");
               return _context6.abrupt("return", data);
-            case 3:
+            case 1:
               if (!(data === null)) {
-                _context6.next = 6;
+                _context6.next = 2;
                 break;
               }
               console.warn("Contentstack Gatsby (Live Preview): null was passed to get()");
               return _context6.abrupt("return", data);
-            case 6:
+            case 2:
               if (this.isNested(data)) {
-                _context6.next = 9;
+                _context6.next = 3;
                 break;
               }
               console.warn("Contentstack Gatsby (Live Preview): data passed to get() is invalid");
               return _context6.abrupt("return", data);
-            case 9:
+            case 3:
               dataCloned = (0, _lodash2["default"])(data);
               delete dataCloned["$"];
 
@@ -561,7 +561,7 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
               receivedData = hasSingleEntry || hasMultipleEntries ? this.unwrapEntryData(dataCloned) : dataCloned;
               live_preview = this.stackSdk.live_preview;
               if (!(live_preview !== null && live_preview !== void 0 && live_preview.hash && live_preview.hash !== 'init')) {
-                _context6.next = 59;
+                _context6.next = 13;
                 break;
               }
               this.livePreviewConfig = live_preview;
@@ -570,76 +570,73 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
                 return item === null || item.cslp__meta;
               });
               if (!(!hasCslpMeta && !hasMultipleCslpMeta && !hasTypeNameAndUid)) {
-                _context6.next = 24;
+                _context6.next = 4;
                 break;
               }
               throw new Error("Contentstack Gatsby (Live Preview): Entry data must contain cslp__meta for live preview");
-            case 24:
+            case 4:
               if (!hasMultipleCslpMeta) {
-                _context6.next = 40;
+                _context6.next = 8;
                 break;
               }
-              _context6.prev = 25;
-              _context6.next = 28;
+              _context6.prev = 5;
+              _context6.next = 6;
               return Promise.all(receivedData.map(function (item) {
                 if (item === null) {
                   return Promise.resolve(null);
                 }
                 return _this5.fetchEntry(item.cslp__meta.entryUid, item.cslp__meta.contentTypeUid, item.cslp__meta.refPaths, item.cslp__meta.rtePaths);
               }));
-            case 28:
+            case 6:
               multipleLPEntries = _context6.sent;
               result = {};
               multipleEntriesKey.forEach(function (key, index) {
                 result[key] = multipleLPEntries[index];
               });
               return _context6.abrupt("return", result);
-            case 34:
-              _context6.prev = 34;
-              _context6.t0 = _context6["catch"](25);
-              console.error("Contentstack Gatsby (Live Preview):", _context6.t0);
+            case 7:
+              _context6.prev = 7;
+              _t3 = _context6["catch"](5);
+              console.error("Contentstack Gatsby (Live Preview):", _t3);
               return _context6.abrupt("return", dataCloned);
-            case 38:
-              _context6.next = 59;
-              break;
-            case 40:
+            case 8:
               if (!hasCslpMeta) {
-                _context6.next = 55;
+                _context6.next = 11;
                 break;
               }
               entryCslpMeta = receivedData.cslp__meta;
               contentTypeUid = entryCslpMeta.contentTypeUid;
               entryUid = entryCslpMeta.entryUid;
               if (!(!entryUid || !contentTypeUid)) {
-                _context6.next = 47;
+                _context6.next = 9;
                 break;
               }
               console.warn("Contentstack Gatsby (Live Preview): no entry uid or content type uid was found inside cslp__meta");
               return _context6.abrupt("return", dataCloned);
-            case 47:
+            case 9:
               refPaths = (_entryCslpMeta$refere = entryCslpMeta.referencePaths) !== null && _entryCslpMeta$refere !== void 0 ? _entryCslpMeta$refere : [];
               rtePaths = (_entryCslpMeta$jsonRt = entryCslpMeta.jsonRtePaths) !== null && _entryCslpMeta$jsonRt !== void 0 ? _entryCslpMeta$jsonRt : [];
-              _context6.next = 51;
+              _context6.next = 10;
               return this.fetchEntry(entryUid, contentTypeUid, refPaths, rtePaths);
-            case 51:
+            case 10:
               entry = _context6.sent;
               return _context6.abrupt("return", entry);
-            case 55:
+            case 11:
               if (!hasTypeNameAndUid) {
-                _context6.next = 59;
+                _context6.next = 13;
                 break;
               }
-              _context6.next = 58;
+              _context6.next = 12;
               return this.getUsingTypeName(dataCloned);
-            case 58:
+            case 12:
               return _context6.abrupt("return", _context6.sent);
-            case 59:
+            case 13:
               return _context6.abrupt("return", dataCloned);
-            case 60:
+            case 14:
             case "end":
               return _context6.stop();
           }
-        }, _callee6, this, [[25, 34]]);
+        }, _callee6, this, [[5, 7]]);
       }));
       function get(_x6) {
         return _get.apply(this, arguments);
@@ -681,3 +678,4 @@ var ContentstackGatsby = exports.ContentstackGatsby = /*#__PURE__*/function () {
     }
   }]);
 }();
+//# sourceMappingURL=index.js.map
