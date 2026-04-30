@@ -87,8 +87,7 @@
     "serialize-javascript": "7.0.5",
     "tmp": "0.2.4",
     "uuid": "14.0.0",
-    "webpack": "5.104.1",
-    "@parcel/reporter-dev-server": "2.16.4"
+    "webpack": "5.104.1"
   },
   "resolutions": {
     "@semantic-release/commit-analyzer/semantic-release": "^17.0.0"
