@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-contentstack",
-  "version": "5.4.3",
+  "version": "5.4.4",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
@@ -74,7 +74,21 @@
     }
   },
   "overrides": {
-    "@pnpm/npm-conf": "^3.0.2"
+    "@pnpm/npm-conf": "^3.0.2",
+    "axios": "1.15.2",
+    "cookie": "0.7.0",
+    "file-type": "21.3.2",
+    "follow-redirects": "1.16.0",
+    "glob": "^9.3.5",
+    "immutable": "4.3.8",
+    "lodash": "4.18.1",
+    "path-to-regexp": "0.1.13",
+    "postcss": "8.5.10",
+    "serialize-javascript": "7.0.5",
+    "tmp": "0.2.4",
+    "uuid": "14.0.0",
+    "webpack": "5.104.1",
+    "@parcel/reporter-dev-server": "2.16.4"
   },
   "resolutions": {
     "@semantic-release/commit-analyzer/semantic-release": "^17.0.0"
