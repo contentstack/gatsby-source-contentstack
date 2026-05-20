@@ -6,8 +6,8 @@
     "prepublish": "npm run build",
     "build": "babel src --out-dir .",
     "watch": "babel -w src --out-dir .",
-    "test": "jest —-colors",
-    "test:watch": "jest —-colors --watch"
+    "test": "jest \u2014-colors",
+    "test:watch": "jest \u2014-colors --watch"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -53,7 +53,7 @@
     "@semantic-release/release-notes-generator": "^11.0.0",
     "@types/jest": "^29.5.7",
     "@babel/eslint-parser": "^7.23.0",
-    "eslint": "^8.57.0",
+    "eslint": "9.26.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsx-a11y": "^6.8.0",
@@ -87,7 +87,10 @@
     "serialize-javascript": "7.0.5",
     "tmp": "0.2.4",
     "uuid": "14.0.0",
-    "webpack": "5.104.1"
+    "webpack": "5.104.1",
+    "ws": "8.20.1",
+    "@parcel/reporter-dev-server": "2.16.4",
+    "qs": "6.15.2"
   },
   "resolutions": {
     "@semantic-release/commit-analyzer/semantic-release": "^17.0.0"
