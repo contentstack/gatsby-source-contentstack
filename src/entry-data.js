@@ -15,7 +15,7 @@ class FetchDefaultEntries extends FetchEntries {
         const assetTokenKey = `${typePrefix.toLowerCase()}-sync-token-asset-${configOptions.api_key}`;
         const [syncEntryToken, syncAssetToken] = await Promise.all([cache.get(entryTokenKey), cache.get(assetTokenKey)])
 
-        
+
         const syncEntryParams = syncEntryToken
           ? { sync_token: syncEntryToken }
           : { init: true, limit: configOptions.limit > 100 ? 50 : configOptions.limit };
@@ -72,7 +72,7 @@ class FetchSpecifiedContentTypesEntries extends FetchEntries {
     try {
       let syncData = {};
       const typePrefix = configOptions.type_prefix || 'Contentstack';
-      const contentTypes = await cache.get(typePrefix);
+      const contentTypes = (await cache.get(typePrefix) || []).filter((ct) => !(configOptions.excludeContentTypes || []).includes(ct.uid));
 
       for (let i = 0; i < contentTypes.length; i++) {
         const contentType = contentTypes[i].uid;
@@ -172,9 +172,9 @@ class FetchSpecifiedLocalesAndContentTypesEntries extends FetchEntries {
     try {
       let syncData = {};
       const typePrefix = configOptions.type_prefix || 'Contentstack';
-      const contentTypes = await cache.get(typePrefix);
+      const contentTypes = (await cache.get(typePrefix) || []).filter((ct) => !(configOptions.excludeContentTypes || []).includes(ct.uid));
       const locales = configOptions.locales;
-  
+
       for (let i = 0; i < contentTypes.length; i++) {
         const contentType = contentTypes[i].uid;
         for (let j = 0; j < locales.length; j++) {
