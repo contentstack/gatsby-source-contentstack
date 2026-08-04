@@ -58,5 +58,25 @@ describe('buildCustomSchema: taxonomy field', function () {
     var result = buildCustomSchema(schema, [], [], [], [], [], 'Contentstack_blog', 'Contentstack', false, false, function () {}, undefined);
     expect(result.fields.topics.type).toBe('[taxonomyType]!');
   });
+  test('multiple taxonomy fields on one content type do not push duplicate taxonomyType definitions', function () {
+    var schema = [{
+      uid: 'topics',
+      data_type: 'taxonomy',
+      mandatory: false,
+      multiple: true
+    }, {
+      uid: 'regions',
+      data_type: 'taxonomy',
+      mandatory: false,
+      multiple: true
+    }];
+    var result = buildCustomSchema(schema, [], [], [], [], [], 'Contentstack_blog', 'Contentstack', false, false, function () {}, undefined);
+    var taxonomyTypeDefs = result.types.filter(function (t) {
+      return t === 'type taxonomyType { taxonomy_uid: String term_uid: String }';
+    });
+    expect(taxonomyTypeDefs).toHaveLength(1);
+    expect(result.fields.topics.type).toBe('[taxonomyType]');
+    expect(result.fields.regions.type).toBe('[taxonomyType]');
+  });
 });
 //# sourceMappingURL=normalize-nested-global-field-taxonomy.test.js.map
