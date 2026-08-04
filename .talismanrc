@@ -5,4 +5,10 @@ fileignoreconfig:
 - filename: package-lock.json
   ignore_detectors:
     - filecontent
+- filename: src/create-schema-customization.js
+  checksum: f4745db1b4f868844d5668b56c1401c8c9d87fb82a8742d2a9ac97f37dc5c587
+- filename: src/tests/exclude-content-types.test.js
+  checksum: 4acbcfad3da0e20b6150ce47054668b629db9ddd8362d3a96fadb3a770a0f5a4
+- filename: tests/exclude-content-types.test.js
+  checksum: 907f5d9ee53a42774f4ecbc361dc6b2cd6f278ed7dbf6dd6cf071d4f478a4b67
 version: "1.0"

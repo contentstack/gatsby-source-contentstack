@@ -16,7 +16,7 @@ exports.sourceNodes = async ({ cache, actions, getNode, getNodes, createNodeId, 
     const contentTypeOption = getContentTypeOption(configOptions);
     const { contentstackData: _contentstackData } = await fetchData(configOptions, reporter, cache, contentTypeOption);
     contentstackData = _contentstackData;
-    contentstackData.contentTypes = await cache.get(typePrefix);
+    contentstackData.contentTypes = await cache.get(`${typePrefix}_${configOptions.api_key}`);
   } catch (error) {
     reporter.panic({
       id: CODES.SyncError,

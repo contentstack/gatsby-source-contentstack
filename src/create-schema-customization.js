@@ -17,7 +17,9 @@ exports.createSchemaCustomization = async ({ cache, actions, schema, reporter, c
     const contentTypeOption = getContentTypeOption(configOptions);
     contentTypes = await fetchContentTypes(configOptions, contentTypeOption);
     // Caching content-types because we need to be able to support multiple stacks.
-    await cache.set(typePrefix, contentTypes);
+    // Keyed by api_key too: multiple instances sharing the same type_prefix (to merge
+    // into one schema) would otherwise overwrite each other's cached content-types list.
+    await cache.set(`${typePrefix}_${configOptions.api_key}`, contentTypes);
   } catch (error) {
     console.error('Contentstack fetch content type failed!');
   }
