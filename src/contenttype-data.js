@@ -49,7 +49,8 @@ class FetchUnspecifiedContentTypes extends FetchContentTypes {
     const contentTypes = await fn.apply(null, [url, config, responseKey, query]);
 
     const referredContentTypes = new ReferredContentTypes();
-    const referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes); 
+    const referredContentTypesList = referredContentTypes.getReferredContentTypes(contentTypes)
+      .filter((uid) => !(config.excludeContentTypes || []).includes(uid));
 
     let referredContentTypesData = [];
     if (referredContentTypesList.length) {

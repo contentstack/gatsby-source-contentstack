@@ -72,7 +72,7 @@ class FetchSpecifiedContentTypesEntries extends FetchEntries {
     try {
       let syncData = {};
       const typePrefix = configOptions.type_prefix || 'Contentstack';
-      const contentTypes = await cache.get(typePrefix);
+      const contentTypes = await cache.get(`${typePrefix}_${configOptions.api_key}`);
 
       for (let i = 0; i < contentTypes.length; i++) {
         const contentType = contentTypes[i].uid;
@@ -172,7 +172,7 @@ class FetchSpecifiedLocalesAndContentTypesEntries extends FetchEntries {
     try {
       let syncData = {};
       const typePrefix = configOptions.type_prefix || 'Contentstack';
-      const contentTypes = await cache.get(typePrefix);
+      const contentTypes = await cache.get(`${typePrefix}_${configOptions.api_key}`);
       const locales = configOptions.locales;
   
       for (let i = 0; i < contentTypes.length; i++) {
