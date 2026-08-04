@@ -17,7 +17,7 @@ exports.createResolvers = async ({ createResolvers, cache, createNodeId }, confi
     cache.get(`${typePrefix}_${configOptions.api_key}_json_rte_fields`),
   ]);
 
-  const contentTypes = await cache.get(typePrefix);
+  const contentTypes = await cache.get(`${typePrefix}_${configOptions.api_key}`);
   const contentTypeMap = {};
   contentTypes.forEach((item) => {
     contentTypeMap[item.uid] = item;
