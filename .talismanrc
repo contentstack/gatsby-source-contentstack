@@ -5,4 +5,6 @@ fileignoreconfig:
 - filename: package-lock.json
   ignore_detectors:
     - filecontent
+- filename: src/normalize.js
+  checksum: 471ff9d6a837381c4568abea54abfb5d04821e412b7d046fddacbfd434970d4f
 version: "1.0"
