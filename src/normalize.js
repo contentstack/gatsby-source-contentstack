@@ -204,9 +204,18 @@ const buildBlockCustomSchema = (blocks, types, references, groups, fileFields, j
 
     const typeFields = {};
     const interfaceFields = {};
+    const blockSchemaByUid = new Map((block.schema || []).map(f => [f.uid, f]));
     for (const key in fields) {
       typeFields[key] = fields[key].type || fields[key];
-      interfaceFields[key] = typeFields[key].replace(newparent, newInterfaceParent);
+      // A field nested inside this block can itself be a global field: its type name is
+      // built from its own reference_to, not from newparent, so the blind replace below
+      // would produce a malformed interface field. Point at its own interface type instead.
+      const childField = blockSchemaByUid.get(key);
+      if (childField && childField.data_type === 'global_field' && childField.reference_to) {
+        interfaceFields[key] = typeFields[key].replace(`${newparent}_${key}`, `${prefix}_${childField.reference_to}`);
+      } else {
+        interfaceFields[key] = typeFields[key].replace(newparent, newInterfaceParent);
+      }
     }
 
     if (Object.keys(fields).length > 0) {
@@ -427,9 +436,16 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
 
         const typeFields = {};
         const interfaceFields = {};
+        const fieldSchemaByUid = new Map((field.schema || []).map(f => [f.uid, f]));
         for (const key in result.fields) {
           typeFields[key] = result.fields[key].type || result.fields[key];
-          interfaceFields[key] = typeFields[key].replace(newParent, newInterfaceParent);
+          // Same nested-global-field case as buildBlockCustomSchema above.
+          const childField = fieldSchemaByUid.get(key);
+          if (childField && childField.data_type === 'global_field' && childField.reference_to) {
+            interfaceFields[key] = typeFields[key].replace(`${newParent}_${key}`, `${prefix}_${childField.reference_to}`);
+          } else {
+            interfaceFields[key] = typeFields[key].replace(newParent, newInterfaceParent);
+          }
         }
 
         if (Object.keys(typeFields).length > 0) {
@@ -513,6 +529,19 @@ const buildCustomSchema = (exports.buildCustomSchema = (schema, types, reference
           } else {
             fields[field.uid] = `[${name}]`;
           }
+        }
+        break;
+      case 'taxonomy':
+        if (!types.includes('type taxonomyType { taxonomy_uid: String term_uid: String }')) {
+          types.push('type taxonomyType { taxonomy_uid: String term_uid: String }');
+        }
+        fields[field.uid] = {
+          resolve: source => source[field.uid] || null,
+        };
+        if (field.mandatory && !disableMandatoryFields) {
+          fields[field.uid].type = '[taxonomyType]!';
+        } else {
+          fields[field.uid].type = '[taxonomyType]';
         }
         break;
     }

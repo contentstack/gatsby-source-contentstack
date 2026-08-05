@@ -5,6 +5,14 @@ fileignoreconfig:
 - filename: package-lock.json
   ignore_detectors:
     - filecontent
+# The four entries below are false positives on the literal string "api_key" — a
+# Contentstack plugin option name used throughout this codebase, not a credential.
+# Each checksum pins the exact file content at the time it was reviewed: any future
+# edit to these files changes the checksum, so Talisman re-scans automatically and a
+# real secret added later would still be caught. Narrower per-line ignoring isn't
+# supported by this detector, so a whole-file checksum is the tightest scope available.
+- filename: src/normalize.js
+  checksum: 471ff9d6a837381c4568abea54abfb5d04821e412b7d046fddacbfd434970d4f
 - filename: src/create-schema-customization.js
   checksum: f4745db1b4f868844d5668b56c1401c8c9d87fb82a8742d2a9ac97f37dc5c587
 - filename: src/tests/exclude-content-types.test.js

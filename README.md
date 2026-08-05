@@ -165,6 +165,28 @@ query {
 }
 ```
 
+## Querying taxonomy fields
+
+Taxonomy fields let you categorize entries using taxonomy terms defined in your stack. Each
+taxonomy field resolves to a list of `taxonomyType` objects exposing the taxonomy and term UIDs.
+
+```graphql
+{
+  allContentstackBlogs {
+    edges {
+      node {
+        id
+        title
+        topics {
+          taxonomy_uid
+          term_uid
+        }
+      }
+    }
+  }
+}
+```
+
 ## Querying downloaded images
 
 ## Prerequisites
