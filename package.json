@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-contentstack",
-  "version": "5.4.9",
+  "version": "5.4.10",
   "description": "Gatsby source plugin for building websites using Contentstack as a data source",
   "scripts": {
     "prepublish": "npm run build",
@@ -97,7 +97,9 @@
     "gatsby": {
       "eslint": "9.26.0"
     },
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^4.3.1",
+    "hono": "^4.12.34",
+    "socket.io-parser": "^4.2.7",
     "@eslint/plugin-kit": "^0.3.4",
     "@semantic-release/npm": "^13.1.5"
   },
