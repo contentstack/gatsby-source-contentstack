@@ -5,6 +5,7 @@ fileignoreconfig:
 - filename: package-lock.json
   ignore_detectors:
     - filecontent
+    - base64content
 # The four entries below are false positives on the literal string "api_key" — a
 # Contentstack plugin option name used throughout this codebase, not a credential.
 # Each checksum pins the exact file content at the time it was reviewed: any future
